@@ -8,7 +8,7 @@ import {
   ExhibitScreen,
   CollectingScreen,
   MyCheriCScreen,
-} from '../screens/_index';
+} from '../screens';
 
 const Tab = createBottomTabNavigator();
 
