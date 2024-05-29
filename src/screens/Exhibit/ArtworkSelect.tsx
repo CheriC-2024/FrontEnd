@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
+import FilterInput from '../../components/FilterInput';
 import { useProgressBar } from '../../components/ProgressBarContext';
 
 const ArtworkSelect: React.FC = () => {
   const [selectedArtworks, setSelectedArtworks] = useState<string[]>([]);
   const [expandedCollections, setExpandedCollections] = useState<string[]>([]);
+  const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
 
   useEffect(() => {
@@ -29,6 +31,16 @@ const ArtworkSelect: React.FC = () => {
     );
   };
 
+  const collapseAllCollections = () => {
+    setExpandedCollections([]);
+  };
+
+  const expandAllCollections = () => {
+    setExpandedCollections(
+      artworks.map((collection) => collection.collectionName),
+    );
+  };
+
   const artworks = [
     {
       collectionName: '컬렉션 이름 1',
@@ -46,16 +58,40 @@ const ArtworkSelect: React.FC = () => {
     },
   ];
 
+  const allCollapsed = expandedCollections.length === 0;
+  const allExpanded = expandedCollections.length === artworks.length;
+
+  const filteredArtworks = artworks.map((collection) => ({
+    ...collection,
+    items: collection.items.filter((artwork) =>
+      artwork.name.includes(filterText),
+    ),
+  }));
+
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
       <Title>전시할 작품을 선택해주세요!</Title>
       <SubTitle>클릭하신 작품이 전시에 올라갑니다</SubTitle>
-      <SelectedCount>
-        <SelectedCountText>{selectedArtworks.length} / 30</SelectedCountText>
-      </SelectedCount>
+      <FilterInput filterText={filterText} setFilterText={setFilterText} />
+      <Header>
+        <SelectedCount>
+          <SelectedCountText>{selectedArtworks.length} / 30</SelectedCountText>
+        </SelectedCount>
+        <ButtonGroup>
+          {allCollapsed ? (
+            <ExpandButton onPress={expandAllCollections}>
+              <ExpandButtonText>모두 펴기</ExpandButtonText>
+            </ExpandButton>
+          ) : (
+            <CollapseButton onPress={collapseAllCollections}>
+              <CollapseButtonText>모두 접기</CollapseButtonText>
+            </CollapseButton>
+          )}
+        </ButtonGroup>
+      </Header>
       <ArtworkList>
-        {artworks.map((collection, collectionIndex) => {
+        {filteredArtworks.map((collection, collectionIndex) => {
           const isExpanded = expandedCollections.includes(
             collection.collectionName,
           );
@@ -120,6 +156,45 @@ const Title = styled.Text`
 const SubTitle = styled.Text`
   font-size: 16px;
   margin-bottom: 8px;
+`;
+
+const Header = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+const SelectedCount = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const SelectedCountText = styled.Text`
+  font-size: 16px;
+`;
+
+const ButtonGroup = styled.View`
+  flex-direction: row;
+`;
+
+const CollapseButton = styled(TouchableOpacity)`
+  padding: 8px;
+  margin-right: 8px;
+`;
+
+const CollapseButtonText = styled.Text`
+  font-size: 14px;
+  color: #007aff;
+`;
+
+const ExpandButton = styled(TouchableOpacity)`
+  padding: 8px;
+`;
+
+const ExpandButtonText = styled.Text`
+  font-size: 14px;
+  color: #007aff;
 `;
 
 const ArtworkList = styled.ScrollView`
@@ -189,16 +264,6 @@ const ArtworkName = styled.Text`
 const ArtworkPrice = styled.Text`
   font-size: 12px;
   color: #777;
-`;
-
-const SelectedCount = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 8px;
-`;
-
-const SelectedCountText = styled.Text`
-  font-size: 16px;
 `;
 
 export default ArtworkSelect;
