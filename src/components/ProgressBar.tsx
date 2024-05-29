@@ -39,7 +39,7 @@ const ProgressBar = styled.View`
 const ProgressStep = styled.View<{ active: boolean }>`
   flex: 1;
   height: 8px;
-  background-color: ${(props) => (props.active ? '#007AFF' : '#e0e0e0')};
+  background-color: ${(props) => (props.active ? '#ff2530' : '#e0e0e0')};
   margin-right: 4px;
   border-radius: 4px;
 `;
