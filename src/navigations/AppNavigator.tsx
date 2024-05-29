@@ -10,7 +10,7 @@ import {
   ExhibitScreen,
 } from '../screens';
 import NavigationBar from '../components/NavigationBar';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { View } from 'react-native';
 import styled from 'styled-components/native';
 
 const Tab = createBottomTabNavigator();
@@ -80,7 +80,7 @@ const AppNavigator = () => {
           component={ExhibitScreen}
           initialParams={{ step: 0 }} // 초기값 설정
           options={{
-            headerTitle: 'Exhibit',
+            headerTitle: '',
           }}
         />
       </Stack.Navigator>
