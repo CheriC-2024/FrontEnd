@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import styled from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
@@ -17,9 +23,20 @@ const CollectionSelect: React.FC = () => {
     );
   };
 
+  const collections = Array.from({ length: 10 }, (_, index) => ({
+    name: `컬렉션 이름 ${index + 1}`,
+    description: '컬렉션에 대한 간략한 설명을 여기에 입력합니다.',
+  }));
+
+  const filteredCollections = collections.filter((collection) =>
+    collection.name.includes(filterText),
+  );
+
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
+      <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
+      <SubTitle>전시로 만들고 싶은 컬렉션을 선택해보세요</SubTitle>
       <SelectedCollectionContainer>
         <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
         <CollectionTag>
@@ -28,21 +45,25 @@ const CollectionSelect: React.FC = () => {
           ))}
         </CollectionTag>
       </SelectedCollectionContainer>
+      <FilterInput
+        placeholder="필터링"
+        value={filterText}
+        onChangeText={setFilterText}
+      />
       <CollectionList>
-        {Array.from({ length: 7 }, (_, index) => {
-          const name = `컬렉션 이름 ${index + 1}`;
-          const selected = selectedCollections.includes(name);
+        {filteredCollections.map((collection, index) => {
+          const selected = selectedCollections.includes(collection.name);
           return (
             <CollectionItem
               key={index}
               selected={selected}
-              onPress={() => handleSelectCollection(name)}
+              onPress={() => handleSelectCollection(collection.name)}
             >
               <CollectionImage />
               <CollectionInfo>
-                <CollectionName>{name}</CollectionName>
+                <CollectionName>{collection.name}</CollectionName>
                 <CollectionDescription>
-                  컬렉션에 대한 간략한 설명을 여기에 입력합니다.
+                  {collection.description}
                 </CollectionDescription>
               </CollectionInfo>
             </CollectionItem>
@@ -93,6 +114,13 @@ const CollectionTagText = styled.Text`
   border-radius: 4px;
   margin-right: 8px;
   margin-bottom: 4px;
+`;
+
+const FilterInput = styled.TextInput`
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 16px;
 `;
 
 const CollectionList = styled.ScrollView`
