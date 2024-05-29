@@ -79,40 +79,8 @@ const AppNavigator = () => {
           name="Exhibit"
           component={ExhibitScreen}
           initialParams={{ step: 0 }} // 초기값 설정
-          options={({ navigation, route }) => {
-            const step = route.params?.step ?? 0;
-
-            const goToNext = () => {
-              if (step < 6) {
-                navigation.setParams({ step: step + 1 });
-              } else {
-                navigation.navigate('MainTabs');
-              }
-            };
-
-            const goToPrev = () => {
-              if (step > 0) {
-                navigation.setParams({ step: step - 1 });
-              } else {
-                navigation.goBack();
-              }
-            };
-
-            return {
-              headerTitle: '',
-              headerLeft: () => (
-                <TouchableOpacity onPress={goToPrev}>
-                  <Text style={{ marginLeft: 16, color: '#007AFF' }}>이전</Text>
-                </TouchableOpacity>
-              ),
-              headerRight: () => (
-                <TouchableOpacity onPress={goToNext}>
-                  <Text style={{ marginRight: 16, color: '#007AFF' }}>
-                    다음
-                  </Text>
-                </TouchableOpacity>
-              ),
-            };
+          options={{
+            headerTitle: 'Exhibit',
           }}
         />
       </Stack.Navigator>

@@ -8,6 +8,7 @@ import DescriptionSetting from './DescriptionSetting';
 import CoverSetting from './CoverSetting';
 import FinishSetting from './FinishSetting';
 import { StackScreenProps } from '@react-navigation/stack';
+import { TouchableOpacity, Text } from 'react-native';
 
 const Container = styled.View`
   flex: 1;
@@ -24,17 +25,35 @@ const ExhibitScreen: React.FC<ExhibitScreenProps> = ({ navigation, route }) => {
   const [step, setStep] = useState(route.params?.step || 0);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      const currentStep = route.params?.step || 0;
-      setStep(currentStep);
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={goToPrev}>
+          <Text style={{ marginLeft: 16, color: '#007AFF' }}>이전</Text>
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity onPress={goToNext}>
+          <Text style={{ marginRight: 16, color: '#007AFF' }}>다음</Text>
+        </TouchableOpacity>
+      ),
     });
+  }, [navigation, step]);
 
-    return unsubscribe;
-  }, [navigation, route.params?.step]);
+  const goToNext = () => {
+    if (step < 6) {
+      setStep(step + 1);
+    } else {
+      navigation.navigate('MainTabs');
+    }
+  };
 
-  useEffect(() => {
-    navigation.setParams({ step });
-  }, [step]);
+  const goToPrev = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    } else {
+      navigation.goBack();
+    }
+  };
 
   const renderStep = () => {
     switch (step) {
