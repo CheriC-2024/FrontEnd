@@ -39,7 +39,7 @@ const CollectionSelect: React.FC = () => {
   return (
     <Container>
       <Title>컬렉션 선택 페이지</Title>
-      <ProgressBarComponent totalSteps={6} />
+      <ProgressBarComponent totalSteps={7} />
       <SubTitle>어떤 컬렉션을 전시로 올릴까요?</SubTitle>
       <FilterInput
         placeholder="필터링"
