@@ -1,3 +1,4 @@
+// src/components/NavigationBar.tsx
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -49,81 +50,85 @@ const NavigationBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
-  const handlePress = (routeName: string) => {
-    console.log(`Navigating to ${routeName}`);
-    navigation.navigate(routeName);
-  };
+  const isExhibitScreen = state.routes[state.index].name === 'Exhibit';
 
   return (
-    <View style={styles.navigationContainer}>
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const isFocused = state.index === index;
+    <>
+      {!isExhibitScreen && (
+        <>
+          <View style={styles.navigationContainer}>
+            {state.routes.map((route, index) => {
+              const { options } = descriptors[route.key];
+              const isFocused = state.index === index;
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
+              const onPress = () => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
 
-          if (!isFocused && !event.defaultPrevented) {
-            console.log(`Navigating to ${route.name}`);
-            navigation.navigate(route.name);
-          }
-        };
+                if (!isFocused && !event.defaultPrevented) {
+                  navigation.navigate(route.name);
+                }
+              };
 
-        const getLabel = (name: string) => {
-          switch (name) {
-            case 'Home':
-              return '홈';
-            case 'Search':
-              return '검색';
-            case 'Exhibit':
-              return '';
-            case 'Collecting':
-              return '컬렉팅';
-            case 'My CheriC':
-              return '마이체리시';
-            default:
-              return name;
-          }
-        };
+              const getLabel = (name: string) => {
+                switch (name) {
+                  case 'Home':
+                    return '홈';
+                  case 'Search':
+                    return '검색';
+                  case 'Exhibit':
+                    return '';
+                  case 'Collecting':
+                    return '컬렉팅';
+                  case 'My CheriC':
+                    return '마이체리시';
+                  default:
+                    return name;
+                }
+              };
 
-        return (
-          <TouchableOpacity
-            key={route.key}
-            style={styles.navItem}
-            onPress={onPress}
-          >
-            <FontAwesome5
-              name={
-                route.name === 'Home'
-                  ? 'home'
-                  : route.name === 'Search'
-                    ? 'search'
-                    : route.name === 'Collecting'
-                      ? 'th-large'
-                      : 'user'
-              }
-              size={24}
-              color={isFocused ? '#ff6347' : '#222'}
-            />
-            <Text style={{ color: isFocused ? '#ff6347' : '#222' }}>
-              {getLabel(route.name)}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-      <View style={styles.centerButtonContainer}>
-        <TouchableOpacity
-          style={styles.centerButtonWrapper}
-          onPress={() => handlePress('Exhibit')}
-        >
-          <Text style={styles.centerButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+              return (
+                <TouchableOpacity
+                  key={route.key}
+                  style={styles.navItem}
+                  onPress={onPress}
+                >
+                  <FontAwesome5
+                    name={
+                      route.name === 'Home'
+                        ? 'home'
+                        : route.name === 'Search'
+                          ? 'search'
+                          : route.name === 'Collecting'
+                            ? 'th-large'
+                            : route.name === 'My CheriC'
+                              ? 'user'
+                              : ''
+                    }
+                    size={24}
+                    color={isFocused ? '#ff6347' : '#222'}
+                  />
+                  <Text style={{ color: isFocused ? '#ff6347' : '#222' }}>
+                    {getLabel(route.name)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <View style={styles.centerButtonContainer}>
+            <TouchableOpacity
+              style={styles.centerButtonWrapper}
+              onPress={() => navigation.navigate('Exhibit')}
+            >
+              <Text style={styles.centerButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+    </>
   );
 };
 
