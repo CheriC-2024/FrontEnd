@@ -6,6 +6,7 @@ import { useProgressBar } from '../../components/ProgressBarContext';
 
 const ArtworkSelect: React.FC = () => {
   const [selectedArtworks, setSelectedArtworks] = useState<string[]>([]);
+  const [expandedCollections, setExpandedCollections] = useState<string[]>([]);
   const { step, setStep } = useProgressBar();
 
   useEffect(() => {
@@ -17,6 +18,14 @@ const ArtworkSelect: React.FC = () => {
       prev.includes(name)
         ? prev.filter((item) => item !== name)
         : [...prev, name],
+    );
+  };
+
+  const toggleCollection = (collectionName: string) => {
+    setExpandedCollections((prev) =>
+      prev.includes(collectionName)
+        ? prev.filter((item) => item !== collectionName)
+        : [...prev, collectionName],
     );
   };
 
@@ -46,36 +55,51 @@ const ArtworkSelect: React.FC = () => {
         <SelectedCountText>{selectedArtworks.length} / 30</SelectedCountText>
       </SelectedCount>
       <ArtworkList>
-        {artworks.map((collection, collectionIndex) => (
-          <ArtworkCollection key={collectionIndex}>
-            <CollectionTitle>
-              <CollectionName>{collection.collectionName}</CollectionName>
-              {/* 여기에 필터링이나 정렬 기능을 추가할 수 있습니다. */}
-            </CollectionTitle>
-            <ArtworkGrid>
-              {collection.items.map((artwork, index) => {
-                const selected = selectedArtworks.includes(artwork.name);
-                const selectedIndex = selectedArtworks.indexOf(artwork.name);
-                return (
-                  <ArtworkItem
-                    key={index}
-                    selected={selected}
-                    onPress={() => handleSelectArtwork(artwork.name)}
-                  >
-                    <ArtworkImage />
-                    <ArtworkInfo>
-                      <ArtworkName>
-                        {artwork.name}
-                        {selected && ` (${selectedIndex + 1})`}
-                      </ArtworkName>
-                      <ArtworkPrice>{artwork.price}</ArtworkPrice>
-                    </ArtworkInfo>
-                  </ArtworkItem>
-                );
-              })}
-            </ArtworkGrid>
-          </ArtworkCollection>
-        ))}
+        {artworks.map((collection, collectionIndex) => {
+          const isExpanded = expandedCollections.includes(
+            collection.collectionName,
+          );
+          return (
+            <ArtworkCollection key={collectionIndex}>
+              <CollectionTitle>
+                <CollectionName>{collection.collectionName}</CollectionName>
+                <DropDownButton
+                  onPress={() => toggleCollection(collection.collectionName)}
+                >
+                  <DropDownButtonText>
+                    {isExpanded ? '숨기기' : '보이기'}
+                  </DropDownButtonText>
+                </DropDownButton>
+              </CollectionTitle>
+              {isExpanded && (
+                <ArtworkGrid>
+                  {collection.items.map((artwork, index) => {
+                    const selected = selectedArtworks.includes(artwork.name);
+                    const selectedIndex = selectedArtworks.indexOf(
+                      artwork.name,
+                    );
+                    return (
+                      <ArtworkItem
+                        key={index}
+                        selected={selected}
+                        onPress={() => handleSelectArtwork(artwork.name)}
+                      >
+                        <ArtworkImage />
+                        <ArtworkInfo>
+                          <ArtworkName>
+                            {artwork.name}
+                            {selected && ` (${selectedIndex + 1})`}
+                          </ArtworkName>
+                          <ArtworkPrice>{artwork.price}</ArtworkPrice>
+                        </ArtworkInfo>
+                      </ArtworkItem>
+                    );
+                  })}
+                </ArtworkGrid>
+              )}
+            </ArtworkCollection>
+          );
+        })}
       </ArtworkList>
     </Container>
   );
@@ -116,6 +140,15 @@ const CollectionTitle = styled.View`
 const CollectionName = styled.Text`
   font-size: 18px;
   font-weight: bold;
+`;
+
+const DropDownButton = styled(TouchableOpacity)`
+  padding: 8px;
+`;
+
+const DropDownButtonText = styled.Text`
+  font-size: 14px;
+  color: #007aff;
 `;
 
 const ArtworkGrid = styled.View`
