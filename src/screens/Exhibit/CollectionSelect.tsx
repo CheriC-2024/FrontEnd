@@ -1,8 +1,14 @@
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 
 const CollectionSelect: React.FC = () => {
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+
+  const handleSelectCollection = (name: string) => {
+    setSelectedCollections((prev) => [...prev, name]);
+  };
+
   return (
     <Container>
       <Title>컬렉션 선택 페이지</Title>
@@ -10,13 +16,17 @@ const CollectionSelect: React.FC = () => {
       <SelectedCollectionContainer>
         <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
         <CollectionTag>
-          <CollectionTagText>컬렉션 이름 1</CollectionTagText>
-          <CollectionTagText>컬렉션 이름 2</CollectionTagText>
+          {selectedCollections.map((name, index) => (
+            <CollectionTagText key={index}>{name}</CollectionTagText>
+          ))}
         </CollectionTag>
       </SelectedCollectionContainer>
       <CollectionList>
         {Array.from({ length: 4 }, (_, index) => (
-          <CollectionItem key={index}>
+          <CollectionItem
+            key={index}
+            onPress={() => handleSelectCollection(`컬렉션 이름 ${index + 1}`)}
+          >
             <CollectionImage />
             <CollectionInfo>
               <CollectionName>컬렉션 이름 {index + 1}</CollectionName>
@@ -60,6 +70,7 @@ const SelectedCollectionText = styled.Text`
 
 const CollectionTag = styled.View`
   flex-direction: row;
+  flex-wrap: wrap;
   margin-bottom: 4px;
 `;
 
@@ -69,13 +80,14 @@ const CollectionTagText = styled.Text`
   padding: 4px 8px;
   border-radius: 4px;
   margin-right: 8px;
+  margin-bottom: 4px;
 `;
 
 const CollectionList = styled.ScrollView`
   margin-top: 16px;
 `;
 
-const CollectionItem = styled.View`
+const CollectionItem = styled(TouchableOpacity)`
   flex-direction: row;
   align-items: center;
   padding: 16px;
@@ -106,4 +118,5 @@ const CollectionDescription = styled.Text`
   font-size: 14px;
   color: #777;
 `;
+
 export default CollectionSelect;
