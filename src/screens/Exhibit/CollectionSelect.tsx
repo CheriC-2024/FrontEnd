@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+import ProgressBarComponent from '../../components/ProgressBar';
+import { useProgressBar } from '../../components/ProgressBarContext';
 
 const CollectionSelect: React.FC = () => {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [filterText, setFilterText] = useState('');
+  const { step } = useProgressBar();
 
   const handleSelectCollection = (name: string) => {
     setSelectedCollections((prev) =>
@@ -15,8 +19,7 @@ const CollectionSelect: React.FC = () => {
 
   return (
     <Container>
-      <Title>컬렉션 선택 페이지</Title>
-      <SubTitle>어떤 컬렉션을 전시로 올릴까요?</SubTitle>
+      <ProgressBarComponent totalSteps={7} />
       <SelectedCollectionContainer>
         <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
         <CollectionTag>
