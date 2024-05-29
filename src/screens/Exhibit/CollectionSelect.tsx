@@ -23,6 +23,10 @@ const CollectionSelect: React.FC = () => {
     );
   };
 
+  const handleRemoveCollection = (name: string) => {
+    setSelectedCollections((prev) => prev.filter((item) => item !== name));
+  };
+
   const collections = Array.from({ length: 10 }, (_, index) => ({
     name: `컬렉션 이름 ${index + 1}`,
     description: '컬렉션에 대한 간략한 설명을 여기에 입력합니다.',
@@ -34,22 +38,27 @@ const CollectionSelect: React.FC = () => {
 
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
-      <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
-      <SubTitle>전시로 만들고 싶은 컬렉션을 선택해보세요</SubTitle>
-      <SelectedCollectionContainer>
-        <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
-        <CollectionTag>
-          {selectedCollections.map((name, index) => (
-            <CollectionTagText key={index}>{name}</CollectionTagText>
-          ))}
-        </CollectionTag>
-      </SelectedCollectionContainer>
+      <Title>컬렉션 선택 페이지</Title>
+      <ProgressBarComponent totalSteps={6} />
+      <SubTitle>어떤 컬렉션을 전시로 올릴까요?</SubTitle>
       <FilterInput
         placeholder="필터링"
         value={filterText}
         onChangeText={setFilterText}
       />
+      <SelectedCollectionContainer>
+        <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
+        <CollectionTag>
+          {selectedCollections.map((name, index) => (
+            <CollectionTagWrapper key={index}>
+              <CollectionTagText>{name}</CollectionTagText>
+              <RemoveButton onPress={() => handleRemoveCollection(name)}>
+                <Text>✕</Text>
+              </RemoveButton>
+            </CollectionTagWrapper>
+          ))}
+        </CollectionTag>
+      </SelectedCollectionContainer>
       <CollectionList>
         {filteredCollections.map((collection, index) => {
           const selected = selectedCollections.includes(collection.name);
@@ -107,13 +116,23 @@ const CollectionTag = styled.View`
   margin-bottom: 4px;
 `;
 
-const CollectionTagText = styled.Text`
-  font-size: 14px;
+const CollectionTagWrapper = styled.View`
+  flex-direction: row;
+  align-items: center;
   background-color: #e0e0e0;
   padding: 4px 8px;
   border-radius: 4px;
   margin-right: 8px;
   margin-bottom: 4px;
+`;
+
+const CollectionTagText = styled.Text`
+  font-size: 14px;
+  margin-right: 8px;
+`;
+
+const RemoveButton = styled.TouchableOpacity`
+  padding: 4px;
 `;
 
 const FilterInput = styled.TextInput`
