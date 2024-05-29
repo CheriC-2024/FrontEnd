@@ -6,7 +6,11 @@ const CollectionSelect: React.FC = () => {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
 
   const handleSelectCollection = (name: string) => {
-    setSelectedCollections((prev) => [...prev, name]);
+    setSelectedCollections((prev) =>
+      prev.includes(name)
+        ? prev.filter((item) => item !== name)
+        : [...prev, name],
+    );
   };
 
   return (
@@ -22,20 +26,25 @@ const CollectionSelect: React.FC = () => {
         </CollectionTag>
       </SelectedCollectionContainer>
       <CollectionList>
-        {Array.from({ length: 4 }, (_, index) => (
-          <CollectionItem
-            key={index}
-            onPress={() => handleSelectCollection(`컬렉션 이름 ${index + 1}`)}
-          >
-            <CollectionImage />
-            <CollectionInfo>
-              <CollectionName>컬렉션 이름 {index + 1}</CollectionName>
-              <CollectionDescription>
-                컬렉션에 대한 간략한 설명을 여기에 입력합니다.
-              </CollectionDescription>
-            </CollectionInfo>
-          </CollectionItem>
-        ))}
+        {Array.from({ length: 7 }, (_, index) => {
+          const name = `컬렉션 이름 ${index + 1}`;
+          const selected = selectedCollections.includes(name);
+          return (
+            <CollectionItem
+              key={index}
+              selected={selected}
+              onPress={() => handleSelectCollection(name)}
+            >
+              <CollectionImage />
+              <CollectionInfo>
+                <CollectionName>{name}</CollectionName>
+                <CollectionDescription>
+                  컬렉션에 대한 간략한 설명을 여기에 입력합니다.
+                </CollectionDescription>
+              </CollectionInfo>
+            </CollectionItem>
+          );
+        })}
       </CollectionList>
     </Container>
   );
@@ -87,11 +96,15 @@ const CollectionList = styled.ScrollView`
   margin-top: 16px;
 `;
 
-const CollectionItem = styled(TouchableOpacity)`
+interface CollectionItemProps {
+  selected: boolean;
+}
+
+const CollectionItem = styled(TouchableOpacity)<CollectionItemProps>`
   flex-direction: row;
   align-items: center;
   padding: 16px;
-  background-color: #f8f8f8;
+  background-color: ${(props) => (props.selected ? '#d3d3d3' : '#f8f8f8')};
   border-radius: 8px;
   margin-bottom: 16px;
 `;
