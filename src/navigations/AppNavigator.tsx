@@ -12,6 +12,7 @@ import {
 import NavigationBar from '../components/NavigationBar';
 import { View } from 'react-native';
 import styled from 'styled-components/native';
+import { ProgressBarProvider } from '../components/ProgressBarContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -68,23 +69,25 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="MainTabs"
-          component={MainTabs}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Exhibit"
-          component={ExhibitScreen}
-          initialParams={{ step: 0 }} // 초기값 설정
-          options={{
-            headerTitle: '',
-          }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <ProgressBarProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="MainTabs"
+            component={MainTabs}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Exhibit"
+            component={ExhibitScreen}
+            initialParams={{ step: 0 }} // 초기값 설정
+            options={{
+              headerTitle: '',
+            }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ProgressBarProvider>
   );
 };
 
