@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+import FilterInput from '../../components/FilterInput';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 
 const CollectionSelect: React.FC = () => {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [filterText, setFilterText] = useState('');
-  const { step } = useProgressBar();
+  const { step, setStep } = useProgressBar();
+
+  useEffect(() => {
+    setStep(0); // Set progress bar to step 1 (index 0)
+  }, [setStep]);
 
   const handleSelectCollection = (name: string) => {
     setSelectedCollections((prev) =>
@@ -38,14 +37,10 @@ const CollectionSelect: React.FC = () => {
 
   return (
     <Container>
-      <Title>컬렉션 선택 페이지</Title>
       <ProgressBarComponent totalSteps={7} />
+      <Title>컬렉션 선택 페이지</Title>
       <SubTitle>어떤 컬렉션을 전시로 올릴까요?</SubTitle>
-      <FilterInput
-        placeholder="필터링"
-        value={filterText}
-        onChangeText={setFilterText}
-      />
+      <FilterInput filterText={filterText} setFilterText={setFilterText} />
       <SelectedCollectionContainer>
         <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
         <CollectionTag>
@@ -135,11 +130,14 @@ const RemoveButton = styled.TouchableOpacity`
   padding: 4px;
 `;
 
-const FilterInput = styled.TextInput`
+const FilterInputContainer = styled.View`
+  margin-bottom: 16px;
+`;
+
+const FilterTextInput = styled.TextInput`
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  margin-bottom: 16px;
 `;
 
 const CollectionList = styled.ScrollView`
