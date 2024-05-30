@@ -9,11 +9,20 @@ import {
   MyCheriCScreen,
   ExhibitScreen,
 } from '../screens';
+import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import NavigationBar from '../components/NavigationBar';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import styled from 'styled-components/native';
 import { ProgressBarProvider } from '../components/ProgressBarContext';
 
+type RootStackParamList = {
+  MainTabs: undefined;
+  Exhibit: { step: number };
+  AIRecommendLoading: undefined;
+  AIRecommend: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 const Container = styled.View`
@@ -60,13 +69,6 @@ const MainTabs = () => {
   );
 };
 
-type RootStackParamList = {
-  Exhibit: { step: number };
-  MainTabs: undefined;
-};
-
-const Stack = createStackNavigator<RootStackParamList>();
-
 const AppNavigator = () => {
   return (
     <ProgressBarProvider>
@@ -85,10 +87,64 @@ const AppNavigator = () => {
               headerTitle: '',
             }}
           />
+          <Stack.Screen
+            name="AIRecommendLoading"
+            component={AIRecommendLoading}
+            options={({ navigation }) => ({
+              // headerLeft: () => (
+              //   <TouchableOpacity onPress={() => navigation.goBack()}>
+              //     <Text style={{ marginLeft: 16, color: '#007AFF' }}>이전</Text>
+              //   </TouchableOpacity>
+              // ),
+              headerTitle: '', // 중앙 타이틀을 제거용
+              headerRight: () => (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingRight: 16,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}
+                  >
+                    전시 테마 AI추천
+                  </Text>
+                </View>
+              ),
+            })}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </ProgressBarProvider>
   );
 };
+
+type CustomHeaderProps = {
+  title: string;
+};
+
+const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
+  return (
+    <HeaderContainer>
+      <HeaderTitle>{title}</HeaderTitle>
+    </HeaderContainer>
+  );
+};
+
+const HeaderContainer = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 16px;
+  height: 56px;
+  background-color: #fff;
+`;
+
+const HeaderTitle = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+`;
 
 export default AppNavigator;
