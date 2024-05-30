@@ -38,8 +38,8 @@ const CollectionSelect: React.FC = () => {
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
-      <Title>컬렉션 선택 페이지</Title>
-      <SubTitle>어떤 컬렉션을 전시로 올릴까요?</SubTitle>
+      <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
+      <SubTitle>전시로 만들고 싶은 컬렉션을 선택해보세요</SubTitle>
       <FilterInput filterText={filterText} setFilterText={setFilterText} />
       <SelectedCollectionContainer>
         <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
