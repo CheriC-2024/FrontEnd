@@ -10,6 +10,7 @@ import {
   ExhibitScreen,
 } from '../screens';
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
+import AIRecommend from '../screens/AIRecommendation/AIRecommend';
 import NavigationBar from '../components/NavigationBar';
 import { Text, View } from 'react-native';
 import styled from 'styled-components/native';
@@ -109,6 +110,28 @@ const AppNavigator = () => {
                     style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}
                   >
                     전시 테마 AI추천
+                  </Text>
+                </View>
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="AIRecommend"
+            component={AIRecommend}
+            options={({ navigation }) => ({
+              headerTitle: '', // 중앙 타이틀을 제거용
+              headerRight: () => (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingRight: 16,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}
+                  >
+                    완료
                   </Text>
                 </View>
               ),
