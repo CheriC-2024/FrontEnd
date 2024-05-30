@@ -3,6 +3,7 @@ import styled from 'styled-components/native';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
+import AIRecommendBtn from '../../components/AIRecommendBtn';
 
 const ThemeSetting: React.FC = () => {
   const [themes, setThemes] = useState<string[]>([]);
@@ -24,10 +25,6 @@ const ThemeSetting: React.FC = () => {
     setThemes(themes.filter((t) => t !== theme));
   };
 
-  const handleAIRecommendation = () => {
-    // AI 추천 기능을 여기에 구현 예정
-  };
-
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
@@ -36,9 +33,7 @@ const ThemeSetting: React.FC = () => {
       <InputContainer>
         <InputHeader>
           <Hash>#</Hash>
-          <AIButton onPress={handleAIRecommendation}>
-            <AIButtonText>AI 추천</AIButtonText>
-          </AIButton>
+          <AIRecommendBtn />
         </InputHeader>
         <ThemeInput
           placeholder="테마를 추가해주세요 (최대 3개)"
@@ -121,17 +116,6 @@ const AddButton = styled(TouchableOpacity)<{ disabled: boolean }>`
 `;
 
 const AddButtonText = styled.Text`
-  color: #fff;
-  font-size: 14px;
-`;
-
-const AIButton = styled(TouchableOpacity)`
-  padding: 4px 8px;
-  background-color: #007aff;
-  border-radius: 4px;
-`;
-
-const AIButtonText = styled.Text`
   color: #fff;
   font-size: 14px;
 `;
