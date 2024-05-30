@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
 
 type RootStackParamList = {
@@ -13,11 +14,9 @@ type AIRecommendNavigationProp = StackNavigationProp<
   'AIRecommend'
 >;
 
-type AIRecommendProps = {
-  navigation: AIRecommendNavigationProp;
-};
-
-const AIRecommend: React.FC<AIRecommendProps> = ({ navigation }) => {
+const AIRecommend: React.FC = () => {
+  const navigation = useNavigation<AIRecommendNavigationProp>();
+  const route = useRoute<RouteProp<RootStackParamList, 'AIRecommend'>>();
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
@@ -90,29 +89,6 @@ const AIRecommend: React.FC<AIRecommendProps> = ({ navigation }) => {
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
-`;
-
-const Header = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: #fff;
-`;
-
-const BackButton = styled.TouchableOpacity`
-  padding: 8px;
-`;
-
-const BackButtonText = styled.Text`
-  font-size: 16px;
-  color: #007aff;
-`;
-
-const HeaderTitle = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-  color: #000;
 `;
 
 const Content = styled.ScrollView`
