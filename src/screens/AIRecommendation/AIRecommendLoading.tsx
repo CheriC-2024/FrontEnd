@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 
 type RootStackParamList = {
   AIRecommendLoading: undefined;
   AIRecommend: undefined;
+  ThemeSetting: { selectedThemes: string[] };
 };
 
 type AIRecommendLoadingNavigationProp = StackNavigationProp<
@@ -14,16 +15,12 @@ type AIRecommendLoadingNavigationProp = StackNavigationProp<
   'AIRecommendLoading'
 >;
 
-type AIRecommendLoadingProps = {
-  navigation: AIRecommendLoadingNavigationProp;
-};
+const AIRecommendLoading: React.FC = () => {
+  const navigation = useNavigation<AIRecommendLoadingNavigationProp>();
 
-const AIRecommendLoading: React.FC<AIRecommendLoadingProps> = ({
-  navigation,
-}) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('AIRecommend');
+      navigation.navigate('AIRecommend'); // 일정 시간 후 AIRecommend 페이지로 이동합니다.
     }, 3000);
 
     // Clean up the timer if the component is unmounted
@@ -32,7 +29,7 @@ const AIRecommendLoading: React.FC<AIRecommendLoadingProps> = ({
 
   return (
     <Container>
-      <ActivityIndicator size="large" color="#0000ff" />
+      <ActivityIndicator size="large" color="#E52C32" />
       <LoadingText>AI가 테마를 만들고 있어요...</LoadingText>
     </Container>
   );
