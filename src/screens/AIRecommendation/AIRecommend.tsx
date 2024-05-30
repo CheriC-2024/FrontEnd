@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import styled from 'styled-components/native';
-import { ScrollView, TouchableOpacity, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useProgressBar } from '../../components/ProgressBarContext';
-import ProgressBarComponent from '../../components/ProgressBar';
 
-const AIRecommend: React.FC = () => {
-  const { step, setStep } = useProgressBar();
+type RootStackParamList = {
+  AIRecommend: undefined;
+  ThemeSetting: { selectedThemes: string[] };
+};
+
+type AIRecommendNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'AIRecommend'
+>;
+
+type AIRecommendProps = {
+  navigation: AIRecommendNavigationProp;
+};
+
+const AIRecommend: React.FC<AIRecommendProps> = ({ navigation }) => {
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const navigation = useNavigation();
 
-  React.useEffect(() => {
-    setStep(1); // Set progress bar to step 2 (index 1)
-  }, [setStep]);
-
-  const handleSelectTheme = (theme: string) => {
+  const handleThemeSelect = (theme: string) => {
     if (selectedThemes.includes(theme)) {
       setSelectedThemes(selectedThemes.filter((t) => t !== theme));
     } else if (selectedThemes.length < 3) {
@@ -25,56 +31,92 @@ const AIRecommend: React.FC = () => {
 
   const themes = ['AI추천테마1', 'AI추천테마2', 'AI추천테마3', 'AI추천테마4'];
 
-  const handleShowDetail = (theme: string) => {
-    setSelectedTheme(theme);
+  const handleComplete = () => {
+    navigation.navigate('ThemeSetting', { selectedThemes });
   };
 
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
-      <Title>AI가 전시 테마를 만들었어요!</Title>
-      <SubTitle>원하는 전시 테마를 선택해주세요</SubTitle>
-      <Instruction>테마를 클릭하면 추천 이유를 볼 수 있어요!</Instruction>
-      <ThemeScrollView horizontal>
-        {themes.map((theme, index) => (
-          <ThemeCircle key={index} onPress={() => handleShowDetail(theme)}>
-            <ThemeText>{`#${theme}`}</ThemeText>
-          </ThemeCircle>
-        ))}
-      </ThemeScrollView>
-      {selectedTheme && (
-        <ThemeDetailContainer>
-          <ThemeReasonTitle>{selectedTheme} 추천 이유</ThemeReasonTitle>
-          <ThemeReasonText>
-            많은 분들이 이 테마에 대해 긍정적인 반응을 보였어요. 이 테마는 여러
-            작품과 잘 어울리며, 전시의 주제를 잘 표현할 수 있습니다.
-          </ThemeReasonText>
-        </ThemeDetailContainer>
-      )}
-      <SelectedThemesContainer>
-        <SelectedThemesHeader>
-          <SelectedThemesTitle>선택한 테마</SelectedThemesTitle>
-          <SelectedCount>{selectedThemes.length} / 3</SelectedCount>
-        </SelectedThemesHeader>
-        <SelectedThemes>
-          {selectedThemes.map((theme, index) => (
-            <ThemeTag key={index}>
-              <ThemeTagText>{`#${theme}`}</ThemeTagText>
-              <RemoveButton onPress={() => handleSelectTheme(theme)}>
-                <RemoveButtonText>X</RemoveButtonText>
-              </RemoveButton>
-            </ThemeTag>
+      <Content>
+        <Title>AI가 전시 테마를 만들었어요!</Title>
+        <SubTitle>원하는 전시 테마를 선택해주세요</SubTitle>
+        <Instruction>테마를 클릭하면 추천 이유를 볼 수 있어요!</Instruction>
+        <ThemeScrollView horizontal>
+          {themes.map((theme, index) => (
+            <ThemeCircle
+              key={index}
+              onPress={() => {
+                setSelectedTheme(theme);
+                handleThemeSelect(theme);
+              }}
+              selected={selectedThemes.includes(theme)}
+            >
+              <ThemeText>{`#${theme}`}</ThemeText>
+            </ThemeCircle>
           ))}
-        </SelectedThemes>
-      </SelectedThemesContainer>
+        </ThemeScrollView>
+        {selectedTheme && (
+          <RecommendationReason>
+            <RecommendationReasonText>
+              {`${selectedTheme} 추천 이유: AI가 자동으로 선택한 테마입니다. 이 테마는 ...`}
+            </RecommendationReasonText>
+          </RecommendationReason>
+        )}
+        <SelectedThemesContainer>
+          <SelectedThemesHeader>
+            <SelectedThemesTitle>선택한 테마</SelectedThemesTitle>
+            <ThemeCount>{selectedThemes.length} / 3</ThemeCount>
+          </SelectedThemesHeader>
+          <SelectedThemes>
+            {selectedThemes.map((theme, index) => (
+              <ThemeTag key={index}>
+                <ThemeTagText>#{theme}</ThemeTagText>
+                <RemoveButton onPress={() => handleThemeSelect(theme)}>
+                  <RemoveButtonText>X</RemoveButtonText>
+                </RemoveButton>
+              </ThemeTag>
+            ))}
+          </SelectedThemes>
+        </SelectedThemesContainer>
+      </Content>
+      <CompleteButton onPress={handleComplete}>
+        <CompleteButtonText>완료</CompleteButtonText>
+      </CompleteButton>
     </Container>
   );
 };
 
 const Container = styled.View`
   flex: 1;
+  background-color: #fff;
+`;
+
+const Header = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   padding: 16px;
   background-color: #fff;
+`;
+
+const BackButton = styled.TouchableOpacity`
+  padding: 8px;
+`;
+
+const BackButtonText = styled.Text`
+  font-size: 16px;
+  color: #007aff;
+`;
+
+const HeaderTitle = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+`;
+
+const Content = styled.ScrollView`
+  flex: 1;
+  padding: 16px;
 `;
 
 const Title = styled.Text`
@@ -94,40 +136,37 @@ const Instruction = styled.Text`
   margin-bottom: 16px;
 `;
 
-const ThemeScrollView = styled(ScrollView)`
+const ThemeScrollView = styled.ScrollView`
   flex-grow: 0;
   margin-bottom: 16px;
 `;
 
-const ThemeCircle = styled(TouchableOpacity)`
+const ThemeCircle = styled.TouchableOpacity<{ selected: boolean }>`
   width: 80px;
   height: 80px;
   border-radius: 40px;
-  background-color: #d3d3d3;
+  background-color: ${({ selected }) => (selected ? '#d3d3d3' : '#f0f0f0')};
   justify-content: center;
   align-items: center;
   margin-right: 16px;
 `;
 
-const ThemeText = styled(Text)`
+const ThemeText = styled.Text`
   text-align: center;
   color: #000;
   font-size: 12px;
 `;
 
-const ThemeDetailContainer = styled(View)`
+const RecommendationReason = styled.View`
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
   margin-bottom: 16px;
 `;
 
-const ThemeReasonTitle = styled(Text)`
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 4px;
-`;
-
-const ThemeReasonText = styled(Text)`
+const RecommendationReasonText = styled.Text`
   font-size: 14px;
-  color: #777;
+  color: #333;
 `;
 
 const SelectedThemesContainer = styled.View`
@@ -145,15 +184,10 @@ const SelectedThemesTitle = styled.Text`
   font-weight: bold;
 `;
 
-const SelectedCount = styled.Text`
-  font-size: 14px;
-  color: #777;
-  margin-bottom: 8px;
-`;
-
 const SelectedThemes = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  margin-bottom: 8px;
 `;
 
 const ThemeTag = styled.View`
@@ -171,13 +205,31 @@ const ThemeTagText = styled.Text`
   margin-right: 8px;
 `;
 
-const RemoveButton = styled(TouchableOpacity)`
+const RemoveButton = styled.TouchableOpacity`
   padding: 4px;
 `;
 
 const RemoveButtonText = styled.Text`
   font-size: 14px;
-  color: #ff0000;
+  color: #000;
+`;
+
+const ThemeCount = styled.Text`
+  font-size: 14px;
+  color: #777;
+`;
+
+const CompleteButton = styled.TouchableOpacity`
+  padding: 16px;
+  background-color: #000;
+  border-radius: 8px;
+  align-items: center;
+  margin: 16px;
+`;
+
+const CompleteButtonText = styled.Text`
+  color: #fff;
+  font-size: 16px;
 `;
 
 export default AIRecommend;
