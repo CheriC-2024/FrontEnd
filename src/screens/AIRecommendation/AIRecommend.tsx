@@ -32,7 +32,8 @@ const AIRecommend: React.FC<AIRecommendProps> = ({ navigation }) => {
   const themes = ['AI추천테마1', 'AI추천테마2', 'AI추천테마3', 'AI추천테마4'];
 
   const handleComplete = () => {
-    navigation.navigate('ThemeSetting', { selectedThemes });
+    // navigation.navigate('ThemeSetting', { selectedThemes }); // 이 줄을 제거하고
+    navigation.goBack(); // 이 줄을 추가하여 페이지를 닫습니다.
   };
 
   return (
