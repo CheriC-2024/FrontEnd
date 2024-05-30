@@ -15,7 +15,11 @@ const ThemeSetting: React.FC = () => {
   }, [setStep]);
 
   const handleAddTheme = () => {
-    if (inputText.trim() && themes.length < 3) {
+    if (
+      inputText.trim() &&
+      themes.length < 3 &&
+      !themes.includes(inputText.trim())
+    ) {
       setThemes([...themes, inputText.trim()]);
       setInputText('');
     }
@@ -42,7 +46,11 @@ const ThemeSetting: React.FC = () => {
         />
         <AddButton
           onPress={handleAddTheme}
-          disabled={!inputText.trim() || themes.length >= 3}
+          disabled={
+            !inputText.trim() ||
+            themes.length >= 3 ||
+            themes.includes(inputText.trim())
+          }
         >
           <AddButtonText>추가</AddButtonText>
         </AddButton>
