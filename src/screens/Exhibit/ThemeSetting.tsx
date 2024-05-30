@@ -30,11 +30,11 @@ const ThemeSetting: React.FC = () => {
       <ProgressBarComponent totalSteps={7} />
       <Title>전시의 테마를 알려주세요</Title>
       <SubTitle>이번 전시회의 테마로 설명해주세요</SubTitle>
+      <AIButtonContainer>
+        <AIRecommendBtn />
+      </AIButtonContainer>
       <InputContainer>
-        <InputHeader>
-          <Hash>#</Hash>
-          <AIRecommendBtn />
-        </InputHeader>
+        <Hash>#</Hash>
         <ThemeInput
           placeholder="테마를 추가해주세요 (최대 3개)"
           value={inputText}
@@ -84,14 +84,16 @@ const SubTitle = styled.Text`
   margin-bottom: 8px;
 `;
 
-const InputContainer = styled.View`
-  margin-bottom: 16px;
+const AIButtonContainer = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 `;
 
-const InputHeader = styled.View`
+const InputContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  margin-bottom: 16px;
 `;
 
 const Hash = styled.Text`
@@ -105,14 +107,13 @@ const ThemeInput = styled(TextInput)`
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  margin-top: 8px;
 `;
 
 const AddButton = styled(TouchableOpacity)<{ disabled: boolean }>`
   padding: 8px;
-  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#ff0000')};
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#000')};
   border-radius: 8px;
-  margin-top: 8px;
+  margin-left: 8px;
 `;
 
 const AddButtonText = styled.Text`
