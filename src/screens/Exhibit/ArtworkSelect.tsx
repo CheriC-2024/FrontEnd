@@ -123,7 +123,7 @@ const ArtworkSelect: React.FC = () => {
                         <ArtworkImage />
                         <ArtworkInfo>
                           <ArtworkName>
-                            {artwork.name}
+                            <Name>{artwork.name}</Name>
                             {selected && ` (${selectedIndex + 1})`}
                           </ArtworkName>
                           <ArtworkPrice>{artwork.price}</ArtworkPrice>
@@ -259,6 +259,13 @@ const ArtworkInfo = styled.View`
 const ArtworkName = styled.Text`
   font-size: 14px;
   font-weight: bold;
+  color: #e52c32;
+`;
+
+const Name = styled.Text`
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
 `;
 
 const ArtworkPrice = styled.Text`
