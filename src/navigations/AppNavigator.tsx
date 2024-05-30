@@ -8,6 +8,7 @@ import {
   CollectingScreen,
   MyCheriCScreen,
   ExhibitScreen,
+  ThemeSetting,
 } from '../screens';
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import AIRecommend from '../screens/AIRecommendation/AIRecommend';
@@ -21,6 +22,7 @@ type RootStackParamList = {
   Exhibit: { step: number };
   AIRecommendLoading: undefined;
   AIRecommend: undefined;
+  ThemeSetting: { selectedThemes: string[] };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
