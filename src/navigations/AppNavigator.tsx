@@ -13,7 +13,7 @@ import {
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import AIRecommend from '../screens/AIRecommendation/AIRecommend';
 import NavigationBar from '../components/NavigationBar';
-import { Text, View } from 'react-native';
+import { TouchableOpacity, Text, View } from 'react-native';
 import styled from 'styled-components/native';
 import { ProgressBarProvider } from '../components/ProgressBarContext';
 
@@ -115,6 +115,7 @@ const AppNavigator = () => {
                   </Text>
                 </View>
               ),
+              tabBarVisible: false,
             })}
           />
           <Stack.Screen
@@ -139,37 +140,15 @@ const AppNavigator = () => {
               ),
             })}
           />
+          <Stack.Screen
+            name="ThemeSetting"
+            component={ThemeSetting}
+            options={{ title: 'Theme Setting' }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </ProgressBarProvider>
   );
 };
-
-type CustomHeaderProps = {
-  title: string;
-};
-
-const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
-  return (
-    <HeaderContainer>
-      <HeaderTitle>{title}</HeaderTitle>
-    </HeaderContainer>
-  );
-};
-
-const HeaderContainer = styled.View`
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  padding-right: 16px;
-  height: 56px;
-  background-color: #fff;
-`;
-
-const HeaderTitle = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-  color: #000;
-`;
 
 export default AppNavigator;

@@ -7,7 +7,6 @@ import styled from 'styled-components/native';
 type RootStackParamList = {
   AIRecommendLoading: undefined;
   AIRecommend: undefined;
-  ThemeSetting: { selectedThemes: string[] };
 };
 
 type AIRecommendLoadingNavigationProp = StackNavigationProp<
@@ -20,7 +19,7 @@ const AIRecommendLoading: React.FC = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('AIRecommend'); // 일정 시간 후 AIRecommend 페이지로 이동합니다.
+      navigation.replace('AIRecommend'); // 일정 시간 후 AIRecommend 페이지로 이동하고 현재 화면을 대체합니다.
     }, 3000);
 
     // Clean up the timer if the component is unmounted

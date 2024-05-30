@@ -16,8 +16,10 @@ type AIRecommendNavigationProp = StackNavigationProp<
 
 const AIRecommend: React.FC = () => {
   const navigation = useNavigation<AIRecommendNavigationProp>();
-  const route = useRoute<RouteProp<RootStackParamList, 'AIRecommend'>>();
-  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const route = useRoute<RouteProp<RootStackParamList, 'ThemeSetting'>>();
+  const [selectedThemes, setSelectedThemes] = useState<string[]>(
+    route.params?.selectedThemes || [],
+  );
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
   const handleThemeSelect = (theme: string) => {
@@ -31,8 +33,8 @@ const AIRecommend: React.FC = () => {
   const themes = ['AI추천테마1', 'AI추천테마2', 'AI추천테마3', 'AI추천테마4'];
 
   const handleComplete = () => {
-    // navigation.navigate('ThemeSetting', { selectedThemes }); // 이 줄을 제거하고
-    navigation.goBack(); // 이 줄을 추가하여 페이지를 닫습니다.
+    navigation.goBack();
+    navigation.navigate('ThemeSetting', { selectedThemes });
   };
 
   return (
@@ -188,7 +190,7 @@ const RemoveButton = styled.TouchableOpacity`
 
 const RemoveButtonText = styled.Text`
   font-size: 14px;
-  color: #000;
+  color: #ff0000;
 `;
 
 const ThemeCount = styled.Text`
