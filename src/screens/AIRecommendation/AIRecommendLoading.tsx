@@ -1,16 +1,39 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
-import { View, Text } from 'react-native';
 
-const AIRecommendLoading: React.FC = () => {
+type RootStackParamList = {
+  AIRecommendLoading: undefined;
+  AIRecommend: undefined;
+};
+
+type AIRecommendLoadingNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'AIRecommendLoading'
+>;
+
+type AIRecommendLoadingProps = {
+  navigation: AIRecommendLoadingNavigationProp;
+};
+
+const AIRecommendLoading: React.FC<AIRecommendLoadingProps> = ({
+  navigation,
+}) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigation.navigate('AIRecommend');
+    }, 3000);
+
+    // Clean up the timer if the component is unmounted
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
   return (
     <Container>
-      <LoadingImage />
-      <Title>AI가 테마를 만들고 있어요</Title>
-      <SubTitle>
-        컬렉터님이 선정한 작품들로 전시 테마를 만들어 올게요!{`\n`}잠시만
-        기다려주세요!
-      </SubTitle>
+      <ActivityIndicator size="large" color="#0000ff" />
+      <LoadingText>AI가 테마를 만들고 있어요...</LoadingText>
     </Container>
   );
 };
@@ -19,32 +42,13 @@ const Container = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-  padding: 16px;
   background-color: #fff;
 `;
 
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
-`;
-
-const SubTitle = styled.Text`
-  font-size: 16px;
-  margin-bottom: 16px;
-  text-align: center;
-`;
-
-const LoadingImage = styled.View`
-  width: 200px;
-  height: 200px;
-  background-color: #ccc;
-  margin-bottom: 16px;
-`;
-
 const LoadingText = styled.Text`
-  font-size: 16px;
-  color: #777;
+  margin-top: 20px;
+  font-size: 18px;
+  color: #000;
 `;
 
 export default AIRecommendLoading;
