@@ -1,12 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components/native';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import styled from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+
+type RootStackParamList = {
+  ThemeSetting: { selectedThemes: string[] };
+};
+
+type ThemeSettingRouteProp = RouteProp<RootStackParamList, 'ThemeSetting'>;
 
 const ThemeSetting: React.FC = () => {
-  const [themes, setThemes] = useState<string[]>([]);
+  const route = useRoute<ThemeSettingRouteProp>();
+  const navigation = useNavigation();
+  const [themes, setThemes] = useState<string[]>(
+    route.params?.selectedThemes || [],
+  );
   const [inputText, setInputText] = useState('');
   const { step, setStep } = useProgressBar();
 
@@ -14,12 +25,14 @@ const ThemeSetting: React.FC = () => {
     setStep(2); // Set progress bar to step 3 (index 2)
   }, [setStep]);
 
+  useEffect(() => {
+    if (route.params?.selectedThemes) {
+      setThemes(route.params.selectedThemes);
+    }
+  }, [route.params?.selectedThemes]);
+
   const handleAddTheme = () => {
-    if (
-      inputText.trim() &&
-      themes.length < 3 &&
-      !themes.includes(inputText.trim())
-    ) {
+    if (inputText.trim() && themes.length < 3) {
       setThemes([...themes, inputText.trim()]);
       setInputText('');
     }
@@ -46,13 +59,11 @@ const ThemeSetting: React.FC = () => {
         />
         <AddButton
           onPress={handleAddTheme}
-          disabled={
-            !inputText.trim() ||
-            themes.length >= 3 ||
-            themes.includes(inputText.trim())
-          }
+          disabled={!inputText.trim() || themes.length >= 3}
         >
-          <AddButtonText>추가</AddButtonText>
+          <AddButtonText disabled={!inputText.trim() || themes.length >= 3}>
+            추가
+          </AddButtonText>
         </AddButton>
       </InputContainer>
       <SelectedThemesContainer>
@@ -110,21 +121,21 @@ const Hash = styled.Text`
   color: #000;
 `;
 
-const ThemeInput = styled(TextInput)`
+const ThemeInput = styled.TextInput`
   flex: 1;
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
 `;
 
-const AddButton = styled(TouchableOpacity)<{ disabled: boolean }>`
+const AddButton = styled.TouchableOpacity<{ disabled: boolean }>`
   padding: 8px;
-  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#000')};
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#ff0000')};
   border-radius: 8px;
-  margin-left: 8px;
+  margin-top: 8px;
 `;
 
-const AddButtonText = styled.Text`
+const AddButtonText = styled.Text<{ disabled: boolean }>`
   color: #fff;
   font-size: 14px;
 `;
@@ -165,13 +176,13 @@ const ThemeTagText = styled.Text`
   margin-right: 8px;
 `;
 
-const RemoveButton = styled(TouchableOpacity)`
+const RemoveButton = styled.TouchableOpacity`
   padding: 4px;
 `;
 
 const RemoveButtonText = styled.Text`
   font-size: 14px;
-  color: #000;
+  color: #ff0000;
 `;
 
 const ThemeCount = styled.Text`
