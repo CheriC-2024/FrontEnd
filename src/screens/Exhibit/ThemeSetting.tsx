@@ -24,13 +24,22 @@ const ThemeSetting: React.FC = () => {
     setThemes(themes.filter((t) => t !== theme));
   };
 
+  const handleAIRecommendation = () => {
+    // AI 추천 기능을 여기에 구현 예정
+  };
+
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
       <Title>전시의 테마를 알려주세요</Title>
       <SubTitle>이번 전시회의 테마로 설명해주세요</SubTitle>
       <InputContainer>
-        <Hash>#</Hash>
+        <InputHeader>
+          <Hash>#</Hash>
+          <AIButton onPress={handleAIRecommendation}>
+            <AIButtonText>AI 추천</AIButtonText>
+          </AIButton>
+        </InputHeader>
         <ThemeInput
           placeholder="테마를 추가해주세요 (최대 3개)"
           value={inputText}
@@ -81,9 +90,13 @@ const SubTitle = styled.Text`
 `;
 
 const InputContainer = styled.View`
+  margin-bottom: 16px;
+`;
+
+const InputHeader = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
 `;
 
 const Hash = styled.Text`
@@ -97,16 +110,28 @@ const ThemeInput = styled(TextInput)`
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  margin-right: 8px;
+  margin-top: 8px;
 `;
 
 const AddButton = styled(TouchableOpacity)<{ disabled: boolean }>`
   padding: 8px;
   background-color: ${({ disabled }) => (disabled ? '#ccc' : '#ff0000')};
   border-radius: 8px;
+  margin-top: 8px;
 `;
 
 const AddButtonText = styled.Text`
+  color: #fff;
+  font-size: 14px;
+`;
+
+const AIButton = styled(TouchableOpacity)`
+  padding: 4px 8px;
+  background-color: #007aff;
+  border-radius: 4px;
+`;
+
+const AIButtonText = styled.Text`
   color: #fff;
   font-size: 14px;
 `;
