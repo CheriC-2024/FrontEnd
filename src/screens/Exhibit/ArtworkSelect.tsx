@@ -5,41 +5,16 @@ import ProgressBarComponent from '../../components/ProgressBar';
 import FilterInput from '../../components/FilterInput';
 import { useProgressBar } from '../../components/ProgressBarContext';
 
+interface ExpandedCollections {
+  [key: string]: boolean;
+}
+
 const ArtworkSelect: React.FC = () => {
   const [selectedArtworks, setSelectedArtworks] = useState<string[]>([]);
-  const [expandedCollections, setExpandedCollections] = useState<string[]>([]);
+  const [expandedCollections, setExpandedCollections] =
+    useState<ExpandedCollections>({});
   const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
-
-  useEffect(() => {
-    setStep(1); // Set progress bar to step 2 (index 1)
-  }, [setStep]);
-
-  const handleSelectArtwork = (name: string) => {
-    setSelectedArtworks((prev) =>
-      prev.includes(name)
-        ? prev.filter((item) => item !== name)
-        : [...prev, name],
-    );
-  };
-
-  const toggleCollection = (collectionName: string) => {
-    setExpandedCollections((prev) =>
-      prev.includes(collectionName)
-        ? prev.filter((item) => item !== collectionName)
-        : [...prev, collectionName],
-    );
-  };
-
-  const collapseAllCollections = () => {
-    setExpandedCollections([]);
-  };
-
-  const expandAllCollections = () => {
-    setExpandedCollections(
-      artworks.map((collection) => collection.collectionName),
-    );
-  };
 
   const artworks = [
     {
@@ -58,8 +33,54 @@ const ArtworkSelect: React.FC = () => {
     },
   ];
 
-  const allCollapsed = expandedCollections.length === 0;
-  const allExpanded = expandedCollections.length === artworks.length;
+  useEffect(() => {
+    setStep(1); // Set progress bar to step 2 (index 1)
+
+    // Initialize expandedCollections state with all collections set to true
+    const initialExpandedState: ExpandedCollections = {};
+    artworks.forEach((collection) => {
+      initialExpandedState[collection.collectionName] = true;
+    });
+    setExpandedCollections(initialExpandedState);
+  }, [setStep]);
+
+  const handleSelectArtwork = (name: string) => {
+    setSelectedArtworks((prev) =>
+      prev.includes(name)
+        ? prev.filter((item) => item !== name)
+        : [...prev, name],
+    );
+  };
+
+  const toggleCollection = (collectionName: string) => {
+    setExpandedCollections((prev) => ({
+      ...prev,
+      [collectionName]: !prev[collectionName],
+    }));
+  };
+
+  const collapseAllCollections = () => {
+    const collapsed: ExpandedCollections = {};
+    artworks.forEach((collection) => {
+      collapsed[collection.collectionName] = false;
+    });
+    setExpandedCollections(collapsed);
+  };
+
+  const expandAllCollections = () => {
+    const expanded: ExpandedCollections = {};
+    artworks.forEach((collection) => {
+      expanded[collection.collectionName] = true;
+    });
+    setExpandedCollections(expanded);
+  };
+
+  const allCollapsed = Object.values(expandedCollections).every(
+    (value) => !value,
+  );
+  const allExpanded = Object.values(expandedCollections).every(
+    (value) => value,
+  );
 
   const filteredArtworks = artworks.map((collection) => ({
     ...collection,
@@ -92,9 +113,7 @@ const ArtworkSelect: React.FC = () => {
       </Header>
       <ArtworkList>
         {filteredArtworks.map((collection, collectionIndex) => {
-          const isExpanded = expandedCollections.includes(
-            collection.collectionName,
-          );
+          const isExpanded = expandedCollections[collection.collectionName];
           return (
             <ArtworkCollection key={collectionIndex}>
               <CollectionTitle>
@@ -124,7 +143,12 @@ const ArtworkSelect: React.FC = () => {
                         <ArtworkInfo>
                           <ArtworkName>
                             <Name>{artwork.name}</Name>
-                            {selected && ` (${selectedIndex + 1})`}
+                            {selected && (
+                              <SelectedIndex>
+                                {' '}
+                                ({selectedIndex + 1})
+                              </SelectedIndex>
+                            )}
                           </ArtworkName>
                           <ArtworkPrice>{artwork.price}</ArtworkPrice>
                         </ArtworkInfo>
@@ -256,16 +280,21 @@ const ArtworkInfo = styled.View`
   flex: 1;
 `;
 
-const ArtworkName = styled.Text`
-  font-size: 14px;
-  font-weight: bold;
-  color: #e52c32;
+const ArtworkName = styled.View`
+  flex-direction: row;
+  align-items: center;
 `;
 
 const Name = styled.Text`
   font-size: 14px;
   font-weight: bold;
   color: #000;
+`;
+
+const SelectedIndex = styled.Text`
+  font-size: 14px;
+  font-weight: bold;
+  color: #e52c32;
 `;
 
 const ArtworkPrice = styled.Text`
