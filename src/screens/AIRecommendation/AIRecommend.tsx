@@ -1,25 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 
 type RootStackParamList = {
-  AIRecommend: undefined;
+  MainTabs: undefined;
+  Exhibit: { step: number; selectedThemes?: string[] };
   ThemeSetting: { selectedThemes: string[] };
 };
 
-type AIRecommendNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'AIRecommend'
->;
-
 const AIRecommend: React.FC = () => {
-  const navigation = useNavigation<AIRecommendNavigationProp>();
-  const route = useRoute<RouteProp<RootStackParamList, 'ThemeSetting'>>();
-  const [selectedThemes, setSelectedThemes] = useState<string[]>(
-    route.params?.selectedThemes || [],
-  );
+  const navigation = useNavigation();
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
   const handleThemeSelect = (theme: string) => {
@@ -33,8 +25,12 @@ const AIRecommend: React.FC = () => {
   const themes = ['AI추천테마1', 'AI추천테마2', 'AI추천테마3', 'AI추천테마4'];
 
   const handleComplete = () => {
-    navigation.goBack();
-    navigation.navigate('ThemeSetting', { selectedThemes });
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: 'Exhibit', params: { step: 2, selectedThemes } }],
+      }),
+    );
   };
 
   return (

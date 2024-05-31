@@ -1,28 +1,21 @@
 import React, { useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 
-type RootStackParamList = {
-  AIRecommendLoading: undefined;
-  AIRecommend: undefined;
-};
-
-type AIRecommendLoadingNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'AIRecommendLoading'
->;
-
 const AIRecommendLoading: React.FC = () => {
-  const navigation = useNavigation<AIRecommendLoadingNavigationProp>();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('AIRecommend'); // 일정 시간 후 AIRecommend 페이지로 이동하고 현재 화면을 대체합니다.
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'AIRecommend' }],
+        }),
+      );
     }, 3000);
 
-    // Clean up the timer if the component is unmounted
     return () => clearTimeout(timer);
   }, [navigation]);
 

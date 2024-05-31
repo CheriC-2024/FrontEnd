@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
-import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
   ThemeSetting: { selectedThemes: string[] };
@@ -12,12 +12,19 @@ type RootStackParamList = {
 
 type ThemeSettingRouteProp = RouteProp<RootStackParamList, 'ThemeSetting'>;
 
-const ThemeSetting: React.FC = () => {
+type ThemeSettingProps = {
+  selectedThemes: string[];
+  setSelectedThemes: React.Dispatch<React.SetStateAction<string[]>>;
+  goToNext: () => void;
+};
+
+const ThemeSetting: React.FC<ThemeSettingProps> = ({
+  selectedThemes,
+  setSelectedThemes,
+  goToNext,
+}) => {
   const route = useRoute<ThemeSettingRouteProp>();
-  const navigation = useNavigation();
-  const [themes, setThemes] = useState<string[]>(
-    route.params?.selectedThemes || [],
-  );
+  const [themes, setThemes] = useState<string[]>(selectedThemes || []);
   const [inputText, setInputText] = useState('');
   const { step, setStep } = useProgressBar();
 
@@ -28,18 +35,23 @@ const ThemeSetting: React.FC = () => {
   useEffect(() => {
     if (route.params?.selectedThemes) {
       setThemes(route.params.selectedThemes);
+    } else {
+      setThemes(selectedThemes);
     }
-  }, [route.params?.selectedThemes]);
+  }, [route.params?.selectedThemes, selectedThemes]);
 
   const handleAddTheme = () => {
     if (inputText.trim() && themes.length < 3) {
       setThemes([...themes, inputText.trim()]);
+      setSelectedThemes([...themes, inputText.trim()]);
       setInputText('');
     }
   };
 
   const handleRemoveTheme = (theme: string) => {
-    setThemes(themes.filter((t) => t !== theme));
+    const updatedThemes = themes.filter((t) => t !== theme);
+    setThemes(updatedThemes);
+    setSelectedThemes(updatedThemes);
   };
 
   return (
