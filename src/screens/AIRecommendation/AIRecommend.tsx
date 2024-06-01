@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type RootStackParamList = {
   MainTabs: undefined;
   Exhibit: { step: number; selectedThemes?: string[] };
-  ThemeSetting: { selectedThemes: string[] };
+  AIRecommendLoading: undefined;
+  AIRecommend: undefined;
 };
 
 const AIRecommend: React.FC = () => {
-  const navigation = useNavigation();
-  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { selectedThemes, setSelectedThemes } = useTheme();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+
+  useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: { display: 'none' },
+    });
+
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'flex' },
+      });
+    };
+  }, [navigation]);
 
   const handleThemeSelect = (theme: string) => {
     if (selectedThemes.includes(theme)) {
