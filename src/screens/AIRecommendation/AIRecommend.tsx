@@ -25,12 +25,7 @@ const AIRecommend: React.FC = () => {
   const themes = ['AI추천테마1', 'AI추천테마2', 'AI추천테마3', 'AI추천테마4'];
 
   const handleComplete = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [{ name: 'Exhibit', params: { step: 2, selectedThemes } }],
-      }),
-    );
+    navigation.navigate('Exhibit', { step: 2, selectedThemes });
   };
 
   return (
