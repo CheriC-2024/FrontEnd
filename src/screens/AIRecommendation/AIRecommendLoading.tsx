@@ -1,19 +1,22 @@
 import React, { useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  useNavigation,
+  NavigationProp,
+  ParamListBase,
+} from '@react-navigation/native';
 import styled from 'styled-components/native';
 
+// Navigation 타입 지정
+type AIRecommendLoadingNavigationProp = NavigationProp<ParamListBase>;
+
 const AIRecommendLoading: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<AIRecommendLoadingNavigationProp>();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [{ name: 'AIRecommend' }],
-        }),
-      );
+      navigation.navigate('AIRecommend'); // 타입 명시 필요
     }, 3000);
 
     return () => clearTimeout(timer);
