@@ -1,4 +1,3 @@
-// src/components/NavigationBar.tsx
 import React from 'react';
 import {
   View,
@@ -54,8 +53,20 @@ const NavigationBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
+  const handleClick = () => {
+    navigation.navigate('Exhibit', { step: 0 });
+  };
+
+  // 현재 활성화된 스크린 이름을 가져옴
+  const activeRouteName = state.routeNames[state.index];
+
   return (
-    <View style={styles.navigationContainer}>
+    <View
+      style={[
+        styles.navigationContainer,
+        { display: activeRouteName === 'Exhibit' ? 'none' : 'flex' },
+      ]}
+    >
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === index;
@@ -120,7 +131,7 @@ const NavigationBar: React.FC<BottomTabBarProps> = ({
       <View style={styles.centerButtonContainer}>
         <TouchableOpacity
           style={styles.centerButtonWrapper}
-          onPress={() => navigation.navigate('Exhibit')}
+          onPress={handleClick}
         >
           <Text style={styles.centerButtonText}>+</Text>
         </TouchableOpacity>
