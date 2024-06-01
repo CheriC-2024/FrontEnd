@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { TouchableOpacity, Text } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { CommonActions } from '@react-navigation/native';
 
 type RootStackParamList = {
   AIRecommendLoading: undefined;
@@ -14,7 +15,12 @@ const AIRecommendBtn: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleAIRecommendation = () => {
-    navigation.navigate('AIRecommendLoading'); // AI 추천 페이지로 이동
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'AIRecommendLoading' }],
+      }),
+    );
   };
 
   return (
