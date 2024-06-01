@@ -4,44 +4,28 @@ import styled from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useTheme } from '../../contexts/ThemeContext';
 
-type RootStackParamList = {
-  ThemeSetting: { selectedThemes: string[] };
-};
-
-type ThemeSettingRouteProp = RouteProp<RootStackParamList, 'ThemeSetting'>;
-
-type ThemeSettingProps = {
-  selectedThemes: string[];
-  setSelectedThemes: React.Dispatch<React.SetStateAction<string[]>>;
-  goToNext: () => void;
-};
-
-const ThemeSetting: React.FC<ThemeSettingProps> = ({
-  selectedThemes,
-  setSelectedThemes,
-  goToNext,
-}) => {
-  const route = useRoute<ThemeSettingRouteProp>();
+const ThemeSetting: React.FC<{}> = ({}) => {
+  const { selectedThemes, setSelectedThemes } = useTheme();
   const [themes, setThemes] = useState<string[]>(selectedThemes || []);
   const [inputText, setInputText] = useState('');
   const { step, setStep } = useProgressBar();
 
   useEffect(() => {
     setStep(2); // Set progress bar to step 3 (index 2)
-  }, [setStep]);
+  }, [step]);
 
   useEffect(() => {
-    if (route.params?.selectedThemes) {
-      setThemes(route.params.selectedThemes);
-    } else {
-      setThemes(selectedThemes);
-    }
-  }, [route.params?.selectedThemes, selectedThemes]);
+    setThemes(selectedThemes);
+  }, [selectedThemes]);
 
   const handleAddTheme = () => {
-    if (inputText.trim() && themes.length < 3) {
+    if (
+      inputText.trim() &&
+      themes.length < 3 &&
+      !themes.includes(inputText.trim())
+    ) {
       setThemes([...themes, inputText.trim()]);
       setSelectedThemes([...themes, inputText.trim()]);
       setInputText('');
@@ -71,9 +55,19 @@ const ThemeSetting: React.FC<ThemeSettingProps> = ({
         />
         <AddButton
           onPress={handleAddTheme}
-          disabled={!inputText.trim() || themes.length >= 3}
+          disabled={
+            !inputText.trim() ||
+            themes.length >= 3 ||
+            themes.includes(inputText.trim())
+          }
         >
-          <AddButtonText disabled={!inputText.trim() || themes.length >= 3}>
+          <AddButtonText
+            disabled={
+              !inputText.trim() ||
+              themes.length >= 3 ||
+              themes.includes(inputText.trim())
+            }
+          >
             추가
           </AddButtonText>
         </AddButton>
