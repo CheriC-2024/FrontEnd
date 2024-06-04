@@ -9,14 +9,9 @@ const ProgressBarComponent: React.FC<{ totalSteps: number }> = ({
 
   return (
     <ProgressBarContainer>
-      <ProgressBar>
-        {Array.from({ length: totalSteps }, (_, index) => (
-          <ProgressStep key={index} active={index <= step} />
-        ))}
-      </ProgressBar>
-      <ProgressLabel>
-        {step + 1} / {totalSteps}
-      </ProgressLabel>
+      {Array.from({ length: totalSteps }, (_, index) => (
+        <ProgressDot key={index} active={index <= step} />
+      ))}
     </ProgressBarContainer>
   );
 };
@@ -24,29 +19,17 @@ const ProgressBarComponent: React.FC<{ totalSteps: number }> = ({
 const ProgressBarContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 16px;
 `;
 
-const ProgressBar = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-  margin-right: 16px;
-`;
-
-const ProgressStep = styled.View<{ active: boolean }>`
-  flex: 1;
-  height: 8px;
-  background-color: ${(props) => (props.active ? '#ff2530' : '#e0e0e0')};
-  margin-right: 4px;
-  border-radius: 4px;
-`;
-
-const ProgressLabel = styled.Text`
-  font-size: 14px;
-  color: #777;
+const ProgressDot = styled.View<{ active: boolean }>`
+  width: 11px;
+  height: 11px;
+  background-color: ${(props: { active: any }) =>
+    props.active ? '#E52C32' : '#F7F5F5'};
+  border-radius: 6px;
+  margin: 0 11.5px;
 `;
 
 export default ProgressBarComponent;
