@@ -16,12 +16,7 @@ import DescriptionSetting from './DescriptionSetting';
 import CoverSetting from './CoverSetting';
 import FinishSetting from './FinishSetting';
 import { useProgressBar } from '../../components/ProgressBarContext';
-
-type RootStackParamList = {
-  MainTabs: undefined;
-  Exhibit: { step: number; selectedThemes?: string[] };
-  ThemeSetting: { selectedThemes: string[] };
-};
+import { RootStackParamList } from '../../navigations/AppNavigator';
 
 type ExhibitScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
