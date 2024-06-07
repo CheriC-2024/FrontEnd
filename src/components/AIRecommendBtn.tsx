@@ -30,20 +30,17 @@ const AIRecommendBtn: React.FC<AIRecommendBtnProps> = ({ source }) => {
 
   return (
     <AIButton onPress={handleAIRecommendation}>
-      <AIButtonText>AI 추천</AIButtonText>
+      <AIButtonText>+ AI 추천을 받아보고 싶다면?</AIButtonText>
     </AIButton>
   );
 };
 
-const AIButton = styled(TouchableOpacity)`
-  padding: 4px 8px;
-  background-color: #007aff;
-  border-radius: 4px;
-`;
+const AIButton = styled(TouchableOpacity)``;
 
 const AIButtonText = styled(Text)`
-  color: #fff;
-  font-size: 14px;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
 `;
 
 export default AIRecommendBtn;
