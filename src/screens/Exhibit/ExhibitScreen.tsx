@@ -33,6 +33,7 @@ const ExhibitScreen: React.FC = () => {
   const route = useRoute<ExhibitScreenRouteProp>();
   const { setStep } = useProgressBar();
   const [step, setLocalStep] = useState(route.params?.step || 0);
+  const [isDescriptionValid, setIsDescriptionValid] = useState(false);
 
   useEffect(() => {
     if (route.params?.step !== undefined) {
@@ -45,16 +46,37 @@ const ExhibitScreen: React.FC = () => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity onPress={goToPrev}>
-          <Text style={{ marginLeft: 16, color: '#000' }}>이전</Text>
+          <Text
+            style={{
+              marginLeft: 16,
+              color: '#120000',
+              fontFamily: 'Bold',
+              fontSize: 16,
+            }}
+          >
+            이전
+          </Text>
         </TouchableOpacity>
       ),
       headerRight: () => (
-        <TouchableOpacity onPress={goToNext}>
-          <Text style={{ marginRight: 16, color: '#007AFF' }}>다음</Text>
+        <TouchableOpacity
+          onPress={goToNext}
+          disabled={step === 4 && !isDescriptionValid}
+        >
+          <Text
+            style={{
+              marginRight: 16,
+              color: step === 4 && !isDescriptionValid ? '#ccc' : '#120000',
+              fontFamily: 'Bold',
+              fontSize: 16,
+            }}
+          >
+            다음
+          </Text>
         </TouchableOpacity>
       ),
     });
-  }, [navigation, step]);
+  }, [navigation, step, isDescriptionValid]);
 
   const goToNext = () => {
     if (step < 6) {
@@ -92,7 +114,7 @@ const ExhibitScreen: React.FC = () => {
       case 3:
         return <ArtworkInfoSetting />;
       case 4:
-        return <DescriptionSetting />;
+        return <DescriptionSetting onFieldsFilled={setIsDescriptionValid} />;
       case 5:
         return <CoverSetting />;
       case 6:
