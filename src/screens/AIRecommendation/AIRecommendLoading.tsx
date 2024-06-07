@@ -1,31 +1,58 @@
 import React, { useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import {
-  CommonActions,
   useNavigation,
+  useRoute,
+  RouteProp,
   NavigationProp,
-  ParamListBase,
 } from '@react-navigation/native';
 import styled from 'styled-components/native';
 
-// Navigation 타입 지정
-type AIRecommendLoadingNavigationProp = NavigationProp<ParamListBase>;
+type RootStackParamList = {
+  AIRecommendLoading: { source?: string };
+  AIRecommend: { source?: string };
+  AIRecommendDescription: { source?: string };
+};
+
+type AIRecommendLoadingRouteProp = RouteProp<
+  RootStackParamList,
+  'AIRecommendLoading'
+>;
+type AIRecommendLoadingNavigationProp = NavigationProp<
+  RootStackParamList,
+  'AIRecommendLoading'
+>;
 
 const AIRecommendLoading: React.FC = () => {
   const navigation = useNavigation<AIRecommendLoadingNavigationProp>();
+  const route = useRoute<AIRecommendLoadingRouteProp>();
+  const source = route.params?.source || 'default'; // 기본 값 설정
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('AIRecommend'); // 타입 명시 필요
+      if (source === 'ThemeSetting') {
+        navigation.navigate('AIRecommend', { source });
+      } else if (source === 'DescriptionSetting') {
+        navigation.navigate('AIRecommendDescription', { source });
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, [navigation, source]);
+
+  const getLoadingText = () => {
+    if (source === 'ThemeSetting') {
+      return 'AI가 테마를 만들고 있어요...';
+    } else if (source === 'DescriptionSetting') {
+      return 'AI가 전시명을 작성하고 있어요...';
+    }
+    return 'AI가 작업 중이에요...';
+  };
 
   return (
     <Container>
       <ActivityIndicator size="large" color="#E52C32" />
-      <LoadingText>AI가 테마를 만들고 있어요...</LoadingText>
+      <LoadingText>{getLoadingText()}</LoadingText>
     </Container>
   );
 };

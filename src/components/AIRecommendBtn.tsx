@@ -6,39 +6,41 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { CommonActions } from '@react-navigation/native';
 
 type RootStackParamList = {
-  AIRecommendLoading: undefined;
-  AIRecommend: undefined;
+  AIRecommendLoading: { source: string };
+  AIRecommend: { source: string };
+  AIRecommendDescription: { source: string };
   // 다른 스크린들 추가 가능
 };
 
-const AIRecommendBtn: React.FC = () => {
+interface AIRecommendBtnProps {
+  source: string;
+}
+
+const AIRecommendBtn: React.FC<AIRecommendBtnProps> = ({ source }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleAIRecommendation = () => {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: 'AIRecommendLoading' }],
+        routes: [{ name: 'AIRecommendLoading', params: { source } }],
       }),
     );
   };
 
   return (
     <AIButton onPress={handleAIRecommendation}>
-      <AIButtonText>AI 추천</AIButtonText>
+      <AIButtonText>+ AI 추천을 받아보고 싶다면?</AIButtonText>
     </AIButton>
   );
 };
 
-const AIButton = styled(TouchableOpacity)`
-  padding: 4px 8px;
-  background-color: #007aff;
-  border-radius: 4px;
-`;
+const AIButton = styled(TouchableOpacity)``;
 
 const AIButtonText = styled(Text)`
-  color: #fff;
-  font-size: 14px;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
 `;
 
 export default AIRecommendBtn;
