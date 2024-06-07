@@ -6,19 +6,24 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { CommonActions } from '@react-navigation/native';
 
 type RootStackParamList = {
-  AIRecommendLoading: undefined;
-  AIRecommend: undefined;
+  AIRecommendLoading: { source: string };
+  AIRecommend: { source: string };
+  AIRecommendDescription: { source: string };
   // 다른 스크린들 추가 가능
 };
 
-const AIRecommendBtn: React.FC = () => {
+interface AIRecommendBtnProps {
+  source: string;
+}
+
+const AIRecommendBtn: React.FC<AIRecommendBtnProps> = ({ source }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleAIRecommendation = () => {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: 'AIRecommendLoading' }],
+        routes: [{ name: 'AIRecommendLoading', params: { source } }],
       }),
     );
   };
