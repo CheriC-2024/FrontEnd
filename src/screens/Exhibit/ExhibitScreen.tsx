@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components/native';
-import { TouchableOpacity, Text } from 'react-native';
+import { TouchableOpacity, Text, View } from 'react-native';
 import {
   useNavigation,
   useRoute,
@@ -17,6 +17,7 @@ import CoverSetting from './CoverSetting';
 import FinishSetting from './FinishSetting';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import { RootStackParamList } from '../../navigations/AppNavigator';
+import CustomModal from '../../components/Modal'; // 모달 컴포넌트 임포트
 
 type ExhibitScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -34,6 +35,7 @@ const ExhibitScreen: React.FC = () => {
   const { setStep } = useProgressBar();
   const [step, setLocalStep] = useState(route.params?.step || 0);
   const [isDescriptionValid, setIsDescriptionValid] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     if (route.params?.step !== undefined) {
@@ -60,7 +62,7 @@ const ExhibitScreen: React.FC = () => {
       ),
       headerRight: () => (
         <TouchableOpacity
-          onPress={goToNext}
+          onPress={step === 6 ? showConfirmModal : goToNext} // FinishSetting 모달
           disabled={step === 4 && !isDescriptionValid}
         >
           <Text
@@ -71,19 +73,32 @@ const ExhibitScreen: React.FC = () => {
               fontSize: 16,
             }}
           >
-            다음
+            {step === 6 ? '완성' : '다음'}
           </Text>
         </TouchableOpacity>
       ),
     });
   }, [navigation, step, isDescriptionValid]);
 
+  const showConfirmModal = () => {
+    setModalVisible(true);
+  };
+
+  const closeConfirmModal = () => {
+    setModalVisible(false);
+  };
+
+  const confirmCompletion = () => {
+    closeConfirmModal();
+    navigation.navigate('MainTabs');
+  };
+
   const goToNext = () => {
     if (step < 6) {
       setLocalStep(step + 1);
       setStep(step + 1);
     } else {
-      navigation.navigate('MainTabs');
+      showConfirmModal();
     }
   };
 
@@ -118,15 +133,36 @@ const ExhibitScreen: React.FC = () => {
       case 5:
         return <CoverSetting />;
       case 6:
-        return (
-          <FinishSetting goToHome={() => navigation.navigate('MainTabs')} />
-        );
+        return <FinishSetting />;
       default:
         return <CollectionSelect />;
     }
   };
 
-  return <Container>{renderStep()}</Container>;
+  return (
+    <Container>
+      {renderStep()}
+      <CustomModal
+        visible={modalVisible}
+        onClose={closeConfirmModal}
+        onConfirm={confirmCompletion}
+        title="마지막으로, 전시작품의 이용료를 결제할게요!"
+        body={
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ marginBottom: 5, color: '#120000', fontSize: 16 }}>
+              필요한 체리{' '}
+              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>5</Text>
+            </Text>
+            <Text style={{ color: '#120000', fontSize: 16 }}>
+              보유중인 체리{' '}
+              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>10</Text>
+            </Text>
+          </View>
+        }
+        confirmButtonText="확인했습니다"
+      />
+    </Container>
+  );
 };
 
 export default ExhibitScreen;
