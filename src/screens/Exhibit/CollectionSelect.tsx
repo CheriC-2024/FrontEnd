@@ -4,9 +4,13 @@ import styled from 'styled-components/native';
 import FilterInput from '../../components/FilterInput';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
 
-const CollectionSelect: React.FC = () => {
-  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+const CollectionSelect: React.FC<{
+  onSelectionChange: (count: number) => void;
+}> = ({ onSelectionChange }) => {
+  const { collections } = useGlobalState();
+  const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
   const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
 
@@ -14,54 +18,66 @@ const CollectionSelect: React.FC = () => {
     setStep(0); // Set progress bar to step 1 (index 0)
   }, [setStep]);
 
-  const handleSelectCollection = (name: string) => {
+  useEffect(() => {
+    onSelectionChange(selectedCollections.length);
+  }, [selectedCollections]);
+
+  const handleSelectCollection = (id: number) => {
     setSelectedCollections((prev) =>
-      prev.includes(name)
-        ? prev.filter((item) => item !== name)
-        : [...prev, name],
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
-  const handleRemoveCollection = (name: string) => {
-    setSelectedCollections((prev) => prev.filter((item) => item !== name));
+  const handleRemoveCollection = (id: number) => {
+    setSelectedCollections((prev) => prev.filter((item) => item !== id));
   };
 
-  const collections = Array.from({ length: 10 }, (_, index) => ({
-    name: `컬렉션 이름 ${index + 1}`,
-    description: '컬렉션에 대한 간략한 설명을 여기에 입력합니다.',
-  }));
-
-  const filteredCollections = collections.filter((collection) =>
-    collection.name.includes(filterText),
+  const filteredCollections = collections.filter(
+    (collection) => collection.name.includes(filterText), // filterText is a string
   );
 
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
-      <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
-      <SubTitle>전시로 만들고 싶은 컬렉션을 선택해보세요</SubTitle>
-      <FilterInput filterText={filterText} setFilterText={setFilterText} />
+      <TitleContainer>
+        <TitleIcon source={require('../../assets/images/character.png')} />
+        <TitleText>
+          <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
+          <Subtitle>전시로 만들고 싶은 컬렉션을 선택해보세요</Subtitle>
+        </TitleText>
+      </TitleContainer>
+      <FilterInput
+        placeholder="컬렉션 검색하기"
+        filterText={filterText}
+        setFilterText={setFilterText}
+      />
       <SelectedCollectionContainer>
-        <SelectedCollectionText>현재 선택한 컬렉션</SelectedCollectionText>
+        <SelectedCollectionText>선택한 컬렉션</SelectedCollectionText>
         <CollectionTag>
-          {selectedCollections.map((name, index) => (
-            <CollectionTagWrapper key={index}>
-              <CollectionTagText>{name}</CollectionTagText>
-              <RemoveButton onPress={() => handleRemoveCollection(name)}>
-                <Text>✕</Text>
-              </RemoveButton>
-            </CollectionTagWrapper>
-          ))}
+          {selectedCollections.map((id) => {
+            const collection = collections.find((c) => c.id === id);
+            if (collection) {
+              return (
+                <CollectionTagWrapper key={id}>
+                  <CollectionTagText>{collection.name}</CollectionTagText>
+                  <RemoveButton onPress={() => handleRemoveCollection(id)}>
+                    <CollectionTagText> ✕</CollectionTagText>
+                  </RemoveButton>
+                </CollectionTagWrapper>
+              );
+            }
+            return null;
+          })}
         </CollectionTag>
       </SelectedCollectionContainer>
       <CollectionList>
-        {filteredCollections.map((collection, index) => {
-          const selected = selectedCollections.includes(collection.name);
+        {filteredCollections.map((collection) => {
+          const selected = selectedCollections.includes(collection.id);
           return (
             <CollectionItem
-              key={index}
+              key={collection.id}
               selected={selected}
-              onPress={() => handleSelectCollection(collection.name)}
+              onPress={() => handleSelectCollection(collection.id)}
             >
               <CollectionImage />
               <CollectionInfo>
@@ -84,64 +100,74 @@ const Container = styled.View`
   background-color: #fff;
 `;
 
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
+const TitleContainer = styled.View`
+  flex-direction: row;
+  align-items: flex-end;
+  margin-bottom: 20px;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 16px;
-  margin-bottom: 8px;
+const TitleIcon = styled.Image`
+  width: 45px;
+  height: 75px;
+  margin-right: 10px;
+`;
+
+const TitleText = styled.View`
+  flex-direction: column;
+`;
+
+const Title = styled.Text`
+  font-family: 'Bold';
+  font-size: 18px;
+  color: #120000;
+`;
+
+const Subtitle = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
 `;
 
 const SelectedCollectionContainer = styled.View`
-  margin-bottom: 16px;
+  margin: 18px 0 20px 0;
 `;
 
 const SelectedCollectionText = styled.Text`
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-family: 'Bold';
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #120000;
+  letter-spacing: 0.5px;
 `;
 
 const CollectionTag = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
-  margin-bottom: 4px;
 `;
 
 const CollectionTagWrapper = styled.View`
   flex-direction: row;
   align-items: center;
-  background-color: #e0e0e0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-right: 8px;
-  margin-bottom: 4px;
+  background-color: #413333;
+  padding: 0px 10px;
+  border-radius: 30px;
+  margin-right: 5px;
+  margin-bottom: 5px;
 `;
 
 const CollectionTagText = styled.Text`
-  font-size: 14px;
-  margin-right: 8px;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #fff;
+  letter-spacing: 0.5px;
 `;
 
 const RemoveButton = styled.TouchableOpacity`
   padding: 4px;
 `;
 
-const FilterInputContainer = styled.View`
-  margin-bottom: 16px;
-`;
-
-const FilterTextInput = styled.TextInput`
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 8px;
-`;
-
 const CollectionList = styled.ScrollView`
-  margin-top: 16px;
+  scroll-padding-bottom: 16px;
 `;
 
 interface CollectionItemProps {
@@ -151,18 +177,24 @@ interface CollectionItemProps {
 const CollectionItem = styled(TouchableOpacity)<CollectionItemProps>`
   flex-direction: row;
   align-items: center;
-  padding: 16px;
-  background-color: ${(props) => (props.selected ? '#d3d3d3' : '#f8f8f8')};
-  border-radius: 8px;
+  padding: 10px;
+  background-color: white;
+  border: 1.7px dashed
+    ${(props: { selected: boolean }) =>
+      props.selected ? '#E52C32' : 'transparent'};
+  border-radius: 60px;
   margin-bottom: 16px;
+  margin-horizontal: 3px;
+  elevation: 5;
+  overflow: visible;
 `;
 
 const CollectionImage = styled.View`
-  width: 60px;
-  height: 60px;
+  width: 100px;
+  height: 100px;
   background-color: #d3d3d3;
-  border-radius: 8px;
-  margin-right: 16px;
+  border-radius: 50px;
+  margin-right: 15px;
 `;
 
 const CollectionInfo = styled.View`
@@ -178,6 +210,30 @@ const CollectionName = styled.Text`
 const CollectionDescription = styled.Text`
   font-size: 14px;
   color: #777;
+`;
+
+const NextButton = styled.TouchableOpacity`
+  background-color: #ff8080;
+  padding: 16px;
+  align-items: center;
+  border-radius: 8px;
+  margin-top: 16px;
+`;
+
+const NextButtonText = styled.Text`
+  font-size: 16px;
+  color: #fff;
+  font-weight: bold;
+`;
+
+const ArtworksCount = styled.Text`
+  font-size: 12px;
+  color: #555;
+`;
+
+const NoCollectionSelected = styled.View`
+  align-items: center;
+  margin-top: 20px;
 `;
 
 export default CollectionSelect;
