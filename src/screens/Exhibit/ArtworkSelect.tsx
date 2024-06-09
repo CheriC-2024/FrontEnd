@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import FilterInput from '../../components/FilterInput';
 import { useProgressBar } from '../../components/ProgressBarContext';
@@ -135,7 +136,19 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
                   onPress={() => toggleCollection(collection.name)}
                 >
                   <DropDownButtonText>
-                    {isExpanded ? '숨기기' : '보이기'}
+                    {isExpanded ? (
+                      <Icon
+                        name="chevron-down-outline"
+                        size={20}
+                        color="#120000"
+                      />
+                    ) : (
+                      <Icon
+                        name="chevron-up-outline"
+                        size={20}
+                        color="#120000"
+                      />
+                    )}
                   </DropDownButtonText>
                 </DropDownButton>
               </CollectionTitle>
@@ -164,7 +177,9 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
                         <ArtworkInfo>
                           <ArtworkName>{artwork.title}</ArtworkName>
                           {artwork.isCollectorOnly ? (
-                            <CollectorBadge>Collector Only</CollectorBadge>
+                            <CollectorOnlyImage
+                              source={require('../../assets/images/collectorOnlyText.png')}
+                            />
                           ) : (
                             <ArtworkCherry>
                               {artwork.cherry === 0
@@ -247,8 +262,9 @@ const CollapseButton = styled(TouchableOpacity)`
 `;
 
 const CollapseButtonText = styled.Text`
-  font-size: 14px;
-  color: #007aff;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #b0abab;
 `;
 
 const ExpandButton = styled(TouchableOpacity)`
@@ -256,13 +272,13 @@ const ExpandButton = styled(TouchableOpacity)`
 `;
 
 const ExpandButtonText = styled.Text`
-  text-align: right;
-  font-size: 14px;
-  color: #007aff;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #b0abab;
 `;
 
 const ArtworkList = styled.ScrollView`
-  margin-top: 16px;
+  margin-top: 10px;
 `;
 
 const ArtworkCollection = styled.View`
@@ -273,12 +289,16 @@ const CollectionTitle = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 5px 12px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+  border: 1.5px solid #f8f8f8;
 `;
 
 const CollectionName = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
+  font-family: 'Bold';
+  font-size: 14px;
+  letter-spacing: 0.5px;
 `;
 
 const DropDownButton = styled(TouchableOpacity)`
@@ -301,11 +321,8 @@ interface ArtworkItemProps {
 
 const ArtworkItem = styled(TouchableOpacity)<ArtworkItemProps>`
   flex: 1;
-  margin: 4px;
+  margin: 0 5px 15px 5px;
   max-width: 32%;
-  background-color: ${(props: { selected: boolean }) =>
-    props.selected ? '#d3d3d3' : '#f8f8f8'};
-  border-radius: 8px;
 `;
 
 interface ArtworkImageWrapperProps {
@@ -315,11 +332,11 @@ interface ArtworkImageWrapperProps {
 const ArtworkImageWrapper = styled.View<ArtworkImageWrapperProps>`
   position: relative;
   width: 100%;
-  height: 150px;
-  border-radius: 8px;
+  height: 160px;
+  border-radius: 5px;
   overflow: hidden;
   background-color: ${(props: { selected: boolean }) =>
-    props.selected ? 'rgba(0, 0, 0, 0.6)' : 'transparent'};
+    props.selected ? 'rgba(0, 0, 0, 0.8)' : 'transparent'};
 `;
 
 interface ArtworkImageProps {
@@ -329,43 +346,44 @@ interface ArtworkImageProps {
 const ArtworkImage = styled.Image<ArtworkImageProps>`
   width: 100%;
   height: 100%;
-  opacity: ${(props: { selected: boolean }) => (props.selected ? 0.7 : 1)};
+  opacity: ${(props: { selected: boolean }) => (props.selected ? 0.5 : 1)};
 `;
 
 const SelectedIndexWrapper = styled.View`
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border-radius: 12px;
-  padding: 4px 8px;
+  top: 4px;
+  right: 5px;
+  background-color: #100012;
+  border-radius: 20px;
+  padding: 3px 9px;
 `;
 
 const SelectedIndex = styled.Text`
-  font-size: 14px;
-  font-weight: bold;
+  font-family: 'Regular';
+  font-size: 12px;
   color: #fff;
+  letter-spacing: 0.5px;
 `;
 
 const ArtworkInfo = styled.View`
-  padding: 8px;
+  padding: 7px 0 0 4px;
 `;
 
 const ArtworkName = styled.Text`
+  font-family: 'Bold';
   font-size: 14px;
-  font-weight: bold;
-  color: #000;
+  color: #120000;
 `;
 
-const CollectorBadge = styled.Text`
-  font-size: 12px;
-  color: #e52c32;
-  font-weight: bold;
+const CollectorOnlyImage = styled.Image`
+  width: 80px;
+  height: 15px;
 `;
 
 const ArtworkCherry = styled.Text`
+  font-family: 'Regular';
   font-size: 12px;
-  color: #777;
+  color: #413333;
 `;
 
 export default ArtworkSelect;
