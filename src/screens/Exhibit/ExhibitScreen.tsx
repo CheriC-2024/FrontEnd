@@ -8,6 +8,7 @@ import {
   CommonActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 라이브러리 추가
 import CollectionSelect from './CollectionSelect';
 import ArtworkSelect from './ArtworkSelect';
 import ThemeSetting from './ThemeSetting';
@@ -35,6 +36,7 @@ const ExhibitScreen: React.FC = () => {
   const { setStep } = useProgressBar();
   const [step, setLocalStep] = useState(route.params?.step || 0);
   const [isDescriptionValid, setIsDescriptionValid] = useState(false);
+  const [isCollectionSelected, setIsCollectionSelected] = useState(false); // 선택된 컬렉션의 상태
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -48,27 +50,43 @@ const ExhibitScreen: React.FC = () => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity onPress={goToPrev}>
-          <Text
-            style={{
-              marginLeft: 16,
-              color: '#120000',
-              fontFamily: 'Bold',
-              fontSize: 16,
-            }}
-          >
-            이전
-          </Text>
+          {step === 0 ? (
+            <Icon
+              name="chevron-back"
+              size={24}
+              color="#120000"
+              style={{ marginLeft: 16 }}
+            />
+          ) : (
+            <Text
+              style={{
+                marginLeft: 16,
+                color: '#120000',
+                fontFamily: 'Bold',
+                fontSize: 16,
+              }}
+            >
+              이전
+            </Text>
+          )}
         </TouchableOpacity>
       ),
       headerRight: () => (
         <TouchableOpacity
           onPress={step === 6 ? showConfirmModal : goToNext} // FinishSetting 모달
-          disabled={step === 4 && !isDescriptionValid}
+          disabled={
+            (step === 0 && !isCollectionSelected) ||
+            (step === 4 && !isDescriptionValid)
+          }
         >
           <Text
             style={{
               marginRight: 16,
-              color: step === 4 && !isDescriptionValid ? '#ccc' : '#120000',
+              color:
+                (step === 0 && !isCollectionSelected) ||
+                (step === 4 && !isDescriptionValid)
+                  ? '#ccc'
+                  : '#120000',
               fontFamily: 'Bold',
               fontSize: 16,
             }}
@@ -78,7 +96,7 @@ const ExhibitScreen: React.FC = () => {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, step, isDescriptionValid]);
+  }, [navigation, step, isDescriptionValid, isCollectionSelected]);
 
   const showConfirmModal = () => {
     setModalVisible(true);
@@ -121,7 +139,11 @@ const ExhibitScreen: React.FC = () => {
   const renderStep = () => {
     switch (step) {
       case 0:
-        return <CollectionSelect />;
+        return (
+          <CollectionSelect
+            onSelectionChange={(count) => setIsCollectionSelected(count > 0)}
+          />
+        );
       case 1:
         return <ArtworkSelect />;
       case 2:
@@ -135,7 +157,11 @@ const ExhibitScreen: React.FC = () => {
       case 6:
         return <FinishSetting />;
       default:
-        return <CollectionSelect />;
+        return (
+          <CollectionSelect
+            onSelectionChange={(count) => setIsCollectionSelected(count > 0)}
+          />
+        );
     }
   };
 
