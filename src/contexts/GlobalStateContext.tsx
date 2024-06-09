@@ -8,6 +8,13 @@ export interface Artwork {
   isCollectorOnly: boolean;
 }
 
+export interface Collection {
+  id: number;
+  name: string;
+  description: string;
+  artworks: Artwork[];
+}
+
 interface GlobalState {
   selectedThemes: string[];
   setSelectedThemes: (themes: string[]) => void;
@@ -19,6 +26,9 @@ interface GlobalState {
   setSelectedFont: (font: string) => void;
   artworks: Artwork[];
   setArtworks: (artworks: Artwork[]) => void;
+  collections: Collection[];
+  addCollection: (collection: Collection) => void;
+  removeCollection: (collectionId: number) => void;
 }
 
 const GlobalStateContext = createContext<GlobalState | undefined>(undefined);
@@ -75,9 +85,64 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
     },
   ]);
 
+  const [collections, setCollections] = useState<Collection[]>([
+    {
+      id: 1,
+      name: '인상파 작품 모음',
+      description: '인상파 화가들의 작품을 모았습니다.',
+      artworks: [artworks[0], artworks[3]],
+    },
+    {
+      id: 2,
+      name: '고양이 그림 모음',
+      description:
+        '다양한 고양이 그림을 감상해보세요. 다양한 고양이 그림을 감상해보세요. 다양한 고양이 그림을 감상해보세요.다양한 고양이 그림을 감상해보세요.다양한 고양이 그림을 감상해보세요.다양한 고양이 그림을 감상해보세요.',
+      artworks: [artworks[1]],
+    },
+    {
+      id: 3,
+      name: '추상화 작품 모음',
+      description: '추상화 작품들을 모아놓은 컬렉션입니다.',
+      artworks: [artworks[2], artworks[4], artworks[5]],
+    },
+    {
+      id: 4,
+      name: '인상파 작품 모음2',
+      description: '인상파 화가들의 작품을 모았습니다.',
+      artworks: [artworks[0], artworks[3]],
+    },
+    {
+      id: 5,
+      name: '고양이 그림 모음2',
+      description: '다양한 고양이 그림을 감상해보세요.',
+      artworks: [artworks[1]],
+    },
+    {
+      id: 6,
+      name: '추상화 작품 모음2',
+      description: '추상화 작품들을 모아놓은 컬렉션입니다.',
+      artworks: [artworks[2], artworks[4], artworks[5]],
+    },
+    // 추가 컬렉션 데이터를 여기에 추가
+  ]);
+
+  const addCollection = (collection: Collection) => {
+    setCollections((prev) => [...prev, collection]);
+  };
+
+  const removeCollection = (collectionId: number) => {
+    setCollections((prev) =>
+      prev.filter((collection) => collection.id !== collectionId),
+    );
+  };
+
   return (
     <GlobalStateContext.Provider
       value={{
+        // CollectionSelect page -> 선택한 컬렉션 저장
+        collections,
+        addCollection,
+        removeCollection,
         // ThemeSetting page -> 테마 3개 저장
         selectedThemes,
         setSelectedThemes,
