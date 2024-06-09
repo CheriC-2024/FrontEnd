@@ -39,6 +39,25 @@ const CollectionSelect: React.FC<{
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
+
+      {collections.length === 0 ? ( //컬렉션이 아예 없는 경우
+        <EmptyStateContainer>
+          <EmptyStateImage
+            source={require('../../assets/images/empty_collection.png')}
+          />
+          <EmptyStateText>컬렉션이 텅 비어 있어요!</EmptyStateText>
+          <EmptyStateSubText>
+            전시를 만들기 위해서는 컬렉터님의{`\n`}컬렉션이 필요해요!
+          </EmptyStateSubText>
+          <AddCollectionButton>
+            <AddCollectionButtonText>
+              + 컬렉션 추가하러 가기
+            </AddCollectionButtonText>
+          </AddCollectionButton>
+        </EmptyStateContainer>
+      ) : (
+        // 컬렉션이 있는 경우
+        <>
       <TitleContainer>
         <TitleIcon source={require('../../assets/images/character.png')} />
         <TitleText>
