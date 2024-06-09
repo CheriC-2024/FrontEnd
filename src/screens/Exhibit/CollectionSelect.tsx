@@ -9,8 +9,8 @@ import { useGlobalState } from '../../contexts/GlobalStateContext';
 const CollectionSelect: React.FC<{
   onSelectionChange: (count: number) => void;
 }> = ({ onSelectionChange }) => {
-  const { collections } = useGlobalState();
-  const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
+  const { collections, selectedCollections, setSelectedCollections } =
+    useGlobalState();
   const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
 
@@ -23,13 +23,21 @@ const CollectionSelect: React.FC<{
   }, [selectedCollections]);
 
   const handleSelectCollection = (id: number) => {
-    setSelectedCollections((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
+    setSelectedCollections((prev: number[]) => {
+      const newSelections = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
+      console.log('Selected Collections:', newSelections);
+      return newSelections;
+    });
   };
 
   const handleRemoveCollection = (id: number) => {
-    setSelectedCollections((prev) => prev.filter((item) => item !== id));
+    setSelectedCollections((prev: number[]) => {
+      const newSelections = prev.filter((item) => item !== id);
+      console.log('Selected Collections:', newSelections);
+      return newSelections;
+    });
   };
 
   const filteredCollections = collections.filter(

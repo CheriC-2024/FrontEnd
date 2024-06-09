@@ -29,6 +29,8 @@ interface GlobalState {
   collections: Collection[];
   addCollection: (collection: Collection) => void;
   removeCollection: (collectionId: number) => void;
+  selectedCollections: number[];
+  setSelectedCollections: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 const GlobalStateContext = createContext<GlobalState | undefined>(undefined);
@@ -126,6 +128,8 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
     // 추가 컬렉션 데이터를 여기에 추가
   ]);
 
+  const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
+
   const addCollection = (collection: Collection) => {
     setCollections((prev) => [...prev, collection]);
   };
@@ -143,6 +147,8 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
         collections,
         addCollection,
         removeCollection,
+        selectedCollections,
+        setSelectedCollections,
         // ThemeSetting page -> 테마 3개 저장
         selectedThemes,
         setSelectedThemes,
