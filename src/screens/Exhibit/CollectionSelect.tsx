@@ -113,7 +113,8 @@ const CollectionSelect: React.FC<{
                   <CollectionImage>
                     {firstArtworkImage && (
                       <Image
-                        source={firstArtworkImage}
+                        source={firstArtworkImage} // For local require
+                        // source={{ uri: firstArtworkImage }} // For URI
                         style={{
                           width: '100%',
                           height: '100%',
