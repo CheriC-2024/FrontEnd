@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
 import FilterInput from '../../components/FilterInput';
 import ProgressBarComponent from '../../components/ProgressBar';
@@ -58,57 +58,74 @@ const CollectionSelect: React.FC<{
       ) : (
         // 컬렉션이 있는 경우
         <>
-      <TitleContainer>
-        <TitleIcon source={require('../../assets/images/character.png')} />
-        <TitleText>
-          <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
-          <Subtitle>전시로 만들고 싶은 컬렉션을 선택해보세요</Subtitle>
-        </TitleText>
-      </TitleContainer>
-      <FilterInput
-        placeholder="컬렉션 검색하기"
-        filterText={filterText}
-        setFilterText={setFilterText}
-      />
-      <SelectedCollectionContainer>
-        <SelectedCollectionText>선택한 컬렉션</SelectedCollectionText>
-        <CollectionTag>
-          {selectedCollections.map((id) => {
-            const collection = collections.find((c) => c.id === id);
-            if (collection) {
+          <TitleContainer>
+            <TitleIcon source={require('../../assets/images/character.png')} />
+            <TitleText>
+              <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
+              <Subtitle>전시로 만들고 싶은 컬렉션을 선택해보세요</Subtitle>
+            </TitleText>
+          </TitleContainer>
+          <FilterInput
+            placeholder="컬렉션 검색하기"
+            filterText={filterText}
+            setFilterText={setFilterText}
+          />
+          <SelectedCollectionContainer>
+            <SelectedCollectionText>선택한 컬렉션</SelectedCollectionText>
+            <CollectionTag>
+              {selectedCollections.map((id) => {
+                const collection = collections.find((c) => c.id === id);
+                if (collection) {
+                  return (
+                    <CollectionTagWrapper key={id}>
+                      <CollectionTagText>{collection.name}</CollectionTagText>
+                      <RemoveButton onPress={() => handleRemoveCollection(id)}>
+                        <CollectionTagText> ✕</CollectionTagText>
+                      </RemoveButton>
+                    </CollectionTagWrapper>
+                  );
+                }
+                return null;
+              })}
+            </CollectionTag>
+          </SelectedCollectionContainer>
+          <CollectionList>
+            {filteredCollections.map((collection) => {
+              const selected = selectedCollections.includes(collection.id);
+              const firstArtworkImage =
+                collection.artworks.length > 0
+                  ? collection.artworks[0].imageUrl
+                  : null;
               return (
-                <CollectionTagWrapper key={id}>
-                  <CollectionTagText>{collection.name}</CollectionTagText>
-                  <RemoveButton onPress={() => handleRemoveCollection(id)}>
-                    <CollectionTagText> ✕</CollectionTagText>
-                  </RemoveButton>
-                </CollectionTagWrapper>
+                <CollectionItem
+                  key={collection.id}
+                  selected={selected}
+                  onPress={() => handleSelectCollection(collection.id)}
+                >
+                  <CollectionImage>
+                    {firstArtworkImage && (
+                      <Image
+                        source={firstArtworkImage}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: 50,
+                        }}
+                      />
+                    )}
+                  </CollectionImage>
+                  <CollectionInfo>
+                    <CollectionName>{collection.name}</CollectionName>
+                    <CollectionDescription numberOfLines={2}>
+                      {collection.description}
+                    </CollectionDescription>
+                  </CollectionInfo>
+                </CollectionItem>
               );
-            }
-            return null;
-          })}
-        </CollectionTag>
-      </SelectedCollectionContainer>
-      <CollectionList>
-        {filteredCollections.map((collection) => {
-          const selected = selectedCollections.includes(collection.id);
-          return (
-            <CollectionItem
-              key={collection.id}
-              selected={selected}
-              onPress={() => handleSelectCollection(collection.id)}
-            >
-              <CollectionImage />
-              <CollectionInfo>
-                <CollectionName>{collection.name}</CollectionName>
-                <CollectionDescription>
-                  {collection.description}
-                </CollectionDescription>
-              </CollectionInfo>
-            </CollectionItem>
-          );
-        })}
-      </CollectionList>
+            })}
+          </CollectionList>
+        </>
+      )}
     </Container>
   );
 };
@@ -214,45 +231,66 @@ const CollectionImage = styled.View`
   background-color: #d3d3d3;
   border-radius: 50px;
   margin-right: 15px;
+  overflow: hidden;
 `;
 
 const CollectionInfo = styled.View`
   flex: 1;
+  padding-right: 15px;
 `;
 
 const CollectionName = styled.Text`
-  font-size: 16px;
-  font-weight: bold;
   margin-bottom: 4px;
+  font-family: 'Bold';
+  font-size: 16px;
+  color: #120000;
+  letter-spacing: 0.5px;
 `;
 
 const CollectionDescription = styled.Text`
-  font-size: 14px;
-  color: #777;
-`;
-
-const NextButton = styled.TouchableOpacity`
-  background-color: #ff8080;
-  padding: 16px;
-  align-items: center;
-  border-radius: 8px;
-  margin-top: 16px;
-`;
-
-const NextButtonText = styled.Text`
-  font-size: 16px;
-  color: #fff;
-  font-weight: bold;
-`;
-
-const ArtworksCount = styled.Text`
+  font-family: 'Regular';
   font-size: 12px;
-  color: #555;
+  color: #413333;
 `;
 
-const NoCollectionSelected = styled.View`
+const EmptyStateContainer = styled.View`
+  flex: 1;
+  justify-content: center;
   align-items: center;
-  margin-top: 20px;
+`;
+
+const EmptyStateImage = styled.Image`
+  width: 128px;
+  height: 178px;
+  margin-bottom: 30px;
+`;
+
+const EmptyStateText = styled.Text`
+  font-family: 'Bold';
+  font-size: 20px;
+  color: #120000;
+  margin-bottom: 4px;
+`;
+
+const EmptyStateSubText = styled.Text`
+  text-align: center;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #120000;
+  margin-bottom: 20px;
+`;
+
+const AddCollectionButton = styled.TouchableOpacity`
+  background-color: #120000;
+  padding: 10px 20px;
+  border-radius: 20px;
+`;
+
+const AddCollectionButtonText = styled.Text`
+  font-family: 'Bold';
+  font-size: 14px;
+  color: #fff;
+  letter-spacing: 0.5px;
 `;
 
 export default CollectionSelect;
