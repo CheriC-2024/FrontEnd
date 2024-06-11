@@ -1,4 +1,17 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
+
+export interface Collection {
+  id: number;
+  name: string;
+  description: string;
+  artworks: Artwork[];
+}
 
 export interface Artwork {
   id: number;
@@ -9,11 +22,10 @@ export interface Artwork {
   cherry: number | null; // null은 소장 작품일때
 }
 
-export interface Collection {
-  id: number;
-  name: string;
-  description: string;
-  artworks: Artwork[];
+export interface ArtworkInfoInput {
+  artworkDescription: string;
+  artworkValue: string;
+  artworkAppreciation: string;
 }
 
 interface GlobalState {
@@ -38,6 +50,8 @@ interface GlobalState {
   setSelectedArtworks: React.Dispatch<React.SetStateAction<number[]>>;
   userCherries: number;
   setUserCherries: (cherries: number) => void;
+  artworkInfoInput: ArtworkInfoInput[];
+  setArtworkInfoInput: React.Dispatch<React.SetStateAction<ArtworkInfoInput[]>>;
 }
 
 const GlobalStateContext = createContext<GlobalState | undefined>(undefined);
@@ -151,12 +165,24 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
       description: '추상화 작품들을 모아놓은 컬렉션입니다.',
       artworks: [artworks[2], artworks[4], artworks[5]],
     },
-    // 추가 컬렉션 데이터를 여기에 추가
   ]);
 
   const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
   const [selectedArtworks, setSelectedArtworks] = useState<number[]>([]);
   const [userCherries, setUserCherries] = useState<number>(10);
+  const [artworkInfoInput, setArtworkInfoInput] = useState<ArtworkInfoInput[]>(
+    [],
+  );
+
+  useEffect(() => {
+    setArtworkInfoInput(
+      selectedArtworks.map(() => ({
+        artworkDescription: '',
+        artworkValue: '',
+        artworkAppreciation: '',
+      })),
+    );
+  }, [selectedArtworks]);
 
   const addCollection = (collection: Collection) => {
     setCollections((prev) => [...prev, collection]);
@@ -192,6 +218,8 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
         setSelectedArtworks,
         userCherries,
         setUserCherries,
+        artworkInfoInput,
+        setArtworkInfoInput,
       }}
     >
       {children}

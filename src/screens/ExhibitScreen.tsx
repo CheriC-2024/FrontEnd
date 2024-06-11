@@ -8,7 +8,7 @@ import {
   CommonActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 라이브러리 추가
+import Icon from 'react-native-vector-icons/Ionicons';
 import CollectionSelect from './Exhibit/CollectionSelect';
 import ArtworkSelect from './Exhibit/ArtworkSelect';
 import ThemeSetting from './Exhibit/ThemeSetting';
@@ -18,9 +18,9 @@ import CoverSetting from './Exhibit/CoverSetting';
 import FinishSetting from './Exhibit/FinishSetting';
 import { useProgressBar } from '../components/ProgressBarContext';
 import { RootStackParamList } from '../navigations/AppNavigator';
-import CustomModal from '../components/Modal'; // 모달 컴포넌트 임포트
-import ArtworkSelectModal from '../components/Modals/ArtworkSelectModal'; // 추가된 모달 컴포넌트 임포트
-import { useGlobalState } from '../contexts/GlobalStateContext'; // 상태 불러오기
+import CustomModal from '../components/Modal';
+import ArtworkSelectModal from '../components/Modals/ArtworkSelectModal';
+import { useGlobalState } from '../contexts/GlobalStateContext';
 
 type ExhibitScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -42,12 +42,15 @@ const ExhibitScreen: React.FC = () => {
     userCherries,
     selectedArtworks,
     setSelectedArtworks,
-  } = useGlobalState(); // 상태 추가
+    artworkInfoInput,
+  } = useGlobalState();
   const [step, setLocalStep] = useState(route.params?.step || 0);
-  const [isDescriptionValid, setIsDescriptionValid] = useState(false);
-  const [isCollectionSelected, setIsCollectionSelected] = useState(false); // 선택된 컬렉션의 상태
+  const [isArtworkDescriptionValid, setIsArtworkDescriptionValid] =
+    useState(false);
+  const [isCollectionSelected, setIsCollectionSelected] = useState(false);
+  const [isDescriptionValid, setIsDescriptionValid] = useState(false); // Separate state for other descriptions
   const [modalVisible, setModalVisible] = useState(false);
-  const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false); // 추가된 모달 상태
+  const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
   const [cherryDetails, setCherryDetails] = useState({
     totalRequiredCherries: 0,
     cherryCount: 0,
@@ -56,7 +59,7 @@ const ExhibitScreen: React.FC = () => {
   useEffect(() => {
     if (route.params?.step !== undefined) {
       setLocalStep(route.params.step);
-      setStep(route.params.step); // Ensure ProgressBar step is updated
+      setStep(route.params.step);
     }
   }, [route.params?.step]);
 
@@ -87,10 +90,11 @@ const ExhibitScreen: React.FC = () => {
       ),
       headerRight: () => (
         <TouchableOpacity
-          onPress={step === 6 ? showConfirmModal : goToNext} // FinishSetting 모달
+          onPress={step === 6 ? showConfirmModal : goToNext}
           disabled={
             (step === 0 && !isCollectionSelected) ||
-            (step === 1 && selectedArtworks.length === 0) || // 추가된 조건
+            (step === 1 && selectedArtworks.length === 0) ||
+            (step === 3 && !isArtworkDescriptionValid) ||
             (step === 4 && !isDescriptionValid)
           }
         >
@@ -99,7 +103,8 @@ const ExhibitScreen: React.FC = () => {
               marginRight: 16,
               color:
                 (step === 0 && !isCollectionSelected) ||
-                (step === 1 && selectedArtworks.length === 0) || // 추가된 조건
+                (step === 1 && selectedArtworks.length === 0) ||
+                (step === 3 && !isArtworkDescriptionValid) ||
                 (step === 4 && !isDescriptionValid)
                   ? '#ccc'
                   : '#120000',
@@ -115,9 +120,11 @@ const ExhibitScreen: React.FC = () => {
   }, [
     navigation,
     step,
+    isArtworkDescriptionValid,
     isDescriptionValid,
     isCollectionSelected,
     selectedArtworks,
+    artworkInfoInput,
   ]);
 
   const showConfirmModal = () => {
@@ -179,10 +186,7 @@ const ExhibitScreen: React.FC = () => {
       setStep(step - 1);
     } else {
       navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'MainTabs' }],
-        }),
+        CommonActions.reset({ index: 0, routes: [{ name: 'MainTabs' }] }),
       );
       // 진짜로 나갈 건지 사용자에게 물어보는 기능 추가 예정 (나가기, 임시저장하기)
       // 나가기 누르면 전역 상태 값 다 초기화 시키기
@@ -202,7 +206,13 @@ const ExhibitScreen: React.FC = () => {
       case 2:
         return <ThemeSetting />;
       case 3:
-        return <ArtworkInfoSetting />;
+        return (
+          <ArtworkInfoSetting
+            onArtworkDescriptionChange={(filled) =>
+              setIsArtworkDescriptionValid(filled)
+            }
+          />
+        );
       case 4:
         return <DescriptionSetting onFieldsFilled={setIsDescriptionValid} />;
       case 5:
@@ -244,18 +254,17 @@ const ExhibitScreen: React.FC = () => {
         <ArtworkSelectModal
           visible={isArtworkModalVisible}
           requiredCherries={cherryDetails.totalRequiredCherries}
-          cherryCount={cherryDetails.cherryCount} // 추가된 체리 카운트
+          cherryCount={cherryDetails.cherryCount}
           userCherries={userCherries}
           onClose={() => setIsArtworkModalVisible(false)}
           onBuyCherries={() => {
-            // Handle buying cherries
             setIsArtworkModalVisible(false);
           }}
           onConfirm={() => {
             setLocalStep(2);
             setStep(2);
             setIsArtworkModalVisible(false);
-          }} // step 2로 이동하는 콜백 함수
+          }}
         />
       )}
     </Container>
