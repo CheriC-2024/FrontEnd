@@ -7,12 +7,7 @@ import {
   NavigationProp,
 } from '@react-navigation/native';
 import styled from 'styled-components/native';
-
-type RootStackParamList = {
-  AIRecommendLoading: { source?: string };
-  AIRecommend: { source?: string };
-  AIRecommendDescription: { source?: string };
-};
+import { RootStackParamList } from '../../navigations/AppNavigator';
 
 type AIRecommendLoadingRouteProp = RouteProp<
   RootStackParamList,
@@ -31,7 +26,7 @@ const AIRecommendLoading: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (source === 'ThemeSetting') {
-        navigation.navigate('AIRecommend', { source });
+        navigation.navigate('AIRecommendTheme', { source });
       } else if (source === 'DescriptionSetting') {
         navigation.navigate('AIRecommendDescription', { source });
       }

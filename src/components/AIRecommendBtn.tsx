@@ -4,13 +4,7 @@ import { TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CommonActions } from '@react-navigation/native';
-
-type RootStackParamList = {
-  AIRecommendLoading: { source: string };
-  AIRecommend: { source: string };
-  AIRecommendDescription: { source: string };
-  // 다른 스크린들 추가 가능
-};
+import { RootStackParamList } from '../navigations/AppNavigator';
 
 interface AIRecommendBtnProps {
   source: string;
