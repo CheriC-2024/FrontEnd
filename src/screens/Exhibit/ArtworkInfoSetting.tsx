@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components/native';
 import {
   ScrollView,
@@ -6,46 +6,42 @@ import {
   TouchableOpacity,
   Text,
   View,
+  Image,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigations/AppNavigator';
 
-const colors = [
-  '#e0e0e0',
-  '#c0c0c0',
-  '#a0a0a0',
-  '#808080',
-  '#606060',
-  '#404040',
-  '#202020',
-  '#ff2530',
-  '#e25330',
-  '#c25330',
-];
+interface ArtworkInfoSettingProps {
+  onArtworkDescriptionChange: (filled: boolean) => void;
+}
 
-const initialInputs = Array.from({ length: 10 }, () => ({
-  description: '',
-  value: '',
-  appreciation: '',
-}));
-
-const ArtworkInfoSetting: React.FC = () => {
-  const [inputs, setInputs] = useState(initialInputs);
+const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
+  onArtworkDescriptionChange,
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
-
   const contentScrollViewRef = useRef<ScrollView>(null);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const { selectedArtworks, artworks, artworkInfoInput, setArtworkInfoInput } =
+    useGlobalState();
+
+  useEffect(() => {
+    const allDescriptionsFilled = artworkInfoInput.every(
+      (input) => input.artworkDescription.trim().length > 0,
+    );
+    console.log('Descriptions filled status:', allDescriptionsFilled);
+    onArtworkDescriptionChange(allDescriptionsFilled);
+  }, [artworkInfoInput, onArtworkDescriptionChange]);
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % inputs.length;
+    const nextIndex = (currentIndex + 1) % artworkInfoInput.length;
     setCurrentIndex(nextIndex);
-    scrollViewRef.current?.scrollTo({
-      x: nextIndex * 60, // 50 (width) + 10 (margin) = 60
-      animated: true,
-    });
-    contentScrollViewRef.current?.scrollTo({
-      y: 0,
-      animated: true,
-    });
+    scrollViewRef.current?.scrollTo({ x: nextIndex * 55, animated: true });
+    contentScrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
   const handleCirclePress = (index: number) => {
@@ -53,87 +49,158 @@ const ArtworkInfoSetting: React.FC = () => {
   };
 
   const handleInputChange = (field: string, text: string) => {
-    setInputs((prevInputs) =>
+    setArtworkInfoInput((prevInputs) =>
       prevInputs.map((input, index) =>
         index === currentIndex ? { ...input, [field]: text } : input,
       ),
     );
   };
 
+  const handleDetailPress = () => {
+    const artwork = artworks.find(
+      (artwork) => artwork.id === selectedArtworks[currentIndex],
+    );
+    if (artwork) {
+      navigation.navigate('ArtworkDetail', {
+        isCollectorOnly: artwork.isCollectorOnly,
+        imageUrl: artwork.imageUrl,
+        title: artwork.title,
+      });
+    }
+  };
+
+  const selectedArtworkImages = selectedArtworks.map(
+    (artworkId) =>
+      artworks.find((artwork) => artwork.id === artworkId)?.imageUrl,
+  );
+  const selectedArtworkTitles = selectedArtworks.map(
+    (artworkId) => artworks.find((artwork) => artwork.id === artworkId)?.title,
+  );
+  const selectedArtworkIsCollectorOnly = selectedArtworks.map(
+    (artworkId) =>
+      artworks.find((artwork) => artwork.id === artworkId)?.isCollectorOnly,
+  );
+
+  const currentArtworkInfo = artworkInfoInput[currentIndex] || {
+    artworkDescription: '',
+    artworkValue: '',
+    artworkAppreciation: '',
+  };
+
+  const isDescriptionFilled = (index: number) => {
+    return artworkInfoInput[index]?.artworkDescription?.length > 0;
+  };
+
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
-      <TitleContainer>
-        <Title>작품의 정보를 작성해주세요</Title>
-        <SubTitle>
-          모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요
-        </SubTitle>
-      </TitleContainer>
+      <TopContainer>
+        <ProgressBarComponent totalSteps={7} />
+        <TitleContainer>
+          <TitleIcon source={require('../../assets/images/character.png')} />
+          <TitleText>
+            <Title>작품의 정보를 작성해주세요</Title>
+            <Subtitle>
+              모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요
+            </Subtitle>
+          </TitleText>
+        </TitleContainer>
+      </TopContainer>
       <CircleScrollContainer>
         <CircleScrollView ref={scrollViewRef}>
-          {inputs.map((_, index) => (
+          {selectedArtworkImages.map((image, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => handleCirclePress(index)}
             >
-              <Circle
-                isActive={currentIndex === index}
-                bgColor={colors[index % colors.length]}
-              />
+              <Circle isActive={currentIndex === index}>
+                {image && <CircleImage source={image} />}
+                {isDescriptionFilled(index) && <Overlay />}
+                {isDescriptionFilled(index) && (
+                  <OverlayImage
+                    source={require('../../assets/images/complete_face.png')}
+                  />
+                )}
+              </Circle>
             </TouchableOpacity>
           ))}
         </CircleScrollView>
       </CircleScrollContainer>
       <ContentContainer ref={contentScrollViewRef}>
         <ImageContainer>
-          <ImagePreview
-            style={{ backgroundColor: colors[currentIndex % colors.length] }}
-          />
+          {currentIndex < selectedArtworkImages.length ? (
+            <ImagePreview source={selectedArtworkImages[currentIndex]} />
+          ) : (
+            <ImagePreviewPlaceholder />
+          )}
         </ImageContainer>
-        <ArtworkTitleWrapper>
-          <ArtworkTitle>작품 이름</ArtworkTitle>
-          <CollectorsOnlyIcon
-            source={require('../../assets/images/ExhibitPage/collectors_only.png')}
-          />
-        </ArtworkTitleWrapper>
-        <Label>나만의 작품 소개글</Label>
+        <ArtworkTitleContainer>
+          <ArtworkTitleWrapper>
+            <ArtworkTitle>{selectedArtworkTitles[currentIndex]}</ArtworkTitle>
+            {selectedArtworkIsCollectorOnly[currentIndex] && (
+              <CollectorsOnlyIcon
+                source={require('../../assets/images/ExhibitPage/collectors_only.png')}
+              />
+            )}
+          </ArtworkTitleWrapper>
+          <ArtworkDetailButton onPress={handleDetailPress}>
+            <ArtworkDetailButtonText>
+              작품 정보 상세 보기
+            </ArtworkDetailButtonText>
+            <Icon name="chevron-forward-outline" size={14} color="#120000" />
+          </ArtworkDetailButton>
+        </ArtworkTitleContainer>
+        <Label>
+          나만의 작품 소개글 <CherryRed>*</CherryRed>
+        </Label>
         <InputContainer>
           <Input
             placeholder="컬렉터만의 작품을 소개해주세요"
-            value={inputs[currentIndex].description}
+            value={currentArtworkInfo.artworkDescription}
             onChangeText={(text: string) =>
-              handleInputChange('description', text)
+              handleInputChange('artworkDescription', text)
             }
             multiline
+            maxLength={500}
           />
           <CharacterCount>
-            {inputs[currentIndex].description.length} / 500
+            <BrownBlack>
+              {currentArtworkInfo.artworkDescription.length}
+            </BrownBlack>{' '}
+            / 500
           </CharacterCount>
         </InputContainer>
         <Label>나만의 작품 수집 계기</Label>
         <InputContainer>
           <Input
             placeholder="작품을 수집하게 된 계기를 알려주세요"
-            value={inputs[currentIndex].value}
-            onChangeText={(text: string) => handleInputChange('value', text)}
+            value={currentArtworkInfo.artworkValue}
+            onChangeText={(text: string) =>
+              handleInputChange('artworkValue', text)
+            }
             multiline
+            maxLength={500}
           />
           <CharacterCount>
-            {inputs[currentIndex].value.length} / 500
+            <BrownBlack>{currentArtworkInfo.artworkValue.length}</BrownBlack> /
+            500
           </CharacterCount>
         </InputContainer>
         <Label>나만의 작품 감상법</Label>
         <InputContainer>
           <Input
             placeholder="컬렉터만의 작품 감상법을 알려주세요"
-            value={inputs[currentIndex].appreciation}
+            value={currentArtworkInfo.artworkAppreciation}
             onChangeText={(text: string) =>
-              handleInputChange('appreciation', text)
+              handleInputChange('artworkAppreciation', text)
             }
             multiline
+            maxLength={500}
           />
           <CharacterCount>
-            {inputs[currentIndex].appreciation.length} / 500
+            <BrownBlack>
+              {currentArtworkInfo.artworkAppreciation.length}
+            </BrownBlack>{' '}
+            / 500
           </CharacterCount>
         </InputContainer>
         <NextButton onPress={handleNext}>
@@ -149,13 +216,40 @@ const Container = styled(View)`
   background-color: #fff;
 `;
 
-const TitleContainer = styled(View)`
-  padding: 0 14px;
+const TopContainer = styled(View)`
+  padding: 16px 16px 0 16px;
+`;
+
+const TitleContainer = styled.View`
+  flex-direction: row;
+  align-items: flex-end;
+`;
+
+const TitleIcon = styled.Image`
+  width: 45px;
+  height: 75px;
+  margin-right: 10px;
+`;
+
+const TitleText = styled.View`
+  flex-direction: column;
+`;
+
+const Title = styled.Text`
+  font-family: 'Bold';
+  font-size: 18px;
+  color: #120000;
+`;
+
+const Subtitle = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
 `;
 
 const ContentContainer = styled(ScrollView)`
   flex: 1;
-  padding: 14px;
+  padding: 0 16px;
 `;
 
 const ImageContainer = styled(View)`
@@ -163,7 +257,13 @@ const ImageContainer = styled(View)`
   margin-bottom: 7px;
 `;
 
-const ImagePreview = styled(View)`
+const ImagePreview = styled(Image)`
+  width: 100%;
+  height: 190px;
+  border-radius: 10px;
+`;
+
+const ImagePreviewPlaceholder = styled(View)`
   width: 100%;
   height: 190px;
   border-radius: 10px;
@@ -171,32 +271,44 @@ const ImagePreview = styled(View)`
 `;
 
 const Label = styled(Text)`
-  font-size: 14px;
   margin-bottom: 10px;
-  font-weight: bold;
-  color: #333333;
+  font-family: 'Bold';
+  font-size: 14px;
+  color: #120000;
+  letter-spacing: 0.5px;
+`;
+
+const CherryRed = styled.Text`
+  color: #e52c32;
 `;
 
 const InputContainer = styled(View)`
   width: 100%;
   margin-bottom: 20px;
-  padding: 10px;
+  padding: 12px 16px;
   border-radius: 20px;
   background-color: #f7f5f5;
   position: relative;
 `;
 
 const Input = styled(RNTextInput)`
-  height: 140px;
-  font-size: 12px;
   text-align-vertical: top;
+  height: 147px;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #120000;
+  letter-spacing: 0.5px;
 `;
 
 const CharacterCount = styled(Text)`
+  font-family: 'Regular';
   font-size: 12px;
-  color: #888888;
+  color: #b0abab;
   text-align: right;
-  margin-bottom: 10px;
+`;
+
+const BrownBlack = styled.Text`
+  color: #413333;
 `;
 
 const NextButton = styled(TouchableOpacity)`
@@ -207,36 +319,44 @@ const NextButton = styled(TouchableOpacity)`
 `;
 
 const NextButtonText = styled(Text)`
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: bold;
   padding: 16px;
+  font-family: 'Bold';
+  font-size: 14px;
+  color: #ffffff;
 `;
 
-const Title = styled(Text)`
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 8px;
-`;
-
-const SubTitle = styled(Text)`
-  font-size: 12px;
-  margin-bottom: 8px;
-`;
-
-const ArtworkTitle = styled(Text)`
-  font-size: 20px;
-  font-weight: bold;
+const ArtworkTitleContainer = styled(View)`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
 `;
 
 const ArtworkTitleWrapper = styled(View)`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 20px;
+`;
+
+const ArtworkTitle = styled(Text)`
+  font-family: 'Bold';
+  font-size: 18px;
+  color: #120000;
+`;
+
+const ArtworkDetailButton = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  padding: 2px;
+`;
+const ArtworkDetailButtonText = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #120000;
+  letter-spacing: 0.5px;
 `;
 
 const CollectorsOnlyIcon = styled.Image`
-  width: 70px;
+  width: 65px;
   height: 24px;
   margin-left: 5px;
 `;
@@ -245,40 +365,52 @@ const CircleScrollContainer = styled(View)`
   margin: 25px 0 12px 8px;
 `;
 
-const Circle = styled(View)<{ isActive: boolean; bgColor: string }>`
+const Circle = styled(View)<{ isActive: boolean }>`
   align-items: center;
   justify-content: center;
   width: 45px;
   height: 45px;
   border-radius: 60px;
   margin: 0 5px;
-  background-color: ${(props: { bgColor: any }) => props.bgColor};
-  border-width: ${(props: { isActive: any }) =>
-    props.isActive ? '2px' : '0px'};
-  border-color: ${(props: { isActive: any }) =>
-    props.isActive ? '#ff2530' : 'transparent'};
-  padding: ${(props: { isActive: any }) => (props.isActive ? '2px' : '0px')};
+  background-color: transparent;
+  padding: ${(props) => (props.isActive ? '1.5px' : '0px')};
+  border: 1.7px dashed
+    ${(props) => (props.isActive ? '#E52C32' : 'transparent')};
+  position: relative;
+`;
+
+const CircleImage = styled(Image)`
+  width: 100%;
+  height: 100%;
+  border-radius: 60px;
+`;
+
+const Overlay = styled(View)`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 60px;
+`;
+
+const OverlayImage = styled(Image)`
+  position: absolute;
+  width: 22px;
+  height: 27px;
+  border-radius: 60px;
 `;
 
 const StyledScrollView = styled(ScrollView)`
   flex-direction: row;
 `;
 
-const CircleScrollView = forwardRef<ScrollView, { children: React.ReactNode }>(
-  (props, ref) => (
-    <StyledScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      ref={ref}
-    >
-      {props.children}
-    </StyledScrollView>
-  ),
-);
-
-const images = Array.from({ length: 10 }, (_, index) => ({
-  id: index,
-  uri: '', // Placeholder for images
-}));
+const CircleScrollView = React.forwardRef<
+  ScrollView,
+  { children: React.ReactNode }
+>((props, ref) => (
+  <StyledScrollView horizontal showsHorizontalScrollIndicator={false} ref={ref}>
+    {props.children}
+  </StyledScrollView>
+));
 
 export default ArtworkInfoSetting;
