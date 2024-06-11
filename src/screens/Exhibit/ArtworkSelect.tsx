@@ -332,7 +332,7 @@ interface ArtworkImageWrapperProps {
 const ArtworkImageWrapper = styled.View<ArtworkImageWrapperProps>`
   position: relative;
   width: 100%;
-  height: 160px;
+  height: 150px;
   border-radius: 5px;
   overflow: hidden;
   background-color: ${(props: { selected: boolean }) =>
