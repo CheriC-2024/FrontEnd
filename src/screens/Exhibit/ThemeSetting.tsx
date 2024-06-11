@@ -4,10 +4,10 @@ import styled from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
 
 const ThemeSetting: React.FC<{}> = ({}) => {
-  const { selectedThemes, setSelectedThemes } = useTheme();
+  const { selectedThemes, setSelectedThemes, aiThemes } = useGlobalState();
   const [themes, setThemes] = useState<string[]>(selectedThemes || []);
   const [inputText, setInputText] = useState('');
   const { step, setStep } = useProgressBar();
@@ -41,53 +41,61 @@ const ThemeSetting: React.FC<{}> = ({}) => {
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
-      <Title>전시의 테마를 알려주세요</Title>
-      <SubTitle>이번 전시회의 테마로 설명해주세요</SubTitle>
+      <TitleContainer>
+        <TitleIcon source={require('../../assets/images/character.png')} />
+        <TitleText>
+          <Title>전시의 테마를 알려주세요</Title>
+          <Subtitle>어떤 전시인지 테마로 설명해주세요</Subtitle>
+        </TitleText>
+      </TitleContainer>
       <AIButtonContainer>
-        <AIRecommendBtn />
+        <AIRecommendBtn source="ThemeSetting" />
       </AIButtonContainer>
       <InputContainer>
-        <Hash>#</Hash>
-        <ThemeInput
-          placeholder="테마를 추가해주세요 (최대 3개)"
-          value={inputText}
-          onChangeText={setInputText}
-        />
-        <AddButton
-          onPress={handleAddTheme}
-          disabled={
-            !inputText.trim() ||
-            themes.length >= 3 ||
-            themes.includes(inputText.trim())
-          }
-        >
-          <AddButtonText
+        <ThemeInputContainer>
+          <Hash>#</Hash>
+          <ThemeInput
+            placeholder="테마를 추가해주세요 (최대 3개)"
+            placeholderTextColor="#B0ABAB"
+            value={inputText}
+            onChangeText={setInputText}
+          />
+          <AddButton
+            onPress={handleAddTheme}
             disabled={
               !inputText.trim() ||
               themes.length >= 3 ||
               themes.includes(inputText.trim())
             }
           >
-            추가
-          </AddButtonText>
-        </AddButton>
+            <AddButtonText
+              disabled={
+                !inputText.trim() ||
+                themes.length >= 3 ||
+                themes.includes(inputText.trim())
+              }
+            >
+              추가
+            </AddButtonText>
+          </AddButton>
+        </ThemeInputContainer>
       </InputContainer>
-      <SelectedThemesContainer>
-        <SelectedThemesHeader>
-          <SelectedThemesTitle>설정한 테마</SelectedThemesTitle>
-          <ThemeCount>{themes.length} / 3</ThemeCount>
-        </SelectedThemesHeader>
-        <SelectedThemes>
-          {themes.map((theme, index) => (
-            <ThemeTag key={index}>
-              <ThemeTagText>#{theme}</ThemeTagText>
-              <RemoveButton onPress={() => handleRemoveTheme(theme)}>
-                <RemoveButtonText>X</RemoveButtonText>
-              </RemoveButton>
-            </ThemeTag>
-          ))}
-        </SelectedThemes>
-      </SelectedThemesContainer>
+      <SelectedThemesHeader>
+        <SelectedThemesTitle>설정한 테마</SelectedThemesTitle>
+        <ThemeCount>
+          <RedBlack>{themes.length}</RedBlack> / 3
+        </ThemeCount>
+      </SelectedThemesHeader>
+      <SelectedThemes>
+        {themes.map((theme, index) => (
+          <ThemeTag key={index} isAITheme={aiThemes.includes(theme)}>
+            <ThemeTagText># {theme}</ThemeTagText>
+            <RemoveButton onPress={() => handleRemoveTheme(theme)}>
+              <RemoveButtonText>✕</RemoveButtonText>
+            </RemoveButton>
+          </ThemeTag>
+        ))}
+      </SelectedThemes>
     </Container>
   );
 };
@@ -98,15 +106,32 @@ const Container = styled.View`
   background-color: #fff;
 `;
 
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
+const TitleContainer = styled.View`
+  flex-direction: row;
+  align-items: flex-end;
+  margin-bottom: 20px;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 16px;
-  margin-bottom: 8px;
+const TitleIcon = styled.Image`
+  width: 45px;
+  height: 75px;
+  margin-right: 10px;
+`;
+
+const TitleText = styled.View`
+  flex-direction: column;
+`;
+
+const Title = styled.Text`
+  font-family: 'Bold';
+  font-size: 18px;
+  color: #120000;
+`;
+
+const Subtitle = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
 `;
 
 const AIButtonContainer = styled.View`
@@ -118,82 +143,101 @@ const AIButtonContainer = styled.View`
 const InputContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 94px;
 `;
 
 const Hash = styled.Text`
+  margin-left: 15px;
+  padding-right: 4px;
+  font-family: 'Regular';
   font-size: 16px;
-  padding: 8px;
-  color: #000;
+  color: #120000;
+`;
+
+const ThemeInputContainer = styled.View`
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 20px;
+  background-color: #f7f5f5;
 `;
 
 const ThemeInput = styled.TextInput`
   flex: 1;
-  border: 1px solid #ccc;
-  border-radius: 8px;
   padding: 8px;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #120000;
+  letter-spacing: 0.5px;
 `;
 
 const AddButton = styled.TouchableOpacity<{ disabled: boolean }>`
-  padding: 8px;
-  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#ff0000')};
-  border-radius: 8px;
-  margin-top: 8px;
+  margin-right: 2px;
+  padding: 10px 12px;
+  border-radius: 50px;
+  background-color: ${({ disabled }) => (disabled ? '#B0ABAB' : '#120000')};
 `;
 
 const AddButtonText = styled.Text<{ disabled: boolean }>`
   color: #fff;
   font-size: 14px;
-`;
-
-const SelectedThemesContainer = styled.View`
-  margin-top: 16px;
+  font-family: 'Bold';
 `;
 
 const SelectedThemesHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
 `;
 
 const SelectedThemesTitle = styled.Text`
-  font-size: 16px;
-  font-weight: bold;
+  font-family: 'Bold';
+  font-size: 14px;
+  letter-spacing: 0.5px;
+`;
+
+const ThemeCount = styled.Text`
+  font-family: 'Bold';
+  font-size: 14px;
+  color: #b0abab;
+`;
+
+const RedBlack = styled.Text`
+  color: #120000;
 `;
 
 const SelectedThemes = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+`;
+
+const ThemeTag = styled.View<{ isAITheme: boolean }>`
+  flex-direction: row;
+  align-items: center;
+  background-color: ${({ isAITheme }) => (isAITheme ? '#e52c32' : '#413333')};
+  padding: 4px 8px;
+  border-radius: 30px;
+  margin-right: 8px;
   margin-bottom: 8px;
 `;
 
-const ThemeTag = styled.View`
-  flex-direction: row;
-  align-items: center;
-  background-color: #e0e0e0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-right: 8px;
-  margin-bottom: 4px;
-`;
-
 const ThemeTagText = styled.Text`
+  margin-right: 3px;
+  font-family: 'Regular';
   font-size: 14px;
-  margin-right: 8px;
+  letter-spacing: 0.5px;
+  color: #fff;
 `;
 
 const RemoveButton = styled.TouchableOpacity`
-  padding: 4px;
+  padding: 0px;
 `;
 
 const RemoveButtonText = styled.Text`
+  font-family: 'Regular';
   font-size: 14px;
-  color: #ff0000;
-`;
-
-const ThemeCount = styled.Text`
-  font-size: 14px;
-  color: #777;
+  color: #fff;
 `;
 
 export default ThemeSetting;
