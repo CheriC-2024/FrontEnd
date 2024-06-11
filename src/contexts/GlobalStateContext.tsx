@@ -6,7 +6,7 @@ export interface Artwork {
   artist: string;
   imageUrl: any;
   isCollectorOnly: boolean;
-  cherry: number | null; //null은 소장 작품일때
+  cherry: number | null; // null은 소장 작품일때
 }
 
 export interface Collection {
@@ -19,6 +19,8 @@ export interface Collection {
 interface GlobalState {
   selectedThemes: string[];
   setSelectedThemes: (themes: string[]) => void;
+  aiThemes: string[];
+  setAIThemes: (themes: string[]) => void;
   title: string;
   description: string;
   setTitle: (title: string) => void;
@@ -44,6 +46,13 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const [aiThemes, setAIThemes] = useState<string[]>([
+    'AI추천테마1',
+    'AI추천테마2',
+    'AI추천테마3',
+    'AI추천테마4',
+    'AI추천테마5',
+  ]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedFont, setSelectedFont] = useState('기본 시스템 폰트');
@@ -169,6 +178,8 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
         setSelectedCollections,
         selectedThemes,
         setSelectedThemes,
+        aiThemes,
+        setAIThemes,
         title,
         description,
         setTitle,

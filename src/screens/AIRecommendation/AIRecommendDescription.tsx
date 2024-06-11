@@ -2,18 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
-import { useTheme } from '../../contexts/ThemeContext';
-
-type RootStackParamList = {
-  MainTabs: undefined;
-  Exhibit: { step: number; selectedThemes?: string[] };
-  AIRecommendLoading: undefined;
-  AIRecommend: undefined;
-};
+import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { RootStackParamList } from '../../navigations/AppNavigator';
 
 const AIRecommendDescription: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { selectedThemes, setSelectedThemes } = useTheme();
+  const { selectedThemes, setSelectedThemes } = useGlobalState();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,9 +39,46 @@ const AIRecommendDescription: React.FC = () => {
   return (
     <Container>
       <Content>
-        <Title>AI가 전시명를 만들었어요!</Title>
+        <Title>AI가 전시명을 만들었어요!</Title>
         <SubTitle>전시명을 선택해주세요</SubTitle>
         <Instruction>전시명을 클릭하면 추천 이유를 볼 수 있어요!</Instruction>
+        <ThemeScrollView horizontal>
+          {themes.map((theme, index) => (
+            <ThemeCircle
+              key={index}
+              onPress={() => {
+                setSelectedTheme(theme);
+                handleThemeSelect(theme);
+              }}
+              selected={selectedThemes.includes(theme)}
+            >
+              <ThemeText>{`#${theme}`}</ThemeText>
+            </ThemeCircle>
+          ))}
+        </ThemeScrollView>
+        {selectedTheme && (
+          <RecommendationReason>
+            <RecommendationReasonText>
+              {`${selectedTheme} 추천 이유: AI가 자동으로 선택한 테마입니다. 이 테마는 ...`}
+            </RecommendationReasonText>
+          </RecommendationReason>
+        )}
+        <SelectedThemesContainer>
+          <SelectedThemesHeader>
+            <SelectedThemesTitle>선택한 테마</SelectedThemesTitle>
+            <ThemeCount>{selectedThemes.length} / 3</ThemeCount>
+          </SelectedThemesHeader>
+          <SelectedThemes>
+            {selectedThemes.map((theme, index) => (
+              <ThemeTag key={index}>
+                <ThemeTagText>#{theme}</ThemeTagText>
+                <RemoveButton onPress={() => handleThemeSelect(theme)}>
+                  <RemoveButtonText>X</RemoveButtonText>
+                </RemoveButton>
+              </ThemeTag>
+            ))}
+          </SelectedThemes>
+        </SelectedThemesContainer>
       </Content>
       <CompleteButton onPress={handleComplete}>
         <CompleteButtonText>완료</CompleteButtonText>
