@@ -4,8 +4,9 @@ export interface Artwork {
   id: number;
   title: string;
   artist: string;
-  imageUrl: any; // Replace with appropriate type if necessary
+  imageUrl: any;
   isCollectorOnly: boolean;
+  cherry: number | null; //null은 소장 작품일때
 }
 
 export interface Collection {
@@ -31,6 +32,10 @@ interface GlobalState {
   removeCollection: (collectionId: number) => void;
   selectedCollections: number[];
   setSelectedCollections: React.Dispatch<React.SetStateAction<number[]>>;
+  selectedArtworks: number[];
+  setSelectedArtworks: React.Dispatch<React.SetStateAction<number[]>>;
+  userCherries: number;
+  setUserCherries: (cherries: number) => void;
 }
 
 const GlobalStateContext = createContext<GlobalState | undefined>(undefined);
@@ -47,43 +52,55 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
       id: 1,
       title: '아몬드 꽃',
       artist: '빈센트 반 고흐',
-      imageUrl: require('../assets/picture1.jpg'),
+      imageUrl: require('../assets/picture1.jpg'), // Local require
+      // imageUrl: 'https://example.com/assets/picture1.jpg', // URI
       isCollectorOnly: false,
+      cherry: 0,
     },
     {
       id: 2,
       title: '고양이',
       artist: '두번째 작가',
-      imageUrl: require('../assets/picture2.jpg'),
+      imageUrl: require('../assets/picture2.jpg'), // Local require
+      // imageUrl: 'https://example.com/assets/picture2.jpg', // URI
       isCollectorOnly: true,
+      cherry: null,
     },
     {
       id: 3,
       title: '세번째 작품',
       artist: '세번째 작가',
-      imageUrl: require('../assets/picture3.jpg'),
+      imageUrl: require('../assets/picture3.jpg'), // Local require
+      // imageUrl: 'https://example.com/assets/picture3.jpg', // URI
       isCollectorOnly: true,
+      cherry: null,
     },
     {
       id: 4,
-      title: '아몬드 꽃',
+      title: '별이 빛나는 밤',
       artist: '빈센트 반 고흐',
-      imageUrl: require('../assets/picture4.jpg'),
+      imageUrl: require('../assets/picture4.jpg'), // Local require
+      // imageUrl: 'https://example.com/assets/picture4.jpg', // URI
       isCollectorOnly: false,
+      cherry: 5,
     },
     {
       id: 5,
       title: 'Number 5',
       artist: '두번째 작가',
-      imageUrl: require('../assets/picture5.jpg'),
-      isCollectorOnly: true,
+      imageUrl: require('../assets/picture5.jpg'), // Local require
+      // imageUrl: 'https://example.com/assets/picture5.jpg', // URI
+      isCollectorOnly: false,
+      cherry: 3,
     },
     {
       id: 6,
       title: '육',
       artist: '세번째 작가',
-      imageUrl: require('../assets/picture6.jpg'),
-      isCollectorOnly: true,
+      imageUrl: require('../assets/picture6.jpg'), // Local require
+      // imageUrl: 'https://example.com/assets/picture6.jpg', // URI
+      isCollectorOnly: false,
+      cherry: 6,
     },
   ]);
 
@@ -129,6 +146,8 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
   ]);
 
   const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
+  const [selectedArtworks, setSelectedArtworks] = useState<number[]>([]);
+  const [userCherries, setUserCherries] = useState<number>(10);
 
   const addCollection = (collection: Collection) => {
     setCollections((prev) => [...prev, collection]);
@@ -143,25 +162,25 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <GlobalStateContext.Provider
       value={{
-        // CollectionSelect page -> 선택한 컬렉션 저장
         collections,
         addCollection,
         removeCollection,
         selectedCollections,
         setSelectedCollections,
-        // ThemeSetting page -> 테마 3개 저장
         selectedThemes,
         setSelectedThemes,
-        // DescriptionSetting page -> 전시명과 설명 저장
         title,
         description,
         setTitle,
         setDescription,
-        // Font selection
         selectedFont,
         setSelectedFont,
         artworks,
         setArtworks,
+        selectedArtworks,
+        setSelectedArtworks,
+        userCherries,
+        setUserCherries,
       }}
     >
       {children}

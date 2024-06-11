@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
-import ExhibitScreen from '../screens/Exhibit/ExhibitScreen';
+import ExhibitScreen from '../screens/ExhibitScreen';
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import AIRecommend from '../screens/AIRecommendation/AIRecommend';
 import { ProgressBarProvider } from '../components/ProgressBarContext';

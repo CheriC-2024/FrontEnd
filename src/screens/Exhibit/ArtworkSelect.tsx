@@ -1,54 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import FilterInput from '../../components/FilterInput';
 import { useProgressBar } from '../../components/ProgressBarContext';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
 
 interface ExpandedCollections {
   [key: string]: boolean;
 }
 
-const ArtworkSelect: React.FC = () => {
-  const [selectedArtworks, setSelectedArtworks] = useState<string[]>([]);
+interface ArtworkSelectProps {
+  onSelectionChange: (selectedArtworks: number[]) => void;
+}
+
+const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
   const [expandedCollections, setExpandedCollections] =
     useState<ExpandedCollections>({});
   const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
-
-  const artworks = [
-    {
-      collectionName: '컬렉션 이름 1',
-      items: Array.from({ length: 5 }, (_, index) => ({
-        name: `작품 ${index + 1}`,
-        price: index % 2 === 0 ? '무료' : `${index * 3}체리`,
-      })),
-    },
-    {
-      collectionName: '컬렉션 이름 3',
-      items: Array.from({ length: 5 }, (_, index) => ({
-        name: `작품 ${index + 6}`,
-        price: `${(index + 1) * 1}체리`,
-      })),
-    },
-  ];
+  const {
+    collections,
+    selectedCollections,
+    userCherries,
+    selectedArtworks,
+    setSelectedArtworks,
+  } = useGlobalState();
 
   useEffect(() => {
     setStep(1); // Set progress bar to step 2 (index 1)
 
-    // Initialize expandedCollections state with all collections set to true
+    // Initialize expandedCollections state with selected collections set to true
     const initialExpandedState: ExpandedCollections = {};
-    artworks.forEach((collection) => {
-      initialExpandedState[collection.collectionName] = true;
-    });
+    collections
+      .filter((collection) => selectedCollections.includes(collection.id))
+      .forEach((collection) => {
+        initialExpandedState[collection.name] = true;
+      });
     setExpandedCollections(initialExpandedState);
-  }, [setStep]);
+  }, [setStep, collections, selectedCollections]);
 
-  const handleSelectArtwork = (name: string) => {
+  useEffect(() => {
+    onSelectionChange(selectedArtworks); // 선택된 작품이 변경될 때마다 상위 컴포넌트에 전달
+  }, [selectedArtworks, onSelectionChange]);
+
+  const handleSelectArtwork = (id: number) => {
     setSelectedArtworks((prev) =>
-      prev.includes(name)
-        ? prev.filter((item) => item !== name)
-        : [...prev, name],
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -61,17 +60,21 @@ const ArtworkSelect: React.FC = () => {
 
   const collapseAllCollections = () => {
     const collapsed: ExpandedCollections = {};
-    artworks.forEach((collection) => {
-      collapsed[collection.collectionName] = false;
-    });
+    collections
+      .filter((collection) => selectedCollections.includes(collection.id))
+      .forEach((collection) => {
+        collapsed[collection.name] = false;
+      });
     setExpandedCollections(collapsed);
   };
 
   const expandAllCollections = () => {
     const expanded: ExpandedCollections = {};
-    artworks.forEach((collection) => {
-      expanded[collection.collectionName] = true;
-    });
+    collections
+      .filter((collection) => selectedCollections.includes(collection.id))
+      .forEach((collection) => {
+        expanded[collection.name] = true;
+      });
     setExpandedCollections(expanded);
   };
 
@@ -82,75 +85,108 @@ const ArtworkSelect: React.FC = () => {
     (value) => value,
   );
 
-  const filteredArtworks = artworks.map((collection) => ({
-    ...collection,
-    items: collection.items.filter((artwork) =>
-      artwork.name.includes(filterText),
-    ),
-  }));
+  const filteredCollections = collections
+    .filter((collection) => selectedCollections.includes(collection.id))
+    .map((collection) => ({
+      ...collection,
+      artworks: collection.artworks.filter((artwork) =>
+        artwork.title.includes(filterText),
+      ),
+    }));
 
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
-      <Title>전시할 작품을 선택해주세요!</Title>
-      <SubTitle>클릭하신 작품이 전시에 올라갑니다</SubTitle>
-      <FilterInput filterText={filterText} setFilterText={setFilterText} />
-      <Header>
+      <TitleContainer>
+        <TitleIcon source={require('../../assets/images/character.png')} />
+        <TitleText>
+          <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
+          <CherryCount>
+            보유 중인 체리: <CherryNum>{userCherries}</CherryNum>
+          </CherryCount>
+        </TitleText>
+      </TitleContainer>
+      <FilterInput
+        placeholder="작품 검색하기"
+        filterText={filterText}
+        setFilterText={setFilterText}
+      />
+      <Row>
         <SelectedCount>
-          <SelectedCountText>{selectedArtworks.length} / 30</SelectedCountText>
+          <BrownBlack>{selectedArtworks.length}</BrownBlack> / 30
         </SelectedCount>
-        <ButtonGroup>
-          {allCollapsed ? (
-            <ExpandButton onPress={expandAllCollections}>
-              <ExpandButtonText>모두 펴기</ExpandButtonText>
-            </ExpandButton>
-          ) : (
-            <CollapseButton onPress={collapseAllCollections}>
-              <CollapseButtonText>모두 접기</CollapseButtonText>
-            </CollapseButton>
-          )}
-        </ButtonGroup>
-      </Header>
+        {allCollapsed ? (
+          <ExpandButton onPress={expandAllCollections}>
+            <ExpandButtonText>컬렉션 모두 펼치기</ExpandButtonText>
+          </ExpandButton>
+        ) : (
+          <CollapseButton onPress={collapseAllCollections}>
+            <CollapseButtonText>컬렉션 모두 접기</CollapseButtonText>
+          </CollapseButton>
+        )}
+      </Row>
       <ArtworkList>
-        {filteredArtworks.map((collection, collectionIndex) => {
-          const isExpanded = expandedCollections[collection.collectionName];
+        {filteredCollections.map((collection, collectionIndex) => {
+          const isExpanded = expandedCollections[collection.name];
           return (
             <ArtworkCollection key={collectionIndex}>
               <CollectionTitle>
-                <CollectionName>{collection.collectionName}</CollectionName>
+                <CollectionName>{collection.name}</CollectionName>
                 <DropDownButton
-                  onPress={() => toggleCollection(collection.collectionName)}
+                  onPress={() => toggleCollection(collection.name)}
                 >
                   <DropDownButtonText>
-                    {isExpanded ? '숨기기' : '보이기'}
+                    {isExpanded ? (
+                      <Icon
+                        name="chevron-down-outline"
+                        size={20}
+                        color="#120000"
+                      />
+                    ) : (
+                      <Icon
+                        name="chevron-up-outline"
+                        size={20}
+                        color="#120000"
+                      />
+                    )}
                   </DropDownButtonText>
                 </DropDownButton>
               </CollectionTitle>
               {isExpanded && (
                 <ArtworkGrid>
-                  {collection.items.map((artwork, index) => {
-                    const selected = selectedArtworks.includes(artwork.name);
-                    const selectedIndex = selectedArtworks.indexOf(
-                      artwork.name,
-                    );
+                  {collection.artworks.map((artwork, index) => {
+                    const selected = selectedArtworks.includes(artwork.id);
+                    const selectedIndex = selectedArtworks.indexOf(artwork.id);
                     return (
                       <ArtworkItem
                         key={index}
                         selected={selected}
-                        onPress={() => handleSelectArtwork(artwork.name)}
+                        onPress={() => handleSelectArtwork(artwork.id)}
                       >
-                        <ArtworkImage />
+                        <ArtworkImageWrapper selected={selected}>
+                          <ArtworkImage
+                            source={artwork.imageUrl}
+                            selected={selected}
+                          />
+                          {selected && (
+                            <SelectedIndexWrapper>
+                              <SelectedIndex>{selectedIndex + 1}</SelectedIndex>
+                            </SelectedIndexWrapper>
+                          )}
+                        </ArtworkImageWrapper>
                         <ArtworkInfo>
-                          <ArtworkName>
-                            <Name>{artwork.name}</Name>
-                            {selected && (
-                              <SelectedIndex>
-                                {' '}
-                                ({selectedIndex + 1})
-                              </SelectedIndex>
-                            )}
-                          </ArtworkName>
-                          <ArtworkPrice>{artwork.price}</ArtworkPrice>
+                          <ArtworkName>{artwork.title}</ArtworkName>
+                          {artwork.isCollectorOnly ? (
+                            <CollectorOnlyImage
+                              source={require('../../assets/images/collectorOnlyText.png')}
+                            />
+                          ) : (
+                            <ArtworkCherry>
+                              {artwork.cherry === 0
+                                ? '무료'
+                                : `${artwork.cherry} 체리`}
+                            </ArtworkCherry>
+                          )}
                         </ArtworkInfo>
                       </ArtworkItem>
                     );
@@ -171,58 +207,78 @@ const Container = styled.View`
   background-color: #fff;
 `;
 
+const TitleContainer = styled.View`
+  flex-direction: row;
+  align-items: flex-end;
+  margin-bottom: 20px;
+`;
+
+const TitleIcon = styled.Image`
+  width: 45px;
+  height: 75px;
+  margin-right: 10px;
+`;
+
+const TitleText = styled.View`
+  flex-direction: column;
+`;
+
 const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
+  font-family: 'Bold';
+  font-size: 18px;
+  color: #120000;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 16px;
-  margin-bottom: 8px;
+const CherryCount = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
 `;
 
-const Header = styled.View`
+const CherryNum = styled(CherryCount)`
+  font-family: 'Bold';
+  color: #e52c32;
+`;
+
+const Row = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-top: 14px;
 `;
 
-const SelectedCount = styled.View`
-  flex-direction: row;
-  align-items: center;
+const SelectedCount = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #b0abab;
 `;
 
-const SelectedCountText = styled.Text`
-  font-size: 16px;
-`;
-
-const ButtonGroup = styled.View`
-  flex-direction: row;
+const BrownBlack = styled.Text`
+  color: #413333;
 `;
 
 const CollapseButton = styled(TouchableOpacity)`
-  padding: 8px;
-  margin-right: 8px;
+  padding-left: 8px;
 `;
 
 const CollapseButtonText = styled.Text`
-  font-size: 14px;
-  color: #007aff;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #b0abab;
 `;
 
 const ExpandButton = styled(TouchableOpacity)`
-  padding: 8px;
+  padding-left: 8px;
 `;
 
 const ExpandButtonText = styled.Text`
-  font-size: 14px;
-  color: #007aff;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #b0abab;
 `;
 
 const ArtworkList = styled.ScrollView`
-  margin-top: 16px;
+  margin-top: 10px;
 `;
 
 const ArtworkCollection = styled.View`
@@ -233,12 +289,16 @@ const CollectionTitle = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 5px 12px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+  border: 1.5px solid #f8f8f8;
 `;
 
 const CollectionName = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
+  font-family: 'Bold';
+  font-size: 14px;
+  letter-spacing: 0.5px;
 `;
 
 const DropDownButton = styled(TouchableOpacity)`
@@ -253,7 +313,6 @@ const DropDownButtonText = styled.Text`
 const ArtworkGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-between;
 `;
 
 interface ArtworkItemProps {
@@ -261,45 +320,70 @@ interface ArtworkItemProps {
 }
 
 const ArtworkItem = styled(TouchableOpacity)<ArtworkItemProps>`
-  width: 48%;
-  margin-bottom: 8px;
-  padding: 16px;
-  background-color: ${(props) => (props.selected ? '#d3d3d3' : '#f8f8f8')};
-  border-radius: 8px;
-`;
-
-const ArtworkImage = styled.View`
-  width: 100%;
-  height: 100px;
-  background-color: #ccc;
-  margin-bottom: 8px;
-  border-radius: 8px;
-`;
-
-const ArtworkInfo = styled.View`
   flex: 1;
+  margin: 0 5px 15px 5px;
+  max-width: 32%;
 `;
 
-const ArtworkName = styled.View`
-  flex-direction: row;
-  align-items: center;
+interface ArtworkImageWrapperProps {
+  selected: boolean;
+}
+
+const ArtworkImageWrapper = styled.View<ArtworkImageWrapperProps>`
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: ${(props: { selected: boolean }) =>
+    props.selected ? 'rgba(0, 0, 0, 0.8)' : 'transparent'};
 `;
 
-const Name = styled.Text`
-  font-size: 14px;
-  font-weight: bold;
-  color: #000;
+interface ArtworkImageProps {
+  selected: boolean;
+}
+
+const ArtworkImage = styled.Image<ArtworkImageProps>`
+  width: 100%;
+  height: 100%;
+  opacity: ${(props: { selected: boolean }) => (props.selected ? 0.5 : 1)};
+`;
+
+const SelectedIndexWrapper = styled.View`
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  background-color: #100012;
+  border-radius: 20px;
+  padding: 3px 9px;
 `;
 
 const SelectedIndex = styled.Text`
-  font-size: 14px;
-  font-weight: bold;
-  color: #e52c32;
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #fff;
+  letter-spacing: 0.5px;
 `;
 
-const ArtworkPrice = styled.Text`
+const ArtworkInfo = styled.View`
+  padding: 7px 0 0 4px;
+`;
+
+const ArtworkName = styled.Text`
+  font-family: 'Bold';
+  font-size: 14px;
+  color: #120000;
+`;
+
+const CollectorOnlyImage = styled.Image`
+  width: 80px;
+  height: 15px;
+`;
+
+const ArtworkCherry = styled.Text`
+  font-family: 'Regular';
   font-size: 12px;
-  color: #777;
+  color: #413333;
 `;
 
 export default ArtworkSelect;

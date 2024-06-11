@@ -1,4 +1,4 @@
-export { default as ExhibitScreen } from './ExhibitScreen';
+export { default as ExhibitScreen } from '../ExhibitScreen';
 export { default as CollectionSelect } from './CollectionSelect';
 export { default as ArtworkSelect } from './ArtworkSelect';
 export { default as ThemeSetting } from './ThemeSetting';
