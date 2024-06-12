@@ -46,14 +46,13 @@ const AIRecommendDescription: React.FC = () => {
   ];
 
   const handleComplete = () => {
-    if (!selectedExhibitName) return;
-
-    if (exhibitTitle) {
+    if (exhibitTitle && selectedExhibitName) {
       setIsModalVisible(true);
-    } else {
+      return;
+    } else if (selectedExhibitName) {
       setExhibitTitle(selectedExhibitName);
-      navigation.navigate('Exhibit', { step: 4 });
     }
+    navigation.navigate('Exhibit', { step: 4 });
   };
 
   const handleConfirm = () => {
