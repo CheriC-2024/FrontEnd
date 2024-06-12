@@ -74,7 +74,7 @@ const AppNavigator = () => {
                 name="AIRecommendDescription"
                 component={AIRecommendDescription}
                 options={{
-                  headerTitle: 'AI 전시명',
+                  headerTitle: '전시 이름 AI 추천',
                   headerLeft: () => null,
                   headerBackVisible: false,
                 }}
