@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import CustomModal from '../../components/Modal';
@@ -66,8 +67,9 @@ const AIRecommendDescription: React.FC = () => {
   return (
     <Container>
       <Content>
-        <Title>AI가 전시명을 만들었어요!</Title>
-        <SubTitle>원하는 전시 이름을 선택해 주세요</SubTitle>
+        <Title>AI가 전시 이름을 만들었어요!</Title>
+        <Subtitle>원하는 전시 이름을 선택해 주세요</Subtitle>
+        <Icon name="sync-outline" size={20} color="#120000" />
         <ThemeScrollView horizontal>
           {exhibitNames.map((name, index) => (
             <TouchableOpacity
@@ -137,14 +139,17 @@ const Content = styled.ScrollView`
 `;
 
 const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
+  margin-top: 32px;
+  font-family: 'Bold';
+  font-size: 18px;
+  color: #120000;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 16px;
-  margin-bottom: 16px;
+const Subtitle = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #413333;
+  margin-bottom: 5px;
 `;
 
 const ThemeScrollView = styled.ScrollView`
