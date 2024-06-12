@@ -101,10 +101,10 @@ const AIRecommendDescription: React.FC = () => {
           ) : (
             <InitialReasonContainer>
               <ReasonTitle>
-                테마를 클릭하면 추천 이유를 볼 수 있어요!
+                결과를 클릭하면 추천 이유를 볼 수 있어요!
               </ReasonTitle>
               <InitialSubText>
-                컬렉터님이 설정한 작품들로 테마를 만들었습니다:)
+                컬렉터님이 설정한 작품들로 이름을 만들었습니다:)
               </InitialSubText>
             </InitialReasonContainer>
           )}
