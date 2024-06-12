@@ -1,34 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import AppNavigator from './src/navigations/AppNavigator';
 import * as Font from 'expo-font';
+import { ActivityIndicator, View } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const App = () => {
-  // 폰트 적용
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
     const loadFonts = async () => {
-      await Font.loadAsync({
-        Thin: require('./src/assets/fonts/Pretendard/Pretendard-Thin.otf'),
-        ExtraLight: require('./src/assets/fonts/Pretendard/Pretendard-ExtraLight.otf'),
-        Light: require('./src/assets/fonts/Pretendard/Pretendard-Light.otf'),
-        Regular: require('./src/assets/fonts/Pretendard/Pretendard-Regular.otf'),
-        Medium: require('./src/assets/fonts/Pretendard/Pretendard-Medium.otf'),
-        SemiBold: require('./src/assets/fonts/Pretendard/Pretendard-SemiBold.otf'),
-        Bold: require('./src/assets/fonts/Pretendard/Pretendard-Bold.otf'),
-        ExtraBold: require('./src/assets/fonts/Pretendard/Pretendard-ExtraBold.otf'),
-        Black: require('./src/assets/fonts/Pretendard/Pretendard-Black.otf'),
-      });
-      setFontsLoaded(true);
+      try {
+        await Font.loadAsync({
+          Regular: require('./src/assets/fonts/Pretendard/Pretendard-Regular.otf'),
+          Bold: require('./src/assets/fonts/Pretendard/Pretendard-Bold.otf'),
+          BlackHanSans: require('./src/assets/fonts/BlackHanSans-Regular.ttf'),
+          Mapo: require('./src/assets/fonts/MapoDacapo.ttf'),
+          //SnowFrost: require('./src/assets/fonts/SnowFrost.ttf'),
+          SanTokki: require('./src/assets/fonts/SanTokki.ttf'),
+          Lotteria: require('./src/assets/fonts/Lotteria.otf'),
+          //Ryu: require('./src/assets/fonts/OnGeurLip-Ryu.ttf'),
+        });
+        setFontsLoaded(true);
+      } catch (error) {
+        console.error('Error loading fonts:', error);
+        // Optionally, you can set a state to indicate the error and show an error message to the user
+      }
     };
+
     loadFonts();
   }, []);
 
   if (!fontsLoaded) {
-    return null; // 폰트가 로드되지 않은 경우 null을 반환하여 아무것도 렌더링하지 않음
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E52C32" />
+      </View>
+    );
   }
 
   return (
