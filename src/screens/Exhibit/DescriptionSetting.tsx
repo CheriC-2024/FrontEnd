@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -24,12 +24,13 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
   onFieldsFilled,
 }) => {
   const {
-    title,
-    setTitle,
-    description,
-    setDescription,
+    exhibitTitle,
+    setExhibitTitle,
+    exhibitDescription,
+    setExhibitDescription,
     selectedFont,
     setSelectedFont,
+    fontData,
   } = useGlobalState();
   const { step, setStep } = useProgressBar();
   const navigation =
@@ -40,19 +41,14 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
   }, [setStep]);
 
   useEffect(() => {
-    const allFieldsFilled = title.trim() !== '' && description.trim() !== '';
+    const allFieldsFilled =
+      exhibitTitle.trim() !== '' && exhibitDescription.trim() !== '';
     onFieldsFilled(allFieldsFilled);
-  }, [title, description]);
+  }, [exhibitTitle, exhibitDescription]);
 
   const handleGoToArtworkList = () => {
     navigation.navigate('ArtworkList');
   };
-
-  const data = [
-    { label: '기본 시스템 폰트', value: '기본 시스템 폰트' },
-    { label: 'Pretendard', value: 'Pretendard' },
-    { label: 'Arial', value: 'Arial' },
-  ];
 
   return (
     <Container>
@@ -76,13 +72,13 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
             placeholder="ex) 항해: 김아무개전"
             placeholderTextColor="#b0abab"
             maxLength={30}
-            value={title}
-            onChangeText={setTitle}
+            value={exhibitTitle}
+            onChangeText={setExhibitTitle}
             returnKeyType="done"
             onSubmitEditing={() => {}}
           />
           <CharacterCount>
-            <Black>{title.length}</Black> / 30
+            <Black>{exhibitTitle.length}</Black> / 30
           </CharacterCount>
         </InputContainer>
         <View style={{ zIndex: 1000 }}>
@@ -92,7 +88,7 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
             </InputLabel>
             <DropDownContainer>
               <Dropdown
-                data={data}
+                data={fontData}
                 labelField="label"
                 valueField="value"
                 placeholder="폰트를 선택하세요"
@@ -109,13 +105,30 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
                 placeholderStyle={{
                   fontFamily: 'Regular',
                   fontSize: 12,
-                  color: '#120000',
+                  color: '#B0ABAB',
                 }}
                 selectedTextStyle={{
                   fontFamily: 'Regular',
                   fontSize: 12,
                   color: '#120000',
                 }}
+                renderItem={(item) => (
+                  <View style={{ padding: 10 }}>
+                    <Text
+                      style={{
+                        marginBottom: 6,
+                        fontFamily: 'Regular',
+                        fontSize: 12,
+                        color: '#B0ABAB',
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                    <Text style={{ fontFamily: item.fontFamily, fontSize: 16 }}>
+                      {exhibitTitle}
+                    </Text>
+                  </View>
+                )}
               />
             </DropDownContainer>
           </InputContainer>
@@ -129,14 +142,14 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
             placeholderTextColor="#b0abab"
             multiline
             maxLength={500}
-            value={description}
-            onChangeText={setDescription}
+            value={exhibitDescription}
+            onChangeText={setExhibitDescription}
             style={{ height: 150 }}
             returnKeyType="done"
             blurOnSubmit={true}
           />
           <CharacterCount>
-            <Black>{description.length}</Black> / 500
+            <Black>{exhibitDescription.length}</Black> / 500
           </CharacterCount>
         </InputContainer>
         <Button onPress={handleGoToArtworkList}>

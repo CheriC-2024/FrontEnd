@@ -28,17 +28,24 @@ export interface ArtworkInfoInput {
   artworkAppreciation: string;
 }
 
+interface FontData {
+  label: string;
+  value: string;
+  fontFamily: string;
+}
+
 interface GlobalState {
   selectedThemes: string[];
   setSelectedThemes: (themes: string[]) => void;
   aiThemes: string[];
   setAIThemes: (themes: string[]) => void;
-  title: string;
-  description: string;
-  setTitle: (title: string) => void;
-  setDescription: (description: string) => void;
+  exhibitTitle: string;
+  exhibitDescription: string;
+  setExhibitTitle: (title: string) => void;
+  setExhibitDescription: (description: string) => void;
   selectedFont: string;
   setSelectedFont: (font: string) => void;
+  fontData: FontData[];
   artworks: Artwork[];
   setArtworks: (artworks: Artwork[]) => void;
   collections: Collection[];
@@ -67,9 +74,21 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
     'AI추천테마4',
     'AI추천테마5',
   ]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [exhibitTitle, setExhibitTitle] = useState('');
+  const [exhibitDescription, setExhibitDescription] = useState('');
   const [selectedFont, setSelectedFont] = useState('기본 시스템 폰트');
+  const [fontData] = useState<FontData[]>([
+    {
+      label: '기본 시스템 폰트',
+      value: '기본 시스템 폰트',
+      fontFamily: 'Regular',
+    },
+    { label: '검은고딕', value: 'BlackHanSans', fontFamily: 'BlackHanSans' },
+    { label: '마포다카포', value: 'Mapo', fontFamily: 'Mapo' },
+    { label: '산토끼', value: 'SanTokki', fontFamily: 'SanTokki' },
+    { label: '롯데리아 찹땅겨', value: 'Lotteria', fontFamily: 'Lotteria' },
+    // Add more fonts as needed
+  ]);
   const [artworks, setArtworks] = useState<Artwork[]>([
     {
       id: 1,
@@ -206,12 +225,13 @@ export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({
         setSelectedThemes,
         aiThemes,
         setAIThemes,
-        title,
-        description,
-        setTitle,
-        setDescription,
+        exhibitTitle,
+        exhibitDescription,
+        setExhibitTitle,
+        setExhibitDescription,
         selectedFont,
         setSelectedFont,
+        fontData,
         artworks,
         setArtworks,
         selectedArtworks,
