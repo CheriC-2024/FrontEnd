@@ -4,11 +4,19 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
 import { RootStackParamList } from '../../navigations/AppNavigator';
+import CustomModal from '../../components/Modal';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const AIRecommendDescription: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { selectedThemes, setSelectedThemes } = useGlobalState();
-  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const { exhibitTitle, setExhibitTitle } = useGlobalState();
+  const [selectedExhibitName, setSelectedExhibitName] = useState<string | null>(
+    null,
+  );
+  const [recommendationReason, setRecommendationReason] = useState<
+    string | null
+  >(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
     navigation.getParent()?.setOptions({
@@ -22,67 +30,98 @@ const AIRecommendDescription: React.FC = () => {
     };
   }, [navigation]);
 
-  const handleThemeSelect = (theme: string) => {
-    if (selectedThemes.includes(theme)) {
-      setSelectedThemes(selectedThemes.filter((t) => t !== theme));
-    } else if (selectedThemes.length < 3) {
-      setSelectedThemes([...selectedThemes, theme]);
+  const handleExhibitNameSelect = (name: string) => {
+    setSelectedExhibitName(name);
+    setRecommendationReason(
+      `${name} 추천 이유: 이 전시명은 AI가 자동으로 생성한 추천 전시명입니다.`,
+    );
+  };
+
+  const exhibitNames = [
+    '하늘보다 더 넓은 땅',
+    '넓다랗고 푸른 땅',
+    'AI전시명3',
+    'AI전시명4',
+    'AI전시명5',
+  ];
+
+  const handleComplete = () => {
+    if (!selectedExhibitName) return;
+
+    if (exhibitTitle) {
+      setIsModalVisible(true);
+    } else {
+      setExhibitTitle(selectedExhibitName);
+      navigation.navigate('Exhibit', { step: 4 });
     }
   };
 
-  const themes = ['AI추천테마1', 'AI추천테마2', 'AI추천테마3', 'AI추천테마4'];
-
-  const handleComplete = () => {
-    navigation.navigate('Exhibit', { step: 4, selectedThemes });
+  const handleConfirm = () => {
+    if (selectedExhibitName) {
+      setExhibitTitle(selectedExhibitName);
+      setIsModalVisible(false);
+      navigation.navigate('Exhibit', { step: 4 });
+    }
   };
 
   return (
     <Container>
       <Content>
         <Title>AI가 전시명을 만들었어요!</Title>
-        <SubTitle>전시명을 선택해주세요</SubTitle>
-        <Instruction>전시명을 클릭하면 추천 이유를 볼 수 있어요!</Instruction>
+        <SubTitle>원하는 전시 이름을 선택해 주세요</SubTitle>
         <ThemeScrollView horizontal>
-          {themes.map((theme, index) => (
-            <ThemeCircle
+          {exhibitNames.map((name, index) => (
+            <TouchableOpacity
               key={index}
-              onPress={() => {
-                setSelectedTheme(theme);
-                handleThemeSelect(theme);
-              }}
-              selected={selectedThemes.includes(theme)}
+              onPress={() => handleExhibitNameSelect(name)}
             >
-              <ThemeText>{`#${theme}`}</ThemeText>
-            </ThemeCircle>
+              <ThemeCard selected={selectedExhibitName === name}>
+                {selectedExhibitName === name ? (
+                  <GradientCard colors={['#fff', '#FDEEEE']}>
+                    <ThemeText>{name}</ThemeText>
+                  </GradientCard>
+                ) : (
+                  <ThemeText>{name}</ThemeText>
+                )}
+              </ThemeCard>
+            </TouchableOpacity>
           ))}
         </ThemeScrollView>
-        {selectedTheme && (
-          <RecommendationReason>
-            <RecommendationReasonText>
-              {`${selectedTheme} 추천 이유: AI가 자동으로 선택한 테마입니다. 이 테마는 ...`}
-            </RecommendationReasonText>
-          </RecommendationReason>
-        )}
-        <SelectedThemesContainer>
-          <SelectedThemesHeader>
-            <SelectedThemesTitle>선택한 테마</SelectedThemesTitle>
-            <ThemeCount>{selectedThemes.length} / 3</ThemeCount>
-          </SelectedThemesHeader>
-          <SelectedThemes>
-            {selectedThemes.map((theme, index) => (
-              <ThemeTag key={index}>
-                <ThemeTagText>#{theme}</ThemeTagText>
-                <RemoveButton onPress={() => handleThemeSelect(theme)}>
-                  <RemoveButtonText>X</RemoveButtonText>
-                </RemoveButton>
-              </ThemeTag>
-            ))}
-          </SelectedThemes>
-        </SelectedThemesContainer>
+        <ReasonContainer>
+          <ReasonIcon
+            source={require('../../assets/images/character_ai.png')}
+          />
+          {selectedExhibitName ? (
+            <ReasonTextContainer>
+              <ReasonTitle>추천 이유</ReasonTitle>
+              <ReasonText multiline>
+                {`${selectedExhibitName} AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다.`}
+              </ReasonText>
+            </ReasonTextContainer>
+          ) : (
+            <InitialReasonContainer>
+              <ReasonTitle>
+                테마를 클릭하면 추천 이유를 볼 수 있어요!
+              </ReasonTitle>
+              <InitialSubText>
+                컬렉터님이 설정한 작품들로 테마를 만들었습니다:)
+              </InitialSubText>
+            </InitialReasonContainer>
+          )}
+        </ReasonContainer>
       </Content>
       <CompleteButton onPress={handleComplete}>
-        <CompleteButtonText>완료</CompleteButtonText>
+        <CompleteButtonText>설정 완료하기</CompleteButtonText>
       </CompleteButton>
+      <CustomModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        title={`이미 입력하신 전시 이름이 ${`\n`}있으시네요!`}
+        body={`컬렉터님께서 이미 이름을 입력하셨네요!${`\n`}지금 선택하신 이름으로 변경할까요?`}
+        confirmButtonText="네, 할게요"
+        cancelButtonText="아니오!"
+        onConfirm={handleConfirm}
+      />
     </Container>
   );
 };
@@ -90,6 +129,7 @@ const AIRecommendDescription: React.FC = () => {
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
+  overflow: visible; /* 그림자가 잘리지 않도록 설정 */
 `;
 
 const Content = styled.ScrollView`
@@ -105,109 +145,107 @@ const Title = styled.Text`
 
 const SubTitle = styled.Text`
   font-size: 16px;
-  margin-bottom: 8px;
-`;
-
-const Instruction = styled.Text`
-  font-size: 14px;
-  color: #777;
   margin-bottom: 16px;
 `;
 
 const ThemeScrollView = styled.ScrollView`
   flex-grow: 0;
   margin-bottom: 16px;
+  overflow: visible; /* 그림자가 잘리지 않도록 설정 */
 `;
 
-const ThemeCircle = styled.TouchableOpacity<{ selected: boolean }>`
-  width: 80px;
-  height: 80px;
-  border-radius: 40px;
-  background-color: ${({ selected }) => (selected ? '#d3d3d3' : '#f0f0f0')};
+const ThemeCard = styled.View<{ selected: boolean }>`
+  width: 140px;
+  height: 180px;
   justify-content: center;
   align-items: center;
-  margin-right: 16px;
+  background-color: #fff;
+  border-radius: 10px;
+  margin: 5px;
+  elevation: 5;
+  overflow: visible; /* 그림자가 잘리지 않도록 설정 */
+`;
+
+const GradientCard = styled(LinearGradient)`
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ThemeText = styled.Text`
+  margin: 0 10px;
   text-align: center;
-  color: #000;
+  color: #120000;
+  font-family: 'Bold';
+  font-size: 14px;
+  letter-spacing: 0.5px;
+`;
+
+const ReasonContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  height: 200px;
+  margin-top: 50px;
+  border-radius: 30px;
+  border: 1.7px dashed #e52c32;
+`;
+
+const ReasonIcon = styled.Image`
+  width: 65px;
+  height: 120px;
+  margin: 0 10px;
+`;
+
+const ReasonTextContainer = styled.View`
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: 25px;
+`;
+
+const ReasonTitle = styled.Text`
+  margin-bottom: 10px;
+  font-family: 'Bold';
+  font-size: 14px;
+  color: #120000;
+  letter-spacing: 0.5px;
+`;
+
+const ReasonText = styled.Text`
+  margin-bottom: 10px;
+  font-family: 'Regular';
   font-size: 12px;
+  color: #120000;
+  letter-spacing: 0.5px;
 `;
 
-const RecommendationReason = styled.View`
-  padding: 16px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  margin-bottom: 16px;
+const InitialReasonContainer = styled.View`
+  flex-direction: column;
+  justify-content: center;
 `;
 
-const RecommendationReasonText = styled.Text`
-  font-size: 14px;
-  color: #333;
-`;
-
-const SelectedThemesContainer = styled.View`
-  margin-top: 16px;
-`;
-
-const SelectedThemesHeader = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const SelectedThemesTitle = styled.Text`
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const SelectedThemes = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-`;
-
-const ThemeTag = styled.View`
-  flex-direction: row;
-  align-items: center;
-  background-color: #e0e0e0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-right: 8px;
-  margin-bottom: 4px;
-`;
-
-const ThemeTagText = styled.Text`
-  font-size: 14px;
-  margin-right: 8px;
-`;
-
-const RemoveButton = styled.TouchableOpacity`
-  padding: 4px;
-`;
-
-const RemoveButtonText = styled.Text`
-  font-size: 14px;
-  color: #ff0000;
-`;
-
-const ThemeCount = styled.Text`
-  font-size: 14px;
-  color: #777;
+const InitialSubText = styled.Text`
+  font-family: 'Regular';
+  font-size: 12px;
+  color: #b0abab;
+  letter-spacing: 0.5px;
 `;
 
 const CompleteButton = styled.TouchableOpacity`
-  padding: 16px;
-  background-color: #000;
-  border-radius: 8px;
+  padding: 12px;
+  background-color: #120000;
+  border-radius: 30px;
   align-items: center;
   margin: 16px;
 `;
 
 const CompleteButtonText = styled.Text`
-  color: #fff;
+  font-family: 'Bold';
   font-size: 16px;
+  color: #fff;
 `;
 
 export default AIRecommendDescription;
