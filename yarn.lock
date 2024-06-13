@@ -4089,7 +4089,7 @@ expo-constants@~16.0.0, expo-constants@~16.0.1:
     "@expo/config" "~9.0.0"
     "@expo/env" "~0.3.0"
 
-expo-dev-client@~4.0.14:
+expo-dev-client@~4.0.18:
   version "4.0.18"
   resolved "https://registry.yarnpkg.com/expo-dev-client/-/expo-dev-client-4.0.18.tgz#10244b8f54f882fefe8dcb16aa08ab0ed2394df1"
   integrity sha512-FxqBLHcTvUvIeqgaDGAjEfalWCWn9xmfvVm0Bpb50tkwxFrDcg4t13p/tvYw8sLEm+87HSee/Lx04OrZcC3oiQ==
