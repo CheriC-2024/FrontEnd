@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -17,16 +17,31 @@ import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import { useGlobalState, Artwork } from '../../contexts/GlobalStateContext';
+import MusicSelectionSheet from '../../components/BottomSheets/MusicSelectionSheet';
 
 const FinishSetting: React.FC = () => {
   const { step, setStep } = useProgressBar();
   const navigation =
     useNavigation<NavigationProp<RootStackParamList, 'Exhibit'>>();
-  const { artworks, setArtworks, title, description } = useGlobalState();
+  const {
+    artworks,
+    setArtworks,
+    exhibitTitle,
+    exhibitDescription,
+    selectedThemes,
+    selectedArtworks,
+    selectedFont,
+  } = useGlobalState();
+  const [isMusicSheetVisible, setMusicSheetVisible] = useState(false);
 
   useEffect(() => {
     setStep(6);
   }, [setStep]);
+
+  // Filter the artworks to only include selected artworks
+  const filteredArtworks = artworks.filter((artwork) =>
+    selectedArtworks.includes(artwork.id),
+  );
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Artwork>) => {
     const scale = useSharedValue(1);
@@ -57,6 +72,11 @@ const FinishSetting: React.FC = () => {
         <ArtworkInfo>
           <ArtworkTitle>{item.title}</ArtworkTitle>
           <ArtworkSubtitle>{item.artist}</ArtworkSubtitle>
+          {item.cherry !== null && (
+            <ArtworkCherry>
+              {item.cherry === 0 ? '무료' : `${item.cherry} 체리`}
+            </ArtworkCherry>
+          )}
           {item.isCollectorOnly && (
             <CollectorOnlyImage
               source={require('../../assets/images/collectorOnlyText.png')}
@@ -73,6 +93,9 @@ const FinishSetting: React.FC = () => {
   const handleDragEnd = ({ data }: { data: Artwork[] }) => {
     setArtworks([...data]);
   };
+  const handleEditPress = () => {
+    navigation.navigate('DescriptionSetting');
+  };
 
   return (
     <OuterContainer>
@@ -87,7 +110,7 @@ const FinishSetting: React.FC = () => {
       <GradientContainer>
         <LinearGradient colors={['#ff5f5f', '#f1aaaa']} style={{ padding: 16 }}>
           <MusicContainer>
-            <MusicTextContainer>
+            <MusicTextContainer onPress={() => setMusicSheetVisible(true)}>
               <Icon name="musical-notes-outline" size={16} color="#fff" />
               <MusicText>아직 음악이 없습니다</MusicText>
             </MusicTextContainer>
@@ -96,32 +119,42 @@ const FinishSetting: React.FC = () => {
 
           <DescriptionContainer>
             <SectionTitleContainer>
-              <SectionTitle>{title}</SectionTitle>
+              <SectionTitle style={{ fontFamily: selectedFont }}>
+                {exhibitTitle}
+              </SectionTitle>
               <EditIcon name="pencil-outline" size={20} color="#000" />
             </SectionTitleContainer>
-            <ExhibitName>{description}</ExhibitName>
-            <EditIcon
-              name="pencil-outline"
-              size={20}
-              color="#000"
-              style={{ alignSelf: 'flex-end' }}
-            />
+            <ExhibitDescriptContainer>
+              <ExhibitDescript>{exhibitDescription}</ExhibitDescript>
+              <EditIcon
+                name="pencil-outline"
+                size={20}
+                color="#000"
+                onPress={handleEditPress}
+              />
+            </ExhibitDescriptContainer>
           </DescriptionContainer>
 
           <TagsContainer>
-            <Tag>#선택된 테마1</Tag>
-            <Tag>#선택된 테마2</Tag>
+            {selectedThemes.map((theme, index) => (
+              <Tag key={index}>#{theme}</Tag>
+            ))}
+            <EditIcon name="pencil-outline" size={20} color="#000" />
           </TagsContainer>
         </LinearGradient>
       </GradientContainer>
       <InnerContainer>
         <DraggableFlatList
-          data={artworks}
+          data={filteredArtworks}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           onDragEnd={handleDragEnd}
         />
       </InnerContainer>
+      <MusicSelectionSheet
+        isVisible={isMusicSheetVisible}
+        onClose={() => setMusicSheetVisible(false)}
+      />
     </OuterContainer>
   );
 };
@@ -176,19 +209,20 @@ const MusicContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 70px;
+  margin-bottom: 75px;
 `;
 
-const MusicTextContainer = styled.View`
+const MusicTextContainer = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
-  background-color: #8a7d7d;
+  background-color: #9e8c8f;
   padding: 5px 10px;
   border-radius: 20px;
 `;
 
 const MusicText = styled.Text`
-  font-size: 14px;
+  font-family: 'Regular';
+  font-size: 12px;
   color: #fff;
   margin-left: 5px;
 `;
@@ -205,7 +239,7 @@ const EditIcon = styled(Icon)`
 const SectionTitleContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 `;
 
 const SectionTitle = styled.Text`
@@ -214,7 +248,13 @@ const SectionTitle = styled.Text`
   color: #120000;
 `;
 
-const ExhibitName = styled.Text`
+const ExhibitDescriptContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const ExhibitDescript = styled.Text`
   font-size: 12px;
   font-family: 'Regular';
   color: #120000;
@@ -223,15 +263,19 @@ const ExhibitName = styled.Text`
 const TagsContainer = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  align-items: center;
 `;
 
 const Tag = styled.Text`
+  font-family: 'Regular';
   font-size: 12px;
-  color: #000;
-  background-color: #f0f0f0;
-  padding: 4px 8px;
+  color: #fff;
+  background-color: #413333;
+  padding: 2px 8px;
   border-radius: 10px;
   margin-right: 8px;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
 `;
 
 const ArtworkTouchable = styled(TouchableOpacity)`
@@ -263,6 +307,12 @@ const ArtworkTitle = styled.Text`
 `;
 
 const ArtworkSubtitle = styled.Text`
+  font-size: 12px;
+  font-family: 'Regular';
+  color: #b0abab;
+`;
+
+const ArtworkCherry = styled.Text`
   font-size: 12px;
   font-family: 'Regular';
   color: #b0abab;
