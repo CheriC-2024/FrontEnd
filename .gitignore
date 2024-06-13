@@ -37,4 +37,7 @@ yarn-error.*
 # .vscode
 .vscode/
 
+# 환경 변수 파일
+.env
+
 /%ProgramData%/
