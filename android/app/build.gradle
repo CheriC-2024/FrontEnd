@@ -129,6 +129,11 @@ android {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
     }
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java', 'src/main/kotlin']
+        }
+    }
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
