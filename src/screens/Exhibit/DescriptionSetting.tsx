@@ -165,7 +165,7 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
 
 const Container = styled.View`
   flex: 1;
-  padding: 15px;
+  padding: 16px;
   background-color: #fff;
 `;
 
