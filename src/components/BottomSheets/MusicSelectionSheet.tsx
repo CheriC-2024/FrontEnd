@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   ScrollView,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
 
-const MusicSelectionSheet = ({ isVisible, onClose }) => {
+const MusicSelectionSheet = ({
+  isVisible,
+  onClose,
+  selectedMusic,
+  setSelectedMusic,
+}) => {
+  const { selectedThemes } = useGlobalState();
+
+  const handleMusicSelect = (music: string) => {
+    if (selectedMusic === music) {
+      setSelectedMusic(null); // Deselect if already selected
+    } else {
+      setSelectedMusic(music);
+    }
+  };
+
   return (
     <Modal
       visible={isVisible}
@@ -20,31 +37,35 @@ const MusicSelectionSheet = ({ isVisible, onClose }) => {
         <ModalContainer>
           <TouchableWithoutFeedback>
             <SheetContainer>
-              <Title>
-                <Icon name="musical-notes-outline" size={16} color="#000" />{' '}
-                전시 배경 음악 설정하기
-              </Title>
+              <HeaderContainer>
+                <Icon name="musical-notes-outline" size={24} color="#120000" />
+                <Title>전시 배경 음악 설정하기</Title>
+              </HeaderContainer>
               <Subtitle>
                 컬렉터님의 전시 테마를 기반으로 추천된 배경음이에요
               </Subtitle>
               <TagsContainer>
-                <Tag>#따뜻한</Tag>
-                <Tag>#재미있는</Tag>
-                <Tag>#행복한</Tag>
+                {selectedThemes.map((theme, index) => (
+                  <Tag key={index}>#{theme}</Tag>
+                ))}
               </TagsContainer>
               <ScrollView>
-                <MusicItem>
-                  <Icon name="musical-notes-outline" size={20} color="#000" />
-                  <MusicText>음악 이름</MusicText>
-                </MusicItem>
-                <MusicItem>
-                  <Icon name="musical-notes-outline" size={20} color="#000" />
-                  <MusicText>음악 이름</MusicText>
-                </MusicItem>
-                <MusicItem>
-                  <Icon name="musical-notes-outline" size={20} color="#000" />
-                  <MusicText>음악 이름</MusicText>
-                </MusicItem>
+                {['Brightness', 'Colorful', 'Upbeat Melody'].map(
+                  (music, index) => (
+                    <MusicItem
+                      key={index}
+                      selected={selectedMusic === music}
+                      onPress={() => handleMusicSelect(music)}
+                    >
+                      <Icon
+                        name="musical-note-outline"
+                        size={20}
+                        color="#120000"
+                      />
+                      <MusicText>{music}</MusicText>
+                    </MusicItem>
+                  ),
+                )}
               </ScrollView>
             </SheetContainer>
           </TouchableWithoutFeedback>
@@ -68,10 +89,16 @@ const SheetContainer = styled.View`
   max-height: 50%;
 `;
 
+const HeaderContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
 const Title = styled.Text`
   font-family: 'Bold';
   font-size: 20px;
-  margin-bottom: 5px;
+  margin-left: 10px;
   color: #120000;
 `;
 
@@ -90,22 +117,26 @@ const TagsContainer = styled.View`
 const Tag = styled.Text`
   font-family: 'Regular';
   font-size: 14px;
-  color: #000;
-  background-color: #fff;
-  border: 1px #f7f5f5;
+  color: #fff;
+  background-color: #120000;
   padding: 4px 12px;
   border-radius: 20px;
   margin-right: 6px;
   letter-spacing: 0.5px;
 `;
 
-const MusicItem = styled.TouchableOpacity`
+const MusicItem = styled(TouchableOpacity)<{ selected: boolean }>`
   flex-direction: row;
   align-items: center;
-  background-color: #f0f0f0;
+  background-color: #fff;
   padding: 15px;
+  border: 1.7px dashed
+    ${(props) => (props.selected ? '#E52C32' : 'transparent')};
   border-radius: 30px;
+  margin-horizontal: 3px;
   margin-bottom: 10px;
+  elevation: 3;
+  overflow: visible;
 `;
 
 const MusicText = styled.Text`
