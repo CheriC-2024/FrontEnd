@@ -13,6 +13,7 @@ import ProgressBarComponent from '../../components/ProgressBar';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator';
+import { imageAssets } from '../../assets/DB/imageAssets';
 
 interface ArtworkInfoSettingProps {
   onArtworkDescriptionChange: (filled: boolean) => void;
@@ -26,7 +27,7 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
   const contentScrollViewRef = useRef<ScrollView>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const { selectedArtworks, artworks, artworkInfoInput, setArtworkInfoInput } =
+  const { selectedArtworks, artworkInfoInput, setArtworkInfoInput } =
     useGlobalState();
 
   useEffect(() => {
@@ -57,29 +58,15 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
   };
 
   const handleDetailPress = () => {
-    const artwork = artworks.find(
-      (artwork) => artwork.id === selectedArtworks[currentIndex],
-    );
+    const artwork = selectedArtworks[currentIndex];
     if (artwork) {
       navigation.navigate('ArtworkDetail', {
-        isCollectorOnly: artwork.isCollectorOnly,
-        imageUrl: artwork.imageUrl,
-        title: artwork.title,
+        isCollectorOnly: artwork.cherryNum === null,
+        imageUrl: artwork.fileName,
+        title: artwork.name,
       });
     }
   };
-
-  const selectedArtworkImages = selectedArtworks.map(
-    (artworkId) =>
-      artworks.find((artwork) => artwork.id === artworkId)?.imageUrl,
-  );
-  const selectedArtworkTitles = selectedArtworks.map(
-    (artworkId) => artworks.find((artwork) => artwork.id === artworkId)?.title,
-  );
-  const selectedArtworkIsCollectorOnly = selectedArtworks.map(
-    (artworkId) =>
-      artworks.find((artwork) => artwork.id === artworkId)?.isCollectorOnly,
-  );
 
   const currentArtworkInfo = artworkInfoInput[currentIndex] || {
     artworkDescription: '',
@@ -96,7 +83,9 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
       <TopContainer>
         <ProgressBarComponent totalSteps={7} />
         <TitleContainer>
-          <TitleIcon source={require('../../assets/images/character.png')} />
+          <TitleIcon
+            source={require('src/assets/images/Character/character_smile.png')}
+          />
           <TitleText>
             <Title>작품의 정보를 작성해주세요</Title>
             <Subtitle>
@@ -107,13 +96,15 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
       </TopContainer>
       <CircleScrollContainer>
         <CircleScrollView ref={scrollViewRef}>
-          {selectedArtworkImages.map((image, index) => (
+          {selectedArtworks.map((artwork, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => handleCirclePress(index)}
             >
               <Circle isActive={currentIndex === index}>
-                {image && <CircleImage source={image} />}
+                {artwork.fileName && (
+                  <CircleImage source={imageAssets[artwork.fileName]} />
+                )}
                 {isDescriptionFilled(index) && <Overlay />}
                 {isDescriptionFilled(index) && (
                   <OverlayImage
@@ -127,16 +118,18 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
       </CircleScrollContainer>
       <ContentContainer ref={contentScrollViewRef}>
         <ImageContainer>
-          {currentIndex < selectedArtworkImages.length ? (
-            <ImagePreview source={selectedArtworkImages[currentIndex]} />
+          {currentIndex < selectedArtworks.length ? (
+            <ImagePreview
+              source={imageAssets[selectedArtworks[currentIndex]?.fileName]}
+            />
           ) : (
             <ImagePreviewPlaceholder />
           )}
         </ImageContainer>
         <ArtworkTitleContainer>
           <ArtworkTitleWrapper>
-            <ArtworkTitle>{selectedArtworkTitles[currentIndex]}</ArtworkTitle>
-            {selectedArtworkIsCollectorOnly[currentIndex] && (
+            <ArtworkTitle>{selectedArtworks[currentIndex]?.name}</ArtworkTitle>
+            {selectedArtworks[currentIndex]?.cherryNum === null && (
               <CollectorsOnlyIcon
                 source={require('../../assets/images/ExhibitPage/collectors_only.png')}
               />
@@ -220,28 +213,28 @@ const TopContainer = styled(View)`
   padding: 16px 16px 0 16px;
 `;
 
-const TitleContainer = styled.View`
+const TitleContainer = styled(View)`
   flex-direction: row;
   align-items: flex-end;
 `;
 
-const TitleIcon = styled.Image`
+const TitleIcon = styled(Image)`
   width: 45px;
-  height: 75px;
+  height: 80px;
   margin-right: 10px;
 `;
 
-const TitleText = styled.View`
+const TitleText = styled(View)`
   flex-direction: column;
 `;
 
-const Title = styled.Text`
+const Title = styled(Text)`
   font-family: 'Bold';
   font-size: 18px;
   color: #120000;
 `;
 
-const Subtitle = styled.Text`
+const Subtitle = styled(Text)`
   font-family: 'Regular';
   font-size: 12px;
   color: #413333;
@@ -278,7 +271,7 @@ const Label = styled(Text)`
   letter-spacing: 0.5px;
 `;
 
-const CherryRed = styled.Text`
+const CherryRed = styled(Text)`
   color: #e52c32;
 `;
 
@@ -307,7 +300,7 @@ const CharacterCount = styled(Text)`
   text-align: right;
 `;
 
-const BrownBlack = styled.Text`
+const BrownBlack = styled(Text)`
   color: #413333;
 `;
 
@@ -355,7 +348,7 @@ const ArtworkDetailButtonText = styled.Text`
   letter-spacing: 0.5px;
 `;
 
-const CollectorsOnlyIcon = styled.Image`
+const CollectorsOnlyIcon = styled(Image)`
   width: 65px;
   height: 24px;
   margin-left: 5px;
