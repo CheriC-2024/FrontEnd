@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
@@ -26,8 +28,9 @@ const ThemeSetting: React.FC<{}> = ({}) => {
       themes.length < 3 &&
       !themes.includes(inputText.trim())
     ) {
-      setThemes([...themes, inputText.trim()]);
-      setSelectedThemes([...themes, inputText.trim()]);
+      const newThemes = [...themes, inputText.trim()];
+      setThemes(newThemes);
+      setSelectedThemes(newThemes); //ExhibitScreen에 상태 보내기
       setInputText('');
     }
   };
@@ -40,70 +43,95 @@ const ThemeSetting: React.FC<{}> = ({}) => {
 
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
-      <TitleContainer>
-        <TitleIcon source={require('../../assets/images/character.png')} />
-        <TitleText>
-          <Title>전시의 테마를 알려주세요</Title>
-          <Subtitle>어떤 전시인지 테마로 설명해주세요</Subtitle>
-        </TitleText>
-      </TitleContainer>
-      <AIButtonContainer>
-        <AIRecommendBtn source="ThemeSetting" />
-      </AIButtonContainer>
-      <InputContainer>
-        <ThemeInputContainer>
-          <Hash>#</Hash>
-          <ThemeInput
-            placeholder="테마를 추가해주세요 (최대 3개)"
-            placeholderTextColor="#B0ABAB"
-            value={inputText}
-            onChangeText={setInputText}
+      <GradientBackground>
+        <ProgressBarComponent totalSteps={7} />
+        <TitleContainer>
+          <TitleIcon
+            source={require('src/assets/images/Character/character_smile.png')}
           />
-          <AddButton
-            onPress={handleAddTheme}
-            disabled={
-              !inputText.trim() ||
-              themes.length >= 3 ||
-              themes.includes(inputText.trim())
-            }
-          >
-            <AddButtonText
+          <TitleText>
+            <Title>전시의 테마를 알려주세요</Title>
+            <Subtitle>어떤 전시인지 테마로 설명해주세요</Subtitle>
+          </TitleText>
+        </TitleContainer>
+        <AIButtonContainer>
+          <AIRecommendBtn source="ThemeSetting" />
+        </AIButtonContainer>
+        <InputContainer>
+          <ThemeInputContainer>
+            <Hash>#</Hash>
+            <ThemeInput
+              placeholder="테마를 추가해주세요 (최대 3개)"
+              placeholderTextColor="#B0ABAB"
+              value={inputText}
+              onChangeText={setInputText}
+            />
+            <AddButton
+              onPress={handleAddTheme}
               disabled={
                 !inputText.trim() ||
                 themes.length >= 3 ||
                 themes.includes(inputText.trim())
               }
             >
-              추가
-            </AddButtonText>
-          </AddButton>
-        </ThemeInputContainer>
-      </InputContainer>
-      <SelectedThemesHeader>
-        <SelectedThemesTitle>설정한 테마</SelectedThemesTitle>
-        <ThemeCount>
-          <RedBlack>{themes.length}</RedBlack> / 3
-        </ThemeCount>
-      </SelectedThemesHeader>
-      <SelectedThemes>
-        {themes.map((theme, index) => (
-          <ThemeTag key={index} isAITheme={aiThemes.includes(theme)}>
-            <ThemeTagText># {theme}</ThemeTagText>
-            <RemoveButton onPress={() => handleRemoveTheme(theme)}>
-              <RemoveButtonText>✕</RemoveButtonText>
-            </RemoveButton>
-          </ThemeTag>
-        ))}
-      </SelectedThemes>
+              <AddButtonText
+                disabled={
+                  !inputText.trim() ||
+                  themes.length >= 3 ||
+                  themes.includes(inputText.trim())
+                }
+              >
+                추가
+              </AddButtonText>
+            </AddButton>
+          </ThemeInputContainer>
+        </InputContainer>
+        <SelectedThemesHeader>
+          <SelectedThemesTitle>설정한 테마</SelectedThemesTitle>
+          <ThemeCount>
+            <RedBlack>{themes.length}</RedBlack> / 3
+          </ThemeCount>
+        </SelectedThemesHeader>
+        <SelectedThemes>
+          {themes.map((theme, index) => (
+            <ThemeTag key={index} isAITheme={aiThemes.includes(theme)}>
+              <ThemeTagText># {theme}</ThemeTagText>
+              <RemoveButton onPress={() => handleRemoveTheme(theme)}>
+                <Icon name="close-outline" size={16} color="#fff" />
+              </RemoveButton>
+            </ThemeTag>
+          ))}
+        </SelectedThemes>
+      </GradientBackground>
     </Container>
   );
 };
 
+interface GradientBackgroundProps {
+  colors?: string[];
+  start?: { x: number; y: number };
+  end?: { x: number; y: number };
+}
+
+const GradientBackground = styled(
+  LinearGradient,
+).attrs<GradientBackgroundProps>((props) => ({
+  colors: props.colors || ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
+  start: props.start || { x: 0.5, y: 0.7 },
+  end: props.end || { x: 0.5, y: 1 },
+}))<GradientBackgroundProps>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px;
+`;
+
 const Container = styled.View`
   flex: 1;
-  padding: 16px;
   background-color: #fff;
+  position: relative;
 `;
 
 const TitleContainer = styled.View`
@@ -114,7 +142,7 @@ const TitleContainer = styled.View`
 
 const TitleIcon = styled.Image`
   width: 45px;
-  height: 75px;
+  height: 80px;
   margin-right: 10px;
 `;
 
