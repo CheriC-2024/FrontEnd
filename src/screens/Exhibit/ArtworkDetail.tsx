@@ -3,12 +3,14 @@ import { View, Text, Image, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator'; // RootStackParamList 타입 import
+import { imageAssets } from '../../assets/DB/imageAssets'; // Import your image assets
 
 type ArtworkDetailRouteProp = RouteProp<RootStackParamList, 'ArtworkDetail'>;
 
 const ArtworkDetail: React.FC = () => {
   const route = useRoute<ArtworkDetailRouteProp>();
   const { isCollectorOnly, imageUrl, title } = route.params;
+  const imageSource = imageAssets[imageUrl];
 
   return (
     <Container>
@@ -22,14 +24,14 @@ const ArtworkDetail: React.FC = () => {
               />
             </Row>
             <SectionTitle>대표 이미지</SectionTitle>
-            <MainImage source={imageUrl} />
+            <MainImage source={imageSource} />
             <SectionTitle>
               실물 이미지 <RedStar>*</RedStar>
             </SectionTitle>
             <RealImagesContainer>
-              <RealImage source={imageUrl} />
-              <RealImage source={imageUrl} />
-              <RealImage source={imageUrl} />
+              <RealImage source={imageSource} />
+              <RealImage source={imageSource} />
+              <RealImage source={imageSource} />
             </RealImagesContainer>
             <SectionTitle>작품 기본 정보</SectionTitle>
             <InfoText>
@@ -72,7 +74,7 @@ const ArtworkDetail: React.FC = () => {
               {title} <ArtworkSubtitle>무료</ArtworkSubtitle>
             </ArtworkTitle>
             <SectionTitle>대표 이미지</SectionTitle>
-            <MainImage source={imageUrl} />
+            <MainImage source={imageSource} />
             <SectionTitle>작품 기본 정보</SectionTitle>
             <InfoText>
               <InfoTitle>작가:</InfoTitle> 빈센트 반 고흐
