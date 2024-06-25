@@ -14,7 +14,8 @@ import { RootStackParamList } from '../../navigations/AppNavigator';
 
 const AIRecommendTheme: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { selectedThemes, setSelectedThemes, aiThemes } = useGlobalState();
+  const { selectedThemes, setSelectedThemes, aiThemes, aiThemeReason } =
+    useGlobalState();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [animations, setAnimations] = useState<{
     [key: string]: Animated.Value;
@@ -128,13 +129,13 @@ const AIRecommendTheme: React.FC = () => {
 
         <ReasonContainer>
           <ReasonIcon
-            source={require('../../assets/images/character_ai.png')}
+            source={require('src/assets/images/Character/character_ai.png')}
           />
           {selectedTheme ? (
             <ReasonTextContainer>
               <ReasonTitle>추천 이유</ReasonTitle>
               <ReasonText multiline>
-                {`${selectedTheme} AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다.`}
+                {aiThemeReason[aiThemes.indexOf(selectedTheme)]}
               </ReasonText>
               <ReasonButton onPress={handleAddTheme}>
                 <ReasonButtonText>추가하기</ReasonButtonText>
@@ -210,7 +211,7 @@ const ThemeScrollViewContainer = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: flex-end;
-  height: 140px; /* Adjust based on the maximum height of the enlarged circles */
+  height: 150px; /* Adjust based on the maximum height of the enlarged circles */
 `;
 
 const ThemeScrollView = styled.ScrollView`
@@ -222,8 +223,9 @@ const ThemeCircle = styled.TouchableOpacity<{ selected: boolean }>`
   background-color: ${({ selected }) => (selected ? '#F7F5F5' : '#fff')};
   justify-content: center;
   align-items: center;
-  margin-right: 10px;
+  margin: 5px 10px 5px 5px; /*그림자 잘리는 것 방지 */
   elevation: 5;
+  overflow: visible;
 `;
 
 const AnimatedThemeCircle = Animated.createAnimatedComponent(ThemeCircle);
@@ -252,8 +254,8 @@ const ReasonContainer = styled.View`
 `;
 
 const ReasonIcon = styled.Image`
-  width: 65px;
-  height: 120px;
+  width: 70px;
+  height: 105px;
   margin-right: 10px;
 `;
 
