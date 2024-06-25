@@ -2,71 +2,25 @@ import React from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CherryIcon from '../../assets/icons/cherry.svg';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator'; // RootStackParamList 타입 import
+import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { imageAssets } from '../../assets/DB/imageAssets';
 
 const ArtworkList: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { selectedArtworks } = useGlobalState();
 
-  //더미데이터 - api 연결시 삭제
-  const artworks = [
-    {
-      id: 1,
-      title: '아몬드 꽃1',
-      description: '무료',
-      imageUrl: require('../../assets/picture1.jpg'),
-      isCollectorOnly: false,
-    },
-    {
-      id: 2,
-      title: '고양이',
-      description: 'Collector Only',
-      imageUrl: require('../../assets/picture2.jpg'),
-      isCollectorOnly: true,
-    },
-    {
-      id: 3,
-      title: '아몬드 꽃3',
-      description: '4체리',
-      imageUrl: require('../../assets/picture3.jpg'),
-      isCollectorOnly: false,
-    },
-    {
-      id: 4,
-      title: '별이 빛나는 밤',
-      description: '2체리',
-      imageUrl: require('../../assets/picture4.jpg'),
-      isCollectorOnly: false,
-    },
-    {
-      id: 5,
-      title: '아몬드 꽃5',
-      description: 'Collector Only',
-      imageUrl: require('../../assets/picture5.jpg'),
-      isCollectorOnly: true,
-    },
-    {
-      id: 6,
-      title: 'Space',
-      description: 'Collector Only',
-      imageUrl: require('../../assets/picture6.jpg'),
-      isCollectorOnly: true,
-    },
-    {
-      id: 7,
-      title: '아몬드 꽃7',
-      description: 'Collector Only',
-      imageUrl: require('../../assets/picture7.jpg'),
-      isCollectorOnly: true,
-    },
-  ];
-
-  const handleArtworkPress = (
-    isCollectorOnly: boolean,
-    imageUrl: any,
-    title: string,
-  ) => {
-    navigation.navigate('ArtworkDetail', { isCollectorOnly, imageUrl, title });
+  const handleArtworkPress = (artId: number) => {
+    const artwork = selectedArtworks.find((art) => art.artId === artId);
+    if (artwork) {
+      navigation.navigate('ArtworkDetail', {
+        isCollectorOnly: artwork.cherryNum === null,
+        imageUrl: artwork.fileName,
+        title: artwork.name,
+      });
+    }
   };
 
   return (
@@ -77,26 +31,37 @@ const ArtworkList: React.FC = () => {
       </Instruction>
       <ScrollView>
         <ArtworkContainer>
-          {artworks.map((artwork) => (
+          {selectedArtworks.map((artwork) => (
             <ArtworkTouchable
-              key={artwork.id}
-              onPress={() =>
-                handleArtworkPress(
-                  artwork.isCollectorOnly,
-                  artwork.imageUrl,
-                  artwork.title,
-                )
-              }
+              key={artwork.artId}
+              onPress={() => handleArtworkPress(artwork.artId)}
             >
               <ArtworkItem>
-                <ArtworkImage source={artwork.imageUrl} />
-                <ArtworkTitle>{artwork.title}</ArtworkTitle>
-                {artwork.isCollectorOnly ? (
+                <ArtworkImage source={imageAssets[artwork.fileName]} />
+                <ArtworkTitle>{artwork.name}</ArtworkTitle>
+                {artwork.register === 'COLLECTOR' &&
+                artwork.cherryNum === null ? (
                   <CollectorOnlyImage
                     source={require('../../assets/images/collectorOnlyText.png')}
                   />
                 ) : (
-                  <ArtworkDescription>{artwork.description}</ArtworkDescription>
+                  <ArtworkDescription>
+                    {artwork.cherryNum === 0 ? (
+                      '무료'
+                    ) : (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <CherryIcon fill="#B0ABAB" />
+                        <Text style={{ color: '#B0ABAB' }}>
+                          {artwork.cherryNum}
+                        </Text>
+                      </View>
+                    )}
+                  </ArtworkDescription>
                 )}
               </ArtworkItem>
             </ArtworkTouchable>

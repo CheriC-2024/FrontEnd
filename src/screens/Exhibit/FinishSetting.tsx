@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CherryIcon from '../../assets/icons/cherry.svg';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -18,30 +19,31 @@ import { useProgressBar } from '../../components/ProgressBarContext';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import { useGlobalState, Artwork } from '../../contexts/GlobalStateContext';
 import MusicSelectionSheet from '../../components/BottomSheets/MusicSelectionSheet';
+import { imageAssets } from '../../assets/DB/imageAssets';
 
-const FinishSetting: React.FC = () => {
+interface FinishSettingProps {
+  setIsEditing: (isEditing: boolean) => void;
+}
+
+const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
   const { step, setStep } = useProgressBar();
-  const navigation =
-    useNavigation<NavigationProp<RootStackParamList, 'Exhibit'>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const {
-    artworks,
-    setArtworks,
     exhibitTitle,
     exhibitDescription,
     selectedThemes,
     selectedArtworks,
+    setSelectedArtworks,
     selectedFont,
+    coverColors,
+    selectedMusic,
+    setSelectedMusic,
   } = useGlobalState();
   const [isMusicSheetVisible, setMusicSheetVisible] = useState(false);
 
   useEffect(() => {
     setStep(6);
   }, [setStep]);
-
-  // Filter the artworks to only include selected artworks
-  const filteredArtworks = artworks.filter((artwork) =>
-    selectedArtworks.includes(artwork.id),
-  );
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Artwork>) => {
     const scale = useSharedValue(1);
@@ -64,20 +66,34 @@ const FinishSetting: React.FC = () => {
       }
     }, [isActive]);
 
+    const artworkImage = imageAssets[item.fileName];
+
     return (
       <ArtworkContainer style={animatedStyle}>
         <ArtworkTouchable disabled={isActive}>
-          <ArtworkImage source={item.imageUrl} />
+          <ArtworkImage source={artworkImage} />
         </ArtworkTouchable>
         <ArtworkInfo>
-          <ArtworkTitle>{item.title}</ArtworkTitle>
+          <ArtworkTitle>{item.name}</ArtworkTitle>
           <ArtworkSubtitle>{item.artist}</ArtworkSubtitle>
-          {item.cherry !== null && (
+          {item.cherryNum !== null && (
             <ArtworkCherry>
-              {item.cherry === 0 ? '무료' : `${item.cherry} 체리`}
+              {item.cherryNum === 0 ? (
+                '무료'
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                >
+                  <CherryIcon fill="#B0ABAB" />
+                  <Text style={{ color: '#B0ABAB' }}>{item.cherryNum}</Text>
+                </View>
+              )}
             </ArtworkCherry>
           )}
-          {item.isCollectorOnly && (
+          {item.cherryNum === null && (
             <CollectorOnlyImage
               source={require('../../assets/images/collectorOnlyText.png')}
             />
@@ -91,28 +107,39 @@ const FinishSetting: React.FC = () => {
   };
 
   const handleDragEnd = ({ data }: { data: Artwork[] }) => {
-    setArtworks([...data]);
+    setSelectedArtworks([...data]);
   };
+
   const handleEditPress = () => {
-    navigation.navigate('DescriptionSetting');
+    setIsEditing(true);
+    setTimeout(() => {
+      navigation.navigate('Exhibit', { step: 4 });
+    }, 0);
   };
+
+  const openMusicSheet = () => setMusicSheetVisible(true);
+  const closeMusicSheet = () => setMusicSheetVisible(false);
 
   return (
     <OuterContainer>
       <ProgressBarComponent totalSteps={7} />
       <TitleContainer>
-        <TitleIcon source={require('../../assets/images/character.png')} />
+        <TitleIcon
+          source={require('src/assets/images/Character/character_wink.png')}
+        />
         <TitleText>
           <Title>전시를 마무리해 볼까요?</Title>
           <Subtitle>마지막으로 컬렉터님의 전시를 점검해주세요:)</Subtitle>
         </TitleText>
       </TitleContainer>
       <GradientContainer>
-        <LinearGradient colors={['#ff5f5f', '#f1aaaa']} style={{ padding: 16 }}>
+        <LinearGradient colors={coverColors} style={{ padding: 16 }}>
           <MusicContainer>
             <MusicTextContainer onPress={() => setMusicSheetVisible(true)}>
               <Icon name="musical-notes-outline" size={16} color="#fff" />
-              <MusicText>아직 음악이 없습니다</MusicText>
+              <MusicText>
+                {selectedMusic ? selectedMusic : '아직 음악이 없습니다'}
+              </MusicText>
             </MusicTextContainer>
             <EditIcon name="pencil-outline" size={20} color="#000" />
           </MusicContainer>
@@ -122,16 +149,17 @@ const FinishSetting: React.FC = () => {
               <SectionTitle style={{ fontFamily: selectedFont }}>
                 {exhibitTitle}
               </SectionTitle>
-              <EditIcon name="pencil-outline" size={20} color="#000" />
-            </SectionTitleContainer>
-            <ExhibitDescriptContainer>
-              <ExhibitDescript>{exhibitDescription}</ExhibitDescript>
               <EditIcon
                 name="pencil-outline"
                 size={20}
                 color="#000"
                 onPress={handleEditPress}
               />
+            </SectionTitleContainer>
+            <ExhibitDescriptContainer>
+              <ExhibitDescript numberOfLines={1} ellipsizeMode="tail">
+                {exhibitDescription}
+              </ExhibitDescript>
             </ExhibitDescriptContainer>
           </DescriptionContainer>
 
@@ -145,15 +173,17 @@ const FinishSetting: React.FC = () => {
       </GradientContainer>
       <InnerContainer>
         <DraggableFlatList
-          data={filteredArtworks}
+          data={selectedArtworks}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.artId.toString()}
           onDragEnd={handleDragEnd}
         />
       </InnerContainer>
       <MusicSelectionSheet
         isVisible={isMusicSheetVisible}
-        onClose={() => setMusicSheetVisible(false)}
+        onClose={closeMusicSheet}
+        selectedMusic={selectedMusic}
+        setSelectedMusic={setSelectedMusic}
       />
     </OuterContainer>
   );
@@ -179,7 +209,7 @@ const TitleContainer = styled.View`
 
 const TitleIcon = styled.Image`
   width: 45px;
-  height: 75px;
+  height: 80px;
   margin-right: 10px;
 `;
 

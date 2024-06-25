@@ -9,15 +9,12 @@ import RadialGradientComponent from '../../components/Gradients/RadialGradientCo
 import AngularGradientComponent from '../../components/Gradients/AngularGradientComponent';
 import DiamondGradientComponent from '../../components/Gradients/DiamondGradientComponent';
 import * as ImagePicker from 'expo-image-picker';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { extractProperties } from '../../api/cloudVisionApi';
 
 const CoverSetting: React.FC = () => {
-  const colorPalettes = [
-    ['#FFE4E1', '#FFB6C1', '#FF69B4', '#FF1493'], // Pink palette
-    ['#98FB98', '#00FA9A', '#00FF7F', '#3CB371'], // Green palette
-    ['#87CEFA', '#00BFFF', '#1E90FF', '#0000CD'], // Blue palette
-    ['#FFFFE0', '#FFD700', '#FFA500', '#FF8C00'], // Yellow-Orange palette
-  ];
-
+  const { colorPalettes, setColorPalettes, selectedArtworks, setCoverColors } =
+    useGlobalState();
   const { step, setStep } = useProgressBar();
   const [selectedCover, setSelectedCover] = useState(colorPalettes[0]);
   const [isReversed, setIsReversed] = useState(false);
@@ -25,14 +22,47 @@ const CoverSetting: React.FC = () => {
   const [selectedGradient, setSelectedGradient] = useState<number | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [coverType, setCoverType] = useState<'gradient' | 'solid'>('gradient');
+  const [isLoading, setIsLoading] = useState(true);
+  const [randomPalettes, setRandomPalettes] = useState(
+    colorPalettes.slice(0, 4),
+  );
 
   useEffect(() => {
     setStep(5); // Set progress bar to step 6 (index 5)
   }, [step]);
 
+  useEffect(() => {
+    const fetchAIRecommendations = async () => {
+      try {
+        const artIds = selectedArtworks.map((artwork) => artwork.artId);
+        const extractedProperties = await extractProperties(artIds, 'COLOR');
+        console.log('Extracted Properties:', extractedProperties);
+
+        const newPalettes = extractedProperties.map(
+          (item: any) => item.properties,
+        );
+        setColorPalettes(newPalettes);
+        setRandomPalettes(getRandomPalettes(newPalettes));
+        setSelectedCover(newPalettes[0]);
+      } catch (error) {
+        console.error('Failed to extract properties:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAIRecommendations();
+  }, []);
+
+  const getRandomPalettes = (palettes: string[][]) => {
+    const shuffled = palettes.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 4);
+  };
+
   const handleCoverSelect = (index: number) => {
     setSelectedPalette(index);
     setSelectedCover(colorPalettes[index]);
+    setCoverColors(colorPalettes[index]);
   };
 
   const handleReverseGradient = () => {
@@ -65,12 +95,18 @@ const CoverSetting: React.FC = () => {
     setSelectedGradient(null); // Reset selected gradient
   };
 
+  const handleShufflePalettes = () => {
+    setRandomPalettes(getRandomPalettes(colorPalettes));
+  };
+
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <TitleContainer>
-          <TitleIcon source={require('../../assets/images/character.png')} />
+          <TitleIcon
+            source={require('src/assets/images/Character/character_happy.png')}
+          />
           <TitleText>
             <Title>전시 커버 설정하기</Title>
             <Subtitle>전시와 어울리는 커버를 선택해주세요!</Subtitle>
@@ -82,23 +118,27 @@ const CoverSetting: React.FC = () => {
           <CoverSubtitle>
             컬렉터님의 전시 작품 컬러를 바탕으로 만들었어요 :)
           </CoverSubtitle>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleShufflePalettes}>
             <Icon name="sync-outline" size={22} color="#120000" />
           </TouchableOpacity>
         </CoverTextContainer>
 
         <PaletteContainer>
-          {colorPalettes.map((palette, index) => (
-            <PaletteButton
-              key={index}
-              onPress={() => handleCoverSelect(index)}
-              selected={selectedPalette === index}
-            >
-              {palette.map((color, colorIndex) => (
-                <PaletteColor key={colorIndex} color={color} />
-              ))}
-            </PaletteButton>
-          ))}
+          {isLoading ? (
+            <LoadingText>추출 중 ...</LoadingText>
+          ) : (
+            randomPalettes.map((palette, index) => (
+              <PaletteButton
+                key={index}
+                onPress={() => handleCoverSelect(index)}
+                selected={selectedPalette === index}
+              >
+                {palette.map((color, colorIndex) => (
+                  <PaletteColor key={colorIndex} color={color} />
+                ))}
+              </PaletteButton>
+            ))
+          )}
         </PaletteContainer>
 
         <CoverTypeButtonContainer>
@@ -215,7 +255,7 @@ const TitleContainer = styled.View`
 
 const TitleIcon = styled.Image`
   width: 45px;
-  height: 75px;
+  height: 80px;
   margin-right: 10px;
 `;
 
@@ -279,6 +319,14 @@ const PaletteButton = styled.TouchableOpacity<{ selected?: boolean }>`
 const PaletteColor = styled.View<{ color: string }>`
   flex: 1;
   background-color: ${(props) => props.color};
+`;
+
+const LoadingText = styled.Text`
+  font-family: 'Regular';
+  font-size: 14px;
+  color: #413333;
+  text-align: center;
+  width: 100%;
 `;
 
 const CoverSection = styled.View`

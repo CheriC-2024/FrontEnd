@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
@@ -20,11 +20,13 @@ export type RootStackParamList = {
   AIRecommendLoading: { source: string };
   AIRecommendTheme: { source: string };
   AIRecommendDescription: { source: string };
+  ThemeSetting: undefined;
+  DescriptionSetting: undefined;
   ArtworkList: undefined;
   ArtworkDetail: {
     isCollectorOnly: boolean;
     imageUrl: any;
-    title: string;
+    title: ReactNode;
   };
 };
 
@@ -59,13 +61,32 @@ const AppNavigator = () => {
               <Stack.Screen
                 name="AIRecommendLoading"
                 component={AIRecommendLoading}
-                options={{ headerTitle: 'AI 추천' }}
+                options={({ navigation, route }) => ({
+                  headerTitle: 'AI 추천',
+                  headerLeft: () => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (route.params?.source === 'ThemeSetting') {
+                          navigation.navigate('Exhibit', { step: 2 });
+                        } else if (
+                          route.params?.source === 'DescriptionSetting'
+                        ) {
+                          navigation.navigate('Exhibit', { step: 4 });
+                        } else {
+                          navigation.goBack();
+                        }
+                      }}
+                    >
+                      <Icon name="chevron-back" size={24} color="#120000" />
+                    </TouchableOpacity>
+                  ),
+                })}
               />
               <Stack.Screen
                 name="AIRecommendTheme"
                 component={AIRecommendTheme}
                 options={{
-                  headerTitle: 'AI 테마 선택',
+                  headerTitle: '전시 테마 AI 추천',
                   headerLeft: () => null,
                   headerBackVisible: false,
                 }}
@@ -86,7 +107,7 @@ const AppNavigator = () => {
                   headerTitle: '전시로 올려질 작품',
                   headerLeft: () => (
                     <TouchableOpacity onPress={() => navigation.goBack()}>
-                      <Icon name="arrow-back" size={24} color="#000" />
+                      <Icon name="chevron-back" size={24} color="#000" />
                     </TouchableOpacity>
                   ),
                 })}
@@ -98,7 +119,7 @@ const AppNavigator = () => {
                   headerTitle: '작품의 상세 정보',
                   headerLeft: () => (
                     <TouchableOpacity onPress={() => navigation.goBack()}>
-                      <Icon name="arrow-back" size={24} color="#000" />
+                      <Icon name="chevron-back" size={24} color="#000" />
                     </TouchableOpacity>
                   ),
                 })}

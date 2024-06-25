@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+import CherryIcon from '../../assets/icons/cherry.svg';
 import Animated, { Easing } from 'react-native-reanimated';
 import {
   useSharedValue,
@@ -75,10 +76,17 @@ const ArtworkSelectModal: React.FC<ArtworkSelectModalProps> = ({
                 가 필요해요{`\n`}체리를 더 구매하셔야 될 것 같아요!
               </ModalText>
             )}
-            <ModalCherry>
-              보유 중인 체리{' '}
-              <Text style={{ color: '#E52C32' }}>{userCherries}</Text>
-            </ModalCherry>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <ModalCherry>
+                보유 중인 체리 <CherryIcon fill="#E52C32" />
+                <Text style={{ color: '#E52C32' }}>{userCherries}</Text>
+              </ModalCherry>
+            </View>
             <ButtonContainer>
               <ModalButtonLeft onPress={onClose}>
                 <ButtonTextLeft>뒤로가기</ButtonTextLeft>

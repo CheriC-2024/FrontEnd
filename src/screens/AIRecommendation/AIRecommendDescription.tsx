@@ -10,13 +10,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const AIRecommendDescription: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { exhibitTitle, setExhibitTitle } = useGlobalState();
-  const [selectedExhibitName, setSelectedExhibitName] = useState<string | null>(
-    null,
-  );
-  const [recommendationReason, setRecommendationReason] = useState<
-    string | null
-  >(null);
+  const { exhibitTitle, setExhibitTitle, aiTitle, aiTitleReason } =
+    useGlobalState();
+  const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
@@ -31,34 +27,23 @@ const AIRecommendDescription: React.FC = () => {
     };
   }, [navigation]);
 
-  const handleExhibitNameSelect = (name: string) => {
-    setSelectedExhibitName(name);
-    setRecommendationReason(
-      `${name} 추천 이유: 이 전시명은 AI가 자동으로 생성한 추천 전시명입니다.`,
-    );
+  const handleTitleSelect = (title: string) => {
+    setSelectedTitle(title);
   };
 
-  const exhibitNames = [
-    '하늘보다 더 넓은 땅',
-    '넓다랗고 푸른 땅',
-    'AI전시명3',
-    'AI전시명4',
-    'AI전시명5',
-  ];
-
   const handleComplete = () => {
-    if (exhibitTitle && selectedExhibitName) {
+    if (exhibitTitle && selectedTitle) {
       setIsModalVisible(true);
       return;
-    } else if (selectedExhibitName) {
-      setExhibitTitle(selectedExhibitName);
+    } else if (selectedTitle) {
+      setExhibitTitle(selectedTitle);
     }
     navigation.navigate('Exhibit', { step: 4 });
   };
 
   const handleConfirm = () => {
-    if (selectedExhibitName) {
-      setExhibitTitle(selectedExhibitName);
+    if (selectedTitle) {
+      setExhibitTitle(selectedTitle);
       setIsModalVisible(false);
       navigation.navigate('Exhibit', { step: 4 });
     }
@@ -71,32 +56,31 @@ const AIRecommendDescription: React.FC = () => {
         <Subtitle>원하는 전시 이름을 선택해 주세요</Subtitle>
         <Icon name="sync-outline" size={20} color="#120000" />
         <ThemeScrollView horizontal>
-          {exhibitNames.map((name, index) => (
-            <TouchableOpacity
+          {aiTitle.map((title, index) => (
+            <ThemeCard
               key={index}
-              onPress={() => handleExhibitNameSelect(name)}
+              onPress={() => handleTitleSelect(title)}
+              selected={selectedTitle === title}
             >
-              <ThemeCard selected={selectedExhibitName === name}>
-                {selectedExhibitName === name ? (
-                  <GradientCard colors={['#fff', '#FDEEEE']}>
-                    <ThemeText>{name}</ThemeText>
-                  </GradientCard>
-                ) : (
-                  <ThemeText>{name}</ThemeText>
-                )}
-              </ThemeCard>
-            </TouchableOpacity>
+              {selectedTitle === title ? (
+                <GradientCard colors={['#fff', '#FDEEEE']}>
+                  <ThemeText>{title}</ThemeText>
+                </GradientCard>
+              ) : (
+                <ThemeText>{title}</ThemeText>
+              )}
+            </ThemeCard>
           ))}
         </ThemeScrollView>
         <ReasonContainer>
           <ReasonIcon
-            source={require('../../assets/images/character_ai.png')}
+            source={require('src/assets/images/Character/character_ai.png')}
           />
-          {selectedExhibitName ? (
+          {selectedTitle ? (
             <ReasonTextContainer>
               <ReasonTitle>추천 이유</ReasonTitle>
               <ReasonText multiline>
-                {`${selectedExhibitName} AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다. AI가 자동으로 선택한 테마입니다.`}
+                {aiTitleReason[aiTitle.indexOf(selectedTitle)]}
               </ReasonText>
             </ReasonTextContainer>
           ) : (
@@ -158,7 +142,7 @@ const ThemeScrollView = styled.ScrollView`
   overflow: visible; /* 그림자가 잘리지 않도록 설정 */
 `;
 
-const ThemeCard = styled.View<{ selected: boolean }>`
+const ThemeCard = styled.TouchableOpacity<{ selected: boolean }>`
   width: 140px;
   height: 180px;
   justify-content: center;
@@ -198,8 +182,8 @@ const ReasonContainer = styled.View`
 `;
 
 const ReasonIcon = styled.Image`
-  width: 65px;
-  height: 120px;
+  width: 70px;
+  height: 105px;
   margin: 0 10px;
 `;
 

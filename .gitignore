@@ -37,4 +37,13 @@ yarn-error.*
 # .vscode
 .vscode/
 
+# 환경 변수 파일
+.env
+
+# api key
+src/api/api.ts
+
+# local image
+src/assets/DB/
+
 /%ProgramData%/

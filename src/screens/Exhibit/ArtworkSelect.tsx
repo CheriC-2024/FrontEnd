@@ -2,17 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CherryIcon from '../../assets/icons/cherry.svg';
 import ProgressBarComponent from '../../components/ProgressBar';
 import FilterInput from '../../components/FilterInput';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { fetchArtworksByCollectionIds } from '../../api/collectionApi';
+import { imageAssets } from '../../assets/DB/imageAssets';
 
 interface ExpandedCollections {
   [key: string]: boolean;
 }
 
 interface ArtworkSelectProps {
-  onSelectionChange: (selectedArtworks: number[]) => void;
+  onSelectionChange: (
+    selectedArtworks: number[],
+    totalCherries: number,
+  ) => void;
 }
 
 const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
@@ -21,33 +27,61 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
   const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
   const {
-    collections,
     selectedCollections,
     userCherries,
     selectedArtworks,
     setSelectedArtworks,
   } = useGlobalState();
+  const [collections, setCollections] = useState([]);
 
   useEffect(() => {
     setStep(1); // Set progress bar to step 2 (index 1)
 
-    // Initialize expandedCollections state with selected collections set to true
-    const initialExpandedState: ExpandedCollections = {};
-    collections
-      .filter((collection) => selectedCollections.includes(collection.id))
-      .forEach((collection) => {
-        initialExpandedState[collection.name] = true;
-      });
-    setExpandedCollections(initialExpandedState);
-  }, [setStep, collections, selectedCollections]);
+    // Fetch artworks for selected collections
+    const fetchArtworks = async () => {
+      try {
+        const data = await fetchArtworksByCollectionIds(selectedCollections);
+        console.log('Fetched Artworks:', data); // Log the response data
+        setCollections(data.collections);
+
+        // Log each artwork's cherryNum value
+        data.collections.forEach((collection) => {
+          collection.artList.forEach((artwork) => {
+            console.log(
+              `Artwork ID: ${artwork.artId}, CherryNum: ${artwork.cherryNum},Register: ${artwork.register}`,
+            );
+          });
+        });
+
+        // Initialize expandedCollections state with selected collections set to true
+        const initialExpandedState: ExpandedCollections = {};
+        data.collections.forEach((collection) => {
+          initialExpandedState[collection.collectionName] = true;
+        });
+        setExpandedCollections(initialExpandedState);
+      } catch (error) {
+        console.error('Error fetching artworks:', error);
+      }
+    };
+
+    if (selectedCollections.length > 0) {
+      fetchArtworks();
+    }
+  }, [selectedCollections, setStep]);
 
   useEffect(() => {
-    onSelectionChange(selectedArtworks); // 선택된 작품이 변경될 때마다 상위 컴포넌트에 전달
+    const totalCherries = selectedArtworks.reduce(
+      (sum, artwork) => sum + (artwork.cherryNum || 0),
+      0,
+    );
+    onSelectionChange(selectedArtworks, totalCherries); // Notify parent component when selected artworks change
   }, [selectedArtworks, onSelectionChange]);
 
-  const handleSelectArtwork = (id: number) => {
+  const handleSelectArtwork = (artwork) => {
     setSelectedArtworks((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      prev.some((item) => item.artId === artwork.artId)
+        ? prev.filter((item) => item.artId !== artwork.artId)
+        : [...prev, artwork],
     );
   };
 
@@ -60,21 +94,17 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
 
   const collapseAllCollections = () => {
     const collapsed: ExpandedCollections = {};
-    collections
-      .filter((collection) => selectedCollections.includes(collection.id))
-      .forEach((collection) => {
-        collapsed[collection.name] = false;
-      });
+    collections.forEach((collection) => {
+      collapsed[collection.collectionName] = false;
+    });
     setExpandedCollections(collapsed);
   };
 
   const expandAllCollections = () => {
     const expanded: ExpandedCollections = {};
-    collections
-      .filter((collection) => selectedCollections.includes(collection.id))
-      .forEach((collection) => {
-        expanded[collection.name] = true;
-      });
+    collections.forEach((collection) => {
+      expanded[collection.collectionName] = true;
+    });
     setExpandedCollections(expanded);
   };
 
@@ -85,25 +115,27 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
     (value) => value,
   );
 
-  const filteredCollections = collections
-    .filter((collection) => selectedCollections.includes(collection.id))
-    .map((collection) => ({
-      ...collection,
-      artworks: collection.artworks.filter((artwork) =>
-        artwork.title.includes(filterText),
-      ),
-    }));
+  const filteredCollections = collections.map((collection) => ({
+    ...collection,
+    artList: collection.artList.filter((artwork) =>
+      artwork.name.includes(filterText),
+    ),
+  }));
 
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
       <TitleContainer>
-        <TitleIcon source={require('../../assets/images/character.png')} />
+        <TitleIcon
+          source={require('src/assets/images/Character/character_surprised.png')}
+        />
         <TitleText>
-          <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
-          <CherryCount>
-            보유 중인 체리: <CherryNum>{userCherries}</CherryNum>
-          </CherryCount>
+          <Title>전시할 작품을 선택해주세요!</Title>
+          <CherryContainer>
+            <CherryCountText>보유 중인 체리{` `}</CherryCountText>
+            <CherryIcon fill="#E52C32" />
+            <CherryNum>{userCherries}</CherryNum>
+          </CherryContainer>
         </TitleText>
       </TitleContainer>
       <FilterInput
@@ -127,13 +159,13 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
       </Row>
       <ArtworkList>
         {filteredCollections.map((collection, collectionIndex) => {
-          const isExpanded = expandedCollections[collection.name];
+          const isExpanded = expandedCollections[collection.collectionName];
           return (
             <ArtworkCollection key={collectionIndex}>
               <CollectionTitle>
-                <CollectionName>{collection.name}</CollectionName>
+                <CollectionName>{collection.collectionName}</CollectionName>
                 <DropDownButton
-                  onPress={() => toggleCollection(collection.name)}
+                  onPress={() => toggleCollection(collection.collectionName)}
                 >
                   <DropDownButtonText>
                     {isExpanded ? (
@@ -154,18 +186,23 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
               </CollectionTitle>
               {isExpanded && (
                 <ArtworkGrid>
-                  {collection.artworks.map((artwork, index) => {
-                    const selected = selectedArtworks.includes(artwork.id);
-                    const selectedIndex = selectedArtworks.indexOf(artwork.id);
+                  {collection.artList.map((artwork) => {
+                    const selected = selectedArtworks.some(
+                      (item) => item.artId === artwork.artId,
+                    );
+                    const selectedIndex = selectedArtworks.findIndex(
+                      (item) => item.artId === artwork.artId,
+                    );
+                    const artworkImage = imageAssets[artwork.fileName];
                     return (
                       <ArtworkItem
-                        key={index}
+                        key={artwork.artId}
                         selected={selected}
-                        onPress={() => handleSelectArtwork(artwork.id)}
+                        onPress={() => handleSelectArtwork(artwork)}
                       >
                         <ArtworkImageWrapper selected={selected}>
                           <ArtworkImage
-                            source={artwork.imageUrl}
+                            source={artworkImage}
                             selected={selected}
                           />
                           {selected && (
@@ -175,16 +212,29 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
                           )}
                         </ArtworkImageWrapper>
                         <ArtworkInfo>
-                          <ArtworkName>{artwork.title}</ArtworkName>
-                          {artwork.isCollectorOnly ? (
+                          <ArtworkName>{artwork.name}</ArtworkName>
+                          {artwork.register === 'COLLECTOR' &&
+                          artwork.cherryNum === null ? (
                             <CollectorOnlyImage
                               source={require('../../assets/images/collectorOnlyText.png')}
                             />
                           ) : (
                             <ArtworkCherry>
-                              {artwork.cherry === 0
-                                ? '무료'
-                                : `${artwork.cherry} 체리`}
+                              {artwork.cherryNum === 0 ? (
+                                '무료'
+                              ) : (
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <CherryIcon fill="#B0ABAB" />
+                                  <Text style={{ color: '#B0ABAB' }}>
+                                    {artwork.cherryNum}
+                                  </Text>
+                                </View>
+                              )}
                             </ArtworkCherry>
                           )}
                         </ArtworkInfo>
@@ -215,7 +265,7 @@ const TitleContainer = styled.View`
 
 const TitleIcon = styled.Image`
   width: 45px;
-  height: 75px;
+  height: 80px;
   margin-right: 10px;
 `;
 
@@ -228,14 +278,18 @@ const Title = styled.Text`
   font-size: 18px;
   color: #120000;
 `;
+const CherryContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
 
-const CherryCount = styled.Text`
+const CherryCountText = styled.Text`
   font-family: 'Regular';
   font-size: 12px;
   color: #413333;
 `;
 
-const CherryNum = styled(CherryCount)`
+const CherryNum = styled(CherryCountText)`
   font-family: 'Bold';
   color: #e52c32;
 `;
@@ -320,9 +374,8 @@ interface ArtworkItemProps {
 }
 
 const ArtworkItem = styled(TouchableOpacity)<ArtworkItemProps>`
-  flex: 1;
-  margin: 0 5px 15px 5px;
-  max-width: 32%;
+  width: 33.33%;
+  padding: 5px;
 `;
 
 interface ArtworkImageWrapperProps {
@@ -335,7 +388,7 @@ const ArtworkImageWrapper = styled.View<ArtworkImageWrapperProps>`
   height: 150px;
   border-radius: 5px;
   overflow: hidden;
-  background-color: ${(props: { selected: boolean }) =>
+  background-color: ${(props) =>
     props.selected ? 'rgba(0, 0, 0, 0.8)' : 'transparent'};
 `;
 
@@ -346,7 +399,7 @@ interface ArtworkImageProps {
 const ArtworkImage = styled.Image<ArtworkImageProps>`
   width: 100%;
   height: 100%;
-  opacity: ${(props: { selected: boolean }) => (props.selected ? 0.5 : 1)};
+  opacity: ${(props) => (props.selected ? 0.5 : 1)};
 `;
 
 const SelectedIndexWrapper = styled.View`
@@ -383,7 +436,7 @@ const CollectorOnlyImage = styled.Image`
 const ArtworkCherry = styled.Text`
   font-family: 'Regular';
   font-size: 12px;
-  color: #413333;
+  color: #b0abab;
 `;
 
 export default ArtworkSelect;

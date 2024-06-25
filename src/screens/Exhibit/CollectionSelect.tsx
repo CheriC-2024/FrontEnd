@@ -1,18 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import styled from 'styled-components/native';
+import LinearGradient from 'react-native-linear-gradient'; //그라디언트 배경을 적용하기 위해
+import Icon from 'react-native-vector-icons/Ionicons';
 import FilterInput from '../../components/FilterInput';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { fetchCollectionsByUser } from '../../api/collectionApi';
+import { imageAssets } from '../../assets/DB/imageAssets';
+
+interface Collection {
+  id: number;
+  name: string;
+  description: string;
+  filePath: string;
+  fileName: string;
+}
 
 const CollectionSelect: React.FC<{
   onSelectionChange: (count: number) => void;
 }> = ({ onSelectionChange }) => {
-  const { collections, selectedCollections, setSelectedCollections } =
-    useGlobalState();
+  const { selectedCollections, setSelectedCollections } = useGlobalState();
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [filterText, setFilterText] = useState('');
   const { step, setStep } = useProgressBar();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setStep(0); // Set progress bar to step 1 (index 0)
@@ -21,6 +41,30 @@ const CollectionSelect: React.FC<{
   useEffect(() => {
     onSelectionChange(selectedCollections.length);
   }, [selectedCollections]);
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      try {
+        const userId = 2; // 테스트할 사용자 ID
+        console.log(
+          `Fetching collections for user ID from global state: ${userId}`,
+        );
+        const data = await fetchCollectionsByUser(userId);
+        console.log('Fetched Collections:', data.collections);
+        setCollections(data.collections);
+
+        data.collections.forEach((collection: Collection) => {
+          console.log('File Path:', collection.fileName);
+        });
+      } catch (error) {
+        console.error('LoadCollection Error: ', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCollections();
+  }, []);
 
   const handleSelectCollection = (id: number) => {
     setSelectedCollections((prev: number[]) => {
@@ -40,108 +84,151 @@ const CollectionSelect: React.FC<{
     });
   };
 
-  const filteredCollections = collections.filter(
-    (collection) => collection.name.includes(filterText), // filterText is a string
+  const filteredCollections = collections.filter((collection) =>
+    collection.name.includes(filterText),
   );
+
+  if (loading) {
+    return (
+      <LoadingContainer>
+        <ActivityIndicator size="large" color="#E52C32" />
+      </LoadingContainer>
+    );
+  }
 
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
-
-      {collections.length === 0 ? ( //컬렉션이 아예 없는 경우
-        <EmptyStateContainer>
-          <EmptyStateImage
-            source={require('../../assets/images/empty_collection.png')}
-          />
-          <EmptyStateText>컬렉션이 텅 비어 있어요!</EmptyStateText>
-          <EmptyStateSubText>
-            전시를 만들기 위해서는 컬렉터님의{`\n`}컬렉션이 필요해요!
-          </EmptyStateSubText>
-          <AddCollectionButton>
-            <AddCollectionButtonText>
-              + 컬렉션 추가하러 가기
-            </AddCollectionButtonText>
-          </AddCollectionButton>
-        </EmptyStateContainer>
-      ) : (
-        // 컬렉션이 있는 경우
-        <>
-          <TitleContainer>
-            <TitleIcon source={require('../../assets/images/character.png')} />
-            <TitleText>
-              <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
-              <Subtitle>전시로 만들고 싶은 컬렉션을 선택해보세요</Subtitle>
-            </TitleText>
-          </TitleContainer>
-          <FilterInput
-            placeholder="컬렉션 검색하기"
-            filterText={filterText}
-            setFilterText={setFilterText}
-          />
-          <SelectedCollectionContainer>
-            <SelectedCollectionText>선택한 컬렉션</SelectedCollectionText>
-            <CollectionTag>
-              {selectedCollections.map((id) => {
-                const collection = collections.find((c) => c.id === id);
-                if (collection) {
-                  return (
-                    <CollectionTagWrapper key={id}>
-                      <CollectionTagText>{collection.name}</CollectionTagText>
-                      <RemoveButton onPress={() => handleRemoveCollection(id)}>
-                        <CollectionTagText> ✕</CollectionTagText>
-                      </RemoveButton>
-                    </CollectionTagWrapper>
+      <GradientBackground>
+        <ProgressBarComponent totalSteps={7} />
+        {collections.length === 0 ? ( // 컬렉션이 아예 없는 경우
+          <EmptyStateContainer>
+            <EmptyStateImage
+              source={require('src/assets/images/ExhibitPage/empty_collection.png')}
+            />
+            <EmptyStateText>컬렉션이 텅 비어 있어요!</EmptyStateText>
+            <EmptyStateSubText>
+              전시를 만들기 위해서는 컬렉터님의{`\n`}컬렉션이 필요해요!
+            </EmptyStateSubText>
+            <AddCollectionButton>
+              <Icon name="add-outline" size={22} color="#fff" />
+              <AddCollectionButtonText>
+                {` `}컬렉션 추가하러 가기
+              </AddCollectionButtonText>
+            </AddCollectionButton>
+          </EmptyStateContainer>
+        ) : (
+          // 컬렉션이 있는 경우
+          <>
+            <TitleContainer>
+              <TitleIcon
+                source={require('src/assets/images/Character/character_surprised.png')}
+              />
+              <TitleText>
+                <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
+                <Subtitle>전시로 만들고 싶은 컬렉션을 선택해보세요</Subtitle>
+              </TitleText>
+            </TitleContainer>
+            <FilterInput
+              placeholder="컬렉션 검색하기"
+              filterText={filterText}
+              setFilterText={setFilterText}
+            />
+            <SelectedCollectionContainer>
+              <SelectedCollectionText>선택한 컬렉션</SelectedCollectionText>
+              <CollectionTag>
+                {selectedCollections.map((id) => {
+                  const collection = collections.find((c) => c.id === id);
+                  if (collection) {
+                    return (
+                      <CollectionTagWrapper key={id}>
+                        <CollectionTagText>{collection.name}</CollectionTagText>
+                        <RemoveButton
+                          onPress={() => handleRemoveCollection(id)}
+                        >
+                          <Icon name="close-outline" size={16} color="#fff" />
+                        </RemoveButton>
+                      </CollectionTagWrapper>
+                    );
+                  }
+                  return null;
+                })}
+              </CollectionTag>
+            </SelectedCollectionContainer>
+            <CollectionList>
+              {filteredCollections.map((collection) => {
+                const selected = selectedCollections.includes(collection.id);
+                const firstArtworkImage = imageAssets[collection.fileName]; //TODO: url로 변경 예정
+                if (!firstArtworkImage) {
+                  console.warn(
+                    `Image not found for fileName: ${collection.fileName}`,
                   );
                 }
-                return null;
+                return (
+                  <CollectionItem
+                    key={collection.id}
+                    selected={selected}
+                    onPress={() => handleSelectCollection(collection.id)}
+                  >
+                    <CollectionImage>
+                      {firstArtworkImage && (
+                        <Image
+                          source={firstArtworkImage}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 50,
+                          }}
+                        />
+                      )}
+                    </CollectionImage>
+                    <CollectionInfo>
+                      <CollectionName>{collection.name}</CollectionName>
+                      <CollectionDescription numberOfLines={2}>
+                        {collection.description}
+                      </CollectionDescription>
+                    </CollectionInfo>
+                  </CollectionItem>
+                );
               })}
-            </CollectionTag>
-          </SelectedCollectionContainer>
-          <CollectionList>
-            {filteredCollections.map((collection) => {
-              const selected = selectedCollections.includes(collection.id);
-              const firstArtworkImage =
-                collection.artworks.length > 0
-                  ? collection.artworks[0].imageUrl
-                  : null;
-              return (
-                <CollectionItem
-                  key={collection.id}
-                  selected={selected}
-                  onPress={() => handleSelectCollection(collection.id)}
-                >
-                  <CollectionImage>
-                    {firstArtworkImage && (
-                      <Image
-                        source={firstArtworkImage} // For local require
-                        // source={{ uri: firstArtworkImage }} // For URI
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          borderRadius: 50,
-                        }}
-                      />
-                    )}
-                  </CollectionImage>
-                  <CollectionInfo>
-                    <CollectionName>{collection.name}</CollectionName>
-                    <CollectionDescription numberOfLines={2}>
-                      {collection.description}
-                    </CollectionDescription>
-                  </CollectionInfo>
-                </CollectionItem>
-              );
-            })}
-          </CollectionList>
-        </>
-      )}
+            </CollectionList>
+          </>
+        )}
+      </GradientBackground>
     </Container>
   );
 };
 
+interface GradientBackgroundProps {
+  colors?: string[];
+  start?: { x: number; y: number };
+  end?: { x: number; y: number };
+}
+
+const GradientBackground = styled(
+  LinearGradient,
+).attrs<GradientBackgroundProps>((props) => ({
+  colors: props.colors || ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
+  start: props.start || { x: 0.5, y: 0.7 },
+  end: props.end || { x: 0.5, y: 1 },
+}))<GradientBackgroundProps>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 16px 0 16px;
+`;
+
 const Container = styled.View`
   flex: 1;
-  padding: 16px;
+  background-color: #fff;
+  position: relative;
+`;
+
+const LoadingContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
   background-color: #fff;
 `;
 
@@ -153,7 +240,7 @@ const TitleContainer = styled.View`
 
 const TitleIcon = styled.Image`
   width: 45px;
-  height: 75px;
+  height: 80px;
   margin-right: 10px;
 `;
 
@@ -269,8 +356,8 @@ const EmptyStateContainer = styled.View`
 `;
 
 const EmptyStateImage = styled.Image`
-  width: 128px;
-  height: 178px;
+  width: 155px;
+  height: 180px;
   margin-bottom: 30px;
 `;
 
@@ -290,6 +377,7 @@ const EmptyStateSubText = styled.Text`
 `;
 
 const AddCollectionButton = styled.TouchableOpacity`
+  flex-direction: row;
   background-color: #120000;
   padding: 10px 20px;
   border-radius: 20px;

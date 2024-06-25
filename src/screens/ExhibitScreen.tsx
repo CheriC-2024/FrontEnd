@@ -37,12 +37,12 @@ const ExhibitScreen: React.FC = () => {
   const route = useRoute<ExhibitScreenRouteProp>();
   const { setStep } = useProgressBar();
   const {
-    collections,
     selectedCollections,
     userCherries,
     selectedArtworks,
     setSelectedArtworks,
     artworkInfoInput,
+    selectedThemes,
   } = useGlobalState();
   const [step, setLocalStep] = useState(route.params?.step || 0);
   const [isArtworkDescriptionValid, setIsArtworkDescriptionValid] =
@@ -51,10 +51,8 @@ const ExhibitScreen: React.FC = () => {
   const [isDescriptionValid, setIsDescriptionValid] = useState(false); // Separate state for other descriptions
   const [modalVisible, setModalVisible] = useState(false);
   const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
-  const [cherryDetails, setCherryDetails] = useState({
-    totalRequiredCherries: 0,
-    cherryCount: 0,
-  });
+  const [totalRequiredCherries, setTotalRequiredCherries] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (route.params?.step !== undefined) {
@@ -65,65 +63,92 @@ const ExhibitScreen: React.FC = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity onPress={goToPrev}>
-          {step === 0 ? (
-            <Icon
-              name="chevron-back"
-              size={24}
-              color="#120000"
-              style={{ marginLeft: 16 }}
-            />
-          ) : (
+      headerLeft: () =>
+        isEditing ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={handleSave}>
+              <Icon
+                name="chevron-back"
+                size={24}
+                color="#120000"
+                style={{ marginLeft: 16 }}
+              />
+            </TouchableOpacity>
             <Text
               style={{
-                marginLeft: 16,
                 color: '#120000',
+                fontFamily: 'Bold',
+                fontSize: 16,
+                marginLeft: 5,
+              }}
+            >
+              전시 이름, 설명 수정하기
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity onPress={goToPrev}>
+            {step === 0 ? (
+              <Icon
+                name="chevron-back"
+                size={24}
+                color="#120000"
+                style={{ marginLeft: 16 }}
+              />
+            ) : (
+              <Text
+                style={{
+                  marginLeft: 16,
+                  color: '#120000',
+                  fontFamily: 'Bold',
+                  fontSize: 16,
+                }}
+              >
+                이전
+              </Text>
+            )}
+          </TouchableOpacity>
+        ),
+      headerRight: () =>
+        isEditing ? null : (
+          <TouchableOpacity
+            onPress={step === 6 ? showConfirmModal : goToNext}
+            disabled={
+              (step === 0 && !isCollectionSelected) ||
+              (step === 1 && selectedArtworks.length === 0) ||
+              (step === 2 && selectedThemes.length === 0) ||
+              (step === 3 && !isArtworkDescriptionValid) ||
+              (step === 4 && !isDescriptionValid)
+            }
+          >
+            <Text
+              style={{
+                marginRight: 16,
+                color:
+                  (step === 0 && !isCollectionSelected) ||
+                  (step === 1 && selectedArtworks.length === 0) ||
+                  (step === 2 && selectedThemes.length === 0) ||
+                  (step === 3 && !isArtworkDescriptionValid) ||
+                  (step === 4 && !isDescriptionValid)
+                    ? '#ccc'
+                    : '#120000',
                 fontFamily: 'Bold',
                 fontSize: 16,
               }}
             >
-              이전
+              {step === 6 ? '완성' : '다음'}
             </Text>
-          )}
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={step === 6 ? showConfirmModal : goToNext}
-          disabled={
-            (step === 0 && !isCollectionSelected) ||
-            (step === 1 && selectedArtworks.length === 0) ||
-            (step === 3 && !isArtworkDescriptionValid) ||
-            (step === 4 && !isDescriptionValid)
-          }
-        >
-          <Text
-            style={{
-              marginRight: 16,
-              color:
-                (step === 0 && !isCollectionSelected) ||
-                (step === 1 && selectedArtworks.length === 0) ||
-                (step === 3 && !isArtworkDescriptionValid) ||
-                (step === 4 && !isDescriptionValid)
-                  ? '#ccc'
-                  : '#120000',
-              fontFamily: 'Bold',
-              fontSize: 16,
-            }}
-          >
-            {step === 6 ? '완성' : '다음'}
-          </Text>
-        </TouchableOpacity>
-      ),
+          </TouchableOpacity>
+        ),
     });
   }, [
     navigation,
     step,
+    isEditing,
     isArtworkDescriptionValid,
     isDescriptionValid,
     isCollectionSelected,
     selectedArtworks,
+    selectedThemes,
     artworkInfoInput,
   ]);
 
@@ -142,31 +167,10 @@ const ExhibitScreen: React.FC = () => {
 
   const goToNext = () => {
     if (step === 1) {
-      const newCherryDetails = selectedArtworks.reduce(
-        (acc, artworkId) => {
-          const artwork = collections
-            .flatMap((collection) => collection.artworks)
-            .find((art) => art.id === artworkId);
-          if (artwork && artwork.cherry && artwork.cherry > 0) {
-            return {
-              totalRequiredCherries: acc.totalRequiredCherries + artwork.cherry,
-              cherryCount: acc.cherryCount + 1,
-            };
-          }
-          return acc;
-        },
-        { totalRequiredCherries: 0, cherryCount: 0 },
-      );
-
-      setCherryDetails(newCherryDetails);
-
-      if (
-        newCherryDetails.totalRequiredCherries > userCherries &&
-        newCherryDetails.totalRequiredCherries > 0
-      ) {
+      if (totalRequiredCherries > userCherries && totalRequiredCherries > 0) {
         setIsArtworkModalVisible(true);
         return;
-      } else if (newCherryDetails.totalRequiredCherries > 0) {
+      } else if (totalRequiredCherries > 0) {
         setIsArtworkModalVisible(true);
         return;
       }
@@ -193,6 +197,12 @@ const ExhibitScreen: React.FC = () => {
     }
   };
 
+  const handleSave = () => {
+    // Save logic here, then exit editing mode
+    setIsEditing(false);
+    navigation.navigate('Exhibit', { step: 6 });
+  };
+
   const renderStep = () => {
     switch (step) {
       case 0:
@@ -202,7 +212,14 @@ const ExhibitScreen: React.FC = () => {
           />
         );
       case 1:
-        return <ArtworkSelect onSelectionChange={setSelectedArtworks} />;
+        return (
+          <ArtworkSelect
+            onSelectionChange={(artworks, totalCherries) => {
+              setSelectedArtworks(artworks);
+              setTotalRequiredCherries(totalCherries);
+            }}
+          />
+        );
       case 2:
         return <ThemeSetting />;
       case 3:
@@ -218,7 +235,7 @@ const ExhibitScreen: React.FC = () => {
       case 5:
         return <CoverSetting />;
       case 6:
-        return <FinishSetting />;
+        return <FinishSetting setIsEditing={setIsEditing} />;
       default:
         return (
           <CollectionSelect
@@ -240,21 +257,24 @@ const ExhibitScreen: React.FC = () => {
           <View style={{ alignItems: 'center' }}>
             <Text style={{ marginBottom: 5, color: '#120000', fontSize: 16 }}>
               필요한 체리{' '}
-              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>5</Text>
+              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>2</Text>
             </Text>
             <Text style={{ color: '#120000', fontSize: 16 }}>
               보유중인 체리{' '}
-              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>10</Text>
+              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>
+                {userCherries}
+              </Text>
             </Text>
           </View>
         }
         confirmButtonText="확인했습니다"
+        cancelButtonText={'이전으로'}
       />
-      {isArtworkModalVisible && cherryDetails.totalRequiredCherries > 0 && (
+      {isArtworkModalVisible && totalRequiredCherries > 0 && (
         <ArtworkSelectModal
           visible={isArtworkModalVisible}
-          requiredCherries={cherryDetails.totalRequiredCherries}
-          cherryCount={cherryDetails.cherryCount}
+          requiredCherries={totalRequiredCherries}
+          cherryCount={selectedArtworks.length}
           userCherries={userCherries}
           onClose={() => setIsArtworkModalVisible(false)}
           onBuyCherries={() => {
@@ -267,8 +287,33 @@ const ExhibitScreen: React.FC = () => {
           }}
         />
       )}
+      {isEditing && (
+        <SaveButtonContainer>
+          <SaveButton onPress={handleSave}>
+            <SaveButtonText>수정한 내용 저장하기</SaveButtonText>
+          </SaveButton>
+        </SaveButtonContainer>
+      )}
     </Container>
   );
 };
+
+const SaveButtonContainer = styled.View`
+  background-color: transparent;
+`;
+
+const SaveButton = styled.TouchableOpacity`
+  background-color: #120000;
+  padding: 15px;
+  border-radius: 30px;
+  align-items: center;
+  margin: 20px;
+`;
+
+const SaveButtonText = styled.Text`
+  font-size: 16px;
+  font-family: 'Bold';
+  color: #fff;
+`;
 
 export default ExhibitScreen;
