@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CheriC",
-    "slug": "CheriC",
+    "slug": "cheri-c",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
