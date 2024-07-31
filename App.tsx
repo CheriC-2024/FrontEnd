@@ -5,6 +5,8 @@ import { ActivityIndicator, View } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ThemeProvider } from 'styled-components/native';
+import { theme } from 'src/styles/theme';
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -13,8 +15,8 @@ const App = () => {
     const loadFonts = async () => {
       try {
         await Font.loadAsync({
-          Regular: require('./src/assets/fonts/Pretendard/Pretendard-Regular.otf'),
-          Bold: require('./src/assets/fonts/Pretendard/Pretendard-Bold.otf'),
+          PretendardRegular: require('./src/assets/fonts/Pretendard/Pretendard-Regular.otf'),
+          PretendardBold: require('./src/assets/fonts/Pretendard/Pretendard-Bold.otf'),
           BlackHanSans: require('./src/assets/fonts/BlackHanSans-Regular.ttf'),
           Mapo: require('./src/assets/fonts/MapoDacapo.ttf'),
           //SnowFrost: require('./src/assets/fonts/SnowFrost.ttf'),
@@ -42,7 +44,9 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppNavigator />
+      <ThemeProvider theme={theme}>
+        <AppNavigator />
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 };
