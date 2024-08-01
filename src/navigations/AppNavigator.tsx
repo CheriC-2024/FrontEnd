@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import ExhibitScreen from '../screens/ExhibitScreen';
+//import OnboardingScreen from '../screens/OnboardingScreen';
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import AIRecommendTheme from '../screens/AIRecommendation/AIRecommendTheme';
 import { ProgressBarProvider } from '../components/ProgressBarContext';
@@ -15,6 +16,7 @@ import { GlobalStateProvider } from '../contexts/GlobalStateContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   MainTabs: undefined;
   Exhibit: { step: number; selectedThemes?: string[] };
   AIRecommendLoading: { source: string };
@@ -42,12 +44,13 @@ const AppNavigator = () => {
               initialRouteName="MainTabs"
               screenOptions={{
                 headerTitleStyle: {
-                  fontFamily: 'Bold', // 원하는 폰트 패밀리로 변경
+                  fontFamily: 'PretendardBold', // 원하는 폰트 패밀리로 변경
                   fontSize: 16, // 원하는 폰트 크기로 변경
                   color: '#120000', // 원하는 폰트 색상으로 변경
                 },
               }}
             >
+              {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} /> */}
               <Stack.Screen
                 name="MainTabs"
                 component={MainTabs}
