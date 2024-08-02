@@ -1,4 +1,4 @@
-rootProject.name = 'FrontEnd'
+rootProject.name = 'CheriC'
 
 dependencyResolutionManagement {
   versionCatalogs {
