@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import ExhibitScreen from '../screens/ExhibitScreen';
-//import OnboardingScreen from '../screens/OnboardingScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import AIRecommendTheme from '../screens/AIRecommendation/AIRecommendTheme';
 import { ProgressBarProvider } from '../components/ProgressBarContext';
@@ -41,7 +41,7 @@ const AppNavigator = () => {
         <ProgressBarProvider>
           <NavigationContainer>
             <Stack.Navigator
-              initialRouteName="MainTabs"
+              initialRouteName="Onboarding"
               screenOptions={{
                 headerTitleStyle: {
                   fontFamily: 'PretendardBold', // 원하는 폰트 패밀리로 변경
@@ -50,7 +50,11 @@ const AppNavigator = () => {
                 },
               }}
             >
-              {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} /> */}
+              <Stack.Screen
+                name="Onboarding"
+                component={OnboardingScreen}
+                options={{ headerShown: false }}
+              />
               <Stack.Screen
                 name="MainTabs"
                 component={MainTabs}
