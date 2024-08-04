@@ -1,17 +1,16 @@
-// src/components/InfoBlock.tsx
 import React from 'react';
 import styled from 'styled-components/native';
 import { TextInput, View } from 'react-native';
 import { Subtitle2, Caption } from './Typography';
 
-const Container = styled.View`
-  margin: ${({ theme }) => theme.spacing.s4};
-`;
-
 const Label = styled(Subtitle2)`
   color: ${({ theme }) => theme.colors.redBlack};
   margin-bottom: ${({ theme }) => theme.spacing.s1};
   margin-left: ${({ theme }) => theme.spacing.s1};
+`;
+
+const InputWrapper = styled.View`
+  position: relative;
 `;
 
 const Input = styled(TextInput)`
@@ -23,8 +22,14 @@ const Input = styled(TextInput)`
 `;
 
 const CharacterCount = styled(Caption)`
-  align-self: flex-end;
+  position: absolute;
+  bottom: ${({ theme }) => theme.spacing.s2};
+  right: ${({ theme }) => theme.spacing.s2};
   color: ${({ theme }) => theme.colors.grey_6};
+`;
+
+const CharacterCountRedBlack = styled.Text`
+  color: ${({ theme }) => theme.colors.redBlack};
 `;
 
 interface InfoBlockProps {
@@ -41,19 +46,24 @@ const InfoBlock: React.FC<InfoBlockProps> = ({
   const [text, setText] = React.useState('');
 
   return (
-    <Container>
+    <>
       <Label>{label}</Label>
-      <Input
-        multiline
-        numberOfLines={4}
-        maxLength={maxLength}
-        value={text}
-        onChangeText={setText}
-        placeholder={placeholder}
-        placeholderTextColor={'#9E9E9E'}
-      />
-      <CharacterCount>{`${text.length} / ${maxLength}`}</CharacterCount>
-    </Container>
+      <InputWrapper>
+        <Input
+          multiline
+          numberOfLines={4}
+          maxLength={maxLength}
+          value={text}
+          onChangeText={setText}
+          placeholder={placeholder}
+          placeholderTextColor={'#9E9E9E'}
+        />
+        <CharacterCount>
+          <CharacterCountRedBlack>{text.length}</CharacterCountRedBlack> /{' '}
+          {maxLength}
+        </CharacterCount>
+      </InputWrapper>
+    </>
   );
 };
 
