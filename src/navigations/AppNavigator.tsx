@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import ExhibitScreen from '../screens/ExhibitScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import LoginScreen from '../screens/LoginScreen';
+import SignupScreen from '../screens/SignupScreen';
 import AIRecommendLoading from '../screens/AIRecommendation/AIRecommendLoading';
 import AIRecommendTheme from '../screens/AIRecommendation/AIRecommendTheme';
 import { ProgressBarProvider } from '../components/ProgressBarContext';
@@ -17,6 +19,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export type RootStackParamList = {
   Onboarding: undefined;
+  Login: undefined;
+  Signup: undefined;
   MainTabs: undefined;
   Exhibit: { step: number; selectedThemes?: string[] };
   AIRecommendLoading: { source: string };
@@ -53,6 +57,16 @@ const AppNavigator = () => {
               <Stack.Screen
                 name="Onboarding"
                 component={OnboardingScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Login"
+                component={LoginScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Signup"
+                component={SignupScreen}
                 options={{ headerShown: false }}
               />
               <Stack.Screen
