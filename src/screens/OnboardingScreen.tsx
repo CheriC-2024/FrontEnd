@@ -25,7 +25,7 @@ const OnboardingScreen: React.FC = () => {
         bottomBarHeight={60}
         DotComponent={Dots}
         SkipButtonComponent={(props) => <Skip {...props}>SKIP ></Skip>}
-        onSkip={() => navigation.replace('MainTabs')}
+        onSkip={() => navigation.replace('Login')}
         pages={[
           {
             backgroundColor: theme.colors.grey_4,
@@ -69,7 +69,7 @@ const OnboardingScreen: React.FC = () => {
                 <ButtonWrapper>
                   <Button
                     title="Cheric 로그인 하기"
-                    onPress={() => navigation.replace('MainTabs')}
+                    onPress={() => navigation.replace('Login')}
                     color={theme.colors.cherryRed_10}
                   />
                 </ButtonWrapper>
