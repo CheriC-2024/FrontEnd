@@ -39,13 +39,13 @@ export const H6 = styled.Text`
 export const Subtitle1 = styled.Text`
   font-size: ${({ theme }) => theme.fontSizes.subtitle1};
   line-height: ${({ theme }) => theme.lineHeights.subtitle1};
-  font-family: ${({ theme }) => theme.fonts.regular};
+  font-family: ${({ theme }) => theme.fonts.bold};
 `;
 
 export const Subtitle2 = styled.Text`
   font-size: ${({ theme }) => theme.fontSizes.subtitle2};
   line-height: ${({ theme }) => theme.lineHeights.subtitle2};
-  font-family: ${({ theme }) => theme.fonts.regular};
+  font-family: ${({ theme }) => theme.fonts.bold};
 `;
 
 export const Body1 = styled.Text`
