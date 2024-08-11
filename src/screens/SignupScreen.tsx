@@ -63,8 +63,12 @@ const SignupScreen: React.FC = () => {
   ];
 
   return (
-    <ScrollView>
-      <Container>
+    <Container>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+      >
         <TitleSubtitle
           title={<H5>CheriC에 처음 오셨군요!</H5>}
           subtitle={
@@ -167,8 +171,8 @@ const SignupScreen: React.FC = () => {
           </RadioButton>
         </RadioSection>
       </ScrollView>
-        <ToastMessage message={toastMessage} visible={toastVisible} />
-      </Container>
+      <ToastMessage message={toastMessage} visible={toastVisible} />
+    </Container>
   );
 };
 
