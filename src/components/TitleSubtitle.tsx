@@ -8,16 +8,16 @@ const Container = styled.View`
 
 const Title = styled(H6)`
   color: ${({ theme }) => theme.colors.redBlack};
-  margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
 const Subtitle = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_8};
+  padding-top: ${({ theme }) => theme.spacing.s1};
 `;
 
 interface TitleSubtitleProps {
-  title: string;
-  subtitle: string;
+  title: React.ReactNode;
+  subtitle: React.ReactNode;
 }
 
 const TitleSubtitle: React.FC<TitleSubtitleProps> = ({ title, subtitle }) => {
