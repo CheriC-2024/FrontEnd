@@ -70,10 +70,10 @@ export const theme = {
     s12: '48px',
   },
   radius: {
-    xs: '4px',
-    s: '8px',
-    m: '16px',
-    l: '24px',
+    xs: '8px',
+    s: '16px',
+    m: '24px',
+    l: '32px',
   },
   padding: {
     xs: '4px',
