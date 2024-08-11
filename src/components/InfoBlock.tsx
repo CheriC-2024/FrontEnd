@@ -14,21 +14,25 @@ const InputWrapper = styled.View`
 `;
 
 const Input = styled(TextInput)`
+  height: 150px;
   background-color: ${({ theme }) => theme.colors.grey_4};
   padding: ${({ theme }) => theme.spacing.s4};
   border-radius: ${({ theme }) => theme.radius.m};
   font-size: ${({ theme }) => theme.fontSizes.body2};
+  line-height: ${({ theme }) => theme.lineHeights.body2};
+  font-family: ${({ theme }) => theme.fonts.regular};
   color: ${({ theme }) => theme.colors.redBlack};
+  text-align-vertical: top;
 `;
 
 const CharacterCount = styled(Caption)`
   position: absolute;
-  bottom: ${({ theme }) => theme.spacing.s2};
-  right: ${({ theme }) => theme.spacing.s2};
+  bottom: ${({ theme }) => theme.spacing.s4};
+  right: ${({ theme }) => theme.spacing.s4};
   color: ${({ theme }) => theme.colors.grey_6};
 `;
 
-const CharacterCountRedBlack = styled.Text`
+const CharacterCountText = styled.Text`
   color: ${({ theme }) => theme.colors.redBlack};
 `;
 
@@ -59,8 +63,7 @@ const InfoBlock: React.FC<InfoBlockProps> = ({
           placeholderTextColor={'#9E9E9E'}
         />
         <CharacterCount>
-          <CharacterCountRedBlack>{text.length}</CharacterCountRedBlack> /{' '}
-          {maxLength}
+          <CharacterCountText>{text.length}</CharacterCountText> / {maxLength}
         </CharacterCount>
       </InputWrapper>
     </>
