@@ -166,10 +166,9 @@ const SignupScreen: React.FC = () => {
             <RadioLabel selected={isArtist === 'no'}>아니에요!</RadioLabel>
           </RadioButton>
         </RadioSection>
-
+      </ScrollView>
         <ToastMessage message={toastMessage} visible={toastVisible} />
       </Container>
-    </ScrollView>
   );
 };
 
