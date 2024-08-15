@@ -8,19 +8,18 @@ const ToastContainer = styled(Animated.View)<{ style: ViewStyle }>`
   bottom: 50px;
   left: 0;
   right: 0;
-  margin: 0 auto;
-  background-color: #6e6e6e;
-  padding: ${(props) => props.theme.spacing.s4};
-  border-radius: ${(props) => props.theme.radius.s};
+  background-color: ${(props) => props.theme.colors.redBlack_alpha80};
+  margin: 0 ${(props) => props.theme.margin.s};
+  padding: ${(props) => props.theme.spacing.s2};
+  border-radius: ${(props) => props.theme.radius.xs};
   flex-direction: row;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 `;
 
-const ToastText = styled.Text`
+const ToastText = styled(Body2)`
   color: ${(props) => props.theme.colors.white};
-  font-family: ${(props) => props.theme.fonts.regular};
 `;
 
 interface ToastMessageProps {
