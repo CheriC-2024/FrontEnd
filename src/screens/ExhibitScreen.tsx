@@ -20,6 +20,8 @@ import { useProgressBar } from '../components/ProgressBarContext';
 import { RootStackParamList } from '../navigations/AppNavigator';
 import CustomModal from '../components/Modal';
 import ArtworkSelectModal from '../components/Modals/ArtworkSelectModal';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store';
 import { useGlobalState } from '../contexts/GlobalStateContext';
 
 type ExhibitScreenNavigationProp = NativeStackNavigationProp<
@@ -36,8 +38,13 @@ const ExhibitScreen: React.FC = () => {
   const navigation = useNavigation<ExhibitScreenNavigationProp>();
   const route = useRoute<ExhibitScreenRouteProp>();
   const { setStep } = useProgressBar();
+  const dispatch = useDispatch();
+  // 리덕스 상태 가져오기
+  const selectedCollections = useSelector(
+    (state: RootState) => state.collection.selectedCollections,
+  );
+  // 로컬 상태 관리
   const {
-    selectedCollections,
     userCherries,
     selectedArtworks,
     setSelectedArtworks,
@@ -47,7 +54,6 @@ const ExhibitScreen: React.FC = () => {
   const [step, setLocalStep] = useState(route.params?.step || 0);
   const [isArtworkDescriptionValid, setIsArtworkDescriptionValid] =
     useState(false);
-  const [isCollectionSelected, setIsCollectionSelected] = useState(false);
   const [isDescriptionValid, setIsDescriptionValid] = useState(false); // Separate state for other descriptions
   const [modalVisible, setModalVisible] = useState(false);
   const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
@@ -113,7 +119,7 @@ const ExhibitScreen: React.FC = () => {
           <TouchableOpacity
             onPress={step === 6 ? showConfirmModal : goToNext}
             disabled={
-              (step === 0 && !isCollectionSelected) ||
+              (step === 0 && selectedCollections.length === 0) ||
               (step === 1 && selectedArtworks.length === 0) ||
               (step === 2 && selectedThemes.length === 0) ||
               (step === 3 && !isArtworkDescriptionValid) ||
@@ -124,7 +130,7 @@ const ExhibitScreen: React.FC = () => {
               style={{
                 marginRight: 16,
                 color:
-                  (step === 0 && !isCollectionSelected) ||
+                  (step === 0 && selectedCollections.length === 0) ||
                   (step === 1 && selectedArtworks.length === 0) ||
                   (step === 2 && selectedThemes.length === 0) ||
                   (step === 3 && !isArtworkDescriptionValid) ||
@@ -146,7 +152,7 @@ const ExhibitScreen: React.FC = () => {
     isEditing,
     isArtworkDescriptionValid,
     isDescriptionValid,
-    isCollectionSelected,
+    selectedCollections,
     selectedArtworks,
     selectedThemes,
     artworkInfoInput,
@@ -206,11 +212,7 @@ const ExhibitScreen: React.FC = () => {
   const renderStep = () => {
     switch (step) {
       case 0:
-        return (
-          <CollectionSelect
-            onSelectionChange={(count) => setIsCollectionSelected(count > 0)}
-          />
-        );
+        return <CollectionSelect />;
       case 1:
         return (
           <ArtworkSelect
@@ -237,11 +239,7 @@ const ExhibitScreen: React.FC = () => {
       case 6:
         return <FinishSetting setIsEditing={setIsEditing} />;
       default:
-        return (
-          <CollectionSelect
-            onSelectionChange={(count) => setIsCollectionSelected(count > 0)}
-          />
-        );
+        return <CollectionSelect />;
     }
   };
 
