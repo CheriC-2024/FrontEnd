@@ -1,16 +1,17 @@
 import styled from 'styled-components/native';
 
-export const Btn = styled.TouchableOpacity`
-  background-color: ${({ theme }) => theme.colors.redBlack};
-  padding: ${({ theme }) =>
-    theme.spacing.s4}; //padding값은 디자인 시스템 수정되는데로 변경 예정
+export const Btn = styled.TouchableOpacity<{ disabled?: boolean }>`
+  background-color: ${({ theme, disabled }) =>
+    disabled ? theme.colors.grey_6 : theme.colors.redBlack};
+  padding: ${({ theme }) => theme.spacing.s4};
   border-radius: ${({ theme }) => theme.radius.l};
   align-items: center;
   justify-content: center;
 `;
 
-export const BtnText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.fonts.regular};
-  font-size: ${({ theme }) => theme.fontSizes.body1};
+export const BtnText = styled.Text<{ disabled?: boolean }>`
+  color: ${({ theme, disabled }) =>
+    disabled ? theme.colors.grey_2 : theme.colors.white};
+  font-family: ${({ theme }) => theme.fonts.bold};
+  font-size: ${({ theme }) => theme.fontSizes.subtitle1};
 `;
