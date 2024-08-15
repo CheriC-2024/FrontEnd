@@ -97,7 +97,7 @@ const DotsWrapper = styled.View`
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 30px;
+  top: 50px;
   width: 100%;
 `;
 
