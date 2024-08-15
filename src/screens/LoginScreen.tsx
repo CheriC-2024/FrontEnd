@@ -6,7 +6,7 @@ import {
 import styled from 'styled-components/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigations/AppNavigator';
-import { H1 } from '../components/Typography';
+import { H1 } from '../styles/typography';
 import { useNavigation } from '@react-navigation/native';
 
 const Container = styled.View`

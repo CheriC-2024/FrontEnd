@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { H6, Caption } from './Typography';
+import { H6, Caption } from '../styles/typography';
 
 const Container = styled.View`
   //margin: ${({ theme }) => theme.spacing.s4};

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled, { useTheme } from 'styled-components/native';
 import { ScrollView, TextInput, View, ImageBackground } from 'react-native';
-import { H1, H5, Subtitle2, Body1, ButtonText } from '../components/Typography';
+import { H5, Subtitle2, Body1, ButtonText, Body2 } from '../styles/typography';
 import InfoBlock from '../components/InfoBlock';
 import TitleSubtitle from '../components/TitleSubtitle';
 import { Btn, BtnText } from '../components/Button';

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { TextInput, View } from 'react-native';
-import { Subtitle2, Caption } from './Typography';
+import { Subtitle2, Caption } from '../styles/typography';
 
 const Label = styled(Subtitle2)`
   color: ${({ theme }) => theme.colors.redBlack};

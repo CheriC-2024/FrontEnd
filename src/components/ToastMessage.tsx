@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
+import { Body2 } from '../styles/typography';
 
 const ToastContainer = styled(Animated.View)<{ style: ViewStyle }>`
   position: absolute;
