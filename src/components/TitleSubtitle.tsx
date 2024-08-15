@@ -3,7 +3,13 @@ import styled from 'styled-components/native';
 import { H6, Caption } from '../styles/typography';
 
 const Container = styled.View`
-  //margin: ${({ theme }) => theme.spacing.s4};
+  flex-direction: row;
+  align-items: flex-end;
+  margin: ${({ theme }) => theme.spacing.s4};
+`;
+
+const TextContainer = styled.View`
+  flex-direction: column;
 `;
 
 const Title = styled(H6)`
@@ -15,16 +21,30 @@ const Subtitle = styled(Caption)`
   padding-top: ${({ theme }) => theme.spacing.s1};
 `;
 
+const Image = styled.Image`
+  width: 45px;
+  height: 80px;
+  margin-right: ${({ theme }) => theme.spacing.s3};
+`;
+
 interface TitleSubtitleProps {
-  title: React.ReactNode;
-  subtitle: React.ReactNode;
+  title: string | React.ReactNode;
+  subtitle: string | React.ReactNode;
+  imageSource?: { uri: string } | number;
 }
 
-const TitleSubtitle: React.FC<TitleSubtitleProps> = ({ title, subtitle }) => {
+const TitleSubtitle: React.FC<TitleSubtitleProps> = ({
+  title,
+  subtitle,
+  imageSource,
+}) => {
   return (
     <Container>
-      <Title>{title}</Title>
-      <Subtitle>{subtitle}</Subtitle>
+      {imageSource && <Image source={imageSource} />}
+      <TextContainer>
+        <Title>{title}</Title>
+        <Subtitle>{subtitle}</Subtitle>
+      </TextContainer>
     </Container>
   );
 };
