@@ -7,6 +7,8 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from 'styled-components/native';
 import { theme } from 'src/styles/theme';
+import { Provider } from 'react-redux';
+import store from './src/store';
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -44,9 +46,11 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider theme={theme}>
-        <AppNavigator />
-      </ThemeProvider>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <AppNavigator />
+        </ThemeProvider>
+      </Provider>
     </GestureHandlerRootView>
   );
 };
