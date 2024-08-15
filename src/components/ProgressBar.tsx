@@ -2,9 +2,7 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { useProgressBar } from './ProgressBarContext';
 
-const ProgressBarComponent: React.FC<{ totalSteps: number }> = ({
-  totalSteps,
-}) => {
+const ProgressBar: React.FC<{ totalSteps: number }> = ({ totalSteps }) => {
   const { step } = useProgressBar();
 
   return (
@@ -32,4 +30,4 @@ const ProgressDot = styled.View<{ active: boolean }>`
   margin: 0 11.5px;
 `;
 
-export default ProgressBarComponent;
+export default ProgressBar;
