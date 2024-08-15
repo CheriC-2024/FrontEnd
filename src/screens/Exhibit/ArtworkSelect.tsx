@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CherryIcon from '../../assets/icons/cherry.svg';
 import ProgressBarComponent from '../../components/ProgressBar';
-import FilterInput from '../../components/FilterInput';
+import FilterInput from '../../components/SearchBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setCollections,
+  toggleArtworkSelection,
+  toggleCollectionExpansion,
+  setFilterText,
+  collapseAllCollections,
+  expandAllCollections,
+} from '../../slices/artworkSlice';
 import { fetchArtworksByCollectionIds } from '../../api/collectionApi';
+import { RootState } from '../../store';
 import { imageAssets } from '../../assets/DB/imageAssets';
-
-interface ExpandedCollections {
-  [key: string]: boolean;
-}
 
 interface ArtworkSelectProps {
   onSelectionChange: (
@@ -22,43 +27,22 @@ interface ArtworkSelectProps {
 }
 
 const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
-  const [expandedCollections, setExpandedCollections] =
-    useState<ExpandedCollections>({});
-  const [filterText, setFilterText] = useState('');
-  const { step, setStep } = useProgressBar();
-  const {
-    selectedCollections,
-    userCherries,
-    selectedArtworks,
-    setSelectedArtworks,
-  } = useGlobalState();
-  const [collections, setCollections] = useState([]);
+  const dispatch = useDispatch();
+  const { collections, selectedArtworks, expandedCollections, filterText } =
+    useSelector((state: RootState) => state.artwork);
+  const { userCherries, selectedCollections } = useSelector(
+    (state: RootState) => state.collection,
+  );
+
+  const { setStep } = useProgressBar();
 
   useEffect(() => {
     setStep(1); // Set progress bar to step 2 (index 1)
-
     // Fetch artworks for selected collections
     const fetchArtworks = async () => {
       try {
         const data = await fetchArtworksByCollectionIds(selectedCollections);
-        console.log('Fetched Artworks:', data); // Log the response data
-        setCollections(data.collections);
-
-        // Log each artwork's cherryNum value
-        data.collections.forEach((collection) => {
-          collection.artList.forEach((artwork) => {
-            console.log(
-              `Artwork ID: ${artwork.artId}, CherryNum: ${artwork.cherryNum},Register: ${artwork.register}`,
-            );
-          });
-        });
-
-        // Initialize expandedCollections state with selected collections set to true
-        const initialExpandedState: ExpandedCollections = {};
-        data.collections.forEach((collection) => {
-          initialExpandedState[collection.collectionName] = true;
-        });
-        setExpandedCollections(initialExpandedState);
+        dispatch(setCollections(data.collections));
       } catch (error) {
         console.error('Error fetching artworks:', error);
       }
@@ -67,7 +51,7 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
     if (selectedCollections.length > 0) {
       fetchArtworks();
     }
-  }, [selectedCollections, setStep]);
+  }, [selectedCollections, dispatch, setStep]);
 
   useEffect(() => {
     const totalCherries = selectedArtworks.reduce(
@@ -76,44 +60,6 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
     );
     onSelectionChange(selectedArtworks, totalCherries); // Notify parent component when selected artworks change
   }, [selectedArtworks, onSelectionChange]);
-
-  const handleSelectArtwork = (artwork) => {
-    setSelectedArtworks((prev) =>
-      prev.some((item) => item.artId === artwork.artId)
-        ? prev.filter((item) => item.artId !== artwork.artId)
-        : [...prev, artwork],
-    );
-  };
-
-  const toggleCollection = (collectionName: string) => {
-    setExpandedCollections((prev) => ({
-      ...prev,
-      [collectionName]: !prev[collectionName],
-    }));
-  };
-
-  const collapseAllCollections = () => {
-    const collapsed: ExpandedCollections = {};
-    collections.forEach((collection) => {
-      collapsed[collection.collectionName] = false;
-    });
-    setExpandedCollections(collapsed);
-  };
-
-  const expandAllCollections = () => {
-    const expanded: ExpandedCollections = {};
-    collections.forEach((collection) => {
-      expanded[collection.collectionName] = true;
-    });
-    setExpandedCollections(expanded);
-  };
-
-  const allCollapsed = Object.values(expandedCollections).every(
-    (value) => !value,
-  );
-  const allExpanded = Object.values(expandedCollections).every(
-    (value) => value,
-  );
 
   const filteredCollections = collections.map((collection) => ({
     ...collection,
@@ -141,18 +87,18 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
       <FilterInput
         placeholder="작품 검색하기"
         filterText={filterText}
-        setFilterText={setFilterText}
+        setFilterText={(text) => dispatch(setFilterText(text))}
       />
       <Row>
         <SelectedCount>
           <BrownBlack>{selectedArtworks.length}</BrownBlack> / 30
         </SelectedCount>
-        {allCollapsed ? (
-          <ExpandButton onPress={expandAllCollections}>
+        {Object.values(expandedCollections).every((value) => !value) ? (
+          <ExpandButton onPress={() => dispatch(expandAllCollections())}>
             <ExpandButtonText>컬렉션 모두 펼치기</ExpandButtonText>
           </ExpandButton>
         ) : (
-          <CollapseButton onPress={collapseAllCollections}>
+          <CollapseButton onPress={() => dispatch(collapseAllCollections())}>
             <CollapseButtonText>컬렉션 모두 접기</CollapseButtonText>
           </CollapseButton>
         )}
@@ -165,7 +111,11 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
               <CollectionTitle>
                 <CollectionName>{collection.collectionName}</CollectionName>
                 <DropDownButton
-                  onPress={() => toggleCollection(collection.collectionName)}
+                  onPress={() =>
+                    dispatch(
+                      toggleCollectionExpansion(collection.collectionName),
+                    )
+                  }
                 >
                   <DropDownButtonText>
                     {isExpanded ? (
@@ -198,7 +148,9 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
                       <ArtworkItem
                         key={artwork.artId}
                         selected={selected}
-                        onPress={() => handleSelectArtwork(artwork)}
+                        onPress={() =>
+                          dispatch(toggleArtworkSelection(artwork))
+                        }
                       >
                         <ArtworkImageWrapper selected={selected}>
                           <ArtworkImage

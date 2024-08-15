@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,87 +8,69 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import styled from 'styled-components/native';
-import LinearGradient from 'react-native-linear-gradient'; //그라디언트 배경을 적용하기 위해
 import Icon from 'react-native-vector-icons/Ionicons';
-import FilterInput from '../../components/FilterInput';
-import ProgressBarComponent from '../../components/ProgressBar';
-import { useProgressBar } from '../../components/ProgressBarContext';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { useSelector, useDispatch } from 'react-redux';
+import SearchBar from '../../components/SearchBar';
+import ProgressBar from '../../components/ProgressBar';
+import TitleSubtitle from '../../components/TitleSubtitle';
 import { fetchCollectionsByUser } from '../../api/collectionApi';
-import { imageAssets } from '../../assets/DB/imageAssets';
+import { RootState } from '../../store';
+import {
+  setCollections,
+  toggleCollectionSelection,
+  setFilterText,
+} from '../../slices/collectionSlice';
+import { Container } from 'src/styles/layout';
+import GradientBackground from '../../styles/GradientBackground';
+import { useProgressBar } from 'src/components/ProgressBarContext';
+import { imageAssets } from 'src/assets/DB/imageAssets';
+import { Caption, Subtitle1, Subtitle2 } from 'src/styles/typography';
+import TagButton from 'src/components/TagButton';
 
-interface Collection {
-  id: number;
-  name: string;
-  description: string;
-  filePath: string;
-  fileName: string;
-}
+const CollectionSelect: React.FC = () => {
+  const dispatch = useDispatch();
+  const { collections, selectedCollections, filterText } = useSelector(
+    (state: RootState) => state.collection,
+  );
 
-const CollectionSelect: React.FC<{
-  onSelectionChange: (count: number) => void;
-}> = ({ onSelectionChange }) => {
-  const { selectedCollections, setSelectedCollections } = useGlobalState();
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [filterText, setFilterText] = useState('');
-  const { step, setStep } = useProgressBar();
+  const { setStep } = useProgressBar();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setStep(0); // Set progress bar to step 1 (index 0)
+    // ProgressBar 초기화 (1단계)
+    setStep(0);
   }, [setStep]);
 
   useEffect(() => {
-    onSelectionChange(selectedCollections.length);
-  }, [selectedCollections]);
-
-  useEffect(() => {
+    // 컬렉션 데이터 로드
     const loadCollections = async () => {
       try {
         const userId = 2; // 테스트할 사용자 ID
-        console.log(
-          `Fetching collections for user ID from global state: ${userId}`,
-        );
+        console.log(`Fetching collections for : ${userId}`);
         const data = await fetchCollectionsByUser(userId);
         console.log('Fetched Collections:', data.collections);
-        setCollections(data.collections);
+        dispatch(setCollections(data.collections));
 
-        data.collections.forEach((collection: Collection) => {
-          console.log('File Path:', collection.fileName);
-        });
+        // data.collections.forEach((collection: Collection) => {
+        //   console.log('File Name:', collection.fileName);
+        // });
       } catch (error) {
-        console.error('LoadCollection Error: ', error);
+        console.error('Collection Load Error: ', error);
       } finally {
         setLoading(false);
       }
     };
 
     loadCollections();
-  }, []);
+  }, [dispatch]);
 
-  const handleSelectCollection = (id: number) => {
-    setSelectedCollections((prev: number[]) => {
-      const newSelections = prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id];
-      console.log('Selected Collections:', newSelections);
-      return newSelections;
-    });
-  };
-
-  const handleRemoveCollection = (id: number) => {
-    setSelectedCollections((prev: number[]) => {
-      const newSelections = prev.filter((item) => item !== id);
-      console.log('Selected Collections:', newSelections);
-      return newSelections;
-    });
-  };
-
+  // 필터링된 컬렉션 목록
   const filteredCollections = collections.filter((collection) =>
-    collection.name.includes(filterText),
+    collection.name.toLowerCase().includes(filterText.toLowerCase()),
   );
 
   if (loading) {
+    //로딩 상태 표시
     return (
       <LoadingContainer>
         <ActivityIndicator size="large" color="#E52C32" />
@@ -98,132 +80,105 @@ const CollectionSelect: React.FC<{
 
   return (
     <Container>
-      <GradientBackground>
-        <ProgressBarComponent totalSteps={7} />
-        {collections.length === 0 ? ( // 컬렉션이 아예 없는 경우
-          <EmptyStateContainer>
-            <EmptyStateImage
-              source={require('src/assets/images/ExhibitPage/empty_collection.png')}
-            />
-            <EmptyStateText>컬렉션이 텅 비어 있어요!</EmptyStateText>
-            <EmptyStateSubText>
-              전시를 만들기 위해서는 컬렉터님의{`\n`}컬렉션이 필요해요!
-            </EmptyStateSubText>
-            <AddCollectionButton>
-              <Icon name="add-outline" size={22} color="#fff" />
-              <AddCollectionButtonText>
-                {` `}컬렉션 추가하러 가기
-              </AddCollectionButtonText>
-            </AddCollectionButton>
-          </EmptyStateContainer>
-        ) : (
-          // 컬렉션이 있는 경우
-          <>
-            <TitleContainer>
-              <TitleIcon
-                source={require('src/assets/images/Character/character_surprised.png')}
-              />
-              <TitleText>
-                <Title>어떤 컬렉션을 전시로 올릴까요?</Title>
-                <Subtitle>전시로 만들고 싶은 컬렉션을 선택해보세요</Subtitle>
-              </TitleText>
-            </TitleContainer>
-            <FilterInput
-              placeholder="컬렉션 검색하기"
-              filterText={filterText}
-              setFilterText={setFilterText}
-            />
-            <SelectedCollectionContainer>
-              <SelectedCollectionText>선택한 컬렉션</SelectedCollectionText>
-              <CollectionTag>
-                {selectedCollections.map((id) => {
-                  const collection = collections.find((c) => c.id === id);
-                  if (collection) {
-                    return (
-                      <CollectionTagWrapper key={id}>
-                        <CollectionTagText>{collection.name}</CollectionTagText>
-                        <RemoveButton
-                          onPress={() => handleRemoveCollection(id)}
-                        >
-                          <Icon name="close-outline" size={16} color="#fff" />
-                        </RemoveButton>
-                      </CollectionTagWrapper>
-                    );
-                  }
-                  return null;
-                })}
-              </CollectionTag>
-            </SelectedCollectionContainer>
-            <CollectionList>
-              {filteredCollections.map((collection) => {
-                const selected = selectedCollections.includes(collection.id);
-                const firstArtworkImage = imageAssets[collection.fileName]; //TODO: url로 변경 예정
-                if (!firstArtworkImage) {
-                  console.warn(
-                    `Image not found for fileName: ${collection.fileName}`,
-                  );
-                }
+      <GradientBackground />
+      <ProgressBar totalSteps={7} />
+      {collections.length === 0 ? ( // 컬렉션이 아예 없는 경우
+        <EmptyState />
+      ) : (
+        // 컬렉션이 있는 경우
+        <>
+          <TitleSubtitle
+            title="어떤 컬렉션을 전시로 올릴까요?"
+            subtitle="전시로 만들고 싶은 컬렉션을 선택해보세요"
+            imageSource={require('src/assets/images/Character/character_surprised.png')}
+          />
+          <SearchBar
+            placeholder="컬렉션 검색하기"
+            filterText={filterText}
+            setFilterText={(text) => dispatch(setFilterText(text))}
+          />
+          <View style={{ marginTop: 20, paddingBottom: 18 }}>
+            <LabelText>선택한 컬렉션</LabelText>
+            {/*선택한 컬렉션 테그 목록 */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {selectedCollections.map((id) => {
+                const collection = collections.find((c) => c.id === id);
                 return (
-                  <CollectionItem
-                    key={collection.id}
-                    selected={selected}
-                    onPress={() => handleSelectCollection(collection.id)}
-                  >
-                    <CollectionImage>
-                      {firstArtworkImage && (
-                        <Image
-                          source={firstArtworkImage}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: 50,
-                          }}
-                        />
-                      )}
-                    </CollectionImage>
-                    <CollectionInfo>
-                      <CollectionName>{collection.name}</CollectionName>
-                      <CollectionDescription numberOfLines={2}>
-                        {collection.description}
-                      </CollectionDescription>
-                    </CollectionInfo>
-                  </CollectionItem>
+                  collection && (
+                    <TagButton
+                      key={id}
+                      text={collection.name}
+                      onRemove={() => dispatch(toggleCollectionSelection(id))}
+                      showHash={false}
+                    />
+                  )
                 );
               })}
-            </CollectionList>
-          </>
-        )}
-      </GradientBackground>
+            </View>
+          </View>
+          {/*컬렉션 목록 */}
+          <ScrollView
+            style={{ paddingTop: 8, paddingBottom: 16 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {filteredCollections.map((collection) => {
+              const selected = selectedCollections.includes(collection.id);
+              const firstArtworkImage = imageAssets[collection.fileName];
+              return (
+                <CollectionItem
+                  key={collection.id}
+                  selected={selected}
+                  onPress={() =>
+                    dispatch(toggleCollectionSelection(collection.id))
+                  }
+                >
+                  <CollectionImage>
+                    {firstArtworkImage && (
+                      <Image
+                        source={firstArtworkImage}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: 50,
+                        }}
+                      />
+                    )}
+                  </CollectionImage>
+                  <View style={{ flex: 1, paddingRight: 16 }}>
+                    <CollectionName>{collection.name}</CollectionName>
+                    <Caption numberOfLines={2}>
+                      {collection.description}
+                    </Caption>
+                  </View>
+                </CollectionItem>
+              );
+            })}
+          </ScrollView>
+        </>
+      )}
     </Container>
   );
 };
 
-interface GradientBackgroundProps {
-  colors?: string[];
-  start?: { x: number; y: number };
-  end?: { x: number; y: number };
-}
-
-const GradientBackground = styled(
-  LinearGradient,
-).attrs<GradientBackgroundProps>((props) => ({
-  colors: props.colors || ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
-  start: props.start || { x: 0.5, y: 0.7 },
-  end: props.end || { x: 0.5, y: 1 },
-}))<GradientBackgroundProps>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 16px 16px 0 16px;
-`;
-
-const Container = styled.View`
-  flex: 1;
-  background-color: #fff;
-  position: relative;
-`;
+// 빈 상태 표시 컴포넌트
+const EmptyState: React.FC = () => (
+  <EmptyStateContainer>
+    <EmptyStateImage
+      source={require('src/assets/images/ExhibitPage/empty_collection.png')}
+    />
+    <EmptyStateText>컬렉션이 텅 비어 있어요!</EmptyStateText>
+    <EmptyStateSubText>
+      전시를 만들기 위해서는 컬렉터님의{`\n`}컬렉션이 필요해요!
+    </EmptyStateSubText>
+    <AddCollectionButton>
+      <Icon name="add-outline" size={22} color="#fff" />
+      <AddCollectionButtonText>
+        {' '}
+        {` `}컬렉션 추가하러 가기
+      </AddCollectionButtonText>
+    </AddCollectionButton>
+  </EmptyStateContainer>
+);
 
 const LoadingContainer = styled.View`
   flex: 1;
@@ -232,74 +187,9 @@ const LoadingContainer = styled.View`
   background-color: #fff;
 `;
 
-const TitleContainer = styled.View`
-  flex-direction: row;
-  align-items: flex-end;
-  margin-bottom: 20px;
-`;
-
-const TitleIcon = styled.Image`
-  width: 45px;
-  height: 80px;
-  margin-right: 10px;
-`;
-
-const TitleText = styled.View`
-  flex-direction: column;
-`;
-
-const Title = styled.Text`
-  font-family: 'Bold';
-  font-size: 18px;
-  color: #120000;
-`;
-
-const Subtitle = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
-`;
-
-const SelectedCollectionContainer = styled.View`
-  margin: 18px 0 20px 0;
-`;
-
-const SelectedCollectionText = styled.Text`
-  font-family: 'Bold';
-  font-size: 14px;
-  margin-bottom: 6px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const CollectionTag = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-`;
-
-const CollectionTagWrapper = styled.View`
-  flex-direction: row;
-  align-items: center;
-  background-color: #413333;
-  padding: 0px 10px;
-  border-radius: 30px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-`;
-
-const CollectionTagText = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #fff;
-  letter-spacing: 0.5px;
-`;
-
-const RemoveButton = styled.TouchableOpacity`
-  padding: 4px;
-`;
-
-const CollectionList = styled.ScrollView`
-  scroll-padding-bottom: 16px;
+const LabelText = styled(Subtitle2)`
+  margin-bottom: ${(props) => props.theme.margin.s};
+  color: ${(props) => props.theme.colors.redBlack};
 `;
 
 interface CollectionItemProps {
@@ -324,29 +214,13 @@ const CollectionItem = styled(TouchableOpacity)<CollectionItemProps>`
 const CollectionImage = styled.View`
   width: 100px;
   height: 100px;
-  background-color: #d3d3d3;
   border-radius: 50px;
-  margin-right: 15px;
+  margin-right: ${(props) => props.theme.margin.m};
   overflow: hidden;
 `;
 
-const CollectionInfo = styled.View`
-  flex: 1;
-  padding-right: 15px;
-`;
-
-const CollectionName = styled.Text`
-  margin-bottom: 4px;
-  font-family: 'Bold';
-  font-size: 16px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const CollectionDescription = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
+const CollectionName = styled(Subtitle1)`
+  margin-bottom: ${(props) => props.theme.margin.xs};
 `;
 
 const EmptyStateContainer = styled.View`
