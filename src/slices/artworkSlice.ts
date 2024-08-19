@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface Artwork {
+export interface Artwork {
   artId: number;
   name: string;
   fileName: string;
@@ -23,7 +23,7 @@ interface ArtworkState {
 const initialState: ArtworkState = {
   collections: [],
   selectedArtworks: [],
-  expandedCollections: {},
+  expandedCollections: {}, // 초기화
   filterText: '',
 };
 
@@ -33,17 +33,21 @@ const artworkSlice = createSlice({
   reducers: {
     setCollections: (state, action: PayloadAction<Collection[]>) => {
       state.collections = action.payload;
+      // 컬렉션이 추가될 때 expandedCollections를 초기화
       state.expandedCollections = action.payload.reduce(
         (acc, collection) => {
           acc[collection.collectionName] = true;
           return acc;
         },
-        {} as { [key: string]: boolean },
+        {} as { [key: string]: boolean }, // 타입 지정
       );
     },
     toggleArtworkSelection: (state, action: PayloadAction<Artwork>) => {
       const artwork = action.payload;
-      if (state.selectedArtworks.some((item) => item.artId === artwork.artId)) {
+      const isSelected = state.selectedArtworks.some(
+        (item) => item.artId === artwork.artId,
+      );
+      if (isSelected) {
         state.selectedArtworks = state.selectedArtworks.filter(
           (item) => item.artId !== artwork.artId,
         );
@@ -60,14 +64,14 @@ const artworkSlice = createSlice({
       state.filterText = action.payload;
     },
     collapseAllCollections: (state) => {
-      for (let key in state.expandedCollections) {
-        state.expandedCollections[key] = false;
-      }
+      Object.keys(state.expandedCollections).forEach(
+        (key) => (state.expandedCollections[key] = false),
+      );
     },
     expandAllCollections: (state) => {
-      for (let key in state.expandedCollections) {
-        state.expandedCollections[key] = true;
-      }
+      Object.keys(state.expandedCollections).forEach(
+        (key) => (state.expandedCollections[key] = true),
+      );
     },
   },
 });
