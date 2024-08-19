@@ -13,10 +13,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import SearchBar from '../../components/SearchBar';
 import ProgressBar from '../../components/ProgressBar';
 import TitleSubtitle from '../../components/TitleSubtitle';
-import { fetchCollectionsByUser } from '../../api/collectionApi';
-import { RootState } from '../../store';
+import { RootState, AppDispatch } from '../../store';
 import {
-  setCollections,
+  loadCollections,
   toggleCollectionSelection,
   setFilterText,
 } from '../../slices/collectionSlice';
@@ -24,17 +23,24 @@ import { Container } from 'src/styles/layout';
 import GradientBackground from '../../styles/GradientBackground';
 import { useProgressBar } from 'src/components/ProgressBarContext';
 import { imageAssets } from 'src/assets/DB/imageAssets';
-import { Caption, Subtitle1, Subtitle2 } from 'src/styles/typography';
+import {
+  Body1,
+  Caption,
+  H5,
+  H6,
+  Subtitle1,
+  Subtitle2,
+} from 'src/styles/typography';
 import TagButton from 'src/components/TagButton';
 
 const CollectionSelect: React.FC = () => {
-  const dispatch = useDispatch();
-  const { collections, selectedCollections, filterText } = useSelector(
+  const dispatch = useDispatch<AppDispatch>();
+  //Redux 스토어의 전체 상태에서 collection 상태만을 선택해서 반환하는 선택자(selector) 함수
+  const { collections, selectedCollections, filterText, loading } = useSelector(
     (state: RootState) => state.collection,
   );
 
   const { setStep } = useProgressBar();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // ProgressBar 초기화 (1단계)
@@ -42,26 +48,8 @@ const CollectionSelect: React.FC = () => {
   }, [setStep]);
 
   useEffect(() => {
-    // 컬렉션 데이터 로드
-    const loadCollections = async () => {
-      try {
-        const userId = 2; // 테스트할 사용자 ID
-        console.log(`Fetching collections for : ${userId}`);
-        const data = await fetchCollectionsByUser(userId);
-        console.log('Fetched Collections:', data.collections);
-        dispatch(setCollections(data.collections));
-
-        // data.collections.forEach((collection: Collection) => {
-        //   console.log('File Name:', collection.fileName);
-        // });
-      } catch (error) {
-        console.error('Collection Load Error: ', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCollections();
+    // 컬렉션 데이터를 비동기 Thunk를 통해 로드
+    dispatch(loadCollections(2)); // 예시로 userId 2를 전달
   }, [dispatch]);
 
   // 필터링된 컬렉션 목록
@@ -70,7 +58,6 @@ const CollectionSelect: React.FC = () => {
   );
 
   if (loading) {
-    //로딩 상태 표시
     return (
       <LoadingContainer>
         <ActivityIndicator size="large" color="#E52C32" />
@@ -162,22 +149,19 @@ const CollectionSelect: React.FC = () => {
 
 // 빈 상태 표시 컴포넌트
 const EmptyState: React.FC = () => (
-  <EmptyStateContainer>
+  <EmptyStateWrapper>
     <EmptyStateImage
       source={require('src/assets/images/ExhibitPage/empty_collection.png')}
     />
     <EmptyStateText>컬렉션이 텅 비어 있어요!</EmptyStateText>
-    <EmptyStateSubText>
+    <EmptyStateSubtext>
       전시를 만들기 위해서는 컬렉터님의{`\n`}컬렉션이 필요해요!
-    </EmptyStateSubText>
-    <AddCollectionButton>
+    </EmptyStateSubtext>
+    <ActionButton>
       <Icon name="add-outline" size={22} color="#fff" />
-      <AddCollectionButtonText>
-        {' '}
-        {` `}컬렉션 추가하러 가기
-      </AddCollectionButtonText>
-    </AddCollectionButton>
-  </EmptyStateContainer>
+      <ActionButtonText> {` `}컬렉션 추가하러 가기</ActionButtonText>
+    </ActionButton>
+  </EmptyStateWrapper>
 );
 
 const LoadingContainer = styled.View`
@@ -223,7 +207,7 @@ const CollectionName = styled(Subtitle1)`
   margin-bottom: ${(props) => props.theme.margin.xs};
 `;
 
-const EmptyStateContainer = styled.View`
+const EmptyStateWrapper = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -232,36 +216,28 @@ const EmptyStateContainer = styled.View`
 const EmptyStateImage = styled.Image`
   width: 155px;
   height: 180px;
-  margin-bottom: 30px;
+  margin-bottom: ${({ theme }) => theme.spacing.s8};
 `;
 
-const EmptyStateText = styled.Text`
-  font-family: 'Bold';
-  font-size: 20px;
-  color: #120000;
-  margin-bottom: 4px;
+const EmptyStateText = styled(H6)`
+  margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
-const EmptyStateSubText = styled.Text`
+const EmptyStateSubtext = styled(Caption)`
   text-align: center;
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #120000;
-  margin-bottom: 20px;
+  margin-bottom: ${({ theme }) => theme.spacing.s4};
 `;
 
-const AddCollectionButton = styled.TouchableOpacity`
+const ActionButton = styled.TouchableOpacity`
   flex-direction: row;
-  background-color: #120000;
-  padding: 10px 20px;
-  border-radius: 20px;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.redBlack};
+  padding: ${({ theme }) => `${theme.padding.s} ${theme.padding.m}`};
+  border-radius: ${({ theme }) => theme.radius.l};
 `;
 
-const AddCollectionButtonText = styled.Text`
-  font-family: 'Bold';
-  font-size: 14px;
-  color: #fff;
-  letter-spacing: 0.5px;
+const ActionButtonText = styled(Body1)`
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 export default CollectionSelect;
