@@ -16,7 +16,7 @@ export const fetchCollectionsByUser = async (userId: number) => {
 };
 
 //POST
-export const fetchArtworksByCollectionIds = async (collectionIds: number) => {
+export const fetchArtworksByCollectionIds = async (collectionIds: number[]) => {
   try {
     const response = await axiosInstance.post('/collection/all', {
       collectionIds,
