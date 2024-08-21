@@ -7,12 +7,21 @@ import {
   NavigationProp,
 } from '@react-navigation/native';
 import styled from 'styled-components/native';
-import LinearGradient from 'react-native-linear-gradient';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { extractProperties } from '../../api/cloudVisionApi';
 import { getAIThemesTitle } from '../../api/chatgptApi';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from 'src/store';
+import {
+  setAILabel,
+  setAIThemes,
+  setAIThemeReason,
+  setAITitle,
+  setAITitleReason,
+} from 'src/slices/aiRecommendSlice';
+import GradientBackground from 'src/styles/GradientBackground';
+import { Caption, H6 } from 'src/styles/typography';
 
 type AIRecommendLoadingRouteProp = RouteProp<
   RootStackParamList,
@@ -26,17 +35,10 @@ type AIRecommendLoadingNavigationProp = NavigationProp<
 const AIRecommendLoading: React.FC = () => {
   const navigation = useNavigation<AIRecommendLoadingNavigationProp>();
   const route = useRoute<AIRecommendLoadingRouteProp>();
-  const source = route.params?.source || 'default'; // 기본 값 설정
-  const {
-    selectedArtworks,
-    ailabel,
-    setAILabel,
-    setAIThemes,
-    aiThemeReason,
-    setAIThemeReason,
-    setAITitle,
-    setAITitleReason,
-  } = useGlobalState();
+  const source = route.params?.source || 'default';
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
 
   useEffect(() => {
     const fetchAIRecommendations = async () => {
@@ -44,32 +46,25 @@ const AIRecommendLoading: React.FC = () => {
         // 1단계: Artworks에서 properties 추출
         const artIds = selectedArtworks.map((artwork) => artwork.artId);
         const extractedProperties = await extractProperties(artIds, 'LABEL');
-        console.log('로딩 화면 Extracted Properties:', extractedProperties);
-        setAILabel(extractedProperties);
+        dispatch(setAILabel(extractedProperties));
 
-        // 2-1단계: 추출된 properties로 테마 추출
-        const { result: aiThemes, reason: aiThemeReason } =
-          await getAIThemesTitle('THEME', extractedProperties);
-        setAIThemes(aiThemes);
-        setAIThemeReason(aiThemeReason);
-
-        console.log('로딩 화면 Updated AILabel:', ailabel);
-        console.log('로딩 화면 AI Themes:', aiThemes);
-        console.log('로딩 화면 AI Reason:', aiThemeReason);
-
-        // 2-2단계: 추출된 properties로 전시명 추출
-        const { result: aiTitle, reason: aiTitleReason } =
-          await getAIThemesTitle('TITLE', extractedProperties);
-        setAITitle(aiTitle);
-        setAITitleReason(aiTitleReason);
-
-        console.log('로딩 화면 AI Title:', aiTitle);
-        console.log('로딩 화면 AI Title Reason:', aiTitleReason);
-
-        // 페이지 이동
+        // ThemeSetting일 때 THEME API 호출
         if (source === 'ThemeSetting') {
+          const { result: aiThemes, reason: aiThemeReason } =
+            await getAIThemesTitle('THEME', extractedProperties);
+          dispatch(setAIThemes(aiThemes));
+          dispatch(setAIThemeReason(aiThemeReason));
+
           navigation.navigate('AIRecommendTheme', { source });
-        } else if (source === 'DescriptionSetting') {
+        }
+
+        // DescriptionSetting일 때 TITLE API 호출
+        if (source === 'DescriptionSetting') {
+          const { result: aiTitle, reason: aiTitleReason } =
+            await getAIThemesTitle('TITLE', extractedProperties);
+          dispatch(setAITitle(aiTitle));
+          dispatch(setAITitleReason(aiTitleReason));
+
           navigation.navigate('AIRecommendDescription', { source });
         }
       } catch (error) {
@@ -125,65 +120,37 @@ const AIRecommendLoading: React.FC = () => {
 
   return (
     <Container>
-      <GradientBackground>
-        <LoadingImage source={require('src/assets/loading.png')} />
-        <LoadingText>{getLoadingText()}</LoadingText>
-      </GradientBackground>
+      <GradientBackground />
+      <LoadingImage source={require('src/assets/loading.png')} />
+      <LoadingText>{getLoadingText()}</LoadingText>
     </Container>
   );
 };
 
-interface GradientBackgroundProps {
-  colors?: string[];
-  start?: { x: number; y: number };
-  end?: { x: number; y: number };
-}
-
-const GradientBackground = styled(
-  LinearGradient,
-).attrs<GradientBackgroundProps>((props) => ({
-  colors: props.colors || ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
-  start: props.start || { x: 0.5, y: 0.7 },
-  end: props.end || { x: 0.5, y: 1 },
-}))<GradientBackgroundProps>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 16px;
-  justify-content: center;
-  align-items: center;
-`;
-
 const Container = styled.View`
   flex: 1;
-  background-color: #fff;
-  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const LoadingImage = styled.Image`
-  width: 155px;
-  height: 155px;
+  width: 190px;
+  height: 190px;
 `;
 
 const LoadingText = styled.View`
-  margin-top: 28px;
+  margin-top: ${({ theme }) => theme.margin.xl};
 `;
 
-const MainText = styled.Text`
-  font-family: 'Bold';
-  font-size: 20px;
+const MainText = styled(H6)`
   text-align: center;
-  color: #120000;
 `;
 
-const SubText = styled.Text`
-  margin-top: 10px;
-  font-family: 'Regular';
-  font-size: 14px;
+const SubText = styled(Caption)`
+  margin-top: ${({ theme }) => theme.margin.s};
   text-align: center;
-  color: #413333;
+  color: ${({ theme }) => theme.colors.grey_8};
 `;
 
 export default AIRecommendLoading;

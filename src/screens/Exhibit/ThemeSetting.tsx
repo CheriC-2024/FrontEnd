@@ -1,271 +1,148 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
-import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
+import GradientBackground from 'src/styles/GradientBackground';
+import TitleSubtitle from 'src/components/TitleSubtitle';
+import { Subtitle1, Subtitle2 } from 'src/styles/typography';
+import ToastMessage from 'src/components/ToastMessage';
+import { theme } from 'src/styles/theme';
+import TagButton from 'src/components/TagButton';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from 'src/store';
+import { addTheme, removeTheme } from 'src/slices/themeSlice';
 
 const ThemeSetting: React.FC<{}> = ({}) => {
-  const { selectedThemes, setSelectedThemes, aiThemes } = useGlobalState();
-  const [themes, setThemes] = useState<string[]>(selectedThemes || []);
+  const dispatch = useDispatch<AppDispatch>();
+  const { selectedThemes, selectedAiThemes } = useSelector(
+    (state: RootState) => state.theme,
+  );
   const [inputText, setInputText] = useState('');
   const { step, setStep } = useProgressBar();
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
-    setStep(2); // Set progress bar to step 3 (index 2)
+    setStep(2);
   }, [step]);
 
-  useEffect(() => {
-    setThemes(selectedThemes);
-  }, [selectedThemes]);
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 3000);
+  };
 
   const handleAddTheme = () => {
-    if (
-      inputText.trim() &&
-      themes.length < 3 &&
-      !themes.includes(inputText.trim())
-    ) {
-      const newThemes = [...themes, inputText.trim()];
-      setThemes(newThemes);
-      setSelectedThemes(newThemes); //ExhibitScreen에 상태 보내기
+    if (selectedThemes.includes(inputText.trim())) {
+      showToast('이미 등록된 테마입니다');
+    } else if (selectedThemes.length >= 3) {
+      showToast('테마는 최대 3개까지 추가할 수 있습니다');
+    } else {
+      dispatch(addTheme({ name: inputText.trim(), isAI: false }));
       setInputText('');
     }
   };
 
   const handleRemoveTheme = (theme: string) => {
-    const updatedThemes = themes.filter((t) => t !== theme);
-    setThemes(updatedThemes);
-    setSelectedThemes(updatedThemes);
+    dispatch(removeTheme(theme));
   };
 
   return (
     <Container>
-      <GradientBackground>
-        <ProgressBarComponent totalSteps={7} />
-        <TitleContainer>
-          <TitleIcon
-            source={require('src/assets/images/Character/character_smile.png')}
+      <GradientBackground />
+      <ProgressBarComponent totalSteps={7} />
+      <TitleSubtitle
+        title="전시의 테마를 알려주세요"
+        subtitle="어떤 전시인지 테마로 설명해주세요"
+        imageSource={require('src/assets/images/Character/character_smile.png')}
+      />
+      <AIButtonContainer>
+        <AIRecommendBtn source="ThemeSetting" />
+      </AIButtonContainer>
+      <ThemeInputContainer>
+        <Hash>#</Hash>
+        <ThemeInput
+          placeholder="테마를 추가해주세요 (최대 3개)"
+          placeholderTextColor="#B0ABAB"
+          value={inputText}
+          onChangeText={setInputText}
+          onSubmitEditing={handleAddTheme}
+          returnKeyType="done"
+          autoFocus={true}
+          showSoftInputOnFocus={true}
+        />
+      </ThemeInputContainer>
+      <SelectedThemesHeader>
+        <Subtitle2>설정한 테마</Subtitle2>
+        <Subtitle2>
+          {selectedThemes.length}{' '}
+          <Text style={{ color: theme.colors.grey_6 }}>/ 3</Text>
+        </Subtitle2>
+      </SelectedThemesHeader>
+      <SelectedThemes>
+        {selectedThemes.map((theme, index) => (
+          <TagButton
+            key={index}
+            text={theme}
+            onRemove={() => dispatch(removeTheme(theme))}
+            backgroundColor={
+              selectedAiThemes.includes(theme) ? '#e52c32' : '#413333'
+            }
+            textColor="#fff"
           />
-          <TitleText>
-            <Title>전시의 테마를 알려주세요</Title>
-            <Subtitle>어떤 전시인지 테마로 설명해주세요</Subtitle>
-          </TitleText>
-        </TitleContainer>
-        <AIButtonContainer>
-          <AIRecommendBtn source="ThemeSetting" />
-        </AIButtonContainer>
-        <InputContainer>
-          <ThemeInputContainer>
-            <Hash>#</Hash>
-            <ThemeInput
-              placeholder="테마를 추가해주세요 (최대 3개)"
-              placeholderTextColor="#B0ABAB"
-              value={inputText}
-              onChangeText={setInputText}
-            />
-            <AddButton
-              onPress={handleAddTheme}
-              disabled={
-                !inputText.trim() ||
-                themes.length >= 3 ||
-                themes.includes(inputText.trim())
-              }
-            >
-              <AddButtonText
-                disabled={
-                  !inputText.trim() ||
-                  themes.length >= 3 ||
-                  themes.includes(inputText.trim())
-                }
-              >
-                추가
-              </AddButtonText>
-            </AddButton>
-          </ThemeInputContainer>
-        </InputContainer>
-        <SelectedThemesHeader>
-          <SelectedThemesTitle>설정한 테마</SelectedThemesTitle>
-          <ThemeCount>
-            <RedBlack>{themes.length}</RedBlack> / 3
-          </ThemeCount>
-        </SelectedThemesHeader>
-        <SelectedThemes>
-          {themes.map((theme, index) => (
-            <ThemeTag key={index} isAITheme={aiThemes.includes(theme)}>
-              <ThemeTagText># {theme}</ThemeTagText>
-              <RemoveButton onPress={() => handleRemoveTheme(theme)}>
-                <Icon name="close-outline" size={16} color="#fff" />
-              </RemoveButton>
-            </ThemeTag>
-          ))}
-        </SelectedThemes>
-      </GradientBackground>
+        ))}
+      </SelectedThemes>
+      <ToastMessage message={toastMessage} visible={toastVisible} />
     </Container>
   );
 };
 
-interface GradientBackgroundProps {
-  colors?: string[];
-  start?: { x: number; y: number };
-  end?: { x: number; y: number };
-}
-
-const GradientBackground = styled(
-  LinearGradient,
-).attrs<GradientBackgroundProps>((props) => ({
-  colors: props.colors || ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
-  start: props.start || { x: 0.5, y: 0.7 },
-  end: props.end || { x: 0.5, y: 1 },
-}))<GradientBackgroundProps>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 16px;
-`;
-
 const Container = styled.View`
   flex: 1;
-  background-color: #fff;
-  position: relative;
-`;
-
-const TitleContainer = styled.View`
-  flex-direction: row;
-  align-items: flex-end;
-  margin-bottom: 20px;
-`;
-
-const TitleIcon = styled.Image`
-  width: 45px;
-  height: 80px;
-  margin-right: 10px;
-`;
-
-const TitleText = styled.View`
-  flex-direction: column;
-`;
-
-const Title = styled.Text`
-  font-family: 'Bold';
-  font-size: 18px;
-  color: #120000;
-`;
-
-const Subtitle = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
+  padding: 0 16px;
 `;
 
 const AIButtonContainer = styled.View`
   flex-direction: row;
   justify-content: flex-end;
-  margin-bottom: 8px;
+  margin-top: ${({ theme }) => theme.spacing.s9};
+  margin-bottom: ${({ theme }) => theme.margin.xs};
 `;
 
-const InputContainer = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 94px;
-`;
-
-const Hash = styled.Text`
-  margin-left: 15px;
-  padding-right: 4px;
-  font-family: 'Regular';
-  font-size: 16px;
-  color: #120000;
+const Hash = styled(Subtitle1)`
+  margin-left: ${({ theme }) => theme.margin.m};
+  padding-right: ${({ theme }) => theme.padding.s};
 `;
 
 const ThemeInputContainer = styled.View`
-  flex: 1;
   flex-direction: row;
   align-items: center;
-  border-radius: 20px;
+  margin-bottom: ${({ theme }) => theme.margin.xxl};
+  border-radius: ${({ theme }) => theme.radius.m};
   background-color: #f7f5f5;
 `;
 
 const ThemeInput = styled.TextInput`
   flex: 1;
-  padding: 8px;
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const AddButton = styled.TouchableOpacity<{ disabled: boolean }>`
-  margin-right: 2px;
-  padding: 10px 12px;
-  border-radius: 50px;
-  background-color: ${({ disabled }) => (disabled ? '#B0ABAB' : '#120000')};
-`;
-
-const AddButtonText = styled.Text<{ disabled: boolean }>`
-  color: #fff;
-  font-size: 14px;
-  font-family: 'Bold';
+  padding: ${({ theme }) => theme.padding.s};
+  font-family: ${({ theme }) => theme.fonts.regular};
+  font-size: ${({ theme }) => theme.fontSizes.button};
+  color: ${({ theme }) => theme.colors.redBlack};
+  letter-spacing: 1px;
 `;
 
 const SelectedThemesHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-`;
-
-const SelectedThemesTitle = styled.Text`
-  font-family: 'Bold';
-  font-size: 14px;
-  letter-spacing: 0.5px;
-`;
-
-const ThemeCount = styled.Text`
-  font-family: 'Bold';
-  font-size: 14px;
-  color: #b0abab;
-`;
-
-const RedBlack = styled.Text`
-  color: #120000;
+  padding-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const SelectedThemes = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
-`;
-
-const ThemeTag = styled.View<{ isAITheme: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  background-color: ${({ isAITheme }) => (isAITheme ? '#e52c32' : '#413333')};
-  padding: 4px 8px;
-  border-radius: 30px;
-  margin-right: 8px;
-  margin-bottom: 8px;
-`;
-
-const ThemeTagText = styled.Text`
-  margin-right: 3px;
-  font-family: 'Regular';
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  color: #fff;
-`;
-
-const RemoveButton = styled.TouchableOpacity`
-  padding: 0px;
-`;
-
-const RemoveButtonText = styled.Text`
-  font-family: 'Regular';
-  font-size: 14px;
-  color: #fff;
 `;
 
 export default ThemeSetting;
