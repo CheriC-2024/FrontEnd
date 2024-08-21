@@ -24,10 +24,7 @@ import { Caption, Subtitle2 } from 'src/styles/typography';
 import { theme } from 'src/styles/theme';
 
 interface ArtworkSelectProps {
-  onSelectionChange: (
-    selectedArtworks: Artwork[],
-    totalCherries: number,
-  ) => void;
+  onSelectionChange: (totalCherries: number) => void;
 }
 
 const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
@@ -61,7 +58,7 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
       (sum, artwork) => sum + (artwork.cherryNum || 0),
       0,
     );
-    onSelectionChange(selectedArtworks, totalCherries);
+    onSelectionChange(totalCherries);
   }, [selectedArtworks, onSelectionChange]);
 
   const handleToggleAllCollections = useCallback(() => {
@@ -109,12 +106,12 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
           <ArtworkCollection key={index}>
             <CollectionTitle
               collectionName={collection.collectionName}
-              isExpanded={expandedCollections[collection.collectionName]}
+              isExpanded={expandedCollections[collection.name]}
               onToggle={() =>
-                dispatch(toggleCollectionExpansion(collection.collectionName))
+                dispatch(toggleCollectionExpansion(collection.name))
               }
             />
-            {expandedCollections[collection.collectionName] && (
+            {expandedCollections[collection.name] && (
               <ArtworkGrid>
                 {collection.artList.map((artwork) => {
                   const selected = selectedArtworks.some(
@@ -234,15 +231,23 @@ interface ToggleButtonProps {
   onPress: () => void;
 }
 
-const ToggleButton: React.FC<ToggleButtonProps> = ({ onPress }) => (
-  <TouchableOpacity style={{ paddingLeft: 8 }} onPress={onPress}>
-    <Caption style={{ color: theme.colors.grey_6 }}>
-      {Object.values(expandAllCollections).every((value) => !value)
-        ? '컬렉션 모두 펼치기'
-        : '컬렉션 모두 접기'}
-    </Caption>
-  </TouchableOpacity>
-);
+const ToggleButton: React.FC<ToggleButtonProps> = ({ onPress }) => {
+  const expandAllCollections = useSelector(
+    (state: RootState) => state.artwork.expandedCollections,
+  );
+
+  const isAllCollapsed = Object.values(expandAllCollections).every(
+    (value) => !value,
+  );
+
+  return (
+    <TouchableOpacity style={{ paddingLeft: 8 }} onPress={onPress}>
+      <Caption style={{ color: theme.colors.grey_6 }}>
+        {isAllCollapsed ? '컬렉션 모두 펼치기' : '컬렉션 모두 접기'}
+      </Caption>
+    </TouchableOpacity>
+  );
+};
 
 const Container = styled.View`
   flex: 1;
