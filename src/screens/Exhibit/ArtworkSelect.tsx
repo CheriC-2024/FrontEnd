@@ -23,11 +23,7 @@ import TitleSubtitle from 'src/components/TitleSubtitle';
 import { Caption, Subtitle2 } from 'src/styles/typography';
 import { theme } from 'src/styles/theme';
 
-interface ArtworkSelectProps {
-  onSelectionChange: (totalCherries: number) => void;
-}
-
-const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
+const ArtworkSelect: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { collections, selectedArtworks, expandedCollections, filterText } =
     useSelector((state: RootState) => state.artwork);
@@ -52,14 +48,6 @@ const ArtworkSelect: React.FC<ArtworkSelectProps> = ({ onSelectionChange }) => {
       fetchArtworks();
     }
   }, [selectedCollections, dispatch]);
-
-  useEffect(() => {
-    const totalCherries = selectedArtworks.reduce(
-      (sum, artwork) => sum + (artwork.cherryNum || 0),
-      0,
-    );
-    onSelectionChange(totalCherries);
-  }, [selectedArtworks, onSelectionChange]);
 
   const handleToggleAllCollections = useCallback(() => {
     const allCollapsed = Object.values(expandedCollections).every(

@@ -43,8 +43,8 @@ const ExhibitScreen: React.FC = () => {
   const selectedCollections = useSelector(
     (state: RootState) => state.collection.selectedCollections,
   );
-  const selectedArtworks = useSelector(
-    (state: RootState) => state.artwork.selectedArtworks,
+  const { selectedArtworks, totalCherries } = useSelector(
+    (state: RootState) => state.artwork,
   );
   const selectedThemes = useSelector(
     (state: RootState) => state.theme.selectedThemes,
@@ -57,9 +57,8 @@ const ExhibitScreen: React.FC = () => {
   const [isDescriptionValid, setIsDescriptionValid] = useState(false); // Separate state for other descriptions
   const [modalVisible, setModalVisible] = useState(false);
   const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
-  const [totalRequiredCherries, setTotalRequiredCherries] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-  console.log('현재 체리' + totalRequiredCherries);
+  console.log('현재 체리' + totalCherries);
 
   useEffect(() => {
     if (route.params?.step !== undefined) {
@@ -173,14 +172,9 @@ const ExhibitScreen: React.FC = () => {
   };
 
   const goToNext = () => {
-    if (step === 1) {
-      if (totalRequiredCherries > userCherries && totalRequiredCherries > 0) {
-        setIsArtworkModalVisible(true);
-        return;
-      } else if (totalRequiredCherries > 0) {
-        setIsArtworkModalVisible(true);
-        return;
-      }
+    if (step === 1 && totalCherries > 0) {
+      setIsArtworkModalVisible(true);
+      return;
     }
 
     if (step < 6) {
@@ -215,13 +209,7 @@ const ExhibitScreen: React.FC = () => {
       case 0:
         return <CollectionSelect />;
       case 1:
-        return (
-          <ArtworkSelect
-            onSelectionChange={(totalCherries) => {
-              setTotalRequiredCherries(totalCherries);
-            }}
-          />
-        );
+        return <ArtworkSelect />;
       case 2:
         return <ThemeSetting />;
       case 3:
@@ -268,10 +256,10 @@ const ExhibitScreen: React.FC = () => {
         confirmButtonText="확인했습니다"
         cancelButtonText={'이전으로'}
       />
-      {isArtworkModalVisible && totalRequiredCherries > 0 && (
+      {isArtworkModalVisible && totalCherries > 0 && (
         <ArtworkSelectModal
           visible={isArtworkModalVisible}
-          requiredCherries={totalRequiredCherries}
+          requiredCherries={totalCherries}
           cherryCount={selectedArtworks.length}
           userCherries={userCherries}
           onClose={() => setIsArtworkModalVisible(false)}

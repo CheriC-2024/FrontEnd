@@ -22,6 +22,7 @@ interface ArtworkState {
   selectedArtworks: Artwork[];
   expandedCollections: { [key: string]: boolean };
   filterText: string;
+  totalCherries: number;
 }
 
 const initialState: ArtworkState = {
@@ -29,6 +30,7 @@ const initialState: ArtworkState = {
   selectedArtworks: [],
   expandedCollections: {}, // 초기화
   filterText: '',
+  totalCherries: 0,
 };
 
 const artworkSlice = createSlice({
@@ -36,6 +38,7 @@ const artworkSlice = createSlice({
   initialState,
   reducers: {
     setCollections: (state, action: PayloadAction<Collection[]>) => {
+      // ##FIX## 수정
       state.collections = action.payload;
       // 컬렉션이 추가될 때 expandedCollections를 초기화
       state.expandedCollections = action.payload.reduce(
@@ -45,6 +48,10 @@ const artworkSlice = createSlice({
         },
         {} as { [key: string]: boolean }, // 타입 지정
       );
+    },
+    resetSelectedArtworks: (state) => {
+      // 선택된 작품이 초기화될 때 totalCherries도 초기화
+      state.totalCherries = 0;
     },
     toggleArtworkSelection: (state, action: PayloadAction<Artwork>) => {
       const artwork = action.payload;
@@ -58,6 +65,11 @@ const artworkSlice = createSlice({
       } else {
         state.selectedArtworks.push(artwork);
       }
+      // selectedArtworks 변경에 따라 totalCherries 값도 업데이트
+      state.totalCherries = state.selectedArtworks.reduce(
+        (sum, item) => sum + (item.cherryNum || 0),
+        0,
+      );
     },
     toggleCollectionExpansion: (state, action: PayloadAction<string>) => {
       const name = action.payload;
@@ -81,6 +93,7 @@ const artworkSlice = createSlice({
 
 export const {
   setCollections,
+  resetSelectedArtworks,
   toggleArtworkSelection,
   toggleCollectionExpansion,
   setFilterText,
