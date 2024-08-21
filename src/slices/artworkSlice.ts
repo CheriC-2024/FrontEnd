@@ -9,7 +9,11 @@ export interface Artwork {
 }
 
 interface Collection {
-  collectionName: string;
+  id: number;
+  name: string;
+  description: string;
+  filePath: string;
+  fileName: string;
   artList: Artwork[];
 }
 
@@ -36,7 +40,7 @@ const artworkSlice = createSlice({
       // 컬렉션이 추가될 때 expandedCollections를 초기화
       state.expandedCollections = action.payload.reduce(
         (acc, collection) => {
-          acc[collection.collectionName] = true;
+          acc[collection.name] = true;
           return acc;
         },
         {} as { [key: string]: boolean }, // 타입 지정
@@ -56,9 +60,8 @@ const artworkSlice = createSlice({
       }
     },
     toggleCollectionExpansion: (state, action: PayloadAction<string>) => {
-      const collectionName = action.payload;
-      state.expandedCollections[collectionName] =
-        !state.expandedCollections[collectionName];
+      const name = action.payload;
+      state.expandedCollections[name] = !state.expandedCollections[name];
     },
     setFilterText: (state, action: PayloadAction<string>) => {
       state.filterText = action.payload;
