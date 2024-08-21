@@ -43,14 +43,14 @@ const ExhibitScreen: React.FC = () => {
   const selectedCollections = useSelector(
     (state: RootState) => state.collection.selectedCollections,
   );
+  const selectedArtworks = useSelector(
+    (state: RootState) => state.artwork.selectedArtworks,
+  );
+  const selectedThemes = useSelector(
+    (state: RootState) => state.theme.selectedThemes,
+  );
   // 로컬 상태 관리
-  const {
-    userCherries,
-    selectedArtworks,
-    setSelectedArtworks,
-    artworkInfoInput,
-    selectedThemes,
-  } = useGlobalState();
+  const { userCherries, artworkInfoInput } = useGlobalState();
   const [step, setLocalStep] = useState(route.params?.step || 0);
   const [isArtworkDescriptionValid, setIsArtworkDescriptionValid] =
     useState(false);
@@ -59,6 +59,7 @@ const ExhibitScreen: React.FC = () => {
   const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
   const [totalRequiredCherries, setTotalRequiredCherries] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  console.log('현재 체리' + totalRequiredCherries);
 
   useEffect(() => {
     if (route.params?.step !== undefined) {
@@ -216,8 +217,7 @@ const ExhibitScreen: React.FC = () => {
       case 1:
         return (
           <ArtworkSelect
-            onSelectionChange={(artworks, totalCherries) => {
-              setSelectedArtworks(artworks);
+            onSelectionChange={(totalCherries) => {
               setTotalRequiredCherries(totalCherries);
             }}
           />
