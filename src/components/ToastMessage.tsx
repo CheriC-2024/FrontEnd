@@ -5,7 +5,7 @@ import { Body2 } from '../styles/typography';
 
 const ToastContainer = styled(Animated.View)<{ style: ViewStyle }>`
   position: absolute;
-  bottom: 50px;
+  bottom: 80px;
   left: 0;
   right: 0;
   background-color: ${(props) => props.theme.colors.redBlack_alpha80};

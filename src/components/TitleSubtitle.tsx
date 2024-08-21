@@ -5,7 +5,7 @@ import { H6, Caption } from '../styles/typography';
 const Container = styled.View`
   flex-direction: row;
   align-items: flex-end;
-  margin: ${({ theme }) => theme.spacing.s4};
+  margin: ${({ theme }) => theme.spacing.s4} 0;
 `;
 
 const TextContainer = styled.View`
