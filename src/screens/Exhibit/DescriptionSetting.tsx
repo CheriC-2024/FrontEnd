@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import styled from 'styled-components/native';
-import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Dropdown } from 'react-native-element-dropdown';
 import ProgressBarComponent from '../../components/ProgressBar';
@@ -16,6 +15,8 @@ import AIRecommendBtn from '../../components/AIRecommendBtn';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
+import GradientBackground from 'src/styles/GradientBackground';
+import { Container } from 'src/styles/layout';
 
 interface DescriptionSettingProps {
   onFieldsFilled: (filled: boolean) => void;
@@ -53,149 +54,119 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
 
   return (
     <Container>
-      <GradientBackground>
-        <ProgressBarComponent totalSteps={7} />
-        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-          <TitleContainer>
-            <TitleIcon
-              source={require('src/assets/images/Character/character_happy.png')}
-            />
-            <TitleText>
-              <Title>전시 이름과 설명을 작성해주세요</Title>
-              <Subtitle>거의 다 왔어요! 조금만 더 힘내요</Subtitle>
-            </TitleText>
-          </TitleContainer>
-          <InputContainer>
-            <AIButtonContainer>
-              <InputLabel>
-                전시 이름 <Red>*</Red>
-              </InputLabel>
-              <AIRecommendBtn source="DescriptionSetting" />
-            </AIButtonContainer>
-            <Input
-              placeholder="ex) 항해: 김아무개전"
-              placeholderTextColor="#b0abab"
-              maxLength={30}
-              value={exhibitTitle}
-              onChangeText={setExhibitTitle}
-              returnKeyType="done"
-              onSubmitEditing={() => {}}
-            />
-            <CharacterCount>
-              <Black>{exhibitTitle.length}</Black> / 30
-            </CharacterCount>
-          </InputContainer>
-          <View style={{ zIndex: 1000 }}>
-            <InputContainer>
-              <InputLabel>
-                폰트 설정 <Red>*</Red>
-              </InputLabel>
-              <DropDownContainer>
-                <Dropdown
-                  data={fontData}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="폰트를 선택하세요"
-                  value={selectedFont}
-                  onChange={(item) => {
-                    setSelectedFont(item.value);
-                  }}
-                  style={{
-                    paddingVertical: 4,
-                    paddingHorizontal: 15,
-                    backgroundColor: '#f7f5f5',
-                    borderRadius: 20,
-                  }}
-                  placeholderStyle={{
-                    fontFamily: 'Regular',
-                    fontSize: 12,
-                    color: '#B0ABAB',
-                  }}
-                  selectedTextStyle={{
-                    fontFamily: 'Regular',
-                    fontSize: 12,
-                    color: '#120000',
-                  }}
-                  renderItem={(item) => (
-                    <View style={{ padding: 10 }}>
-                      <Text
-                        style={{
-                          marginBottom: 6,
-                          fontFamily: 'Regular',
-                          fontSize: 12,
-                          color: '#B0ABAB',
-                        }}
-                      >
-                        {item.label}
-                      </Text>
-                      <Text
-                        style={{ fontFamily: item.fontFamily, fontSize: 16 }}
-                      >
-                        {exhibitTitle}
-                      </Text>
-                    </View>
-                  )}
-                />
-              </DropDownContainer>
-            </InputContainer>
-          </View>
+      <GradientBackground />
+      <ProgressBarComponent totalSteps={7} />
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <TitleContainer>
+          <TitleIcon
+            source={require('src/assets/images/Character/character_happy.png')}
+          />
+          <TitleText>
+            <Title>전시 이름과 설명을 작성해주세요</Title>
+            <Subtitle>거의 다 왔어요! 조금만 더 힘내요</Subtitle>
+          </TitleText>
+        </TitleContainer>
+        <InputContainer>
+          <AIButtonContainer>
+            <InputLabel>
+              전시 이름 <Red>*</Red>
+            </InputLabel>
+            <AIRecommendBtn source="DescriptionSetting" />
+          </AIButtonContainer>
+          <Input
+            placeholder="ex) 항해: 김아무개전"
+            placeholderTextColor="#b0abab"
+            maxLength={30}
+            value={exhibitTitle}
+            onChangeText={setExhibitTitle}
+            returnKeyType="done"
+            onSubmitEditing={() => {}}
+          />
+          <CharacterCount>
+            <Black>{exhibitTitle.length}</Black> / 30
+          </CharacterCount>
+        </InputContainer>
+        <View style={{ zIndex: 1000 }}>
           <InputContainer>
             <InputLabel>
-              전시 설명 <Red>*</Red>
+              폰트 설정 <Red>*</Red>
             </InputLabel>
-            <Input
-              placeholder="컬렉터님만의 감상을 담아 전시를 소개해주세요"
-              placeholderTextColor="#b0abab"
-              multiline
-              maxLength={500}
-              value={exhibitDescription}
-              onChangeText={setExhibitDescription}
-              style={{ height: 150 }}
-              returnKeyType="done"
-              blurOnSubmit={true}
-            />
-            <CharacterCount>
-              <Black>{exhibitDescription.length}</Black> / 500
-            </CharacterCount>
+            <DropDownContainer>
+              <Dropdown
+                data={fontData}
+                labelField="label"
+                valueField="value"
+                placeholder="폰트를 선택하세요"
+                value={selectedFont}
+                onChange={(item) => {
+                  setSelectedFont(item.value);
+                }}
+                style={{
+                  paddingVertical: 4,
+                  paddingHorizontal: 15,
+                  backgroundColor: '#f7f5f5',
+                  borderRadius: 20,
+                }}
+                placeholderStyle={{
+                  fontFamily: 'Regular',
+                  fontSize: 12,
+                  color: '#B0ABAB',
+                }}
+                selectedTextStyle={{
+                  fontFamily: 'Regular',
+                  fontSize: 12,
+                  color: '#120000',
+                }}
+                renderItem={(item) => (
+                  <View style={{ padding: 10 }}>
+                    <Text
+                      style={{
+                        marginBottom: 6,
+                        fontFamily: 'Regular',
+                        fontSize: 12,
+                        color: '#B0ABAB',
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                    <Text style={{ fontFamily: item.fontFamily, fontSize: 16 }}>
+                      {exhibitTitle}
+                    </Text>
+                  </View>
+                )}
+              />
+            </DropDownContainer>
           </InputContainer>
-          <Button onPress={handleGoToArtworkList}>
-            <ButtonContent>
-              <ButtonText>전시로 올려진 작품 보러가기</ButtonText>
-              <ButtonIcon name="chevron-forward" size={16} color="#120000" />
-            </ButtonContent>
-          </Button>
-        </ScrollView>
-      </GradientBackground>
+        </View>
+        <InputContainer>
+          <InputLabel>
+            전시 설명 <Red>*</Red>
+          </InputLabel>
+          <Input
+            placeholder="컬렉터님만의 감상을 담아 전시를 소개해주세요"
+            placeholderTextColor="#b0abab"
+            multiline
+            maxLength={500}
+            value={exhibitDescription}
+            onChangeText={setExhibitDescription}
+            style={{ height: 150 }}
+            returnKeyType="done"
+            blurOnSubmit={true}
+          />
+          <CharacterCount>
+            <Black>{exhibitDescription.length}</Black> / 500
+          </CharacterCount>
+        </InputContainer>
+        <Button onPress={handleGoToArtworkList}>
+          <ButtonContent>
+            <ButtonText>전시로 올려진 작품 보러가기</ButtonText>
+            <ButtonIcon name="chevron-forward" size={16} color="#120000" />
+          </ButtonContent>
+        </Button>
+      </ScrollView>
     </Container>
   );
 };
-
-interface GradientBackgroundProps {
-  colors?: string[];
-  start?: { x: number; y: number };
-  end?: { x: number; y: number };
-}
-
-const GradientBackground = styled(
-  LinearGradient,
-).attrs<GradientBackgroundProps>((props) => ({
-  colors: props.colors || ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
-  start: props.start || { x: 0.5, y: 0.7 },
-  end: props.end || { x: 0.5, y: 1 },
-}))<GradientBackgroundProps>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 16px;
-`;
-
-const Container = styled.View`
-  flex: 1;
-  background-color: #fff;
-  position: relative;
-`;
 
 const TitleContainer = styled.View`
   flex-direction: row;

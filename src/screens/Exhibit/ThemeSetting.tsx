@@ -13,6 +13,7 @@ import TagButton from 'src/components/TagButton';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from 'src/store';
 import { addTheme, removeTheme } from 'src/slices/themeSlice';
+import { Container } from 'src/styles/layout';
 
 const ThemeSetting: React.FC<{}> = ({}) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -98,11 +99,6 @@ const ThemeSetting: React.FC<{}> = ({}) => {
     </Container>
   );
 };
-
-const Container = styled.View`
-  flex: 1;
-  padding: 0 16px;
-`;
 
 const AIButtonContainer = styled.View`
   flex-direction: row;

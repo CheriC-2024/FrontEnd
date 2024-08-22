@@ -22,6 +22,7 @@ import { imageAssets } from '../../assets/DB/imageAssets';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { Caption, Subtitle2 } from 'src/styles/typography';
 import { theme } from 'src/styles/theme';
+import { Container } from 'src/styles/layout';
 
 const ArtworkSelect: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -236,12 +237,6 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ onPress }) => {
     </TouchableOpacity>
   );
 };
-
-const Container = styled.View`
-  flex: 1;
-  padding: 0 16px;
-  background-color: #fff;
-`;
 
 const CherryCountText = styled.Text`
   font-family: 'Regular';
