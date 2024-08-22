@@ -1,12 +1,61 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { TextInput, View } from 'react-native';
+import { TextInput, View, ViewStyle } from 'react-native';
 import { Subtitle2, Caption } from '../styles/typography';
+import { theme } from 'src/styles/theme';
+interface InfoBlockProps {
+  label: string;
+  placeholder: string;
+  maxLength: number;
+  value: string;
+  required?: boolean;
+  style?: ViewStyle;
+  onChangeText?: (text: string) => void;
+}
+
+const InfoBlock: React.FC<InfoBlockProps> = ({
+  label,
+  placeholder,
+  maxLength,
+  value,
+  required = false,
+  style,
+  onChangeText = () => {},
+}) => {
+  return (
+    <View style={style}>
+      <Label>
+        {label}
+        {required && <RequiredAsterisk> *</RequiredAsterisk>}
+      </Label>
+      <InputWrapper>
+        <Input
+          multiline
+          numberOfLines={4}
+          maxLength={maxLength}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={theme.colors.grey_6}
+        />
+        <CharacterCount>
+          <CharacterCountText>{value.length}</CharacterCountText> / {maxLength}
+        </CharacterCount>
+      </InputWrapper>
+    </View>
+  );
+};
 
 const Label = styled(Subtitle2)`
   color: ${({ theme }) => theme.colors.redBlack};
   margin-bottom: ${({ theme }) => theme.spacing.s1};
   margin-left: ${({ theme }) => theme.spacing.s1};
+  flex-direction: row;
+`;
+
+const RequiredAsterisk = styled.Text`
+  color: ${({ theme }) => theme.colors.cherryRed_10};
+  padding-left: ${({ theme }) => theme.spacing.s1};
 `;
 
 const InputWrapper = styled.View`
@@ -35,39 +84,5 @@ const CharacterCount = styled(Caption)`
 const CharacterCountText = styled.Text`
   color: ${({ theme }) => theme.colors.redBlack};
 `;
-
-interface InfoBlockProps {
-  label: string;
-  placeholder: string;
-  maxLength: number;
-}
-
-const InfoBlock: React.FC<InfoBlockProps> = ({
-  label,
-  placeholder,
-  maxLength,
-}) => {
-  const [text, setText] = React.useState('');
-
-  return (
-    <>
-      <Label>{label}</Label>
-      <InputWrapper>
-        <Input
-          multiline
-          numberOfLines={4}
-          maxLength={maxLength}
-          value={text}
-          onChangeText={setText}
-          placeholder={placeholder}
-          placeholderTextColor={'#9E9E9E'}
-        />
-        <CharacterCount>
-          <CharacterCountText>{text.length}</CharacterCountText> / {maxLength}
-        </CharacterCount>
-      </InputWrapper>
-    </>
-  );
-};
 
 export default InfoBlock;
