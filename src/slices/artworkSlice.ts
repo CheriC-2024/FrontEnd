@@ -8,6 +8,12 @@ export interface Artwork {
   register: string;
 }
 
+interface ArtworkInfo {
+  artworkDescription: string;
+  artworkValue: string;
+  artworkAppreciation: string;
+}
+
 interface Collection {
   id: number;
   name: string;
@@ -23,14 +29,16 @@ interface ArtworkState {
   expandedCollections: { [key: string]: boolean };
   filterText: string;
   totalCherries: number;
+  artworkInfoInput: ArtworkInfo[];
 }
 
 const initialState: ArtworkState = {
   collections: [],
   selectedArtworks: [],
-  expandedCollections: {}, // 초기화
+  expandedCollections: {},
   filterText: '',
   totalCherries: 0,
+  artworkInfoInput: [],
 };
 
 const artworkSlice = createSlice({
@@ -38,34 +46,42 @@ const artworkSlice = createSlice({
   initialState,
   reducers: {
     setCollections: (state, action: PayloadAction<Collection[]>) => {
-      // ##FIX## 수정
       state.collections = action.payload;
-      // 컬렉션이 추가될 때 expandedCollections를 초기화
       state.expandedCollections = action.payload.reduce(
         (acc, collection) => {
           acc[collection.name] = true;
           return acc;
         },
-        {} as { [key: string]: boolean }, // 타입 지정
+        {} as { [key: string]: boolean },
       );
     },
     resetSelectedArtworks: (state) => {
-      // 선택된 작품이 초기화될 때 totalCherries도 초기화
       state.totalCherries = 0;
+      state.selectedArtworks = [];
+      state.artworkInfoInput = [];
     },
     toggleArtworkSelection: (state, action: PayloadAction<Artwork>) => {
       const artwork = action.payload;
       const isSelected = state.selectedArtworks.some(
         (item) => item.artId === artwork.artId,
       );
+
       if (isSelected) {
         state.selectedArtworks = state.selectedArtworks.filter(
           (item) => item.artId !== artwork.artId,
         );
+        state.artworkInfoInput = state.artworkInfoInput.filter(
+          (_, index) => state.selectedArtworks[index]?.artId !== artwork.artId,
+        );
       } else {
         state.selectedArtworks.push(artwork);
+        state.artworkInfoInput.push({
+          artworkDescription: '',
+          artworkValue: '',
+          artworkAppreciation: '',
+        });
       }
-      // selectedArtworks 변경에 따라 totalCherries 값도 업데이트
+
       state.totalCherries = state.selectedArtworks.reduce(
         (sum, item) => sum + (item.cherryNum || 0),
         0,
@@ -88,6 +104,15 @@ const artworkSlice = createSlice({
         (key) => (state.expandedCollections[key] = true),
       );
     },
+    updateArtworkInfoInput: (
+      state,
+      action: PayloadAction<{ index: number; field: string; value: string }>,
+    ) => {
+      const { index, field, value } = action.payload;
+      if (state.artworkInfoInput[index]) {
+        (state.artworkInfoInput[index] as any)[field] = value;
+      }
+    },
   },
 });
 
@@ -99,6 +124,7 @@ export const {
   setFilterText,
   collapseAllCollections,
   expandAllCollections,
+  updateArtworkInfoInput,
 } = artworkSlice.actions;
 
 export default artworkSlice.reducer;

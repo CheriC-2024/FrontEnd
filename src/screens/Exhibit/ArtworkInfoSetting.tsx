@@ -3,21 +3,28 @@ import styled from 'styled-components/native';
 import { ScrollView, TouchableOpacity, View, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import { imageAssets } from '../../assets/DB/imageAssets';
 import TitleSubtitle from 'src/components/TitleSubtitle';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { Container } from 'src/styles/layout';
 import { Caption, H6 } from 'src/styles/typography';
 import InfoBlock from 'src/components/InfoBlock';
 import { theme } from 'src/styles/theme';
 import { Btn, BtnText } from 'src/components/Button';
+import { Artwork, updateArtworkInfoInput } from 'src/slices/artworkSlice';
 
 interface ArtworkInfoSettingProps {
   onArtworkDescriptionChange: (filled: boolean) => void;
+}
+interface CircleSelectorProps {
+  selectedArtworks: Artwork[];
+  currentIndex: number;
+  onCirclePress: (index: number) => void;
+  isDescriptionFilled: (index: number) => boolean;
+  scrollViewRef: React.RefObject<ScrollView>;
 }
 
 const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
@@ -27,34 +34,35 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
   const scrollViewRef = useRef<ScrollView>(null);
   const contentScrollViewRef = useRef<ScrollView>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const dispatch = useDispatch();
 
-  const { artworkInfoInput, setArtworkInfoInput } = useGlobalState();
-  const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
+  const { artworkInfoInput, selectedArtworks } = useSelector(
+    (state: RootState) => state.artwork,
+  );
 
   useEffect(() => {
     const allDescriptionsFilled = artworkInfoInput.every(
       (input) => input.artworkDescription.trim().length > 0,
     );
-    console.log('Descriptions filled status:', allDescriptionsFilled);
     onArtworkDescriptionChange(allDescriptionsFilled);
   }, [artworkInfoInput, onArtworkDescriptionChange]);
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % artworkInfoInput.length;
+    const nextIndex = (currentIndex + 1) % selectedArtworks.length;
     setCurrentIndex(nextIndex);
-    scrollViewRef.current?.scrollTo({ x: nextIndex * 55, animated: true });
-    contentScrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    scrollToPosition(scrollViewRef, nextIndex * 60);
+    scrollToTop(contentScrollViewRef);
   };
 
-  const handleCirclePress = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const handleCirclePress = (index: number) => setCurrentIndex(index);
 
   const handleInputChange = (field: string, text: string) => {
-    setArtworkInfoInput((prevInputs) =>
-      prevInputs.map((input, index) =>
-        index === currentIndex ? { ...input, [field]: text } : input,
-      ),
+    dispatch(
+      updateArtworkInfoInput({
+        index: currentIndex,
+        field,
+        value: text,
+      }),
     );
   };
 
@@ -75,10 +83,6 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
     artworkAppreciation: '',
   };
 
-  const isDescriptionFilled = (index: number) => {
-    return artworkInfoInput[index]?.artworkDescription?.length > 0;
-  };
-
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} />
@@ -87,38 +91,24 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
         subtitle="모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요"
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />
-      <CircleScrollContainer>
-        <CircleScrollView ref={scrollViewRef}>
-          {selectedArtworks.map((artwork, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => handleCirclePress(index)}
-            >
-              <Circle isActive={currentIndex === index}>
-                {artwork.fileName && (
-                  <CircleImage source={imageAssets[artwork.fileName]} />
-                )}
-                {isDescriptionFilled(index) && <Overlay />}
-                {isDescriptionFilled(index) && (
-                  <OverlayImage
-                    source={require('../../assets/images/complete_face.png')}
-                  />
-                )}
-              </Circle>
-            </TouchableOpacity>
-          ))}
-        </CircleScrollView>
-      </CircleScrollContainer>
+      <CircleSelector
+        selectedArtworks={selectedArtworks}
+        currentIndex={currentIndex}
+        onCirclePress={handleCirclePress}
+        isDescriptionFilled={(index: number) =>
+          artworkInfoInput[index]?.artworkDescription?.length > 0
+        }
+        scrollViewRef={scrollViewRef}
+      />
       <ScrollView
         ref={contentScrollViewRef}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {currentIndex < selectedArtworks.length ? (
+        {selectedArtworks.length > 0 && (
           <ImagePreview
             source={imageAssets[selectedArtworks[currentIndex]?.fileName]}
           />
-        ) : (
-          <ImagePreviewPlaceholder />
         )}
         <ArtworkTitleContainer>
           <ArtworkTitleWrapper>
@@ -173,11 +163,46 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
   );
 };
 
-const CircleScrollContainer = styled(View)`
-  margin-bottom: ${({ theme }) => theme.spacing.s3};
-`;
+const CircleSelector: React.FC<CircleSelectorProps> = ({
+  selectedArtworks,
+  currentIndex,
+  onCirclePress,
+  isDescriptionFilled,
+  scrollViewRef,
+}) => (
+  <View style={{ marginBottom: parseInt(theme.spacing.s3) }}>
+    <CircleScrollView ref={scrollViewRef}>
+      {selectedArtworks.map((artwork, index) => (
+        <TouchableOpacity key={index} onPress={() => onCirclePress(index)}>
+          <Circle isActive={currentIndex === index}>
+            {artwork.fileName && (
+              <CircleImage source={imageAssets[artwork.fileName]} />
+            )}
+            {isDescriptionFilled(index) && <Overlay />}
+            {isDescriptionFilled(index) && (
+              <OverlayImage
+                source={require('../../assets/images/complete_face.png')}
+              />
+            )}
+          </Circle>
+        </TouchableOpacity>
+      ))}
+    </CircleScrollView>
+  </View>
+);
 
-const Circle = styled(View)<{ isActive: boolean }>`
+const scrollToPosition = (
+  ref: React.RefObject<ScrollView>,
+  xPosition: number,
+) => {
+  ref.current?.scrollTo({ x: xPosition, animated: true });
+};
+
+const scrollToTop = (ref: React.RefObject<ScrollView>) => {
+  ref.current?.scrollTo({ y: 0, animated: true });
+};
+
+const Circle = styled.View<{ isActive: boolean }>`
   align-items: center;
   justify-content: center;
   width: 50px;
@@ -191,13 +216,13 @@ const Circle = styled(View)<{ isActive: boolean }>`
   position: relative;
 `;
 
-const CircleImage = styled(Image)`
+const CircleImage = styled.Image`
   width: 100%;
   height: 100%;
   border-radius: 60px;
 `;
 
-const Overlay = styled(View)`
+const Overlay = styled.View`
   position: absolute;
   width: 100%;
   height: 100%;
@@ -205,54 +230,47 @@ const Overlay = styled(View)`
   border-radius: 60px;
 `;
 
-const OverlayImage = styled(Image)`
+const OverlayImage = styled.Image`
   position: absolute;
   width: 22px;
   height: 27px;
   border-radius: 60px;
 `;
 
-const StyledScrollView = styled(ScrollView)`
-  flex-direction: row;
-`;
-
 const CircleScrollView = React.forwardRef<
   ScrollView,
   { children: React.ReactNode }
 >((props, ref) => (
-  <StyledScrollView horizontal showsHorizontalScrollIndicator={false} ref={ref}>
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    ref={ref}
+    style={{ flexDirection: 'row' }}
+  >
     {props.children}
-  </StyledScrollView>
+  </ScrollView>
 ));
 
-const ImagePreview = styled(Image)`
+const ImagePreview = styled.Image`
   width: 100%;
   height: 190px;
   margin-bottom: ${({ theme }) => theme.margin.s};
   border-radius: ${({ theme }) => theme.radius.s};
 `;
 
-const ImagePreviewPlaceholder = styled(View)`
-  width: 100%;
-  height: 190px;
-  margin-bottom: ${({ theme }) => theme.margin.s};
-  border-radius: ${({ theme }) => theme.radius.s};
-  background-color: #e0e0e0;
-`;
-
-const ArtworkTitleContainer = styled(View)`
+const ArtworkTitleContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding-bottom: ${({ theme }) => theme.padding.l};
 `;
 
-const ArtworkTitleWrapper = styled(View)`
+const ArtworkTitleWrapper = styled.View`
   flex-direction: row;
   align-items: center;
 `;
 
-const CollectorsOnlyIcon = styled(Image)`
+const CollectorsOnlyIcon = styled.Image`
   width: 65px;
   height: 24px;
   margin-left: ${({ theme }) => theme.margin.xs};
