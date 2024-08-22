@@ -1,19 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components/native';
-import {
-  ScrollView,
-  TextInput as RNTextInput,
-  TouchableOpacity,
-  Text,
-  View,
-  Image,
-} from 'react-native';
+import { ScrollView, TouchableOpacity, View, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator';
 import { imageAssets } from '../../assets/DB/imageAssets';
+import TitleSubtitle from 'src/components/TitleSubtitle';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { Container } from 'src/styles/layout';
+import { Caption, H6 } from 'src/styles/typography';
+import InfoBlock from 'src/components/InfoBlock';
+import { theme } from 'src/styles/theme';
+import { Btn, BtnText } from 'src/components/Button';
 
 interface ArtworkInfoSettingProps {
   onArtworkDescriptionChange: (filled: boolean) => void;
@@ -27,8 +28,8 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
   const contentScrollViewRef = useRef<ScrollView>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const { selectedArtworks, artworkInfoInput, setArtworkInfoInput } =
-    useGlobalState();
+  const { artworkInfoInput, setArtworkInfoInput } = useGlobalState();
+  const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
 
   useEffect(() => {
     const allDescriptionsFilled = artworkInfoInput.every(
@@ -80,20 +81,12 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
 
   return (
     <Container>
-      <TopContainer>
-        <ProgressBarComponent totalSteps={7} />
-        <TitleContainer>
-          <TitleIcon
-            source={require('src/assets/images/Character/character_smile.png')}
-          />
-          <TitleText>
-            <Title>작품의 정보를 작성해주세요</Title>
-            <Subtitle>
-              모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요
-            </Subtitle>
-          </TitleText>
-        </TitleContainer>
-      </TopContainer>
+      <ProgressBarComponent totalSteps={7} />
+      <TitleSubtitle
+        title="작품의 정보를 작성해주세요"
+        subtitle="모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요"
+        imageSource={require('src/assets/images/Character/character_smile.png')}
+      />
       <CircleScrollContainer>
         <CircleScrollView ref={scrollViewRef}>
           {selectedArtworks.map((artwork, index) => (
@@ -116,255 +109,81 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
           ))}
         </CircleScrollView>
       </CircleScrollContainer>
-      <ContentContainer ref={contentScrollViewRef}>
-        <ImageContainer>
-          {currentIndex < selectedArtworks.length ? (
-            <ImagePreview
-              source={imageAssets[selectedArtworks[currentIndex]?.fileName]}
-            />
-          ) : (
-            <ImagePreviewPlaceholder />
-          )}
-        </ImageContainer>
+      <ScrollView
+        ref={contentScrollViewRef}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        {currentIndex < selectedArtworks.length ? (
+          <ImagePreview
+            source={imageAssets[selectedArtworks[currentIndex]?.fileName]}
+          />
+        ) : (
+          <ImagePreviewPlaceholder />
+        )}
         <ArtworkTitleContainer>
           <ArtworkTitleWrapper>
-            <ArtworkTitle>{selectedArtworks[currentIndex]?.name}</ArtworkTitle>
-            {selectedArtworks[currentIndex]?.cherryNum === null && (
+            <H6>{selectedArtworks[currentIndex]?.name}</H6>
+            {selectedArtworks[currentIndex]?.cherryNum === null && ( // 컬렉터 소장 작품인 경우
               <CollectorsOnlyIcon
                 source={require('../../assets/images/ExhibitPage/collectors_only.png')}
               />
             )}
           </ArtworkTitleWrapper>
           <ArtworkDetailButton onPress={handleDetailPress}>
-            <ArtworkDetailButtonText>
-              작품 정보 상세 보기
-            </ArtworkDetailButtonText>
+            <Caption>작품 정보 상세 보기</Caption>
             <Icon name="chevron-forward-outline" size={14} color="#120000" />
           </ArtworkDetailButton>
         </ArtworkTitleContainer>
-        <Label>
-          나만의 작품 소개글 <CherryRed>*</CherryRed>
-        </Label>
-        <InputContainer>
-          <Input
-            placeholder="컬렉터만의 작품을 소개해주세요"
-            value={currentArtworkInfo.artworkDescription}
-            onChangeText={(text: string) =>
-              handleInputChange('artworkDescription', text)
-            }
-            multiline
-            maxLength={500}
-          />
-          <CharacterCount>
-            <BrownBlack>
-              {currentArtworkInfo.artworkDescription.length}
-            </BrownBlack>{' '}
-            / 500
-          </CharacterCount>
-        </InputContainer>
-        <Label>나만의 작품 수집 계기</Label>
-        <InputContainer>
-          <Input
-            placeholder="작품을 수집하게 된 계기를 알려주세요"
-            value={currentArtworkInfo.artworkValue}
-            onChangeText={(text: string) =>
-              handleInputChange('artworkValue', text)
-            }
-            multiline
-            maxLength={500}
-          />
-          <CharacterCount>
-            <BrownBlack>{currentArtworkInfo.artworkValue.length}</BrownBlack> /
-            500
-          </CharacterCount>
-        </InputContainer>
-        <Label>나만의 작품 감상법</Label>
-        <InputContainer>
-          <Input
-            placeholder="컬렉터만의 작품 감상법을 알려주세요"
-            value={currentArtworkInfo.artworkAppreciation}
-            onChangeText={(text: string) =>
-              handleInputChange('artworkAppreciation', text)
-            }
-            multiline
-            maxLength={500}
-          />
-          <CharacterCount>
-            <BrownBlack>
-              {currentArtworkInfo.artworkAppreciation.length}
-            </BrownBlack>{' '}
-            / 500
-          </CharacterCount>
-        </InputContainer>
-        <NextButton onPress={handleNext}>
-          <NextButtonText>다음 작품 작성하기</NextButtonText>
-        </NextButton>
-      </ContentContainer>
+        <InfoBlock
+          label="나만의 작품 소개글"
+          placeholder="컬렉터님만의 작품을 소개해주세요"
+          maxLength={500}
+          required
+          value={currentArtworkInfo.artworkDescription}
+          onChangeText={(text: string) =>
+            handleInputChange('artworkDescription', text)
+          }
+          style={{ paddingBottom: parseInt(theme.padding.l) }}
+        />
+        <InfoBlock
+          label="나만의 작품 수집 계기"
+          placeholder="작품을 수집하게 된 계기를 알려주세요"
+          maxLength={500}
+          value={currentArtworkInfo.artworkValue}
+          onChangeText={(text: string) =>
+            handleInputChange('artworkValue', text)
+          }
+          style={{ paddingBottom: parseInt(theme.padding.l) }}
+        />
+        <InfoBlock
+          label="나만의 작품 감상법"
+          placeholder="컬렉터님만의 작품 감상법을 알려주세요"
+          maxLength={500}
+          value={currentArtworkInfo.artworkAppreciation}
+          onChangeText={(text: string) =>
+            handleInputChange('artworkAppreciation', text)
+          }
+          style={{ paddingBottom: parseInt(theme.padding.l) }}
+        />
+        <Btn onPress={handleNext}>
+          <BtnText>다음 작품 작성하기</BtnText>
+        </Btn>
+      </ScrollView>
     </Container>
   );
 };
 
-const Container = styled(View)`
-  flex: 1;
-  background-color: #fff;
-`;
-
-const TopContainer = styled(View)`
-  padding: 16px 16px 0 16px;
-`;
-
-const TitleContainer = styled(View)`
-  flex-direction: row;
-  align-items: flex-end;
-`;
-
-const TitleIcon = styled(Image)`
-  width: 45px;
-  height: 80px;
-  margin-right: 10px;
-`;
-
-const TitleText = styled(View)`
-  flex-direction: column;
-`;
-
-const Title = styled(Text)`
-  font-family: 'Bold';
-  font-size: 18px;
-  color: #120000;
-`;
-
-const Subtitle = styled(Text)`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
-`;
-
-const ContentContainer = styled(ScrollView)`
-  flex: 1;
-  padding: 0 16px;
-`;
-
-const ImageContainer = styled(View)`
-  align-items: center;
-  margin-bottom: 7px;
-`;
-
-const ImagePreview = styled(Image)`
-  width: 100%;
-  height: 190px;
-  border-radius: 10px;
-`;
-
-const ImagePreviewPlaceholder = styled(View)`
-  width: 100%;
-  height: 190px;
-  border-radius: 10px;
-  background-color: #e0e0e0;
-`;
-
-const Label = styled(Text)`
-  margin-bottom: 10px;
-  font-family: 'Bold';
-  font-size: 14px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const CherryRed = styled(Text)`
-  color: #e52c32;
-`;
-
-const InputContainer = styled(View)`
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  border-radius: 20px;
-  background-color: #f7f5f5;
-  position: relative;
-`;
-
-const Input = styled(RNTextInput)`
-  text-align-vertical: top;
-  height: 147px;
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const CharacterCount = styled(Text)`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #b0abab;
-  text-align: right;
-`;
-
-const BrownBlack = styled(Text)`
-  color: #413333;
-`;
-
-const NextButton = styled(TouchableOpacity)`
-  background-color: #120000;
-  border-radius: 30px;
-  align-items: center;
-  margin: 25px 0 60px 0;
-`;
-
-const NextButtonText = styled(Text)`
-  padding: 16px;
-  font-family: 'Bold';
-  font-size: 14px;
-  color: #ffffff;
-`;
-
-const ArtworkTitleContainer = styled(View)`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-`;
-
-const ArtworkTitleWrapper = styled(View)`
-  flex-direction: row;
-  align-items: center;
-`;
-
-const ArtworkTitle = styled(Text)`
-  font-family: 'Bold';
-  font-size: 18px;
-  color: #120000;
-`;
-
-const ArtworkDetailButton = styled.TouchableOpacity`
-  flex-direction: row;
-  align-items: center;
-  padding: 2px;
-`;
-const ArtworkDetailButtonText = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const CollectorsOnlyIcon = styled(Image)`
-  width: 65px;
-  height: 24px;
-  margin-left: 5px;
-`;
-
 const CircleScrollContainer = styled(View)`
-  margin: 25px 0 12px 8px;
+  margin-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const Circle = styled(View)<{ isActive: boolean }>`
   align-items: center;
   justify-content: center;
-  width: 45px;
-  height: 45px;
+  width: 50px;
+  height: 50px;
   border-radius: 60px;
-  margin: 0 5px;
+  margin-right: 10px;
   background-color: transparent;
   padding: ${(props) => (props.isActive ? '1.5px' : '0px')};
   border: 1.7px dashed
@@ -405,5 +224,44 @@ const CircleScrollView = React.forwardRef<
     {props.children}
   </StyledScrollView>
 ));
+
+const ImagePreview = styled(Image)`
+  width: 100%;
+  height: 190px;
+  margin-bottom: ${({ theme }) => theme.margin.s};
+  border-radius: ${({ theme }) => theme.radius.s};
+`;
+
+const ImagePreviewPlaceholder = styled(View)`
+  width: 100%;
+  height: 190px;
+  margin-bottom: ${({ theme }) => theme.margin.s};
+  border-radius: ${({ theme }) => theme.radius.s};
+  background-color: #e0e0e0;
+`;
+
+const ArtworkTitleContainer = styled(View)`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: ${({ theme }) => theme.padding.l};
+`;
+
+const ArtworkTitleWrapper = styled(View)`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const CollectorsOnlyIcon = styled(Image)`
+  width: 65px;
+  height: 24px;
+  margin-left: ${({ theme }) => theme.margin.xs};
+`;
+
+const ArtworkDetailButton = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  padding: 2px 0;
+`;
 
 export default ArtworkInfoSetting;
