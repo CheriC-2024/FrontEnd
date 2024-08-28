@@ -3,6 +3,7 @@ import collectionReducer from '../slices/collectionSlice';
 import artworkReducer from '../slices/artworkSlice';
 import themeReducer from '../slices/themeSlice';
 import aiRecommendReducer from '../slices/aiRecommendSlice';
+import exhibitReducer from '../slices/exhibitSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     artwork: artworkReducer,
     theme: themeReducer,
     aiRecommend: aiRecommendReducer,
+    exhibit: exhibitReducer,
   },
 });
 
