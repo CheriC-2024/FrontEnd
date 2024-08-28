@@ -1,16 +1,20 @@
 import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import CherryIcon from '../../assets/icons/cherry.svg';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigations/AppNavigator'; // RootStackParamList 타입 import
-import { useGlobalState } from '../../contexts/GlobalStateContext';
 import { imageAssets } from '../../assets/DB/imageAssets';
+import { RootState } from 'src/store';
+import { useSelector } from 'react-redux';
+import TitleSubtitle from 'src/components/TitleSubtitle';
+import { Container } from 'src/styles/layout';
+import { theme } from 'src/styles/theme';
+import { Caption, Subtitle2 } from 'src/styles/typography';
 
 const ArtworkList: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { selectedArtworks } = useGlobalState();
+  const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
 
   const handleArtworkPress = (artId: number) => {
     const artwork = selectedArtworks.find((art) => art.artId === artId);
@@ -25,11 +29,11 @@ const ArtworkList: React.FC = () => {
 
   return (
     <Container>
-      <Subtitle>전시로 올려진 작품들이에요!</Subtitle>
-      <Instruction>
-        작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요
-      </Instruction>
-      <ScrollView>
+      <TitleSubtitle
+        title="전시로 올려진 작품들이에요!"
+        subtitle="작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요"
+      />
+      <ScrollView showsVerticalScrollIndicator={false}>
         <ArtworkContainer>
           {selectedArtworks.map((artwork) => (
             <ArtworkTouchable
@@ -38,7 +42,7 @@ const ArtworkList: React.FC = () => {
             >
               <ArtworkItem>
                 <ArtworkImage source={imageAssets[artwork.fileName]} />
-                <ArtworkTitle>{artwork.name}</ArtworkTitle>
+                <Subtitle2>{artwork.name}</Subtitle2>
                 {artwork.register === 'COLLECTOR' &&
                 artwork.cherryNum === null ? (
                   <CollectorOnlyImage
@@ -72,30 +76,11 @@ const ArtworkList: React.FC = () => {
   );
 };
 
-const Container = styled.View`
-  flex: 1;
-  padding: 15px;
-  background-color: #fff;
-`;
-
-const Subtitle = styled.Text`
-  font-family: 'Bold';
-  font-size: 18px;
-  margin: 30px 0 5px 0;
-  color: #120000;
-`;
-
-const Instruction = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
-  margin-bottom: 30px;
-`;
-
 const ArtworkContainer = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
+  margin-top: ${theme.spacing.s8};
 `;
 
 const ArtworkTouchable = styled(TouchableOpacity)`
@@ -110,20 +95,12 @@ const ArtworkItem = styled.View`
 const ArtworkImage = styled.Image`
   width: 100%;
   height: 150px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: ${theme.radius.xs};
+  margin-bottom: ${theme.margin.xs};
 `;
 
-const ArtworkTitle = styled.Text`
-  font-family: 'Bold';
-  font-size: 12px;
-  color: #120000;
-`;
-
-const ArtworkDescription = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
+const ArtworkDescription = styled(Caption)`
+  color: ${theme.colors.grey_6};
 `;
 
 const CollectorOnlyImage = styled.Image`
