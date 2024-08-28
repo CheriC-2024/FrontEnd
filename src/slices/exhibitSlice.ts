@@ -5,6 +5,9 @@ interface ExhibitState {
   exhibitDescription: string;
   selectedFont: string;
   fontData: { label: string; value: string; fontFamily: string }[];
+  colorPalettes: string[][];
+  selectedPalette: string[];
+  coverColors: string[];
 }
 
 const initialState: ExhibitState = {
@@ -22,6 +25,9 @@ const initialState: ExhibitState = {
     { label: '산토끼', value: 'SanTokki', fontFamily: 'SanTokki' },
     { label: '롯데리아 찹땅겨', value: 'Lotteria', fontFamily: 'Lotteria' },
   ],
+  colorPalettes: [],
+  selectedPalette: [],
+  coverColors: [],
 };
 
 const exhibitSlice = createSlice({
@@ -45,6 +51,21 @@ const exhibitSlice = createSlice({
     ) => {
       state.fontData = action.payload;
     },
+    setColorPalettes: (state, action: PayloadAction<string[][]>) => {
+      return {
+        ...state,
+        colorPalettes: action.payload, // 새로운 객체 반환
+      };
+    },
+    setSelectedPalette: (state, action: PayloadAction<string[]>) => {
+      return {
+        ...state,
+        selectedPalette: action.payload, // 새로운 객체 반환
+      };
+    },
+    setCoverColors: (state, action: PayloadAction<string[]>) => {
+      state.coverColors = action.payload;
+    },
   },
 });
 
@@ -53,6 +74,9 @@ export const {
   setExhibitDescription,
   setSelectedFont,
   setFontData,
+  setColorPalettes,
+  setSelectedPalette,
+  setCoverColors,
 } = exhibitSlice.actions;
 
 export default exhibitSlice.reducer;
