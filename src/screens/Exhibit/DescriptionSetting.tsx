@@ -21,6 +21,7 @@ import {
   setSelectedFont,
 } from 'src/slices/exhibitSlice';
 import { Caption, Subtitle2 } from 'src/styles/typography';
+import { ScrollView } from 'react-native-gesture-handler';
 
 interface DescriptionSettingProps {
   onFieldsFilled: (filled: boolean) => void;
@@ -56,77 +57,79 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
     <Container>
       <GradientBackground />
       <ProgressBarComponent totalSteps={7} />
-      <TitleSubtitle
-        title="전시 이름과 설명을 작성해주세요"
-        subtitle="거의 다 왔어요! 조금만 더 힘내요"
-        imageSource={require('src/assets/images/Character/character_happy.png')}
-      />
-      <InputContainer>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <TitleSubtitle
+          title="전시 이름과 설명을 작성해주세요"
+          subtitle="거의 다 왔어요! 조금만 더 힘내요"
+          imageSource={require('src/assets/images/Character/character_happy.png')}
+        />
+        <InputContainer>
+          <InfoBlock
+            label="전시 이름"
+            placeholder="ex) 항해 : 김아무개전"
+            maxLength={30}
+            required
+            value={exhibitTitle}
+            onChangeText={(text) => dispatch(setExhibitTitle(text))}
+            style={{ paddingBottom: parseInt(theme.padding.l) }}
+          />
+          <AIButtonContainer>
+            <AIRecommendBtn source="DescriptionSetting" />
+          </AIButtonContainer>
+        </InputContainer>
+        <DropdownContainer>
+          <DropdownLabel>
+            폰트 설정<Red>*</Red>
+          </DropdownLabel>
+          <DropdownWrapper>
+            <Dropdown
+              data={fontData}
+              labelField="label"
+              valueField="value"
+              placeholder="폰트를 선택하세요"
+              value={selectedFont}
+              onChange={(item) => {
+                dispatch(setSelectedFont(item.value));
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
+              onBlur={() => setIsDropdownOpen(false)}
+              style={dropdownStyle}
+              placeholderStyle={placeholderStyle}
+              selectedTextStyle={selectedTextStyle}
+              renderRightIcon={() => (
+                <Icon
+                  name={isDropdownOpen ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  color={theme.colors.redBlack}
+                />
+              )}
+              renderItem={(item) => (
+                <DropdownItem>
+                  <DropdownItemLabel>{item.label}</DropdownItemLabel>
+                  <DropdownItemText style={{ fontFamily: item.fontFamily }}>
+                    {exhibitTitle || '여기에 전시 제목이 뜹니다'}
+                  </DropdownItemText>
+                </DropdownItem>
+              )}
+            />
+          </DropdownWrapper>
+        </DropdownContainer>
         <InfoBlock
-          label="전시 이름"
-          placeholder="ex) 항해 : 김아무개전"
-          maxLength={30}
+          label="전시 설명"
+          placeholder="컬렉터님만의 감상을 담아 전시를 소개해주세요"
+          maxLength={500}
           required
-          value={exhibitTitle}
-          onChangeText={(text) => dispatch(setExhibitTitle(text))}
+          value={exhibitDescription}
+          onChangeText={(text) => dispatch(setExhibitDescription(text))}
           style={{ paddingBottom: parseInt(theme.padding.l) }}
         />
-        <AIButtonContainer>
-          <AIRecommendBtn source="DescriptionSetting" />
-        </AIButtonContainer>
-      </InputContainer>
-      <DropdownContainer>
-        <DropdownLabel>
-          폰트 설정<Red>*</Red>
-        </DropdownLabel>
-        <DropdownWrapper>
-          <Dropdown
-            data={fontData}
-            labelField="label"
-            valueField="value"
-            placeholder="폰트를 선택하세요"
-            value={selectedFont}
-            onChange={(item) => {
-              dispatch(setSelectedFont(item.value));
-            }}
-            onFocus={() => setIsDropdownOpen(true)}
-            onBlur={() => setIsDropdownOpen(false)}
-            style={dropdownStyle}
-            placeholderStyle={placeholderStyle}
-            selectedTextStyle={selectedTextStyle}
-            renderRightIcon={() => (
-              <Icon
-                name={isDropdownOpen ? 'chevron-up' : 'chevron-down'}
-                size={16}
-                color={theme.colors.redBlack}
-              />
-            )}
-            renderItem={(item) => (
-              <DropdownItem>
-                <DropdownItemLabel>{item.label}</DropdownItemLabel>
-                <DropdownItemText style={{ fontFamily: item.fontFamily }}>
-                  {exhibitTitle || '여기에 전시 제목이 뜹니다'}
-                </DropdownItemText>
-              </DropdownItem>
-            )}
-          />
-        </DropdownWrapper>
-      </DropdownContainer>
-      <InfoBlock
-        label="전시 설명"
-        placeholder="컬렉터님만의 감상을 담아 전시를 소개해주세요"
-        maxLength={500}
-        required
-        value={exhibitDescription}
-        onChangeText={(text) => dispatch(setExhibitDescription(text))}
-        style={{ paddingBottom: parseInt(theme.padding.l) }}
-      />
-      <Button onPress={handleGoToArtworkList}>
-        <ButtonContent>
-          <ButtonText>전시로 올려진 작품 보러가기</ButtonText>
-          <ButtonIcon name="chevron-forward" size={16} color="#120000" />
-        </ButtonContent>
-      </Button>
+        <Button onPress={handleGoToArtworkList}>
+          <ButtonContent>
+            <ButtonText>전시로 올려진 작품 보러가기</ButtonText>
+            <ButtonIcon name="chevron-forward" size={16} color="#120000" />
+          </ButtonContent>
+        </Button>
+      </ScrollView>
     </Container>
   );
 };
