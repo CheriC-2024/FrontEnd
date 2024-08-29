@@ -42,7 +42,9 @@ const CoverSetting: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [coverType, setCoverType] = useState<'gradient' | 'solid'>('gradient');
   const [isLoading, setIsLoading] = useState(true);
-  const [randomPalettes, setRandomPalettes] = useState<string[][]>([]);
+  const [randomPalettes, setRandomPalettes] = useState<
+    { palette: string[]; index: number }[]
+  >([]);
 
   useEffect(() => {
     setStep(5);
@@ -88,16 +90,21 @@ const CoverSetting: React.FC = () => {
   }, [dispatch, selectedArtworks]);
 
   const getRandomPalettes = (palettes: string[][]) => {
-    const shuffled = palettes.sort(() => 0.5 - Math.random());
+    const palettesWithIndexes = palettes.map((palette, index) => ({
+      palette,
+      index,
+    }));
+    const shuffled = palettesWithIndexes.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 4);
   };
 
-  const handleCoverSelect = (index: number) => {
-    if (colorPalettes[index]) {
-      dispatch(setSelectedPalette(colorPalettes[index]));
-      dispatch(setCoverColors(colorPalettes[index]));
-      setSelectedCover(colorPalettes[index]);
-    }
+  const handleCoverSelect = (randomIndex: number) => {
+    const originalIndex = randomPalettes[randomIndex].index;
+    const selectedPalette = colorPalettes[originalIndex];
+
+    dispatch(setSelectedPalette(selectedPalette));
+    dispatch(setCoverColors(selectedPalette));
+    setSelectedCover(selectedPalette);
   };
 
   const handleReverseGradient = () => {
@@ -165,7 +172,7 @@ const CoverSetting: React.FC = () => {
           {isLoading ? (
             <LoadingText>추출 중 ...</LoadingText>
           ) : (
-            randomPalettes.map((palette, index) => (
+            randomPalettes.map(({ palette }, index) => (
               <PaletteButton
                 key={index}
                 onPress={() => handleCoverSelect(index)}
