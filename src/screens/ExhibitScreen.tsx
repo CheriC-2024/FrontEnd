@@ -74,7 +74,7 @@ const ExhibitScreen: React.FC = () => {
                 name="chevron-back"
                 size={24}
                 color={theme.colors.redBlack}
-                style={{ marginLeft: theme.spacing.s3 }}
+                style={{ marginLeft: theme.spacing.s4 }}
               />
             </TouchableOpacity>
             <HeaderLeftText>전시 이름, 설명 수정하기</HeaderLeftText>
@@ -86,7 +86,7 @@ const ExhibitScreen: React.FC = () => {
                 name="chevron-back"
                 size={24}
                 color={theme.colors.redBlack}
-                style={{ marginLeft: theme.spacing.s3 }}
+                style={{ marginLeft: theme.spacing.s4 }}
               />
             ) : (
               <PrevText>이전</PrevText>
@@ -284,15 +284,15 @@ const HeaderLeftText = styled.Text`
   color: ${theme.colors.redBlack};
   font-family: ${theme.fonts.bold};
   font-size: ${theme.fontSizes.body1};
-  margin-left: ${theme.spacing.s2};
+  margin-left: ${theme.spacing.s4};
 `;
 
 const PrevText = styled(Subtitle1)`
-  margin-left: ${theme.spacing.s1};
+  margin-left: ${theme.spacing.s4};
 `;
 
 const NextText = styled(Subtitle1)<{ disabled: boolean }>`
-  margin-right: ${theme.spacing.s1};
+  margin-right: ${theme.spacing.s4};
   color: ${({ disabled }) =>
     disabled ? theme.colors.grey_6 : theme.colors.redBlack};
 `;
