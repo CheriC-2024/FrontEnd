@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Artwork {
+  artist: string;
   artId: number;
   name: string;
   fileName: string;
@@ -113,6 +114,9 @@ const artworkSlice = createSlice({
         (state.artworkInfoInput[index] as any)[field] = value;
       }
     },
+    setSelectedArtworks: (state, action: PayloadAction<Artwork[]>) => {
+      state.selectedArtworks = action.payload;
+    },
   },
 });
 
@@ -125,6 +129,7 @@ export const {
   collapseAllCollections,
   expandAllCollections,
   updateArtworkInfoInput,
+  setSelectedArtworks,
 } = artworkSlice.actions;
 
 export default artworkSlice.reducer;

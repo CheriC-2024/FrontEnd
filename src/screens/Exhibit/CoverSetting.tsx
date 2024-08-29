@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, ScrollView } from 'react-native';
+import { View, TouchableOpacity, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styled from 'styled-components/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,31 +7,37 @@ import { RootState } from 'src/store';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import RadialGradientComponent from '../../components/Gradients/RadialGradientComponent';
-import AngularGradientComponent from '../../components/Gradients/AngularGradientComponent';
-import DiamondGradientComponent from '../../components/Gradients/DiamondGradientComponent';
 import * as ImagePicker from 'expo-image-picker';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { Container } from 'src/styles/layout';
 import { Body2, Caption, Subtitle2 } from 'src/styles/typography';
 import { theme } from 'src/styles/theme';
 import GradientBackground from 'src/styles/GradientBackground';
-import { extractProperties } from '../../api/cloudVisionApi';
 import {
   setCoverColors,
   setSelectedPalette,
   setColorPalettes,
   setRandomPalettes,
   setCoverType,
+  setSelectedCoverImage,
 } from 'src/slices/exhibitSlice';
+import { extractProperties } from 'src/api/cloudVisionApi';
+import AngularGradientComponent from 'src/components/Gradients/AngularGradientComponent';
+import RadialGradientComponent from 'src/components/Gradients/RadialGradientComponent';
+import DiamondGradientComponent from 'src/components/Gradients/DiamondGradientComponent';
 
 const CoverSetting: React.FC = () => {
   const dispatch = useDispatch();
   const selectedArtworks = useSelector(
     (state: RootState) => state.artwork.selectedArtworks,
   );
-  const { coverType, colorPalettes, randomPalettes, selectedPalette } =
-    useSelector((state: RootState) => state.exhibit);
+  const {
+    coverType,
+    colorPalettes,
+    randomPalettes,
+    selectedPalette,
+    selectedCoverImage,
+  } = useSelector((state: RootState) => state.exhibit);
   const { setStep } = useProgressBar();
   const [selectedCover, setSelectedCover] = useState(
     selectedPalette.length > 0
@@ -42,7 +48,6 @@ const CoverSetting: React.FC = () => {
   const [selectedGradient, setSelectedGradient] = useState<number | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [shufflePressed, setShufflePressed] = useState(false); // New state to track shuffle button press
 
   useEffect(() => {
     setStep(5);
@@ -50,20 +55,29 @@ const CoverSetting: React.FC = () => {
 
   useEffect(() => {
     if (colorPalettes.length > 0) {
-      // randomPalettes가 비어있다면 새로 설정
       if (randomPalettes.length === 0) {
         const palettes = getRandomPalettes(colorPalettes);
         dispatch(setRandomPalettes(palettes));
       }
 
-      // selectedCover가 비어있다면 첫 번째 팔레트로 초기화
       if (selectedCover.length === 0) {
         setSelectedCover(colorPalettes[0]);
         dispatch(setSelectedPalette(colorPalettes[0]));
         dispatch(setCoverColors(colorPalettes[0]));
       }
     }
-  }, [colorPalettes, randomPalettes, selectedCover, dispatch]);
+
+    // Redux 상태의 selectedCoverImage를 로컬 상태로 설정
+    if (selectedCoverImage) {
+      setUploadedImage(selectedCoverImage);
+    }
+  }, [
+    colorPalettes,
+    randomPalettes,
+    selectedCover,
+    selectedCoverImage,
+    dispatch,
+  ]);
 
   useEffect(() => {
     const fetchColorPalettes = async () => {
@@ -76,15 +90,13 @@ const CoverSetting: React.FC = () => {
         ]);
         dispatch(setColorPalettes(newPalettes));
 
-        // 첫 번째 팔레트를 선택하고 저장
         if (newPalettes.length > 0) {
-          const initialCover = newPalettes[0]; // 첫 번째 팔레트
-          dispatch(setSelectedPalette(initialCover)); // selectedPalette에 첫 번째 팔레트 설정
-          dispatch(setCoverColors(initialCover)); // coverColors에 첫 번째 팔레트 설정
-          setSelectedCover(initialCover); // selectedCover에 첫 번째 팔레트 설정
+          const initialCover = newPalettes[0];
+          dispatch(setSelectedPalette(initialCover));
+          dispatch(setCoverColors(initialCover));
+          setSelectedCover(initialCover);
         }
 
-        // Shuffle palettes initially
         dispatch(setRandomPalettes(getRandomPalettes(newPalettes)));
       } catch (error) {
         console.error('Failed to extract properties:', error);
@@ -106,7 +118,7 @@ const CoverSetting: React.FC = () => {
       index,
     }));
     const shuffled = palettesWithIndexes.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, Math.min(shuffled.length, 4)); // 최대 4개의 팔레트만 반환
+    return shuffled.slice(0, Math.min(shuffled.length, 4));
   };
 
   const handleCoverSelect = (randomIndex: number) => {
@@ -135,23 +147,34 @@ const CoverSetting: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setUploadedImage(result.assets[0].uri);
+      const imageUri = result.assets[0].uri;
+      setUploadedImage(imageUri); // 로컬 상태 업데이트
+      dispatch(setSelectedCoverImage(imageUri)); // Redux 상태 업데이트
+      dispatch(setCoverType('image')); // coverType을 'image'로 설정
     }
   };
 
   const handleImageRemove = () => {
     setUploadedImage(null);
+    dispatch(setSelectedCoverImage(null)); // 이미지 삭제 후에도 null로 업데이트
+    dispatch(setCoverType('gradient')); // 기본으로 되돌림
   };
 
   const handleCoverTypeChange = (type: 'gradient' | 'solid') => {
-    dispatch(setCoverType(type)); // Redux에 상태 저장
+    if (uploadedImage) return; // 이미지를 업로드한 경우 타입 변경을 막음
+
+    dispatch(setCoverType(type));
+    if (type === 'solid') {
+      dispatch(setCoverColors([selectedCover[0]])); // 단색으로 첫 번째 색상 설정
+    } else if (type === 'gradient') {
+      dispatch(setCoverColors(selectedCover)); // 기존 팔레트 색상으로 설정
+    }
     setSelectedGradient(null);
   };
 
   const handleShufflePalettes = () => {
     const shuffledPalettes = getRandomPalettes(colorPalettes);
-    dispatch(setRandomPalettes(shuffledPalettes)); // Redux 상태 업데이트
-    setShufflePressed(true); // Shuffle 버튼이 눌린 상태를 업데이트
+    dispatch(setRandomPalettes(shuffledPalettes));
   };
 
   const arePalettesEqual = (palette1: string[], palette2: string[]) => {
@@ -209,6 +232,7 @@ const CoverSetting: React.FC = () => {
             onCoverTypeChange={handleCoverTypeChange}
             onReverseGradient={handleReverseGradient}
             showReverseButton={coverType === 'gradient'}
+            isImageUploaded={!!uploadedImage}
           />
         </CoverTypeButtonContainer>
         {coverType === 'gradient' ? (
@@ -244,16 +268,42 @@ const CoverSetting: React.FC = () => {
               ))}
             </CoverGrid>
           )
-        ) : isLoading ? (
-          <LoadingContainer>
-            <LoadingText>추출 중 ...</LoadingText>
-          </LoadingContainer>
+        ) : coverType === 'solid' ? (
+          isLoading ? (
+            <LoadingContainer>
+              <LoadingText>추출 중 ...</LoadingText>
+            </LoadingContainer>
+          ) : (
+            <CoverGrid>
+              {selectedPalette.map((color, index) => (
+                <CoverOption
+                  key={index}
+                  onPress={() => {
+                    setSelectedGradient(index);
+                    dispatch(setCoverColors([color]));
+                  }}
+                >
+                  <View style={[styles.gradient, { backgroundColor: color }]}>
+                    {selectedGradient === index && (
+                      <SelectedOverlay>
+                        <Icon name="checkmark" size={32} color="#fff" />
+                      </SelectedOverlay>
+                    )}
+                  </View>
+                </CoverOption>
+              ))}
+            </CoverGrid>
+          )
         ) : (
+          // 이미지를 업로드했을 때도 CoverGrid를 유지합니다.
           <CoverGrid>
             {selectedPalette.map((color, index) => (
               <CoverOption
                 key={index}
-                onPress={() => handleGradientSelect(index)}
+                onPress={() => {
+                  setSelectedGradient(index);
+                  dispatch(setCoverColors([color]));
+                }}
               >
                 <View style={[styles.gradient, { backgroundColor: color }]}>
                   {selectedGradient === index && (
@@ -289,38 +339,52 @@ const CoverSetting: React.FC = () => {
 };
 
 const CoverTypeToggle: React.FC<{
-  coverType: 'gradient' | 'solid';
+  coverType: 'gradient' | 'solid' | 'image';
   onCoverTypeChange: (type: 'gradient' | 'solid') => void;
   onReverseGradient: () => void;
   showReverseButton: boolean;
+  isImageUploaded: boolean; // 추가: 이미지 업로드 상태
 }> = ({
   coverType,
   onCoverTypeChange,
   onReverseGradient,
   showReverseButton,
+  isImageUploaded, // 추가: 이미지 업로드 상태
 }) => (
   <>
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <CoverTypeButton
         selected={coverType === 'gradient'}
         onPress={() => onCoverTypeChange('gradient')}
+        disabled={isImageUploaded} // 이미지가 업로드된 경우 비활성화
       >
-        <CoverTypeButtonText selected={coverType === 'gradient'}>
+        <CoverTypeButtonText
+          selected={coverType === 'gradient'}
+          disabled={isImageUploaded}
+        >
           그라디언트 커버
         </CoverTypeButtonText>
       </CoverTypeButton>
       <CoverTypeButton
         selected={coverType === 'solid'}
         onPress={() => onCoverTypeChange('solid')}
+        disabled={isImageUploaded} // 이미지가 업로드된 경우 비활성화
       >
-        <CoverTypeButtonText selected={coverType === 'solid'}>
+        <CoverTypeButtonText
+          selected={coverType === 'solid'}
+          disabled={isImageUploaded}
+        >
           단색 커버
         </CoverTypeButtonText>
       </CoverTypeButton>
     </View>
     {showReverseButton && (
-      <TouchableOpacity onPress={onReverseGradient}>
-        <Icon name="swap-horizontal-outline" size={22} color="#120000" />
+      <TouchableOpacity onPress={onReverseGradient} disabled={isImageUploaded}>
+        <Icon
+          name="swap-horizontal-outline"
+          size={22}
+          color={isImageUploaded ? '#ccc' : '#120000'}
+        />
       </TouchableOpacity>
     )}
   </>

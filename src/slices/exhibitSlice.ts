@@ -9,7 +9,9 @@ interface ExhibitState {
   selectedPalette: string[];
   coverColors: string[];
   randomPalettes: { palette: string[]; index: number }[];
-  coverType: 'gradient' | 'solid';
+  coverType: 'gradient' | 'solid' | 'image';
+  selectedCoverImage: string | null;
+  selectedPattern: 'linear' | 'radial' | 'angular' | 'diamond';
 }
 
 const initialState: ExhibitState = {
@@ -32,6 +34,8 @@ const initialState: ExhibitState = {
   coverColors: [],
   randomPalettes: [],
   coverType: 'gradient',
+  selectedCoverImage: null, // 초기값 설정
+  selectedPattern: 'linear', // 초기값 설정
 };
 
 const exhibitSlice = createSlice({
@@ -76,8 +80,20 @@ const exhibitSlice = createSlice({
     ) => {
       state.randomPalettes = action.payload;
     },
-    setCoverType: (state, action: PayloadAction<'gradient' | 'solid'>) => {
+    setCoverType: (
+      state,
+      action: PayloadAction<'gradient' | 'solid' | 'image'>,
+    ) => {
       state.coverType = action.payload;
+    },
+    setSelectedCoverImage: (state, action: PayloadAction<string | null>) => {
+      state.selectedCoverImage = action.payload;
+    },
+    setSelectedPattern: (
+      state,
+      action: PayloadAction<'linear' | 'radial' | 'angular' | 'diamond'>,
+    ) => {
+      state.selectedPattern = action.payload;
     },
   },
 });
@@ -92,6 +108,8 @@ export const {
   setCoverColors,
   setRandomPalettes,
   setCoverType,
+  setSelectedCoverImage,
+  setSelectedPattern,
 } = exhibitSlice.actions;
 
 export default exhibitSlice.reducer;

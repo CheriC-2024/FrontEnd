@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+} from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CherryIcon from '../../assets/icons/cherry.svg';
+import PencilIcon from '../../assets/icons/pencil.svg';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -17,28 +24,38 @@ import LinearGradient from 'react-native-linear-gradient';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { useProgressBar } from '../../components/ProgressBarContext';
 import { RootStackParamList } from '../../navigations/AppNavigator';
-import { useGlobalState, Artwork } from '../../contexts/GlobalStateContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from 'src/store';
+import { setSelectedArtworks } from '../../slices/artworkSlice';
 import MusicSelectionSheet from '../../components/BottomSheets/MusicSelectionSheet';
 import { imageAssets } from '../../assets/DB/imageAssets';
+import TitleSubtitle from 'src/components/TitleSubtitle';
+import { Container } from 'src/styles/layout';
+import { Artwork } from '../../slices/artworkSlice';
+import { useGlobalState } from 'src/contexts/GlobalStateContext';
+import { Caption, H5, Subtitle2 } from 'src/styles/typography';
 
 interface FinishSettingProps {
   setIsEditing: (isEditing: boolean) => void;
 }
 
 const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
+  const dispatch = useDispatch();
   const { step, setStep } = useProgressBar();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
   const {
     exhibitTitle,
     exhibitDescription,
-    selectedThemes,
-    selectedArtworks,
-    setSelectedArtworks,
     selectedFont,
     coverColors,
-    selectedMusic,
-    setSelectedMusic,
-  } = useGlobalState();
+    coverType,
+    selectedCoverImage,
+  } = useSelector((state: RootState) => state.exhibit);
+
+  const { selectedThemes } = useSelector((state: RootState) => state.theme);
+  const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
+  const { selectedMusic, setSelectedMusic } = useGlobalState();
   const [isMusicSheetVisible, setMusicSheetVisible] = useState(false);
 
   useEffect(() => {
@@ -74,7 +91,7 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
           <ArtworkImage source={artworkImage} />
         </ArtworkTouchable>
         <ArtworkInfo>
-          <ArtworkTitle>{item.name}</ArtworkTitle>
+          <Subtitle2>{item.name}</Subtitle2>
           <ArtworkSubtitle>{item.artist}</ArtworkSubtitle>
           {item.cherryNum !== null && (
             <ArtworkCherry>
@@ -107,7 +124,7 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
   };
 
   const handleDragEnd = ({ data }: { data: Artwork[] }) => {
-    setSelectedArtworks([...data]);
+    dispatch(setSelectedArtworks([...data]));
   };
 
   const handleEditPress = () => {
@@ -120,57 +137,71 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
   const openMusicSheet = () => setMusicSheetVisible(true);
   const closeMusicSheet = () => setMusicSheetVisible(false);
 
+  const renderCoverContent = () => (
+    <>
+      <MusicContainer>
+        <MusicTextContainer onPress={openMusicSheet}>
+          <Icon name="musical-notes-outline" size={16} color="#fff" />
+          <MusicText>
+            {selectedMusic ? selectedMusic : '아직 음악이 없습니다'}
+          </MusicText>
+        </MusicTextContainer>
+        <PencilIcon width={16} height={16} />
+      </MusicContainer>
+      <SectionTitleContainer>
+        <H5 style={{ fontFamily: selectedFont }}>{exhibitTitle}</H5>
+        <PencilIcon width={16} height={16} onPress={handleEditPress} />
+      </SectionTitleContainer>
+      <ExhibitDescriptionContainer>
+        <Caption numberOfLines={1} ellipsizeMode="tail">
+          {exhibitDescription}
+        </Caption>
+      </ExhibitDescriptionContainer>
+      <TagsContainer>
+        {selectedThemes.map((theme, index) => (
+          <Tag key={index}>#{theme}</Tag>
+        ))}
+        <PencilIcon width={16} height={16} />
+      </TagsContainer>
+    </>
+  );
+
   return (
-    <OuterContainer>
+    <Container>
       <ProgressBarComponent totalSteps={7} />
-      <TitleContainer>
-        <TitleIcon
-          source={require('src/assets/images/Character/character_wink.png')}
-        />
-        <TitleText>
-          <Title>전시를 마무리해 볼까요?</Title>
-          <Subtitle>마지막으로 컬렉터님의 전시를 점검해주세요:)</Subtitle>
-        </TitleText>
-      </TitleContainer>
+      <TitleSubtitle
+        title="전시를 마무리해 볼까요?"
+        subtitle="마지막으로 컬렉터님의 전시를 점검해주세요:)"
+        imageSource={require('src/assets/images/Character/character_wink.png')}
+      />
+
       <GradientContainer>
-        <LinearGradient colors={coverColors} style={{ padding: 16 }}>
-          <MusicContainer>
-            <MusicTextContainer onPress={() => setMusicSheetVisible(true)}>
-              <Icon name="musical-notes-outline" size={16} color="#fff" />
-              <MusicText>
-                {selectedMusic ? selectedMusic : '아직 음악이 없습니다'}
-              </MusicText>
-            </MusicTextContainer>
-            <EditIcon name="pencil-outline" size={20} color="#000" />
-          </MusicContainer>
+        {/* 이미지 업로드된 경우 우선적으로 이미지 표시 */}
+        {selectedCoverImage ? (
+          <ImageBackground
+            source={{ uri: selectedCoverImage }}
+            style={{ width: '100%', height: '100%', padding: 16 }}
+            resizeMode="contain"
+          >
+            {renderCoverContent()}
+          </ImageBackground>
+        ) : (
+          <>
+            {coverType === 'gradient' && (
+              <LinearGradient colors={coverColors} style={{ padding: 16 }}>
+                {renderCoverContent()}
+              </LinearGradient>
+            )}
 
-          <DescriptionContainer>
-            <SectionTitleContainer>
-              <SectionTitle style={{ fontFamily: selectedFont }}>
-                {exhibitTitle}
-              </SectionTitle>
-              <EditIcon
-                name="pencil-outline"
-                size={20}
-                color="#000"
-                onPress={handleEditPress}
-              />
-            </SectionTitleContainer>
-            <ExhibitDescriptContainer>
-              <ExhibitDescript numberOfLines={1} ellipsizeMode="tail">
-                {exhibitDescription}
-              </ExhibitDescript>
-            </ExhibitDescriptContainer>
-          </DescriptionContainer>
-
-          <TagsContainer>
-            {selectedThemes.map((theme, index) => (
-              <Tag key={index}>#{theme}</Tag>
-            ))}
-            <EditIcon name="pencil-outline" size={20} color="#000" />
-          </TagsContainer>
-        </LinearGradient>
+            {coverType === 'solid' && (
+              <View style={{ backgroundColor: coverColors[0], padding: 16 }}>
+                {renderCoverContent()}
+              </View>
+            )}
+          </>
+        )}
       </GradientContainer>
+
       <InnerContainer>
         <DraggableFlatList
           data={selectedArtworks}
@@ -179,54 +210,21 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
           onDragEnd={handleDragEnd}
         />
       </InnerContainer>
+
       <MusicSelectionSheet
         isVisible={isMusicSheetVisible}
         onClose={closeMusicSheet}
         selectedMusic={selectedMusic}
-        setSelectedMusic={setSelectedMusic}
+        setSelectedMusic={(music) => dispatch(setSelectedMusic(music))}
       />
-    </OuterContainer>
+    </Container>
   );
 };
-
-const OuterContainer = styled.View`
-  flex: 1;
-  background-color: #fff;
-  padding: 16px;
-`;
 
 const InnerContainer = styled.View`
   flex: 1;
   margin: -16px;
   padding-top: 15px;
-`;
-
-const TitleContainer = styled.View`
-  flex-direction: row;
-  align-items: flex-end;
-  margin-bottom: 20px;
-`;
-
-const TitleIcon = styled.Image`
-  width: 45px;
-  height: 80px;
-  margin-right: 10px;
-`;
-
-const TitleText = styled.View`
-  flex-direction: column;
-`;
-
-const Title = styled.Text`
-  font-family: 'Bold';
-  font-size: 18px;
-  color: #120000;
-`;
-
-const Subtitle = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
 `;
 
 const GradientContainer = styled.View`
@@ -245,31 +243,20 @@ const MusicContainer = styled.View`
 const MusicTextContainer = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
-  background-color: #9e8c8f;
+  background-color: ${({ theme }) => theme.colors.redBlack_alpha40};
   padding: 5px 10px;
-  border-radius: 20px;
+  border-radius: ${({ theme }) => theme.radius.l};
 `;
 
-const MusicText = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
+const MusicText = styled(Caption)`
   color: #fff;
-  margin-left: 5px;
-`;
-
-const DescriptionContainer = styled.View`
-  background-color: #ffffff00;
-  border-radius: 12px;
-`;
-
-const EditIcon = styled(Icon)`
-  margin-left: 8px;
+  margin-left: ${({ theme }) => theme.margin.xs};
 `;
 
 const SectionTitleContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const SectionTitle = styled.Text`
@@ -278,16 +265,10 @@ const SectionTitle = styled.Text`
   color: #120000;
 `;
 
-const ExhibitDescriptContainer = styled.View`
+const ExhibitDescriptionContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
-`;
-
-const ExhibitDescript = styled.Text`
-  font-size: 12px;
-  font-family: 'Regular';
-  color: #120000;
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const TagsContainer = styled.View`
@@ -296,15 +277,13 @@ const TagsContainer = styled.View`
   align-items: center;
 `;
 
-const Tag = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
+const Tag = styled(Caption)`
   color: #fff;
-  background-color: #413333;
+  background-color: ${({ theme }) => theme.colors.grey_8};
   padding: 2px 8px;
-  border-radius: 10px;
-  margin-right: 8px;
-  margin-bottom: 10px;
+  border-radius: ${({ theme }) => theme.radius.l};
+  margin-right: ${({ theme }) => theme.margin.s};
+  margin-bottom: ${({ theme }) => theme.margin.m};
   letter-spacing: 0.5px;
 `;
 
@@ -315,51 +294,41 @@ const ArtworkTouchable = styled(TouchableOpacity)`
 const ArtworkContainer = styled(Animated.View)`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 16px;
-  padding: 0 16px;
+  margin-bottom: ${({ theme }) => theme.margin.m};
+  padding: 0 ${({ theme }) => theme.padding.m};
 `;
 
 const ArtworkImage = styled.Image`
   width: 70px;
   height: 85px;
-  border-radius: 5px;
-  margin-right: 30px;
+  border-radius: ${({ theme }) => theme.radius.xs};
+  margin-right: ${({ theme }) => theme.margin.xl};
 `;
 
 const ArtworkInfo = styled.View`
   flex: 1;
 `;
 
-const ArtworkTitle = styled.Text`
-  font-size: 14px;
-  font-family: 'Bold';
-  color: #120000;
+const ArtworkSubtitle = styled(Caption)`
+  color: ${({ theme }) => theme.colors.grey_6};
 `;
 
-const ArtworkSubtitle = styled.Text`
-  font-size: 12px;
-  font-family: 'Regular';
-  color: #b0abab;
-`;
-
-const ArtworkCherry = styled.Text`
-  font-size: 12px;
-  font-family: 'Regular';
-  color: #b0abab;
+const ArtworkCherry = styled(Caption)`
+  color: ${({ theme }) => theme.colors.grey_6};
 `;
 
 const CollectorOnlyImage = styled.Image`
   width: 75px;
   height: 15px;
-  margin-top: 8px;
+  margin-top: ${({ theme }) => theme.margin.s};
 `;
 
 const MenuIconContainer = styled.TouchableOpacity`
-  margin-left: 8px;
+  margin-left: ${({ theme }) => theme.margin.s};
 `;
 
 const MenuIcon = styled(Icon)`
-  padding-right: 16px;
+  padding-right: ${({ theme }) => theme.padding.m};
 `;
 
 export default FinishSetting;
