@@ -21,6 +21,8 @@ import {
   setCoverColors,
   setSelectedPalette,
   setColorPalettes,
+  setRandomPalettes,
+  setCoverType,
 } from 'src/slices/exhibitSlice';
 
 const CoverSetting: React.FC = () => {
@@ -28,23 +30,19 @@ const CoverSetting: React.FC = () => {
   const selectedArtworks = useSelector(
     (state: RootState) => state.artwork.selectedArtworks,
   );
-  const {
-    colorPalettes = [],
-    selectedPalette = [],
-    coverColors,
-  } = useSelector((state: RootState) => state.exhibit);
+  const { coverType, colorPalettes, randomPalettes, selectedPalette } =
+    useSelector((state: RootState) => state.exhibit);
   const { setStep } = useProgressBar();
   const [selectedCover, setSelectedCover] = useState(
-    colorPalettes[0] || ['#e5e5e5', '#797979'],
+    selectedPalette.length > 0
+      ? selectedPalette
+      : colorPalettes[0] || ['#e5e5e5', '#e5e5e5'],
   );
   const [isReversed, setIsReversed] = useState(false);
   const [selectedGradient, setSelectedGradient] = useState<number | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [coverType, setCoverType] = useState<'gradient' | 'solid'>('gradient');
   const [isLoading, setIsLoading] = useState(true);
-  const [randomPalettes, setRandomPalettes] = useState<
-    { palette: string[]; index: number }[]
-  >([]);
+  const [shufflePressed, setShufflePressed] = useState(false); // New state to track shuffle button press
 
   useEffect(() => {
     setStep(5);
@@ -52,20 +50,22 @@ const CoverSetting: React.FC = () => {
 
   useEffect(() => {
     if (colorPalettes.length > 0) {
-      setSelectedCover(colorPalettes[0]);
+      // randomPalettes가 비어있다면 새로 설정
+      if (randomPalettes.length === 0) {
+        const palettes = getRandomPalettes(colorPalettes);
+        dispatch(setRandomPalettes(palettes));
+      }
+
+      // selectedCover가 비어있다면 첫 번째 팔레트로 초기화
+      if (selectedCover.length === 0) {
+        setSelectedCover(colorPalettes[0]);
+        dispatch(setSelectedPalette(colorPalettes[0]));
+        dispatch(setCoverColors(colorPalettes[0]));
+      }
     }
-  }, [colorPalettes]);
+  }, [colorPalettes, randomPalettes, selectedCover, dispatch]);
 
   useEffect(() => {
-    if (colorPalettes.length > 0) {
-      const initialCover = colorPalettes[0] || [];
-      setRandomPalettes(getRandomPalettes(colorPalettes));
-      setSelectedCover(initialCover);
-      dispatch(setCoverColors(initialCover));
-      setIsLoading(false);
-      return;
-    }
-
     const fetchColorPalettes = async () => {
       try {
         const artIds = selectedArtworks.map((artwork) => artwork.artId);
@@ -75,10 +75,17 @@ const CoverSetting: React.FC = () => {
           ...item.properties,
         ]);
         dispatch(setColorPalettes(newPalettes));
-        setRandomPalettes(getRandomPalettes(newPalettes));
-        const initialCover = newPalettes[0] || [];
-        setSelectedCover(initialCover);
-        dispatch(setCoverColors(initialCover));
+
+        // 첫 번째 팔레트를 선택하고 저장
+        if (newPalettes.length > 0) {
+          const initialCover = newPalettes[0]; // 첫 번째 팔레트
+          dispatch(setSelectedPalette(initialCover)); // selectedPalette에 첫 번째 팔레트 설정
+          dispatch(setCoverColors(initialCover)); // coverColors에 첫 번째 팔레트 설정
+          setSelectedCover(initialCover); // selectedCover에 첫 번째 팔레트 설정
+        }
+
+        // Shuffle palettes initially
+        dispatch(setRandomPalettes(getRandomPalettes(newPalettes)));
       } catch (error) {
         console.error('Failed to extract properties:', error);
       } finally {
@@ -86,8 +93,12 @@ const CoverSetting: React.FC = () => {
       }
     };
 
-    fetchColorPalettes();
-  }, [dispatch, selectedArtworks]);
+    if (colorPalettes.length === 0) {
+      fetchColorPalettes();
+    } else {
+      setIsLoading(false);
+    }
+  }, [dispatch, selectedArtworks, colorPalettes]);
 
   const getRandomPalettes = (palettes: string[][]) => {
     const palettesWithIndexes = palettes.map((palette, index) => ({
@@ -95,7 +106,7 @@ const CoverSetting: React.FC = () => {
       index,
     }));
     const shuffled = palettesWithIndexes.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 4);
+    return shuffled.slice(0, Math.min(shuffled.length, 4)); // 최대 4개의 팔레트만 반환
   };
 
   const handleCoverSelect = (randomIndex: number) => {
@@ -133,12 +144,14 @@ const CoverSetting: React.FC = () => {
   };
 
   const handleCoverTypeChange = (type: 'gradient' | 'solid') => {
-    setCoverType(type);
+    dispatch(setCoverType(type)); // Redux에 상태 저장
     setSelectedGradient(null);
   };
 
   const handleShufflePalettes = () => {
-    setRandomPalettes(getRandomPalettes(colorPalettes));
+    const shuffledPalettes = getRandomPalettes(colorPalettes);
+    dispatch(setRandomPalettes(shuffledPalettes)); // Redux 상태 업데이트
+    setShufflePressed(true); // Shuffle 버튼이 눌린 상태를 업데이트
   };
 
   const arePalettesEqual = (palette1: string[], palette2: string[]) => {
@@ -172,7 +185,7 @@ const CoverSetting: React.FC = () => {
           {isLoading ? (
             <LoadingText>추출 중 ...</LoadingText>
           ) : (
-            randomPalettes.map(({ palette }, index) => (
+            randomPalettes.slice(0, 4).map(({ palette }, index) => (
               <PaletteButton
                 key={index}
                 onPress={() => handleCoverSelect(index)}
@@ -199,34 +212,42 @@ const CoverSetting: React.FC = () => {
           />
         </CoverTypeButtonContainer>
         {coverType === 'gradient' ? (
-          <CoverGrid>
-            {[
-              LinearGradient,
-              RadialGradientComponent,
-              AngularGradientComponent,
-              DiamondGradientComponent,
-            ].map((GradientComponent, index) => (
-              <CoverOption
-                key={index}
-                onPress={() => handleGradientSelect(index)}
-              >
-                <GradientComponent
-                  colors={
-                    isReversed ? [...selectedCover].reverse() : selectedCover
-                  }
-                  style={[
-                    styles.gradient,
-                    selectedGradient === index && styles.selectedGradient,
-                  ]}
-                />
-                {selectedGradient === index && (
-                  <SelectedOverlay>
-                    <Icon name="checkmark" size={32} color="#fff" />
-                  </SelectedOverlay>
-                )}
-              </CoverOption>
-            ))}
-          </CoverGrid>
+          isLoading ? (
+            <LoadingText>추출 중 ...</LoadingText>
+          ) : (
+            <CoverGrid>
+              {[
+                LinearGradient,
+                RadialGradientComponent,
+                AngularGradientComponent,
+                DiamondGradientComponent,
+              ].map((GradientComponent, index) => (
+                <CoverOption
+                  key={index}
+                  onPress={() => handleGradientSelect(index)}
+                >
+                  <GradientComponent
+                    colors={
+                      isReversed ? [...selectedCover].reverse() : selectedCover
+                    }
+                    style={[
+                      styles.gradient,
+                      selectedGradient === index && styles.selectedGradient,
+                    ]}
+                  />
+                  {selectedGradient === index && (
+                    <SelectedOverlay>
+                      <Icon name="checkmark" size={32} color="#fff" />
+                    </SelectedOverlay>
+                  )}
+                </CoverOption>
+              ))}
+            </CoverGrid>
+          )
+        ) : isLoading ? (
+          <LoadingContainer>
+            <LoadingText>추출 중 ...</LoadingText>
+          </LoadingContainer>
         ) : (
           <CoverGrid>
             {selectedPalette.map((color, index) => (
@@ -354,6 +375,14 @@ const PaletteColor = styled.View<{
     props.index === props.total - 1 ? '14px' : '0'};
   border-bottom-right-radius: ${(props) =>
     props.index === props.total - 1 ? '14px' : '0'};
+`;
+
+const LoadingContainer = styled.View`
+  flex-basis: 155px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
 `;
 
 const LoadingText = styled(Body2)`

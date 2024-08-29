@@ -8,6 +8,8 @@ interface ExhibitState {
   colorPalettes: string[][];
   selectedPalette: string[];
   coverColors: string[];
+  randomPalettes: { palette: string[]; index: number }[];
+  coverType: 'gradient' | 'solid';
 }
 
 const initialState: ExhibitState = {
@@ -28,6 +30,8 @@ const initialState: ExhibitState = {
   colorPalettes: [],
   selectedPalette: [],
   coverColors: [],
+  randomPalettes: [],
+  coverType: 'gradient',
 };
 
 const exhibitSlice = createSlice({
@@ -54,17 +58,26 @@ const exhibitSlice = createSlice({
     setColorPalettes: (state, action: PayloadAction<string[][]>) => {
       return {
         ...state,
-        colorPalettes: action.payload, // 새로운 객체 반환
+        colorPalettes: action.payload,
       };
     },
     setSelectedPalette: (state, action: PayloadAction<string[]>) => {
       return {
         ...state,
-        selectedPalette: action.payload, // 새로운 객체 반환
+        selectedPalette: action.payload,
       };
     },
     setCoverColors: (state, action: PayloadAction<string[]>) => {
       state.coverColors = action.payload;
+    },
+    setRandomPalettes: (
+      state,
+      action: PayloadAction<{ palette: string[]; index: number }[]>,
+    ) => {
+      state.randomPalettes = action.payload;
+    },
+    setCoverType: (state, action: PayloadAction<'gradient' | 'solid'>) => {
+      state.coverType = action.payload;
     },
   },
 });
@@ -77,6 +90,8 @@ export const {
   setColorPalettes,
   setSelectedPalette,
   setCoverColors,
+  setRandomPalettes,
+  setCoverType,
 } = exhibitSlice.actions;
 
 export default exhibitSlice.reducer;
