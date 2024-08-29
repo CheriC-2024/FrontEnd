@@ -5,11 +5,12 @@ import { H6, Caption } from '../styles/typography';
 const Container = styled.View`
   flex-direction: row;
   align-items: flex-end;
-  margin: 0 0 ${({ theme }) => theme.spacing.s4} 0;
+  margin-bottom: ${({ theme }) => theme.spacing.s4};
 `;
 
-const TextContainer = styled.View`
+const TextContainer = styled.View<{ hasImage: boolean }>`
   flex-direction: column;
+  margin-top: ${({ hasImage, theme }) => (hasImage ? '0px' : theme.spacing.s4)};
 `;
 
 const Title = styled(H6)`
@@ -41,7 +42,7 @@ const TitleSubtitle: React.FC<TitleSubtitleProps> = ({
   return (
     <Container>
       {imageSource && <Image source={imageSource} />}
-      <TextContainer>
+      <TextContainer hasImage={!!imageSource}>
         <Title>{title}</Title>
         <Subtitle>{subtitle}</Subtitle>
       </TextContainer>
