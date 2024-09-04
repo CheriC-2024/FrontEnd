@@ -5,7 +5,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 import styled from 'styled-components/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigations/AppNavigator';
+import { RootStackParamList } from '../navigation/StackNavigator';
 import { H1 } from '../styles/typography';
 import { useNavigation } from '@react-navigation/native';
 

@@ -4,7 +4,7 @@ import { TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CommonActions } from '@react-navigation/native';
-import { RootStackParamList } from '../navigations/AppNavigator';
+import { RootStackParamList } from '../navigation/StackNavigator';
 
 interface AIRecommendBtnProps {
   source: string;

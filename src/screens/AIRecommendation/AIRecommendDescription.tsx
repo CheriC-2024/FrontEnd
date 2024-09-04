@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { RootStackParamList } from '../../navigation/StackNavigator';
 import CustomModal from '../../components/Modal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';

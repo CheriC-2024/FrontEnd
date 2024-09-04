@@ -10,7 +10,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { RootStackParamList } from '../../navigation/StackNavigator';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { addTheme, removeTheme } from '../../slices/themeSlice';
 import { RootState } from 'src/store';

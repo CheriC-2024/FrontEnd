@@ -9,28 +9,25 @@ import {
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
-import CollectionSelect from './Exhibit/CollectionSelect';
-import ArtworkSelect from './Exhibit/ArtworkSelect';
-import ThemeSetting from './Exhibit/ThemeSetting';
-import ArtworkInfoSetting from './Exhibit/ArtworkInfoSetting';
-import DescriptionSetting from './Exhibit/DescriptionSetting';
-import CoverSetting from './Exhibit/CoverSetting';
-import FinishSetting from './Exhibit/FinishSetting';
-import { useProgressBar } from '../components/ProgressBarContext';
-import { RootStackParamList } from '../navigations/AppNavigator';
+import CollectionSelect from './ExhibitScreens/CollectionSelect';
+import ArtworkSelect from './ExhibitScreens/ArtworkSelect';
+import ThemeSetting from './ExhibitScreens/ThemeSetting';
+import ArtworkInfoSetting from './ExhibitScreens/ArtworkInfoSetting';
+import DescriptionSetting from './ExhibitScreens/DescriptionSetting';
+import CoverSetting from './ExhibitScreens/CoverSetting';
+import FinishSetting from './ExhibitScreens/FinishSetting';
+import { useProgressBar } from '../contexts/ProgressBarContext';
+import { StackParamList } from '../navigation/types';
 import CustomModal from '../components/Modal';
-import ArtworkSelectModal from '../components/Modals/ArtworkSelectModal';
+import ArtworkSelectModal from '../components/modals/ArtworkSelectModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { useGlobalState } from '../contexts/GlobalStateContext';
 import { theme } from 'src/styles/theme';
 import { Subtitle1 } from 'src/styles/typography';
 
-type ExhibitScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Exhibit'
->;
-type ExhibitScreenRouteProp = RouteProp<RootStackParamList, 'Exhibit'>;
+type ExhibitScreenNavigationProp = NativeStackNavigationProp<StackParamList>;
+type ExhibitScreenRouteProp = RouteProp<StackParamList>;
 
 const ExhibitScreen: React.FC = () => {
   const navigation = useNavigation<ExhibitScreenNavigationProp>();
@@ -71,7 +68,7 @@ const ExhibitScreen: React.FC = () => {
           <HeaderLeftContainer>
             <TouchableOpacity onPress={handleSave}>
               <Icon
-                name="chevron-back"
+                name='chevron-back'
                 size={24}
                 color={theme.colors.redBlack}
                 style={{ marginLeft: theme.spacing.s4 }}
@@ -83,7 +80,7 @@ const ExhibitScreen: React.FC = () => {
           <TouchableOpacity onPress={goToPrev}>
             {step === 0 ? (
               <Icon
-                name="chevron-back"
+                name='chevron-back'
                 size={24}
                 color={theme.colors.redBlack}
                 style={{ marginLeft: theme.spacing.s4 }}
@@ -208,7 +205,7 @@ const ExhibitScreen: React.FC = () => {
         visible={modalVisible}
         onClose={closeConfirmModal}
         onConfirm={confirmCompletion}
-        title="마지막으로, 전시작품의 이용료를 결제할게요!"
+        title='마지막으로, 전시작품의 이용료를 결제할게요!'
         body={
           <ModalContent>
             <Text
@@ -240,7 +237,7 @@ const ExhibitScreen: React.FC = () => {
             </Text>
           </ModalContent>
         }
-        confirmButtonText="확인했습니다"
+        confirmButtonText='확인했습니다'
         cancelButtonText={'이전으로'}
       />
       {isArtworkModalVisible && totalCherries > 0 && (

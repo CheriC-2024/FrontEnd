@@ -7,7 +7,7 @@ import {
   NavigationProp,
 } from '@react-navigation/native';
 import styled from 'styled-components/native';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { RootStackParamList } from '../../navigation/StackNavigator';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { extractProperties } from '../../api/cloudVisionApi';
 import { getAIThemesTitle } from '../../api/chatgptApi';
