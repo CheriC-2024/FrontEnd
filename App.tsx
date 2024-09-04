@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import AppNavigator from './src/navigations/AppNavigator';
+import AppNavigator from './src/navigation/RootNavigator';
 import * as Font from 'expo-font';
 import { ActivityIndicator, View } from 'react-native';
 import 'react-native-gesture-handler';
@@ -9,6 +9,10 @@ import { ThemeProvider } from 'styled-components/native';
 import { theme } from 'src/styles/theme';
 import { Provider } from 'react-redux';
 import store from './src/store';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NavigationContainer } from '@react-navigation/native';
+
+const queryClient = new QueryClient();
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -46,11 +50,15 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <AppNavigator />
-        </ThemeProvider>
-      </Provider>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+          <ThemeProvider theme={theme}>
+            <NavigationContainer>
+              <AppNavigator />
+            </NavigationContainer>
+          </ThemeProvider>
+        </Provider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 };
