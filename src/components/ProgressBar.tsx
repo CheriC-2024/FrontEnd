@@ -1,14 +1,19 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { useProgressBar } from './ProgressBarContext';
 
-const ProgressBar: React.FC<{ totalSteps: number }> = ({ totalSteps }) => {
-  const { step } = useProgressBar();
+interface ProgressBarProps {
+  currentStep: number;
+  totalSteps: number;
+}
 
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  currentStep,
+  totalSteps,
+}) => {
   return (
     <ProgressBarContainer>
       {Array.from({ length: totalSteps }, (_, index) => (
-        <ProgressDot key={index} active={index <= step} />
+        <ProgressDot key={index} active={index < currentStep} />
       ))}
     </ProgressBarContainer>
   );
@@ -24,8 +29,7 @@ const ProgressBarContainer = styled.View`
 const ProgressDot = styled.View<{ active: boolean }>`
   width: 11px;
   height: 11px;
-  background-color: ${(props: { active: any }) =>
-    props.active ? '#E52C32' : '#F7F5F5'};
+  background-color: ${({ active }) => (active ? '#E52C32' : '#F7F5F5')};
   border-radius: 6px;
   margin: 0 11.5px;
 `;
