@@ -1,13 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-export interface Artwork {
-  artist: string;
-  artId: number;
-  name: string;
-  fileName: string;
-  cherryNum: number | null;
-  register: string;
-}
+import { Artwork } from 'src/interfaces/collection';
 
 interface ArtworkInfo {
   artworkDescription: string;
@@ -15,17 +7,7 @@ interface ArtworkInfo {
   artworkAppreciation: string;
 }
 
-interface Collection {
-  id: number;
-  name: string;
-  description: string;
-  filePath: string;
-  fileName: string;
-  artList: Artwork[];
-}
-
 interface ArtworkState {
-  collections: Collection[];
   selectedArtworks: Artwork[];
   expandedCollections: { [key: string]: boolean };
   filterText: string;
@@ -34,7 +16,6 @@ interface ArtworkState {
 }
 
 const initialState: ArtworkState = {
-  collections: [],
   selectedArtworks: [],
   expandedCollections: {},
   filterText: '',
@@ -46,15 +27,11 @@ const artworkSlice = createSlice({
   name: 'artwork',
   initialState,
   reducers: {
-    setCollections: (state, action: PayloadAction<Collection[]>) => {
-      state.collections = action.payload;
-      state.expandedCollections = action.payload.reduce(
-        (acc, collection) => {
-          acc[collection.name] = true;
-          return acc;
-        },
-        {} as { [key: string]: boolean },
-      );
+    // 모든 컬렉션 목록 열기
+    expandAllCollections: (state, action: PayloadAction<number[]>) => {
+      action.payload.forEach((collectionId) => {
+        state.expandedCollections[collectionId] = true;
+      });
     },
     resetSelectedArtworks: (state) => {
       state.totalCherries = 0;
@@ -63,11 +40,14 @@ const artworkSlice = createSlice({
     },
     toggleArtworkSelection: (state, action: PayloadAction<Artwork>) => {
       const artwork = action.payload;
+
+      // 이미 선택된 작품인지 확인 (모든 컬렉션을 포함하여 확인)
       const isSelected = state.selectedArtworks.some(
         (item) => item.artId === artwork.artId,
       );
 
       if (isSelected) {
+        // 이미 선택된 경우 해당 작품을 배열에서 제거
         state.selectedArtworks = state.selectedArtworks.filter(
           (item) => item.artId !== artwork.artId,
         );
@@ -75,6 +55,7 @@ const artworkSlice = createSlice({
           (_, index) => state.selectedArtworks[index]?.artId !== artwork.artId,
         );
       } else {
+        // 아직 선택되지 않은 경우 배열에 추가
         state.selectedArtworks.push(artwork);
         state.artworkInfoInput.push({
           artworkDescription: '',
@@ -83,26 +64,20 @@ const artworkSlice = createSlice({
         });
       }
 
+      // 총 체리 갯수 업데이트
       state.totalCherries = state.selectedArtworks.reduce(
         (sum, item) => sum + (item.cherryNum || 0),
         0,
       );
     },
-    toggleCollectionExpansion: (state, action: PayloadAction<string>) => {
-      const name = action.payload;
-      state.expandedCollections[name] = !state.expandedCollections[name];
-    },
-    setFilterText: (state, action: PayloadAction<string>) => {
-      state.filterText = action.payload;
+    toggleCollectionExpansion: (state, action: PayloadAction<number>) => {
+      const collectionId = action.payload; // collectionId 사용
+      state.expandedCollections[collectionId] =
+        !state.expandedCollections[collectionId];
     },
     collapseAllCollections: (state) => {
       Object.keys(state.expandedCollections).forEach(
         (key) => (state.expandedCollections[key] = false),
-      );
-    },
-    expandAllCollections: (state) => {
-      Object.keys(state.expandedCollections).forEach(
-        (key) => (state.expandedCollections[key] = true),
       );
     },
     updateArtworkInfoInput: (
@@ -114,22 +89,16 @@ const artworkSlice = createSlice({
         (state.artworkInfoInput[index] as any)[field] = value;
       }
     },
-    setSelectedArtworks: (state, action: PayloadAction<Artwork[]>) => {
-      state.selectedArtworks = action.payload;
-    },
   },
 });
 
 export const {
-  setCollections,
   resetSelectedArtworks,
   toggleArtworkSelection,
   toggleCollectionExpansion,
-  setFilterText,
   collapseAllCollections,
   expandAllCollections,
   updateArtworkInfoInput,
-  setSelectedArtworks,
 } = artworkSlice.actions;
 
 export default artworkSlice.reducer;
