@@ -14,8 +14,15 @@
     "paths": {
       "@env": ["./env.d.ts"]
     },
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "types": ["node"]
   },
-  "include": ["src", "env.d.ts", "App.tsx", "declarations.d.ts"]
+  "include": [
+    "src",
+    "env.d.ts",
+    "App.tsx",
+    "declarations.d.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["node_modules"]
 }
