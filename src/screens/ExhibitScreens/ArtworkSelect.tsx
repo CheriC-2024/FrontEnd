@@ -9,6 +9,7 @@ import {
   expandAllCollections,
   toggleCollectionExpansion,
   collapseAllCollections,
+  resetSelectedArtworks,
 } from '../../slices/artworkSlice';
 import { useArtworkList } from '../../api/hooks/useCollectionQueries';
 import { Container } from 'src/styles/layout';
@@ -66,7 +67,19 @@ const ArtworkSelect: React.FC = () => {
         onHeaderRightPress: handleNext, // "다음" 버튼 클릭 시 handleNext 호출
       }),
     );
-  }, [navigation, selectedArtworks, handleNext]);
+  }, [navigation, selectedArtworks]);
+
+  // 사용자가 해당 화면 나가면 상태 초기화
+  useEffect(() => {
+    // 'beforeRemove' 이벤트는 화면이 뒤로 가기 전에 트리거됩니다.
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // 선택한 작품을 초기화하는 액션 호출
+      dispatch(resetSelectedArtworks());
+    });
+
+    // cleanup: 컴포넌트가 언마운트될 때 이벤트 리스너 제거
+    return unsubscribe;
+  }, [navigation, dispatch]);
 
   useEffect(() => {
     if (artworkListData) {
