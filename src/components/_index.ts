@@ -5,5 +5,7 @@ export { default as ProgressBar } from './ProgressBar';
 export { default as SearchBar } from './SearchBar';
 export { default as TagButton } from './TagButton';
 export { default as TitleSubtitle } from './TitleSubtitle';
+export { default as ToastMessage } from './ToastMessage';
 
+export * from './gradients/_index';
 export * from './modals/_index';
