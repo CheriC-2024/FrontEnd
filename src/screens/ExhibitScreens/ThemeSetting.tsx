@@ -1,39 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import ProgressBarComponent from '../../components/ProgressBar';
-import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
 import GradientBackground from 'src/styles/GradientBackground';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { Subtitle1, Subtitle2 } from 'src/styles/typography';
 import ToastMessage from 'src/components/ToastMessage';
-import { theme } from 'src/styles/theme';
 import TagButton from 'src/components/TagButton';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from 'src/store';
 import { addTheme, removeTheme } from 'src/slices/themeSlice';
 import { Container } from 'src/styles/layout';
+import { useNavigation } from '@react-navigation/native';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { useToastMessage } from 'src/hooks/_index';
 
 const ThemeSetting: React.FC<{}> = ({}) => {
+  const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
   const { selectedThemes, selectedAiThemes } = useSelector(
     (state: RootState) => state.theme,
   );
+  const { toastVisible, toastMessage, showToast } = useToastMessage();
   const [inputText, setInputText] = useState('');
-  const { step, setStep } = useProgressBar();
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
 
+  // 헤더의 "다음" 버튼을 설정
   useEffect(() => {
-    setStep(2);
-  }, [step]);
-
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 3000);
-  };
+    const isNextEnabled = selectedThemes.length > 0;
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'text',
+        headerRightText: '다음',
+        nextScreenName: 'ArtworkInfoSetting',
+        headerRightDisabled: !isNextEnabled,
+      }),
+    );
+  }, [navigation, selectedThemes]);
 
   const handleAddTheme = () => {
     if (selectedThemes.includes(inputText.trim())) {
@@ -46,31 +50,27 @@ const ThemeSetting: React.FC<{}> = ({}) => {
     }
   };
 
-  const handleRemoveTheme = (theme: string) => {
-    dispatch(removeTheme(theme));
-  };
-
   return (
     <Container>
       <GradientBackground />
-      <ProgressBarComponent totalSteps={7} />
+      <ProgressBarComponent totalSteps={7} currentStep={3} />
       <TitleSubtitle
-        title="전시의 테마를 알려주세요"
-        subtitle="어떤 전시인지 테마로 설명해주세요"
+        title='전시의 테마를 알려주세요'
+        subtitle='어떤 전시인지 테마로 설명해주세요'
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />
       <AIButtonContainer>
-        <AIRecommendBtn source="ThemeSetting" />
+        <AIRecommendBtn source='ThemeSetting' />
       </AIButtonContainer>
       <ThemeInputContainer>
         <Hash>#</Hash>
         <ThemeInput
-          placeholder="테마를 추가해주세요 (최대 3개)"
-          placeholderTextColor="#B0ABAB"
+          placeholder='테마를 추가해주세요 (최대 3개)'
+          placeholderTextColor={`${({ theme }) => theme.colors.grey_8}`}
           value={inputText}
           onChangeText={setInputText}
           onSubmitEditing={handleAddTheme}
-          returnKeyType="done"
+          returnKeyType='done'
           autoFocus={true}
           showSoftInputOnFocus={true}
         />
@@ -83,15 +83,17 @@ const ThemeSetting: React.FC<{}> = ({}) => {
         </Subtitle2>
       </SelectedThemesHeader>
       <SelectedThemes>
-        {selectedThemes.map((theme, index) => (
+        {selectedThemes.map((themeName, index) => (
           <TagButton
             key={index}
-            text={theme}
-            onRemove={() => dispatch(removeTheme(theme))}
+            text={themeName}
+            onRemove={() => dispatch(removeTheme(themeName))}
             backgroundColor={
-              selectedAiThemes.includes(theme) ? '#e52c32' : '#413333'
+              selectedAiThemes.includes(themeName)
+                ? theme.colors.cherryRed_10
+                : theme.colors.grey_8
             }
-            textColor="#fff"
+            textColor='#fff'
           />
         ))}
       </SelectedThemes>
