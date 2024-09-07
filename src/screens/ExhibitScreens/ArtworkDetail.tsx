@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, Text, Image } from 'react-native';
 import styled from 'styled-components/native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { StackParamList } from '../../navigation/types';
 import { imageAssets } from '../../assets/DB/imageAssets';
 import { Container } from 'src/styles/layout';
 import { Caption, H4, Subtitle1 } from 'src/styles/typography';
 import { theme } from 'src/styles/theme';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
 
-type ArtworkDetailRouteProp = RouteProp<RootStackParamList, 'ArtworkDetail'>;
+type ArtworkDetailRouteProp = RouteProp<StackParamList, 'ArtworkDetail'>;
 
 interface InfoItem {
   title: string;
@@ -17,8 +18,19 @@ interface InfoItem {
 
 const ArtworkDetail: React.FC = () => {
   const route = useRoute<ArtworkDetailRouteProp>();
+  const navigation = useNavigation();
   const { isCollectorOnly, imageUrl, title } = route.params;
   const imageSource = imageAssets[imageUrl];
+
+  // 헤더 설정
+  useEffect(() => {
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'both',
+        leftButtonText: '작품의 상세 정보',
+      }),
+    );
+  }, [navigation]);
 
   return (
     <Container>

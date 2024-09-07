@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Dropdown } from 'react-native-element-dropdown';
 import ProgressBarComponent from '../../components/ProgressBar';
-import { useProgressBar } from '../../components/ProgressBarContext';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { useNavigation } from '@react-navigation/native';
 import GradientBackground from 'src/styles/GradientBackground';
 import { Container } from 'src/styles/layout';
 import TitleSubtitle from 'src/components/TitleSubtitle';
@@ -22,51 +19,49 @@ import {
 } from 'src/slices/exhibitSlice';
 import { Caption, Subtitle2 } from 'src/styles/typography';
 import { ScrollView } from 'react-native-gesture-handler';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
 
-interface DescriptionSettingProps {
-  onFieldsFilled: (filled: boolean) => void;
-}
-
-const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
-  onFieldsFilled,
-}) => {
+const DescriptionSetting: React.FC = () => {
   const dispatch = useDispatch();
   const { exhibitTitle, exhibitDescription, selectedFont, fontData } =
     useSelector((state: RootState) => state.exhibit);
-  const { step, setStep } = useProgressBar();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigation = useNavigation();
 
-  const navigation =
-    useNavigation<NavigationProp<RootStackParamList, 'Exhibit'>>();
-
-  useEffect(() => {
-    setStep(4); // Set progress bar to step 4
-  }, [setStep]);
-
+  // 필드 값이 변경될 때 '다음' 버튼 활성화/비활성화 업데이트
   useEffect(() => {
     const allFieldsFilled =
       exhibitTitle.trim() !== '' && exhibitDescription.trim() !== '';
-    onFieldsFilled(allFieldsFilled);
-  }, [exhibitTitle, exhibitDescription]);
+
+    // 헤더에 '다음' 버튼 설정
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'text',
+        headerRightText: '다음',
+        nextScreenName: 'CoverSetting', // 다음 화면으로 이동할 경로
+        headerRightDisabled: !allFieldsFilled, // 필드가 모두 채워지지 않으면 비활성화
+      }),
+    );
+  }, [navigation, exhibitTitle, exhibitDescription]);
 
   const handleGoToArtworkList = () => {
-    navigation.navigate('ArtworkList');
+    navigation.navigate('Stack', { screen: 'ArtworkList' });
   };
 
   return (
     <Container>
       <GradientBackground />
-      <ProgressBarComponent totalSteps={7} />
+      <ProgressBarComponent totalSteps={7} currentStep={5} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <TitleSubtitle
-          title="전시 이름과 설명을 작성해주세요"
-          subtitle="거의 다 왔어요! 조금만 더 힘내요"
+          title='전시 이름과 설명을 작성해주세요'
+          subtitle='거의 다 왔어요! 조금만 더 힘내요'
           imageSource={require('src/assets/images/Character/character_happy.png')}
         />
         <InputContainer>
           <InfoBlock
-            label="전시 이름"
-            placeholder="ex) 항해 : 김아무개전"
+            label='전시 이름'
+            placeholder='ex) 항해 : 김아무개전'
             maxLength={30}
             required
             value={exhibitTitle}
@@ -74,7 +69,7 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
             style={{ paddingBottom: parseInt(theme.padding.l) }}
           />
           <AIButtonContainer>
-            <AIRecommendBtn source="DescriptionSetting" />
+            <AIRecommendBtn source='DescriptionSetting' />
           </AIButtonContainer>
         </InputContainer>
         <DropdownContainer>
@@ -84,9 +79,9 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
           <DropdownWrapper>
             <Dropdown
               data={fontData}
-              labelField="label"
-              valueField="value"
-              placeholder="폰트를 선택하세요"
+              labelField='label'
+              valueField='value'
+              placeholder='폰트를 선택하세요'
               value={selectedFont}
               onChange={(item) => {
                 dispatch(setSelectedFont(item.value));
@@ -115,8 +110,8 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
           </DropdownWrapper>
         </DropdownContainer>
         <InfoBlock
-          label="전시 설명"
-          placeholder="컬렉터님만의 감상을 담아 전시를 소개해주세요"
+          label='전시 설명'
+          placeholder='컬렉터님만의 감상을 담아 전시를 소개해주세요'
           maxLength={500}
           required
           value={exhibitDescription}
@@ -125,8 +120,8 @@ const DescriptionSetting: React.FC<DescriptionSettingProps> = ({
         />
         <Button onPress={handleGoToArtworkList}>
           <ButtonContent>
-            <ButtonText>전시로 올려진 작품 보러가기</ButtonText>
-            <ButtonIcon name="chevron-forward" size={16} color="#120000" />
+            <ButtonText>전시로 올려질 작품 보러가기</ButtonText>
+            <ButtonIcon name='chevron-forward' size={16} color='#120000' />
           </ButtonContent>
         </Button>
       </ScrollView>
@@ -198,11 +193,11 @@ const selectedTextStyle = {
   color: theme.colors.redBlack,
 };
 
-const Button = styled.TouchableOpacity`
+const Button = styled.TouchableOpacity<{ disabled: boolean }>`
   margin: 10px 0 20px 0;
   border-radius: 20px;
   border: 1px solid #f7f5f5;
-  background-color: white;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
   justify-content: center;
   z-index: 1; /* Ensure button is above other elements */
 `;

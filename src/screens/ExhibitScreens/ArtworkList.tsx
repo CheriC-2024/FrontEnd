@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
-import CherryIcon from '../../assets/icons/cherry.svg';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigations/AppNavigator'; // RootStackParamList 타입 import
+import { CherryIcon } from '../../assets/icons/_index.js';
+import { useNavigation } from '@react-navigation/native';
 import { imageAssets } from '../../assets/DB/imageAssets';
 import { RootState } from 'src/store';
 import { useSelector } from 'react-redux';
@@ -11,10 +10,21 @@ import TitleSubtitle from 'src/components/TitleSubtitle';
 import { Container } from 'src/styles/layout';
 import { theme } from 'src/styles/theme';
 import { Caption, Subtitle2 } from 'src/styles/typography';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
 
 const ArtworkList: React.FC = () => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation();
   const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
+
+  // 헤더 설정
+  useEffect(() => {
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'both',
+        leftButtonText: '작품 전시 목록',
+      }),
+    );
+  }, [navigation]);
 
   const handleArtworkPress = (artId: number) => {
     const artwork = selectedArtworks.find((art) => art.artId === artId);
@@ -30,8 +40,8 @@ const ArtworkList: React.FC = () => {
   return (
     <Container>
       <TitleSubtitle
-        title="전시로 올려진 작품들이에요!"
-        subtitle="작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요"
+        title='전시로 올려질 작품들이에요!'
+        subtitle='작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요'
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         <ArtworkContainer>
@@ -59,7 +69,7 @@ const ArtworkList: React.FC = () => {
                           alignItems: 'center',
                         }}
                       >
-                        <CherryIcon fill="#B0ABAB" />
+                        <CherryIcon fill='#B0ABAB' />
                         <Text style={{ color: '#B0ABAB' }}>
                           {artwork.cherryNum}
                         </Text>

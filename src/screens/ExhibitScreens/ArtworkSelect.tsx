@@ -58,10 +58,9 @@ const ArtworkSelect: React.FC = () => {
   // 헤더의 "다음" 버튼을 설정
   useEffect(() => {
     const isNextEnabled = selectedArtworks.length > 0;
-
     navigation.setOptions(
       headerOptions(navigation, {
-        buttonType: 'text',
+        leftButtonType: 'text',
         headerRightText: '다음',
         headerRightDisabled: !isNextEnabled,
         onHeaderRightPress: handleNext, // "다음" 버튼 클릭 시 handleNext 호출
@@ -71,7 +70,7 @@ const ArtworkSelect: React.FC = () => {
 
   // 사용자가 해당 화면 나가면 상태 초기화
   useEffect(() => {
-    // 'beforeRemove' 이벤트는 화면이 뒤로 가기 전에 트리거됩니다.
+    // 'beforeRemove' 이벤트는 화면이 뒤로 가기 전에 트리거
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       // 선택한 작품을 초기화하는 액션 호출
       dispatch(resetSelectedArtworks());

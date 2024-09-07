@@ -4,7 +4,7 @@ import { ScrollView, TouchableOpacity, View, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { ExhibitStackParamList } from 'src/navigation/types';
 import { imageAssets } from '../../assets/DB/imageAssets';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,11 +14,10 @@ import { Caption, H6 } from 'src/styles/typography';
 import InfoBlock from 'src/components/InfoBlock';
 import { theme } from 'src/styles/theme';
 import { Btn, BtnText } from 'src/components/Button';
-import { Artwork, updateArtworkInfoInput } from 'src/slices/artworkSlice';
+import { updateArtworkInfoInput } from 'src/slices/artworkSlice';
+import { Artwork } from 'src/interfaces/collection';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
 
-interface ArtworkInfoSettingProps {
-  onArtworkDescriptionChange: (filled: boolean) => void;
-}
 interface CircleSelectorProps {
   selectedArtworks: Artwork[];
   currentIndex: number;
@@ -27,25 +26,34 @@ interface CircleSelectorProps {
   scrollViewRef: React.RefObject<ScrollView>;
 }
 
-const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
-  onArtworkDescriptionChange,
-}) => {
+const ArtworkInfoSetting: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const contentScrollViewRef = useRef<ScrollView>(null);
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ExhibitStackParamList>>();
   const dispatch = useDispatch();
 
   const { artworkInfoInput, selectedArtworks } = useSelector(
     (state: RootState) => state.artwork,
   );
 
-  useEffect(() => {
-    const allDescriptionsFilled = artworkInfoInput.every(
+  const allDescriptionFilled = () => {
+    return artworkInfoInput.every(
       (input) => input.artworkDescription.trim().length > 0,
     );
-    onArtworkDescriptionChange(allDescriptionsFilled);
-  }, [artworkInfoInput, onArtworkDescriptionChange]);
+  };
+  // 헤더 설정
+  useEffect(() => {
+    const isNextEnabled = allDescriptionFilled();
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'text',
+        headerRightText: '다음',
+        nextScreenName: 'DescriptionSetting',
+        headerRightDisabled: !isNextEnabled,
+      }),
+    );
+  }, [navigation, artworkInfoInput]);
 
   const handleNext = () => {
     const nextIndex = (currentIndex + 1) % selectedArtworks.length;
@@ -69,10 +77,13 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
   const handleDetailPress = () => {
     const artwork = selectedArtworks[currentIndex];
     if (artwork) {
-      navigation.navigate('ArtworkDetail', {
-        isCollectorOnly: artwork.cherryNum === null,
-        imageUrl: artwork.fileName,
-        title: artwork.name,
+      navigation.navigate('Stack', {
+        screen: 'ArtworkDetail',
+        params: {
+          isCollectorOnly: artwork.cherryNum === null,
+          imageUrl: artwork.fileName,
+          title: artwork.name,
+        },
       });
     }
   };
@@ -85,10 +96,10 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
 
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
+      <ProgressBarComponent totalSteps={7} currentStep={4} />
       <TitleSubtitle
-        title="작품의 정보를 작성해주세요"
-        subtitle="모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요"
+        title='작품의 정보를 작성해주세요'
+        subtitle='모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요'
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />
       <CircleSelector
@@ -121,12 +132,12 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
           </ArtworkTitleWrapper>
           <ArtworkDetailButton onPress={handleDetailPress}>
             <Caption>작품 정보 상세 보기</Caption>
-            <Icon name="chevron-forward-outline" size={14} color="#120000" />
+            <Icon name='chevron-forward-outline' size={14} color='#120000' />
           </ArtworkDetailButton>
         </ArtworkTitleContainer>
         <InfoBlock
-          label="나만의 작품 소개글"
-          placeholder="컬렉터님만의 작품을 소개해주세요"
+          label='나만의 작품 소개글'
+          placeholder='컬렉터님만의 작품을 소개해주세요'
           maxLength={500}
           required
           value={currentArtworkInfo.artworkDescription}
@@ -136,8 +147,8 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
           style={{ paddingBottom: parseInt(theme.padding.l) }}
         />
         <InfoBlock
-          label="나만의 작품 수집 계기"
-          placeholder="작품을 수집하게 된 계기를 알려주세요"
+          label='나만의 작품 수집 계기'
+          placeholder='작품을 수집하게 된 계기를 알려주세요'
           maxLength={500}
           value={currentArtworkInfo.artworkValue}
           onChangeText={(text: string) =>
@@ -146,8 +157,8 @@ const ArtworkInfoSetting: React.FC<ArtworkInfoSettingProps> = ({
           style={{ paddingBottom: parseInt(theme.padding.l) }}
         />
         <InfoBlock
-          label="나만의 작품 감상법"
-          placeholder="컬렉터님만의 작품 감상법을 알려주세요"
+          label='나만의 작품 감상법'
+          placeholder='컬렉터님만의 작품 감상법을 알려주세요'
           maxLength={500}
           value={currentArtworkInfo.artworkAppreciation}
           onChangeText={(text: string) =>
