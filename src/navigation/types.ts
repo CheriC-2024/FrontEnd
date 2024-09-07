@@ -21,7 +21,6 @@ export type StackParamList = {
   Login: undefined;
   Signup: undefined;
   MainTabs: undefined;
-  Exhibit: { step: number; selectedThemes?: string[] };
   AIRecommendLoading: { source: string };
   AIRecommendTheme: { source: string };
   AIRecommendDescription: { source: string };

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export const useToastMessage = (initialMessage: string = '') => {
+const useToastMessage = (initialMessage: string = '') => {
   const [toastVisible, setToastVisible] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>(initialMessage);
 
@@ -14,3 +14,5 @@ export const useToastMessage = (initialMessage: string = '') => {
 
   return { toastVisible, toastMessage, showToast };
 };
+
+export default useToastMessage;
