@@ -1,52 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-} from 'react-native';
+import React, { useState } from 'react';
+import { Text, Animated } from 'react-native';
+import styled, { useTheme } from 'styled-components/native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import styled from 'styled-components/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useDispatch, useSelector } from 'react-redux';
 import { StackParamList } from 'src/navigation/types';
-import TitleSubtitle from 'src/components/TitleSubtitle';
-import { addTheme, removeTheme } from '../../slices/themeSlice';
+import { LinearGradient } from 'expo-linear-gradient';
 import { RootState } from 'src/store';
-import TagButton from 'src/components/TagButton';
-import { Caption, Subtitle2 } from 'src/styles/typography';
-import { theme } from 'src/styles/theme';
-import ToastMessage from 'src/components/ToastMessage';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTheme, removeTheme } from '../../slices/themeSlice';
+import { useToastMessage } from 'src/hooks/_index';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { TitleSubtitle, TagButton, ToastMessage } from 'src/components/_index';
 import { Btn, BtnText } from 'src/components/Button';
-import RefreshIcon from '../../assets/icons/refresh';
+import { Container } from 'src/styles/layout';
+import { RefreshIcon } from '../../assets/icons/_index.js';
+import { Caption, Subtitle2 } from 'src/styles/typography';
 
 const AIRecommendTheme: React.FC = () => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
   const dispatch = useDispatch();
+  const theme = useTheme();
 
-  const selectedThemes = useSelector(
-    (state: RootState) => state.theme.selectedThemes,
+  const { selectedAiThemes, selectedThemes } = useSelector(
+    (state: RootState) => state.theme,
   );
-  const selectedAiThemes = useSelector(
-    (state: RootState) => state.theme.selectedAiThemes,
+  const { aiThemes, aiThemeReason } = useSelector(
+    (state: RootState) => state.aiRecommend,
   );
-  const aiThemes = useSelector(
-    (state: RootState) => state.aiRecommend.aiThemes,
-  );
-  const aiThemeReason = useSelector(
-    (state: RootState) => state.aiRecommend.aiThemeReason,
-  );
-
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const { toastVisible, toastMessage, showToast } = useToastMessage();
 
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 3000);
-  };
+  navigation.setOptions(
+    headerOptions(navigation, {
+      leftButtonType: null,
+      headerTitle: '전시 테마 AI 추천',
+      headerTitleAlign: 'left',
+    }),
+  );
 
   const [animations, setAnimations] = useState<{
     [key: string]: Animated.Value;
@@ -70,18 +59,6 @@ const AIRecommendTheme: React.FC = () => {
       {} as { [key: string]: Animated.Value },
     ),
   );
-
-  useEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: { display: 'none' },
-    });
-
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'flex' },
-      });
-    };
-  }, [navigation]);
 
   const handleThemeSelect = (theme: string) => {
     if (selectedTheme !== theme) {
@@ -217,12 +194,6 @@ const AIRecommendTheme: React.FC = () => {
     </>
   );
 };
-
-const Container = styled.View`
-  flex: 1;
-  padding: 40px 16px;
-  background-color: #fff;
-`;
 
 const ThemeScrollViewContainer = styled.View`
   flex-direction: row;
