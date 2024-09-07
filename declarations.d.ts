@@ -11,3 +11,9 @@ import { ThemeType } from 'src/styles/theme';
 declare module 'styled-components' {
   export interface DefaultTheme extends ThemeType {}
 }
+
+declare module 'react-native-immersive-mode' {
+  export function fullScreen(): void;
+  export function immersiveOn(): void;
+  export function immersiveOff(): void;
+}
