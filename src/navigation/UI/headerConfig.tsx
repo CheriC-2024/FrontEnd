@@ -5,31 +5,45 @@ import { BackIcon } from 'src/assets/icons/_index';
 import { Subtitle1 } from 'src/styles/typography';
 
 interface HeaderConfigOptions {
-  buttonType?: 'text' | 'icon';
+  leftButtonType?: 'text' | 'icon' | 'both';
   iconColor?: string;
   headerTitleAlign?: 'left' | 'center';
   headerRightText?: string;
   headerTitle?: string;
   nextScreenName?: string;
   headerRightDisabled?: boolean;
-  onHeaderRightPress?: () => void; // 헤더 오른쪽 버튼 커스텀 동작
+  onHeaderRightPress?: () => void;
+  leftButtonText?: string;
 }
 
 const createHeaderLeft = (
   onPress: () => void,
   options: HeaderConfigOptions = {},
 ) => {
-  const { buttonType = 'icon', iconColor = '#120000' } = options;
+  const {
+    leftButtonType = 'icon',
+    iconColor = '#120000',
+    leftButtonText = '이전',
+  } = options;
 
-  return () => (
+  return (
     <TouchableOpacity
       onPress={onPress}
       style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 14 }}
     >
-      {buttonType === 'icon' ? (
+      {leftButtonType === 'icon' && (
         <BackIcon width={22} height={22} fill={iconColor} />
-      ) : (
-        <Subtitle1 style={{ color: iconColor }}>이전</Subtitle1>
+      )}
+      {leftButtonType === 'text' && (
+        <Subtitle1 style={{ color: iconColor }}>{leftButtonText}</Subtitle1>
+      )}
+      {leftButtonType === 'both' && (
+        <>
+          <BackIcon width={22} height={22} fill={iconColor} />
+          <Subtitle1 style={{ color: iconColor, marginLeft: 8 }}>
+            {leftButtonText}
+          </Subtitle1>
+        </>
       )}
     </TouchableOpacity>
   );
@@ -41,7 +55,7 @@ const createHeaderRight = (
 ) => {
   const { iconColor = '#120000', headerRightDisabled = false } = options;
 
-  return () => (
+  return (
     <TouchableOpacity
       onPress={onPress}
       disabled={headerRightDisabled}
@@ -60,21 +74,26 @@ const createHeaderRight = (
 };
 
 export const headerOptions = (
-  navigation: any,
+  navigation?: any,
   options: HeaderConfigOptions = {},
 ): StackNavigationOptions => ({
-  headerTitle: options.headerTitle || ' ',
-  headerLeft: createHeaderLeft(() => navigation.goBack(), options),
+  headerShown: true,
+  headerLeft: () => createHeaderLeft(() => navigation.goBack(), options),
   headerRight: options.headerRightText
-    ? createHeaderRight(() => {
-        if (!options.headerRightDisabled && options.onHeaderRightPress) {
-          // 커스텀 onPress가 있으면 실행
-          options.onHeaderRightPress();
-        } else if (!options.headerRightDisabled && options.nextScreenName) {
-          // 기본적으로 다음 화면으로 이동
-          navigation.navigate(options.nextScreenName);
-        }
-      }, options)
+    ? () =>
+        createHeaderRight(() => {
+          if (!options.headerRightDisabled && options.onHeaderRightPress) {
+            options.onHeaderRightPress();
+          } else if (!options.headerRightDisabled && options.nextScreenName) {
+            navigation.navigate(options.nextScreenName);
+          }
+        }, options)
     : undefined,
-  headerTitleAlign: options.headerTitleAlign || 'center',
+  headerTitle: options.headerTitle || ' ',
+  headerTitleAlign: options.headerTitleAlign,
+  headerTitleStyle: {
+    fontSize: 16,
+    fontFamily: 'PretendardBold',
+    color: options.iconColor,
+  },
 });
