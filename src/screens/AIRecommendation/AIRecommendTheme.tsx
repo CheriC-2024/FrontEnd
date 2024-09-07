@@ -10,7 +10,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootStackParamList } from '../../navigation/StackNavigator';
+import { StackParamList } from 'src/navigation/types';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { addTheme, removeTheme } from '../../slices/themeSlice';
 import { RootState } from 'src/store';
@@ -22,7 +22,7 @@ import { Btn, BtnText } from 'src/components/Button';
 import RefreshIcon from '../../assets/icons/refresh';
 
 const AIRecommendTheme: React.FC = () => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<StackParamList>>();
   const dispatch = useDispatch();
 
   const selectedThemes = useSelector(
@@ -124,8 +124,8 @@ const AIRecommendTheme: React.FC = () => {
     <>
       <Container>
         <TitleSubtitle
-          title="AI가 전시 테마를 만들었어요!"
-          subtitle="원하는 전시 테마를 선택해주세요"
+          title='AI가 전시 테마를 만들었어요!'
+          subtitle='원하는 전시 테마를 선택해주세요'
         />
         <RefreshIcon />
         <ThemeScrollViewContainer>
@@ -204,7 +204,7 @@ const AIRecommendTheme: React.FC = () => {
               backgroundColor={
                 selectedAiThemes.includes(theme) ? '#e52c32' : '#413333'
               }
-              textColor="#fff"
+              textColor='#fff'
             />
           ))}
         </SelectedThemes>
@@ -220,7 +220,7 @@ const AIRecommendTheme: React.FC = () => {
 
 const Container = styled.View`
   flex: 1;
-  padding: 16px;
+  padding: 40px 16px;
   background-color: #fff;
 `;
 

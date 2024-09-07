@@ -1,25 +1,23 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { TouchableOpacity, Text } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { CommonActions } from '@react-navigation/native';
-import { RootStackParamList } from '../navigation/StackNavigator';
+import { StackParamList } from '../navigation/types';
+import { Caption } from 'src/styles/typography';
 
 interface AIRecommendBtnProps {
   source: string;
 }
 
 const AIRecommendBtn: React.FC<AIRecommendBtnProps> = ({ source }) => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavigationProp<StackParamList>>();
 
   const handleAIRecommendation = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'AIRecommendLoading', params: { source } }],
-      }),
-    );
+    navigation.navigate('Stack', {
+      screen: 'AIRecommendLoading',
+      params: { source },
+    });
   };
 
   return (
@@ -31,10 +29,8 @@ const AIRecommendBtn: React.FC<AIRecommendBtnProps> = ({ source }) => {
 
 const AIButton = styled(TouchableOpacity)``;
 
-const AIButtonText = styled(Text)`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
+const AIButtonText = styled(Caption)`
+  color: ${({ theme }) => theme.colors.grey_8};
 `;
 
 export default AIRecommendBtn;
