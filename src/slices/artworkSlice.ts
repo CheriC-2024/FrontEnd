@@ -42,20 +42,19 @@ const artworkSlice = createSlice({
       const artwork = action.payload;
 
       // 이미 선택된 작품인지 확인 (모든 컬렉션을 포함하여 확인)
-      const isSelected = state.selectedArtworks.some(
+      const existingIndex = state.selectedArtworks.findIndex(
         (item) => item.artId === artwork.artId,
       );
 
-      if (isSelected) {
-        // 이미 선택된 경우 해당 작품을 배열에서 제거
-        state.selectedArtworks = state.selectedArtworks.filter(
-          (item) => item.artId !== artwork.artId,
-        );
-        state.artworkInfoInput = state.artworkInfoInput.filter(
-          (_, index) => state.selectedArtworks[index]?.artId !== artwork.artId,
-        );
+      console.log('Toggling artwork:', artwork);
+      console.log('Existing index:', existingIndex);
+
+      if (existingIndex >= 0) {
+        // If already selected, remove the artwork from both selectedArtworks and artworkInfoInput
+        state.selectedArtworks.splice(existingIndex, 1);
+        state.artworkInfoInput.splice(existingIndex, 1);
       } else {
-        // 아직 선택되지 않은 경우 배열에 추가
+        // If not selected, add the artwork and its corresponding info
         state.selectedArtworks.push(artwork);
         state.artworkInfoInput.push({
           artworkDescription: '',
@@ -66,9 +65,12 @@ const artworkSlice = createSlice({
 
       // 총 체리 갯수 업데이트
       state.totalCherries = state.selectedArtworks.reduce(
-        (sum, item) => sum + (item.cherryNum || 0),
+        (sum, item) => sum + (item.cherryNum !== null ? item.cherryNum : 0),
         0,
       );
+
+      console.log('Updated selected artworks:', state.selectedArtworks);
+      console.log('Updated total cherries:', state.totalCherries);
     },
     toggleCollectionExpansion: (state, action: PayloadAction<number>) => {
       const collectionId = action.payload; // collectionId 사용
