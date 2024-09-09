@@ -8,7 +8,7 @@ import {
   SearchScreen,
   CollectingScreen,
   MyCheriCScreen,
-} from '../screens';
+} from '../screens/_index';
 import {
   NoticeIcon,
   HomeIcon,

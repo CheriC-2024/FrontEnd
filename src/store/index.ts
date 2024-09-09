@@ -1,17 +1,21 @@
 import { configureStore } from '@reduxjs/toolkit';
-import collectionReducer from '../slices/collectionSlice';
-import artworkReducer from '../slices/artworkSlice';
-import themeReducer from '../slices/themeSlice';
-import aiRecommendReducer from '../slices/aiRecommendSlice';
-import exhibitReducer from '../slices/exhibitSlice';
+import {
+  aiRecommendReducer,
+  artworkReducer,
+  collectionReducer,
+  coverReducer,
+  exhibitReducer,
+  themeReducer,
+} from '../slices/_index';
 
 const store = configureStore({
   reducer: {
-    collection: collectionReducer,
-    artwork: artworkReducer,
-    theme: themeReducer,
     aiRecommend: aiRecommendReducer,
+    artwork: artworkReducer,
+    collection: collectionReducer,
+    cover: coverReducer,
     exhibit: exhibitReducer,
+    theme: themeReducer,
   },
 });
 
