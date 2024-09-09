@@ -11,7 +11,7 @@ const useCherryModal = (
   const handleNext = () => {
     if (selectedCherries === 0) {
       onAction();
-    } else if (userCherries > selectedCherries) {
+    } else if (userCherries >= selectedCherries) {
       setModalProps({
         title: `전시 완료 시점에 체리 ${selectedCherries}개가\n사용돼요!`,
         message: `선택하신 작품 중 ${'<작품개수>점'}은, 작가님이 설정한\n갯수만큼 체리가 필요해요\n우리 작품의 저작권을 함께 지켜요!`,
