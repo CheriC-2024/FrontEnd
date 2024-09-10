@@ -11,13 +11,13 @@ interface CoverState {
 }
 
 const initialState: CoverState = {
-  selectedCover: [], // 초기값은 빈 배열
-  selectedCoverImage: null, // 초기값은 null
+  selectedCover: [],
+  selectedCoverImage: null,
   colorPalettes: [],
   randomPalettes: [],
   coverType: 'gradient',
-  selectedPalette: [], // 초기값 추가
-  coverColors: [], // 초기값 추가
+  selectedPalette: [],
+  coverColors: [],
 };
 
 const coverSlice = createSlice({
@@ -46,10 +46,10 @@ const coverSlice = createSlice({
       state.coverType = action.payload;
     },
     setSelectedPalette: (state, action: PayloadAction<string[]>) => {
-      state.selectedPalette = action.payload; // 선택된 팔레트 업데이트
+      state.selectedPalette = action.payload;
     },
     setCoverColors: (state, action: PayloadAction<string[]>) => {
-      state.coverColors = action.payload; // 선택된 커버 색상 업데이트
+      state.coverColors = action.payload;
     },
   },
 });
@@ -60,8 +60,8 @@ export const {
   setColorPalettes,
   setRandomPalettes,
   setCoverType,
-  setSelectedPalette, // 추가
-  setCoverColors, // 추가
+  setSelectedPalette,
+  setCoverColors,
 } = coverSlice.actions;
 
 export default coverSlice.reducer;
