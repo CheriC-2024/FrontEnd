@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  ImageBackground,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import CherryIcon from '../../assets/icons/cherry.svg';
-import PencilIcon from '../../assets/icons/pencil.svg';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { CherryIcon, PencilIcon } from '../../assets/icons/_index.js';
+import { useNavigation } from '@react-navigation/native';
 import DraggableFlatList, {
   RenderItemParams,
 } from 'react-native-draggable-flatlist';
@@ -21,46 +14,65 @@ import {
 } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
-import ProgressBarComponent from '../../components/ProgressBar';
-import { useProgressBar } from '../../components/ProgressBarContext';
-import { RootStackParamList } from '../../navigations/AppNavigator';
 import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedArtworks } from 'src/slices/artworkSlice';
 import { RootState } from 'src/store';
-import { setSelectedArtworks } from '../../slices/artworkSlice';
-import MusicSelectionSheet from '../../components/BottomSheets/MusicSelectionSheet';
+import MusicSelectionSheet from '../../components/bottomSheets/MusicSelectionSheet';
 import { imageAssets } from '../../assets/DB/imageAssets';
-import TitleSubtitle from 'src/components/TitleSubtitle';
+import {
+  TitleSubtitle,
+  ProgressBar,
+  CherryFinishModal,
+} from 'src/components/_index';
 import { Container } from 'src/styles/layout';
-import { Artwork } from '../../slices/artworkSlice';
-import { useGlobalState } from 'src/contexts/GlobalStateContext';
 import { Caption, H5, Subtitle2 } from 'src/styles/typography';
+import { Artwork } from 'src/interfaces/collection';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { useCherryFinishModal } from 'src/hooks/_index';
 
-interface FinishSettingProps {
-  setIsEditing: (isEditing: boolean) => void;
-}
-
-const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
+const FinishSetting: React.FC = () => {
   const dispatch = useDispatch();
-  const { step, setStep } = useProgressBar();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation();
 
-  const {
-    exhibitTitle,
-    exhibitDescription,
-    selectedFont,
-    coverColors,
-    coverType,
-    selectedCoverImage,
-  } = useSelector((state: RootState) => state.exhibit);
+  const { exhibitTitle, exhibitDescription, selectedFont } = useSelector(
+    (state: RootState) => state.exhibit,
+  );
+  const { selectedCover, coverType, selectedCoverImage } = useSelector(
+    (state: RootState) => state.cover,
+  );
 
   const { selectedThemes } = useSelector((state: RootState) => state.theme);
-  const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
-  const { selectedMusic, setSelectedMusic } = useGlobalState();
+  const { selectedArtworks, totalCherries } = useSelector(
+    (state: RootState) => state.artwork,
+  );
+  const [selectedMusic, setSelectedMusic] = useState<string[]>([
+    '아직 음악이 없습니다',
+  ]);
   const [isMusicSheetVisible, setMusicSheetVisible] = useState(false);
 
+  // 헤더 설정
   useEffect(() => {
-    setStep(6);
-  }, [setStep]);
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'text',
+        headerRightText: '완성',
+        nextScreenName: 'FinishSetting',
+        onHeaderRightPress: handleNext,
+      }),
+    );
+  }, [navigation]);
+
+  const userCherries = 5; // 실제 사용자의 체리 정보 (임시)
+
+  const { isModalVisible, modalProps, handleNext, setModalVisible } =
+    useCherryFinishModal(userCherries, totalCherries, () => {
+      // 확인했을 때 실행될 POST 요청, 체리 차감 API 등 추가 예정
+      navigation.reset({
+        index: 0, // 첫 번째 스크린으로 설정
+        routes: [{ name: 'Tabs' }], // Tabs 화면으로 이동
+      });
+      console.log('체리 사용 후 전시 완료');
+    });
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Artwork>) => {
     const scale = useSharedValue(1);
@@ -104,7 +116,7 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
                     alignItems: 'center',
                   }}
                 >
-                  <CherryIcon fill="#B0ABAB" />
+                  <CherryIcon fill='#B0ABAB' />
                   <Text style={{ color: '#B0ABAB' }}>{item.cherryNum}</Text>
                 </View>
               )}
@@ -117,7 +129,7 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
           )}
         </ArtworkInfo>
         <MenuIconContainer onLongPress={drag}>
-          <MenuIcon name="menu" size={24} color="#000" />
+          <MenuIcon name='menu' size={24} color='#000' />
         </MenuIconContainer>
       </ArtworkContainer>
     );
@@ -128,7 +140,6 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
   };
 
   const handleEditPress = () => {
-    setIsEditing(true);
     setTimeout(() => {
       navigation.navigate('Exhibit', { step: 4 });
     }, 0);
@@ -141,7 +152,7 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
     <>
       <MusicContainer>
         <MusicTextContainer onPress={openMusicSheet}>
-          <Icon name="musical-notes-outline" size={16} color="#fff" />
+          <Icon name='musical-notes-outline' size={16} color='#fff' />
           <MusicText>
             {selectedMusic ? selectedMusic : '아직 음악이 없습니다'}
           </MusicText>
@@ -153,7 +164,7 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
         <PencilIcon width={16} height={16} onPress={handleEditPress} />
       </SectionTitleContainer>
       <ExhibitDescriptionContainer>
-        <Caption numberOfLines={1} ellipsizeMode="tail">
+        <Caption numberOfLines={1} ellipsizeMode='tail'>
           {exhibitDescription}
         </Caption>
       </ExhibitDescriptionContainer>
@@ -168,10 +179,10 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
 
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} />
+      <ProgressBar totalSteps={7} currentStep={7} />
       <TitleSubtitle
-        title="전시를 마무리해 볼까요?"
-        subtitle="마지막으로 컬렉터님의 전시를 점검해주세요:)"
+        title='전시를 마무리해 볼까요?'
+        subtitle='마지막으로 컬렉터님의 전시를 점검해주세요:)'
         imageSource={require('src/assets/images/Character/character_wink.png')}
       />
 
@@ -180,26 +191,31 @@ const FinishSetting: React.FC<FinishSettingProps> = ({ setIsEditing }) => {
         {selectedCoverImage ? (
           <ImageBackground
             source={{ uri: selectedCoverImage }}
-            style={{ width: '100%', height: '100%', padding: 16 }}
-            resizeMode="contain"
+            style={{ width: 'auto', height: 'auto', padding: 16 }}
+            resizeMode='cover'
           >
             {renderCoverContent()}
           </ImageBackground>
         ) : (
           <>
             {coverType === 'gradient' && (
-              <LinearGradient colors={coverColors} style={{ padding: 16 }}>
+              <LinearGradient colors={selectedCover} style={{ padding: 16 }}>
                 {renderCoverContent()}
               </LinearGradient>
             )}
 
             {coverType === 'solid' && (
-              <View style={{ backgroundColor: coverColors[0], padding: 16 }}>
+              <View style={{ backgroundColor: selectedCover[0], padding: 16 }}>
                 {renderCoverContent()}
               </View>
             )}
           </>
         )}
+        <CherryFinishModal
+          onClose={() => setModalVisible(false)}
+          visible={isModalVisible}
+          {...modalProps}
+        />
       </GradientContainer>
 
       <InnerContainer>
