@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   ScrollView,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
 } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
 
 const MusicSelectionSheet = ({
   isVisible,
@@ -16,7 +16,9 @@ const MusicSelectionSheet = ({
   selectedMusic,
   setSelectedMusic,
 }) => {
-  const { selectedThemes } = useGlobalState();
+  const selectedThemes = useSelector(
+    (state: RootState) => state.theme.selectedThemes,
+  );
 
   const handleMusicSelect = (music: string) => {
     if (selectedMusic === music) {
@@ -29,7 +31,7 @@ const MusicSelectionSheet = ({
   return (
     <Modal
       visible={isVisible}
-      animationType="slide"
+      animationType='slide'
       transparent
       onRequestClose={onClose}
     >
@@ -38,7 +40,7 @@ const MusicSelectionSheet = ({
           <TouchableWithoutFeedback>
             <SheetContainer>
               <HeaderContainer>
-                <Icon name="musical-notes-outline" size={24} color="#120000" />
+                <Icon name='musical-notes-outline' size={24} color='#120000' />
                 <Title>전시 배경 음악 설정하기</Title>
               </HeaderContainer>
               <Subtitle>
@@ -58,9 +60,9 @@ const MusicSelectionSheet = ({
                       onPress={() => handleMusicSelect(music)}
                     >
                       <Icon
-                        name="musical-note-outline"
+                        name='musical-note-outline'
                         size={20}
-                        color="#120000"
+                        color='#120000'
                       />
                       <MusicText>{music}</MusicText>
                     </MusicItem>
