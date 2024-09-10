@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, ScrollView, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import React, { useEffect, useState } from 'react';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import { RootState } from 'src/store';
-import ProgressBarComponent from '../../components/ProgressBar';
-import { useProgressBar } from '../../components/ProgressBarContext';
+import { useDispatch, useSelector } from 'react-redux';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
-import TitleSubtitle from 'src/components/TitleSubtitle';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { TitleSubtitle, ProgressBar } from 'src/components/_index';
 import { Container } from 'src/styles/layout';
 import { Body2, Caption, Subtitle2 } from 'src/styles/typography';
-import { theme } from 'src/styles/theme';
 import GradientBackground from 'src/styles/GradientBackground';
 import {
   setCoverColors,
@@ -20,14 +19,20 @@ import {
   setRandomPalettes,
   setCoverType,
   setSelectedCoverImage,
-} from 'src/slices/exhibitSlice';
-import { extractProperties } from 'src/api/cloudVisionApi';
-import AngularGradientComponent from 'src/components/Gradients/AngularGradientComponent';
-import RadialGradientComponent from 'src/components/Gradients/RadialGradientComponent';
-import DiamondGradientComponent from 'src/components/Gradients/DiamondGradientComponent';
+  setSelectedCover,
+} from 'src/slices/coverSlice';
+import { useCloudVision } from 'src/api/hooks/useAIQueries';
+import {
+  AngularGradientComponent,
+  DiamondGradientComponent,
+  RadialGradientComponent,
+} from '../../components/gradients/_index';
 
 const CoverSetting: React.FC = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  // Redux 상태를 가져옴
   const selectedArtworks = useSelector(
     (state: RootState) => state.artwork.selectedArtworks,
   );
@@ -37,81 +42,133 @@ const CoverSetting: React.FC = () => {
     randomPalettes,
     selectedPalette,
     selectedCoverImage,
-  } = useSelector((state: RootState) => state.exhibit);
-  const { setStep } = useProgressBar();
-  const [selectedCover, setSelectedCover] = useState(
-    selectedPalette.length > 0
-      ? selectedPalette
-      : colorPalettes[0] || ['#e5e5e5', '#e5e5e5'],
-  );
+    selectedCover,
+  } = useSelector((state: RootState) => state.cover);
+
   const [isReversed, setIsReversed] = useState(false);
   const [selectedGradient, setSelectedGradient] = useState<number | null>(null);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [prevSelectedArtworks, setPrevSelectedArtworks] = useState<Artwork[]>(
+    [],
+  );
 
-  useEffect(() => {
-    setStep(5);
-  }, [setStep]);
+  const selectedArtworksChanged = () => {
+    const isChanged =
+      selectedArtworks.length !== prevSelectedArtworks.length ||
+      selectedArtworks.some(
+        (artwork, index) =>
+          artwork.artId !== prevSelectedArtworks[index]?.artId,
+      );
 
-  useEffect(() => {
-    if (colorPalettes.length > 0) {
-      if (randomPalettes.length === 0) {
-        const palettes = getRandomPalettes(colorPalettes);
-        dispatch(setRandomPalettes(palettes));
-      }
-
-      if (selectedCover.length === 0) {
-        setSelectedCover(colorPalettes[0]);
-        dispatch(setSelectedPalette(colorPalettes[0]));
-        dispatch(setCoverColors(colorPalettes[0]));
-      }
+    if (isChanged) {
+      setPrevSelectedArtworks(selectedArtworks);
     }
 
-    // Redux 상태의 selectedCoverImage를 로컬 상태로 설정
-    if (selectedCoverImage) {
-      setUploadedImage(selectedCoverImage);
-    }
-  }, [
-    colorPalettes,
-    randomPalettes,
-    selectedCover,
-    selectedCoverImage,
-    dispatch,
-  ]);
+    return isChanged;
+  };
+
+  // Cloud Vision API 호출
+  const artIds = selectedArtworks.map((artwork) => artwork.artId);
+  const {
+    data: extractedProperties,
+    isLoading: isCloudVisionLoading,
+    isError,
+  } = useCloudVision(artIds, 'COLOR', true);
 
   useEffect(() => {
-    const fetchColorPalettes = async () => {
-      try {
-        const artIds = selectedArtworks.map((artwork) => artwork.artId);
-        const extractedProperties = await extractProperties(artIds, 'COLOR');
+    if (selectedArtworks.length > 0 && selectedArtworksChanged()) {
+      if (extractedProperties) {
+        const newPalettes = extractedProperties.map(
+          (item: any) => item.properties,
+        );
 
-        const newPalettes = extractedProperties.map((item: any) => [
-          ...item.properties,
-        ]);
+        // Redux에 저장
         dispatch(setColorPalettes(newPalettes));
+        const randomPalettes = newPalettes.map((palette, index) => ({
+          palette,
+          index,
+        }));
+        dispatch(setRandomPalettes(randomPalettes));
 
         if (newPalettes.length > 0) {
           const initialCover = newPalettes[0];
           dispatch(setSelectedPalette(initialCover));
           dispatch(setCoverColors(initialCover));
-          setSelectedCover(initialCover);
+          dispatch(setSelectedCover(initialCover));
         }
-
-        dispatch(setRandomPalettes(getRandomPalettes(newPalettes)));
-      } catch (error) {
-        console.error('Failed to extract properties:', error);
-      } finally {
-        setIsLoading(false);
+      } else if (isError) {
+        console.error('데이터를 불러오는 데 실패했습니다.', isError);
       }
-    };
-
-    if (colorPalettes.length === 0) {
-      fetchColorPalettes();
-    } else {
-      setIsLoading(false);
     }
-  }, [dispatch, selectedArtworks, colorPalettes]);
+  }, [extractedProperties, isError, dispatch]);
 
+  // 헤더 설정
+  useEffect(() => {
+    const isNextEnabled = selectedCover.length > 0;
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'text',
+        headerRightText: '다음',
+        nextScreenName: 'FinishSetting',
+        headerRightDisabled: !isNextEnabled,
+      }),
+    );
+  }, [navigation, selectedCover]);
+
+  // 팔레트가 3개 이하일 경우 placeholder로 빈 자리를 채우는 함수
+  const fillWithPlaceholders = (
+    palettes: { palette: string[]; index: number }[],
+  ) => {
+    const placeholdersNeeded = 4 - palettes.length;
+    const placeholders = Array(placeholdersNeeded).fill({
+      palette: ['#ffffff'],
+      index: -1,
+    });
+    return [...palettes, ...placeholders];
+  };
+
+  // extractedProperties가 존재할 때 색상 팔레트를 설정하는 로직
+  useEffect(() => {
+    if (extractedProperties) {
+      const newPalettes = extractedProperties.map(
+        (item: any) => item.properties,
+      );
+
+      // Redux에 저장
+      dispatch(setColorPalettes(newPalettes));
+      const randomPalettes = newPalettes.map((palette, index) => ({
+        palette,
+        index,
+      }));
+      dispatch(setRandomPalettes(randomPalettes));
+
+      if (newPalettes.length > 0) {
+        const initialCover = newPalettes[0];
+        dispatch(setSelectedPalette(initialCover));
+        dispatch(setCoverColors(initialCover));
+        dispatch(setSelectedCover(initialCover));
+      }
+    } else if (isError) {
+      console.error('데이터를 불러오는 데 실패했습니다.', isError);
+    }
+  }, [extractedProperties, isError, dispatch]);
+
+  // colorPalettes와 selectedCover 관련 상태 관리
+  useEffect(() => {
+    if (colorPalettes?.length > 0) {
+      if (randomPalettes?.length === 0) {
+        const palettes = getRandomPalettes(colorPalettes);
+        dispatch(setRandomPalettes(palettes));
+      }
+
+      if (!selectedCover?.length) {
+        dispatch(setSelectedCover(colorPalettes[0]));
+        dispatch(setSelectedPalette(colorPalettes[0]));
+        dispatch(setCoverColors(colorPalettes[0]));
+      }
+    }
+  }, [colorPalettes, randomPalettes, selectedCover, dispatch]);
+
+  // 팔레트 랜덤 추출 함수
   const getRandomPalettes = (palettes: string[][]) => {
     const palettesWithIndexes = palettes.map((palette, index) => ({
       palette,
@@ -127,7 +184,7 @@ const CoverSetting: React.FC = () => {
 
     dispatch(setSelectedPalette(selectedPalette));
     dispatch(setCoverColors(selectedPalette));
-    setSelectedCover(selectedPalette);
+    dispatch(setSelectedCover(selectedPalette));
   };
 
   const handleReverseGradient = () => {
@@ -148,26 +205,24 @@ const CoverSetting: React.FC = () => {
 
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
-      setUploadedImage(imageUri); // 로컬 상태 업데이트
-      dispatch(setSelectedCoverImage(imageUri)); // Redux 상태 업데이트
-      dispatch(setCoverType('image')); // coverType을 'image'로 설정
+      dispatch(setSelectedCoverImage(imageUri));
+      dispatch(setCoverType('image'));
     }
   };
 
   const handleImageRemove = () => {
-    setUploadedImage(null);
-    dispatch(setSelectedCoverImage(null)); // 이미지 삭제 후에도 null로 업데이트
-    dispatch(setCoverType('gradient')); // 기본으로 되돌림
+    dispatch(setSelectedCoverImage(null));
+    dispatch(setCoverType('gradient'));
   };
 
   const handleCoverTypeChange = (type: 'gradient' | 'solid') => {
-    if (uploadedImage) return; // 이미지를 업로드한 경우 타입 변경을 막음
+    if (selectedCoverImage) return;
 
     dispatch(setCoverType(type));
     if (type === 'solid') {
-      dispatch(setCoverColors([selectedCover[0]])); // 단색으로 첫 번째 색상 설정
+      dispatch(setCoverColors([selectedCover[0]]));
     } else if (type === 'gradient') {
-      dispatch(setCoverColors(selectedCover)); // 기존 팔레트 색상으로 설정
+      dispatch(setCoverColors(selectedCover));
     }
     setSelectedGradient(null);
   };
@@ -185,14 +240,14 @@ const CoverSetting: React.FC = () => {
   return (
     <Container>
       <GradientBackground />
-      <ProgressBarComponent totalSteps={7} />
+      <ProgressBar totalSteps={7} currentStep={6} />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
         <TitleSubtitle
-          title="전시 커버 설정하기"
-          subtitle="전시와 어울리는 커버를 선택해주세요!"
+          title='전시 커버 설정하기'
+          subtitle='전시와 어울리는 커버를 선택해주세요!'
           imageSource={require('src/assets/images/Character/character_happy.png')}
         />
         <CoverTitle>체리시가 제안하는 커버</CoverTitle>
@@ -201,29 +256,35 @@ const CoverSetting: React.FC = () => {
             컬렉터님의 전시 작품 컬러를 바탕으로 만들었어요 :)
           </CoverSubtitle>
           <TouchableOpacity onPress={handleShufflePalettes}>
-            <Icon name="sync-outline" size={22} color="#120000" />
+            <Icon name='sync-outline' size={22} color='#120000' />
           </TouchableOpacity>
         </CoverTextContainer>
         <PaletteContainer>
-          {isLoading ? (
-            <LoadingText>추출 중 ...</LoadingText>
+          {isCloudVisionLoading ? (
+            <LoadingText>추출 중...</LoadingText>
+          ) : randomPalettes?.length > 0 ? (
+            fillWithPlaceholders(randomPalettes.slice(0, 4)).map(
+              ({ palette, index }, idx) => (
+                <PaletteButton
+                  key={idx}
+                  onPress={() => index !== -1 && handleCoverSelect(idx)}
+                  selected={
+                    index !== -1 && arePalettesEqual(selectedPalette, palette)
+                  }
+                >
+                  {palette.map((color, colorIndex) => (
+                    <PaletteColor
+                      key={colorIndex}
+                      color={color}
+                      index={colorIndex}
+                      total={palette.length}
+                    />
+                  ))}
+                </PaletteButton>
+              ),
+            )
           ) : (
-            randomPalettes.slice(0, 4).map(({ palette }, index) => (
-              <PaletteButton
-                key={index}
-                onPress={() => handleCoverSelect(index)}
-                selected={arePalettesEqual(selectedPalette, palette)}
-              >
-                {palette.map((color, colorIndex) => (
-                  <PaletteColor
-                    key={colorIndex}
-                    color={color}
-                    index={colorIndex}
-                    total={palette.length}
-                  />
-                ))}
-              </PaletteButton>
-            ))
+            <LoadingText>팔레트를 불러올 수 없습니다.</LoadingText>
           )}
         </PaletteContainer>
         <CoverTypeButtonContainer>
@@ -232,11 +293,11 @@ const CoverSetting: React.FC = () => {
             onCoverTypeChange={handleCoverTypeChange}
             onReverseGradient={handleReverseGradient}
             showReverseButton={coverType === 'gradient'}
-            isImageUploaded={!!uploadedImage}
+            isImageUploaded={!!selectedCoverImage}
           />
         </CoverTypeButtonContainer>
         {coverType === 'gradient' ? (
-          isLoading ? (
+          isCloudVisionLoading ? (
             <LoadingText>추출 중 ...</LoadingText>
           ) : (
             <CoverGrid>
@@ -252,16 +313,21 @@ const CoverSetting: React.FC = () => {
                 >
                   <GradientComponent
                     colors={
-                      isReversed ? [...selectedCover].reverse() : selectedCover
+                      isReversed
+                        ? [
+                            ...(selectedCover.length >= 2
+                              ? selectedCover
+                              : [selectedCover[0], selectedCover[0]]),
+                          ].reverse()
+                        : selectedCover.length >= 2
+                          ? selectedCover
+                          : [selectedCover[0], selectedCover[0]] // 색상이 하나만 있을 경우 중복 처리
                     }
-                    style={[
-                      styles.gradient,
-                      selectedGradient === index && styles.selectedGradient,
-                    ]}
+                    style={[styles.gradient, selectedGradient === index]}
                   />
                   {selectedGradient === index && (
                     <SelectedOverlay>
-                      <Icon name="checkmark" size={32} color="#fff" />
+                      <Icon name='checkmark' size={32} color='#fff' />
                     </SelectedOverlay>
                   )}
                 </CoverOption>
@@ -269,7 +335,7 @@ const CoverSetting: React.FC = () => {
             </CoverGrid>
           )
         ) : coverType === 'solid' ? (
-          isLoading ? (
+          isCloudVisionLoading ? (
             <LoadingContainer>
               <LoadingText>추출 중 ...</LoadingText>
             </LoadingContainer>
@@ -286,7 +352,7 @@ const CoverSetting: React.FC = () => {
                   <View style={[styles.gradient, { backgroundColor: color }]}>
                     {selectedGradient === index && (
                       <SelectedOverlay>
-                        <Icon name="checkmark" size={32} color="#fff" />
+                        <Icon name='checkmark' size={32} color='#fff' />
                       </SelectedOverlay>
                     )}
                   </View>
@@ -295,7 +361,6 @@ const CoverSetting: React.FC = () => {
             </CoverGrid>
           )
         ) : (
-          // 이미지를 업로드했을 때도 CoverGrid를 유지합니다.
           <CoverGrid>
             {selectedPalette.map((color, index) => (
               <CoverOption
@@ -308,7 +373,7 @@ const CoverSetting: React.FC = () => {
                 <View style={[styles.gradient, { backgroundColor: color }]}>
                   {selectedGradient === index && (
                     <SelectedOverlay>
-                      <Icon name="checkmark" size={32} color="#fff" />
+                      <Icon name='checkmark' size={32} color='#fff' />
                     </SelectedOverlay>
                   )}
                 </View>
@@ -320,15 +385,15 @@ const CoverSetting: React.FC = () => {
           <UploadTitle>직접 커버 이미지 추가하기</UploadTitle>
           <UploadButton onPress={handleImageUpload}>
             <UploadPlaceholder>
-              {uploadedImage ? (
+              {selectedCoverImage ? (
                 <>
-                  <UploadedImage source={{ uri: uploadedImage }} />
+                  <UploadedImage source={{ uri: selectedCoverImage }} />
                   <DeleteIcon onPress={handleImageRemove}>
-                    <Icon name="close" size={24} color="#fff" />
+                    <Icon name='close' size={24} color='#fff' />
                   </DeleteIcon>
                 </>
               ) : (
-                <Icon name="add" size={40} color="#999" />
+                <Icon name='add' size={40} color='#999' />
               )}
             </UploadPlaceholder>
           </UploadButton>
@@ -343,20 +408,20 @@ const CoverTypeToggle: React.FC<{
   onCoverTypeChange: (type: 'gradient' | 'solid') => void;
   onReverseGradient: () => void;
   showReverseButton: boolean;
-  isImageUploaded: boolean; // 추가: 이미지 업로드 상태
+  isImageUploaded: boolean;
 }> = ({
   coverType,
   onCoverTypeChange,
   onReverseGradient,
   showReverseButton,
-  isImageUploaded, // 추가: 이미지 업로드 상태
+  isImageUploaded,
 }) => (
   <>
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <CoverTypeButton
         selected={coverType === 'gradient'}
         onPress={() => onCoverTypeChange('gradient')}
-        disabled={isImageUploaded} // 이미지가 업로드된 경우 비활성화
+        disabled={isImageUploaded}
       >
         <CoverTypeButtonText
           selected={coverType === 'gradient'}
@@ -368,7 +433,7 @@ const CoverTypeToggle: React.FC<{
       <CoverTypeButton
         selected={coverType === 'solid'}
         onPress={() => onCoverTypeChange('solid')}
-        disabled={isImageUploaded} // 이미지가 업로드된 경우 비활성화
+        disabled={isImageUploaded}
       >
         <CoverTypeButtonText
           selected={coverType === 'solid'}
@@ -381,7 +446,7 @@ const CoverTypeToggle: React.FC<{
     {showReverseButton && (
       <TouchableOpacity onPress={onReverseGradient} disabled={isImageUploaded}>
         <Icon
-          name="swap-horizontal-outline"
+          name='swap-horizontal-outline'
           size={22}
           color={isImageUploaded ? '#ccc' : '#120000'}
         />
@@ -398,22 +463,25 @@ const CoverTextContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${theme.margin.s};
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const CoverSubtitle = styled(Caption)`
-  color: ${theme.colors.grey_8};
+  color: ${({ theme }) => theme.colors.grey_8};
   letter-spacing: 0.5px;
 `;
 
 const PaletteContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: ${theme.spacing.s5};
+  margin-bottom: ${({ theme }) => theme.spacing.s5};
   flex-wrap: wrap;
 `;
 
-const PaletteButton = styled.TouchableOpacity<{ selected?: boolean }>`
+const PaletteButton = styled.TouchableOpacity<{
+  selected?: boolean;
+  isPlaceholder?: boolean;
+}>`
   flex-direction: row;
   width: 80px;
   height: 40px;
@@ -424,6 +492,8 @@ const PaletteButton = styled.TouchableOpacity<{ selected?: boolean }>`
   border-color: ${(props) => (props.selected ? '#000' : 'transparent')};
   border-style: ${(props) => (props.selected ? 'dashed' : 'solid')};
   padding: ${(props) => (props.selected ? '1px' : 0)};
+  background-color: ${(props) =>
+    props.isPlaceholder ? '#ffffff' : 'transparent'};
 `;
 
 const PaletteColor = styled.View<{
@@ -450,7 +520,7 @@ const LoadingContainer = styled.View`
 `;
 
 const LoadingText = styled(Body2)`
-  color: ${theme.colors.grey_8};
+  color: ${({ theme }) => theme.colors.grey_8};
   text-align: center;
   width: 100%;
 `;
@@ -459,7 +529,7 @@ const CoverTypeButtonContainer = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: ${theme.spacing.s3};
+  margin-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const CoverTypeButton = styled.TouchableOpacity<{ selected?: boolean }>`
@@ -476,7 +546,7 @@ const CoverTypeButtonText = styled(Caption)<{ selected?: boolean }>`
 
 const CoverOption = styled.TouchableOpacity`
   position: relative;
-  margin-bottom: ${theme.spacing.s5};
+  margin-bottom: ${({ theme }) => theme.spacing.s5};
 `;
 
 const CoverGrid = styled.View`
@@ -484,7 +554,7 @@ const CoverGrid = styled.View`
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-evenly;
-  margin-bottom: ${theme.spacing.s5};
+  margin-bottom: ${({ theme }) => theme.spacing.s5};
 `;
 
 const SelectedOverlay = styled.View`
@@ -493,7 +563,7 @@ const SelectedOverlay = styled.View`
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: ${theme.radius.s};
+  border-radius: ${({ theme }) => theme.radius.s};
   background-color: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
@@ -506,14 +576,14 @@ const UploadSection = styled.View`
 `;
 
 const UploadTitle = styled(Subtitle2)`
-  margin-bottom: ${theme.margin.s};
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const UploadButton = styled.TouchableOpacity`
   width: 155px;
   height: 155px;
-  background-color: ${theme.colors.grey_4};
-  border-radius: ${theme.radius.s};
+  background-color: ${({ theme }) => theme.colors.grey_4};
+  border-radius: ${({ theme }) => theme.radius.s};
   justify-content: center;
   align-items: center;
   overflow: hidden;
