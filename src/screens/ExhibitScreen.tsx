@@ -9,49 +9,49 @@ import {
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
-import CollectionSelect from './Exhibit/CollectionSelect';
-import ArtworkSelect from './Exhibit/ArtworkSelect';
-import ThemeSetting from './Exhibit/ThemeSetting';
-import ArtworkInfoSetting from './Exhibit/ArtworkInfoSetting';
-import DescriptionSetting from './Exhibit/DescriptionSetting';
-import CoverSetting from './Exhibit/CoverSetting';
-import FinishSetting from './Exhibit/FinishSetting';
-import { useProgressBar } from '../components/ProgressBarContext';
-import { RootStackParamList } from '../navigations/AppNavigator';
+import CollectionSelect from './ExhibitScreens/CollectionSelect';
+import ArtworkSelect from './ExhibitScreens/ArtworkSelect';
+import ThemeSetting from './ExhibitScreens/ThemeSetting';
+import ArtworkInfoSetting from './ExhibitScreens/ArtworkInfoSetting';
+import DescriptionSetting from './ExhibitScreens/DescriptionSetting';
+import CoverSetting from './ExhibitScreens/CoverSetting';
+import FinishSetting from './ExhibitScreens/FinishSetting';
+import { useProgressBar } from '../contexts/ProgressBarContext';
+import { StackParamList } from '../navigation/types';
 import CustomModal from '../components/Modal';
-import ArtworkSelectModal from '../components/Modals/ArtworkSelectModal';
+import ArtworkSelectModal from '../components/modals/ArtworkSelectModal';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store';
 import { useGlobalState } from '../contexts/GlobalStateContext';
+import { theme } from 'src/styles/theme';
+import { Subtitle1 } from 'src/styles/typography';
 
-type ExhibitScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Exhibit'
->;
-type ExhibitScreenRouteProp = RouteProp<RootStackParamList, 'Exhibit'>;
-
-const Container = styled.View`
-  flex: 1;
-`;
+type ExhibitScreenNavigationProp = NativeStackNavigationProp<StackParamList>;
+type ExhibitScreenRouteProp = RouteProp<StackParamList>;
 
 const ExhibitScreen: React.FC = () => {
   const navigation = useNavigation<ExhibitScreenNavigationProp>();
   const route = useRoute<ExhibitScreenRouteProp>();
   const { setStep } = useProgressBar();
-  const {
-    selectedCollections,
-    userCherries,
-    selectedArtworks,
-    setSelectedArtworks,
-    artworkInfoInput,
-    selectedThemes,
-  } = useGlobalState();
+  const dispatch = useDispatch();
+
+  const selectedCollections = useSelector(
+    (state: RootState) => state.collection.selectedCollections,
+  );
+  const { selectedArtworks, totalCherries } = useSelector(
+    (state: RootState) => state.artwork,
+  );
+  const selectedThemes = useSelector(
+    (state: RootState) => state.theme.selectedThemes,
+  );
+
+  const { userCherries, artworkInfoInput } = useGlobalState();
   const [step, setLocalStep] = useState(route.params?.step || 0);
   const [isArtworkDescriptionValid, setIsArtworkDescriptionValid] =
     useState(false);
-  const [isCollectionSelected, setIsCollectionSelected] = useState(false);
-  const [isDescriptionValid, setIsDescriptionValid] = useState(false); // Separate state for other descriptions
+  const [isDescriptionValid, setIsDescriptionValid] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
-  const [totalRequiredCherries, setTotalRequiredCherries] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -65,46 +65,28 @@ const ExhibitScreen: React.FC = () => {
     navigation.setOptions({
       headerLeft: () =>
         isEditing ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <HeaderLeftContainer>
             <TouchableOpacity onPress={handleSave}>
               <Icon
-                name="chevron-back"
+                name='chevron-back'
                 size={24}
-                color="#120000"
-                style={{ marginLeft: 16 }}
+                color={theme.colors.redBlack}
+                style={{ marginLeft: theme.spacing.s4 }}
               />
             </TouchableOpacity>
-            <Text
-              style={{
-                color: '#120000',
-                fontFamily: 'Bold',
-                fontSize: 16,
-                marginLeft: 5,
-              }}
-            >
-              전시 이름, 설명 수정하기
-            </Text>
-          </View>
+            <HeaderLeftText>전시 이름, 설명 수정하기</HeaderLeftText>
+          </HeaderLeftContainer>
         ) : (
           <TouchableOpacity onPress={goToPrev}>
             {step === 0 ? (
               <Icon
-                name="chevron-back"
+                name='chevron-back'
                 size={24}
-                color="#120000"
-                style={{ marginLeft: 16 }}
+                color={theme.colors.redBlack}
+                style={{ marginLeft: theme.spacing.s4 }}
               />
             ) : (
-              <Text
-                style={{
-                  marginLeft: 16,
-                  color: '#120000',
-                  fontFamily: 'Bold',
-                  fontSize: 16,
-                }}
-              >
-                이전
-              </Text>
+              <PrevText>이전</PrevText>
             )}
           </TouchableOpacity>
         ),
@@ -113,30 +95,24 @@ const ExhibitScreen: React.FC = () => {
           <TouchableOpacity
             onPress={step === 6 ? showConfirmModal : goToNext}
             disabled={
-              (step === 0 && !isCollectionSelected) ||
+              (step === 0 && selectedCollections.length === 0) ||
               (step === 1 && selectedArtworks.length === 0) ||
               (step === 2 && selectedThemes.length === 0) ||
               (step === 3 && !isArtworkDescriptionValid) ||
               (step === 4 && !isDescriptionValid)
             }
           >
-            <Text
-              style={{
-                marginRight: 16,
-                color:
-                  (step === 0 && !isCollectionSelected) ||
-                  (step === 1 && selectedArtworks.length === 0) ||
-                  (step === 2 && selectedThemes.length === 0) ||
-                  (step === 3 && !isArtworkDescriptionValid) ||
-                  (step === 4 && !isDescriptionValid)
-                    ? '#ccc'
-                    : '#120000',
-                fontFamily: 'Bold',
-                fontSize: 16,
-              }}
+            <NextText
+              disabled={
+                (step === 0 && selectedCollections.length === 0) ||
+                (step === 1 && selectedArtworks.length === 0) ||
+                (step === 2 && selectedThemes.length === 0) ||
+                (step === 3 && !isArtworkDescriptionValid) ||
+                (step === 4 && !isDescriptionValid)
+              }
             >
               {step === 6 ? '완성' : '다음'}
-            </Text>
+            </NextText>
           </TouchableOpacity>
         ),
     });
@@ -146,7 +122,7 @@ const ExhibitScreen: React.FC = () => {
     isEditing,
     isArtworkDescriptionValid,
     isDescriptionValid,
-    isCollectionSelected,
+    selectedCollections,
     selectedArtworks,
     selectedThemes,
     artworkInfoInput,
@@ -166,14 +142,9 @@ const ExhibitScreen: React.FC = () => {
   };
 
   const goToNext = () => {
-    if (step === 1) {
-      if (totalRequiredCherries > userCherries && totalRequiredCherries > 0) {
-        setIsArtworkModalVisible(true);
-        return;
-      } else if (totalRequiredCherries > 0) {
-        setIsArtworkModalVisible(true);
-        return;
-      }
+    if (step === 1 && totalCherries > 0) {
+      setIsArtworkModalVisible(true);
+      return;
     }
 
     if (step < 6) {
@@ -192,13 +163,10 @@ const ExhibitScreen: React.FC = () => {
       navigation.dispatch(
         CommonActions.reset({ index: 0, routes: [{ name: 'MainTabs' }] }),
       );
-      // 진짜로 나갈 건지 사용자에게 물어보는 기능 추가 예정 (나가기, 임시저장하기)
-      // 나가기 누르면 전역 상태 값 다 초기화 시키기
     }
   };
 
   const handleSave = () => {
-    // Save logic here, then exit editing mode
     setIsEditing(false);
     navigation.navigate('Exhibit', { step: 6 });
   };
@@ -206,20 +174,9 @@ const ExhibitScreen: React.FC = () => {
   const renderStep = () => {
     switch (step) {
       case 0:
-        return (
-          <CollectionSelect
-            onSelectionChange={(count) => setIsCollectionSelected(count > 0)}
-          />
-        );
+        return <CollectionSelect />;
       case 1:
-        return (
-          <ArtworkSelect
-            onSelectionChange={(artworks, totalCherries) => {
-              setSelectedArtworks(artworks);
-              setTotalRequiredCherries(totalCherries);
-            }}
-          />
-        );
+        return <ArtworkSelect />;
       case 2:
         return <ThemeSetting />;
       case 3:
@@ -237,11 +194,7 @@ const ExhibitScreen: React.FC = () => {
       case 6:
         return <FinishSetting setIsEditing={setIsEditing} />;
       default:
-        return (
-          <CollectionSelect
-            onSelectionChange={(count) => setIsCollectionSelected(count > 0)}
-          />
-        );
+        return <CollectionSelect />;
     }
   };
 
@@ -252,28 +205,45 @@ const ExhibitScreen: React.FC = () => {
         visible={modalVisible}
         onClose={closeConfirmModal}
         onConfirm={confirmCompletion}
-        title="마지막으로, 전시작품의 이용료를 결제할게요!"
+        title='마지막으로, 전시작품의 이용료를 결제할게요!'
         body={
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ marginBottom: 5, color: '#120000', fontSize: 16 }}>
+          <ModalContent>
+            <Text
+              style={{
+                marginBottom: theme.spacing.s2,
+                color: theme.colors.redBlack,
+                fontSize: theme.fontSizes.subtitle1,
+              }}
+            >
               필요한 체리{' '}
-              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>2</Text>
+              <Text
+                style={{ color: theme.colors.cherryRed_10, fontWeight: 'bold' }}
+              >
+                2
+              </Text>
             </Text>
-            <Text style={{ color: '#120000', fontSize: 16 }}>
+            <Text
+              style={{
+                color: theme.colors.redBlack,
+                fontSize: theme.fontSizes.subtitle1,
+              }}
+            >
               보유중인 체리{' '}
-              <Text style={{ color: '#E57373', fontWeight: 'bold' }}>
+              <Text
+                style={{ color: theme.colors.cherryRed_10, fontWeight: 'bold' }}
+              >
                 {userCherries}
               </Text>
             </Text>
-          </View>
+          </ModalContent>
         }
-        confirmButtonText="확인했습니다"
+        confirmButtonText='확인했습니다'
         cancelButtonText={'이전으로'}
       />
-      {isArtworkModalVisible && totalRequiredCherries > 0 && (
+      {isArtworkModalVisible && totalCherries > 0 && (
         <ArtworkSelectModal
           visible={isArtworkModalVisible}
-          requiredCherries={totalRequiredCherries}
+          requiredCherries={totalCherries}
           cherryCount={selectedArtworks.length}
           userCherries={userCherries}
           onClose={() => setIsArtworkModalVisible(false)}
@@ -298,22 +268,52 @@ const ExhibitScreen: React.FC = () => {
   );
 };
 
+const Container = styled.View`
+  flex: 1;
+`;
+
+const HeaderLeftContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const HeaderLeftText = styled.Text`
+  color: ${theme.colors.redBlack};
+  font-family: ${theme.fonts.bold};
+  font-size: ${theme.fontSizes.body1};
+  margin-left: ${theme.spacing.s4};
+`;
+
+const PrevText = styled(Subtitle1)`
+  margin-left: ${theme.spacing.s4};
+`;
+
+const NextText = styled(Subtitle1)<{ disabled: boolean }>`
+  margin-right: ${theme.spacing.s4};
+  color: ${({ disabled }) =>
+    disabled ? theme.colors.grey_6 : theme.colors.redBlack};
+`;
+
+const ModalContent = styled.View`
+  align-items: center;
+`;
+
 const SaveButtonContainer = styled.View`
   background-color: transparent;
 `;
 
 const SaveButton = styled.TouchableOpacity`
-  background-color: #120000;
-  padding: 15px;
-  border-radius: 30px;
+  background-color: ${theme.colors.redBlack};
+  padding: ${theme.spacing.s5};
+  border-radius: ${theme.radius.l};
   align-items: center;
-  margin: 20px;
+  margin: ${theme.spacing.s6};
 `;
 
 const SaveButtonText = styled.Text`
-  font-size: 16px;
-  font-family: 'Bold';
-  color: #fff;
+  font-size: ${theme.fontSizes.body1};
+  font-family: ${theme.fonts.bold};
+  color: ${theme.colors.white};
 `;
 
 export default ExhibitScreen;

@@ -1,11 +1,12 @@
-import axiosInstance from './api';
+import axiosInstance from './axiosInstance';
 
-export const getAIThemesTitle = async (requestType: string, ailabel: any[]) => {
+export const getAIThemesTitle = async (requestType: string, aiLabel: any[]) => {
   try {
     const response = await axiosInstance.post(
       `/chatgpt?requestType=${requestType}`,
-      ailabel, // data 객체가 아니라 직접 ailabel 배열을 전송
+      aiLabel,
     );
+    console.log('ChatGPT API Response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error getting AI themes:', error);

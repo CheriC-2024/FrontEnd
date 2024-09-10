@@ -162,6 +162,8 @@ dependencies {
     implementation project(':react-native-gesture-handler')
     implementation project(':react-native-screens')
     implementation project(':react-native-reanimated')
+    implementation("com.facebook.soloader:soloader:0.10.4")
+    implementation project(':react-native-immersive-mode')
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

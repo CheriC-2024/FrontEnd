@@ -21,6 +21,12 @@ buildscript {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force "com.facebook.soloader:soloader:0.10.4"
+    }
+}
+
 apply plugin: "com.facebook.react.rootproject"
 
 allprojects {

@@ -8,6 +8,7 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.swmansion.rnscreens.RNScreensPackage 
+import com.rnimmersivemode.RNImmersiveModePackage;
 
 import expo.modules.ReactActivityDelegateWrapper
 

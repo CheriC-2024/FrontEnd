@@ -1,22 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-} from 'react-native';
+import React, { useState } from 'react';
+import { Text, Animated } from 'react-native';
+import styled, { useTheme } from 'styled-components/native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import styled from 'styled-components/native';
+import { StackParamList } from 'src/navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useGlobalState } from '../../contexts/GlobalStateContext';
-import { RootStackParamList } from '../../navigations/AppNavigator';
+import { RootState } from 'src/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTheme, removeTheme } from '../../slices/themeSlice';
+import { useToastMessage } from 'src/hooks/_index';
+import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { TitleSubtitle, TagButton, ToastMessage } from 'src/components/_index';
+import { Btn, BtnText } from 'src/components/Button';
+import { Container } from 'src/styles/layout';
+import { RefreshIcon } from '../../assets/icons/_index.js';
+import { Caption, Subtitle2 } from 'src/styles/typography';
 
 const AIRecommendTheme: React.FC = () => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { selectedThemes, setSelectedThemes, aiThemes, aiThemeReason } =
-    useGlobalState();
+  const navigation = useNavigation<NavigationProp<StackParamList>>();
+  const dispatch = useDispatch();
+  const theme = useTheme();
+
+  const { selectedAiThemes, selectedThemes } = useSelector(
+    (state: RootState) => state.theme,
+  );
+  const { aiThemes, aiThemeReason } = useSelector(
+    (state: RootState) => state.aiRecommend,
+  );
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const { toastVisible, toastMessage, showToast } = useToastMessage();
+
+  navigation.setOptions(
+    headerOptions(navigation, {
+      leftButtonType: null,
+      headerTitle: '전시 테마 AI 추천',
+      headerTitleAlign: 'left',
+    }),
+  );
+
   const [animations, setAnimations] = useState<{
     [key: string]: Animated.Value;
   }>(
@@ -33,24 +53,12 @@ const AIRecommendTheme: React.FC = () => {
   }>(
     aiThemes.reduce(
       (acc, theme) => {
-        acc[theme] = new Animated.Value(12); // initial font size
+        acc[theme] = new Animated.Value(14); // initial font size
         return acc;
       },
       {} as { [key: string]: Animated.Value },
     ),
   );
-
-  useEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: { display: 'none' },
-    });
-
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'flex' },
-      });
-    };
-  }, [navigation]);
 
   const handleThemeSelect = (theme: string) => {
     if (selectedTheme !== theme) {
@@ -68,8 +76,10 @@ const AIRecommendTheme: React.FC = () => {
 
   const handleAddTheme = () => {
     if (selectedTheme && !selectedThemes.includes(selectedTheme)) {
-      if (selectedThemes.length < 3) {
-        setSelectedThemes([...selectedThemes, selectedTheme]);
+      if (selectedThemes.length >= 3) {
+        showToast('테마는 최대 3개까지 추가할 수 있습니다');
+      } else {
+        dispatch(addTheme({ name: selectedTheme, isAI: true }));
       }
     }
   };
@@ -90,10 +100,11 @@ const AIRecommendTheme: React.FC = () => {
   return (
     <>
       <Container>
-        <TitleContainer>
-          <Title>AI가 전시 테마를 만들었어요!</Title>
-          <Subtitle>원하는 전시 테마를 선택해주세요</Subtitle>
-        </TitleContainer>
+        <TitleSubtitle
+          title='AI가 전시 테마를 만들었어요!'
+          subtitle='원하는 전시 테마를 선택해주세요'
+        />
+        <RefreshIcon />
         <ThemeScrollViewContainer>
           <ThemeScrollView horizontal showsHorizontalScrollIndicator={false}>
             {aiThemes.map((theme, index) => (
@@ -103,15 +114,17 @@ const AIRecommendTheme: React.FC = () => {
                 selected={
                   selectedThemes.includes(theme) || selectedTheme === theme
                 }
-                style={{ width: animations[theme], height: animations[theme] }}
+                style={{
+                  width: animations[theme],
+                  height: animations[theme],
+                  alignSelf: 'center', // 여기서 중앙 정렬 유지
+                }}
               >
                 {selectedTheme === theme ? (
-                  <GradientCircle
-                    colors={['#fff', '#ffd8d8']}
-                    start={{ x: 0.5, y: 0 }}
-                    end={{ x: 0.5, y: 1 }}
-                  >
-                    <AnimatedThemeText style={{ fontSize: 16 }}>
+                  <GradientCircle colors={['#fff', '#FDEDED']}>
+                    <AnimatedThemeText
+                      style={{ fontSize: 16, fontFamily: 'PretendardBold' }}
+                    >
                       {`#${theme}`}
                     </AnimatedThemeText>
                   </GradientCircle>
@@ -134,7 +147,7 @@ const AIRecommendTheme: React.FC = () => {
           {selectedTheme ? (
             <ReasonTextContainer>
               <ReasonTitle>추천 이유</ReasonTitle>
-              <ReasonText multiline>
+              <ReasonText>
                 {aiThemeReason[aiThemes.indexOf(selectedTheme)]}
               </ReasonText>
               <ReasonButton onPress={handleAddTheme}>
@@ -142,76 +155,51 @@ const AIRecommendTheme: React.FC = () => {
               </ReasonButton>
             </ReasonTextContainer>
           ) : (
-            <InitialReasonContainer>
+            <ReasonTextContainer>
               <ReasonTitle>
                 테마를 클릭하면 추천 이유를 볼 수 있어요!
               </ReasonTitle>
-              <InitialSubText>
+              <ReasonText>
                 컬렉터님이 설정한 작품들로 테마를 만들었습니다:)
-              </InitialSubText>
-            </InitialReasonContainer>
+              </ReasonText>
+            </ReasonTextContainer>
           )}
         </ReasonContainer>
-        <SelectedThemesContainer>
-          <SelectedThemesHeader>
-            <SelectedThemesTitle>설정한 테마</SelectedThemesTitle>
-            <ThemeCount>
-              <RedBlack>{selectedThemes.length}</RedBlack> / 3
-            </ThemeCount>
-          </SelectedThemesHeader>
-          <SelectedThemes>
-            {selectedThemes.map((theme, index) => (
-              <ThemeTag key={index} isAITheme={aiThemes.includes(theme)}>
-                <ThemeTagText>#{theme}</ThemeTagText>
-                <RemoveButton
-                  onPress={() =>
-                    setSelectedThemes(selectedThemes.filter((t) => t !== theme))
-                  }
-                >
-                  <RemoveButtonText>✕</RemoveButtonText>
-                </RemoveButton>
-              </ThemeTag>
-            ))}
-          </SelectedThemes>
-        </SelectedThemesContainer>
+        <SelectedThemesHeader>
+          <Subtitle2>설정한 테마</Subtitle2>
+          <Subtitle2>
+            {selectedThemes.length}{' '}
+            <Text style={{ color: theme.colors.grey_6 }}>/ 3</Text>
+          </Subtitle2>
+        </SelectedThemesHeader>
+        <SelectedThemes>
+          {selectedThemes.map((theme, index) => (
+            <TagButton
+              key={index}
+              text={theme}
+              onRemove={() => dispatch(removeTheme(theme))}
+              backgroundColor={
+                selectedAiThemes.includes(theme) ? '#e52c32' : '#413333'
+              }
+              textColor='#fff'
+            />
+          ))}
+        </SelectedThemes>
+        <Btn onPress={handleComplete}>
+          <BtnText>완료하기</BtnText>
+        </Btn>
       </Container>
-      <ButtonContainer>
-        <CompleteButton onPress={handleComplete}>
-          <CompleteButtonText>완료하기</CompleteButtonText>
-        </CompleteButton>
-      </ButtonContainer>
+
+      <ToastMessage message={toastMessage} visible={toastVisible} />
     </>
   );
 };
 
-const Container = styled.View`
-  flex: 1;
-  padding: 16px;
-  background-color: #fff;
-`;
-
-const TitleContainer = styled.View`
-  margin-top: 32px;
-  margin-bottom: 40px;
-`;
-
-const Title = styled.Text`
-  font-family: 'Bold';
-  font-size: 18px;
-  color: #120000;
-`;
-
-const Subtitle = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #413333;
-`;
-
 const ThemeScrollViewContainer = styled.View`
   flex-direction: row;
   justify-content: center;
-  align-items: flex-end;
-  height: 150px; /* Adjust based on the maximum height of the enlarged circles */
+  align-items: center;
+  height: 150px;
 `;
 
 const ThemeScrollView = styled.ScrollView`
@@ -219,10 +207,11 @@ const ThemeScrollView = styled.ScrollView`
 `;
 
 const ThemeCircle = styled.TouchableOpacity<{ selected: boolean }>`
-  border-radius: 70px; /* Half of the larger size to ensure it remains circular */
+  border-radius: 70px;
   background-color: ${({ selected }) => (selected ? '#F7F5F5' : '#fff')};
   justify-content: center;
   align-items: center;
+  align-self: center;
   margin: 5px 10px 5px 5px; /*그림자 잘리는 것 방지 */
   elevation: 5;
   overflow: visible;
@@ -233,24 +222,27 @@ const AnimatedThemeCircle = Animated.createAnimatedComponent(ThemeCircle);
 const GradientCircle = styled(LinearGradient)`
   width: 100%;
   height: 100%;
-  border-radius: 70px; /* Half of the larger size to ensure it remains circular */
+  border-radius: 70px;
   justify-content: center;
   align-items: center;
 `;
 
-const ThemeText = styled.Text`
+const ThemeText = styled(Caption)`
   text-align: center;
-  font-family: 'Bold';
-  color: #120000;
 `;
 
 const AnimatedThemeText = Animated.createAnimatedComponent(ThemeText);
 
 const ReasonContainer = styled.View`
+  height: 180px;
+  border-radius: ${({ theme }) => theme.radius.l};
+  background-color: #fcfbfb;
   flex-direction: row;
-  align-items: flex-start;
-  margin-top: 63px;
-  margin-bottom: 20px;
+  align-items: flex-end;
+  padding-top: ${({ theme }) => theme.padding.l};
+  padding-bottom: ${({ theme }) => theme.padding.l};
+  margin-top: ${({ theme }) => theme.spacing.s11};
+  margin-bottom: ${({ theme }) => theme.spacing.s9};
 `;
 
 const ReasonIcon = styled.Image`
@@ -263,127 +255,44 @@ const ReasonTextContainer = styled.View`
   flex: 1;
   flex-direction: column;
   justify-content: center;
-  margin-right: 25px;
+  align-self: center;
+  padding-right: ${({ theme }) => theme.padding.l};
 `;
 
-const ReasonTitle = styled.Text`
-  margin-bottom: 10px;
-  font-family: 'Bold';
-  font-size: 14px;
-  color: #120000;
-  letter-spacing: 0.5px;
+const ReasonTitle = styled(Subtitle2)`
+  margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
-const ReasonText = styled.Text`
-  margin-bottom: 10px;
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #120000;
-  letter-spacing: 0.5px;
-`;
-
-const InitialReasonContainer = styled.View`
-  flex-direction: column;
-  justify-content: center;
-`;
-
-const InitialSubText = styled.Text`
-  font-family: 'Regular';
-  font-size: 12px;
-  color: #b0abab;
-  letter-spacing: 0.5px;
+const ReasonText = styled(Caption)`
+  flex-wrap: wrap;
+  margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
 const ReasonButton = styled.TouchableOpacity`
-  align-items: flex-end;
-  margin-left: auto;
-  border-radius: 25px;
+  flex: 1;
+  justify-content: center;
+  align-self: flex-end;
+  margin-top: ${({ theme }) => theme.margin.xl};
+  border-radius: ${({ theme }) => theme.radius.l};
   background-color: #f7f5f5;
 `;
 
-const ReasonButtonText = styled.Text`
+const ReasonButtonText = styled(Caption)`
   padding: 4px 16px;
-  font-family: 'Bold';
-  font-size: 12px;
-  color: #413333;
-`;
-
-const SelectedThemesContainer = styled.View`
-  margin-top: 16px;
+  font-family: ${({ theme }) => theme.fonts.bold};
+  color: ${({ theme }) => theme.colors.grey_8};
 `;
 
 const SelectedThemesHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
-`;
-
-const SelectedThemesTitle = styled.Text`
-  font-family: 'Bold';
-  font-size: 16px;
-  color: #120000;
+  padding-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const SelectedThemes = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
-  margin-bottom: 8px;
-`;
-
-const ThemeTag = styled.View<{ isAITheme: boolean }>`
-  flex-direction: row;
-  align-items: center;
-  background-color: ${({ isAITheme }) => (isAITheme ? '#e52c32' : '#413333')};
-  padding: 4px 8px;
-  border-radius: 30px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-`;
-
-const ThemeTagText = styled.Text`
-  font-family: 'Regular';
-  font-size: 14px;
-  margin-right: 6px;
-  color: #fff;
-  letter-spacing: 0.5px;
-`;
-
-const RemoveButton = styled.TouchableOpacity`
-  padding: 0px;
-`;
-
-const RemoveButtonText = styled.Text`
-  font-size: 14px;
-  color: #fff;
-`;
-
-const ThemeCount = styled.Text`
-  font-family: 'Bold';
-  font-size: 14px;
-  color: #b0abab;
-`;
-
-const RedBlack = styled.Text`
-  color: #120000;
-`;
-
-const ButtonContainer = styled.View`
-  background-color: #fff;
-`;
-
-const CompleteButton = styled.TouchableOpacity`
-  padding: 12px;
-  background-color: #120000;
-  border-radius: 30px;
-  align-items: center;
-  margin: 16px;
-`;
-
-const CompleteButtonText = styled.Text`
-  font-family: 'Bold';
-  font-size: 16px;
-  color: #fff;
 `;
 
 export default AIRecommendTheme;
