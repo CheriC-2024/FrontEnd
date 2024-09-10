@@ -44,8 +44,13 @@ const ArtworkSelect: React.FC = () => {
     error,
   } = useArtworkList(activeCollections);
 
-  // 선택한 체리와 보유한 체리를 가정
-  const userCherries = 2;
+  // 임시 유저 보유 체리 => userApi 사용 예정
+  const userCherries = 5;
+
+  // 체리가 포함된 작품 개수 계산
+  const cherryArtworksCount = selectedArtworks.filter(
+    (artwork) => artwork.cherryNum > 0,
+  ).length;
 
   const handleNextScreen = () => {
     navigation.navigate('ThemeSetting');
@@ -53,7 +58,12 @@ const ArtworkSelect: React.FC = () => {
 
   // useCherryModal 훅 사용: onAction으로 화면 이동 동작을 전달
   const { isModalVisible, modalProps, handleNext, setModalVisible } =
-    useCherryModal(userCherries, totalCherries, handleNextScreen);
+    useCherryModal(
+      userCherries,
+      totalCherries,
+      cherryArtworksCount,
+      handleNextScreen,
+    );
 
   // 헤더의 "다음" 버튼을 설정
   useEffect(() => {

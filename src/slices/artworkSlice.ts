@@ -91,6 +91,9 @@ const artworkSlice = createSlice({
         (state.artworkInfoInput[index] as any)[field] = value;
       }
     },
+    setSelectedArtworks: (state, action: PayloadAction<Artwork[]>) => {
+      state.selectedArtworks = action.payload;
+    },
   },
 });
 
@@ -101,6 +104,7 @@ export const {
   collapseAllCollections,
   expandAllCollections,
   updateArtworkInfoInput,
+  setSelectedArtworks,
 } = artworkSlice.actions;
 
 export default artworkSlice.reducer;
