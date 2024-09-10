@@ -3,6 +3,7 @@ import { useState } from 'react';
 const useCherryModal = (
   userCherries: number,
   selectedCherries: number,
+  selectedArtworks: number,
   onAction: () => void,
 ) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -14,7 +15,7 @@ const useCherryModal = (
     } else if (userCherries >= selectedCherries) {
       setModalProps({
         title: `전시 완료 시점에 체리 ${selectedCherries}개가\n사용돼요!`,
-        message: `선택하신 작품 중 ${'<작품개수>점'}은, 작가님이 설정한\n갯수만큼 체리가 필요해요\n우리 작품의 저작권을 함께 지켜요!`,
+        message: `선택하신 작품 중 ${selectedArtworks}점은, 작가님이 설정한\n갯수만큼 체리가 필요해요\n우리 작품의 저작권을 함께 지켜요!`,
         userCherries: userCherries,
         buttonText: '확인했어요!',
         onAction: () => {
@@ -25,7 +26,7 @@ const useCherryModal = (
     } else {
       setModalProps({
         title: '앗 체리가 부족해요!',
-        message: `선택하신 작품 중 ${'<작품개수>점'}은 전시를 위해 체리 5개가 필요해요\n체리를 더 구매하셔야 될 것 같아요!`,
+        message: `선택하신 작품 중 ${selectedArtworks}점은 전시를 위해 체리 5개가 필요해요\n체리를 더 구매하셔야 될 것 같아요!`,
         userCherries: userCherries,
         buttonText: '체리 구매하기',
         onAction: () => {

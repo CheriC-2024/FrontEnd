@@ -2,32 +2,26 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { Modal } from 'react-native';
 import { CherryIcon } from 'src/assets/icons/_index';
-import { H5, Subtitle2, Body1 } from 'src/styles/typography';
+import { H5, Body1, Subtitle2 } from 'src/styles/typography';
 
-interface CherryUsageModalProps {
+interface CherryFinishModalProps {
   visible: boolean;
   onClose: () => void;
-  title?: string;
-  message?: string;
-  userCherries?: number;
-  requiredCherries?: number;
+  title: string;
+  requiredCherries: number;
+  userCherries: number;
   buttonText?: string;
-  secondaryButtonText?: string;
-  onAction?: () => void;
-  onSecondaryAction?: () => void;
+  onConfirm: () => void;
 }
 
-const CherryUsageModal: React.FC<CherryUsageModalProps> = ({
+const CherryFinishModal: React.FC<CherryFinishModalProps> = ({
   visible,
   onClose,
-  title = '기본 제목',
-  message = '기본 메시지',
-  userCherries = 0,
+  title,
   requiredCherries,
-  buttonText = '확인했어요!',
-  onAction,
-  secondaryButtonText = '뒤로가기',
-  onSecondaryAction = onClose,
+  userCherries,
+  buttonText = '확인했습니다',
+  onConfirm,
 }) => {
   return (
     <Modal
@@ -45,27 +39,24 @@ const CherryUsageModal: React.FC<CherryUsageModalProps> = ({
             <H5>{title}</H5>
           </TitleWrapper>
           <MessageWrapper>
-            <MessageText>{message}</MessageText>
-          </MessageWrapper>
-          {requiredCherries !== undefined && (
             <CherryCountWrapper>
-              <Subtitle2>필요한 체리 </Subtitle2>
-              <Icon />
-              <UserCherries>{requiredCherries}</UserCherries>
+              <MessageText>필요한 체리</MessageText>
+              <CherryIconWrapper>
+                <Icon />
+              </CherryIconWrapper>
+              <RequiredCherries>{requiredCherries}</RequiredCherries>
             </CherryCountWrapper>
-          )}
-          <CherryCountWrapper>
-            <Subtitle2>보유중인 체리 </Subtitle2>
-            <Icon />
-            <UserCherries>{userCherries}</UserCherries>
-          </CherryCountWrapper>
+            <CherryCountWrapper>
+              <MessageText>보유중인 체리</MessageText>
+              <CherryIconWrapper>
+                <Icon />
+              </CherryIconWrapper>
+              <UserCherries>{userCherries}</UserCherries>
+            </CherryCountWrapper>
+          </MessageWrapper>
+
           <ButtonGroup>
-            {secondaryButtonText && (
-              <SecondaryButton onPress={onSecondaryAction}>
-                <Body1>{secondaryButtonText}</Body1>
-              </SecondaryButton>
-            )}
-            <PrimaryButton onPress={onAction}>
+            <PrimaryButton onPress={onConfirm}>
               <Body1>{buttonText}</Body1>
             </PrimaryButton>
           </ButtonGroup>
@@ -75,7 +66,7 @@ const CherryUsageModal: React.FC<CherryUsageModalProps> = ({
   );
 };
 
-export default CherryUsageModal;
+export default CherryFinishModal;
 
 const ModalOverlay = styled.View`
   flex: 1;
@@ -86,11 +77,10 @@ const ModalOverlay = styled.View`
 
 const ModalContainer = styled.View`
   position: relative;
-  align-items: flex-start;
   width: 90%;
-  padding: 65px 34px;
+  padding: 50px 30px;
   border-radius: 16px;
-  background-color: ${({ theme }) => theme.colors.white};
+  background-color: white;
 `;
 
 const CloseButton = styled.TouchableOpacity`
@@ -101,30 +91,38 @@ const CloseButton = styled.TouchableOpacity`
 
 const CloseButtonText = styled.Text`
   font-size: 20px;
-  color: ${({ theme }) => theme.colors.grey_8};
+  color: ${({ theme }) => theme.colors.redBlack};
 `;
 
 const TitleWrapper = styled.View`
-  margin-bottom: 16px;
-`;
-
-const MessageWrapper = styled.View`
   margin-bottom: 20px;
 `;
 
+const MessageWrapper = styled.View`
+  margin-bottom: 60px;
+`;
+
 const MessageText = styled(Body1)`
-  color: ${({ theme }) => theme.colors.grey_6};
   text-align: left;
+  color: ${({ theme }) => theme.colors.grey_6};
 `;
 
 const CherryCountWrapper = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 20px;
+`;
+
+const CherryIconWrapper = styled.View`
+  margin-left: 5px;
+  margin-right: 5px;
 `;
 
 const Icon = styled(CherryIcon)`
   fill: ${({ theme }) => theme.colors.cherryRed_10};
+`;
+
+const RequiredCherries = styled(Subtitle2)`
+  color: ${({ theme }) => theme.colors.cherryRed_10};
 `;
 
 const UserCherries = styled(Subtitle2)`
@@ -132,26 +130,14 @@ const UserCherries = styled(Subtitle2)`
 `;
 
 const ButtonGroup = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
 `;
 
 const PrimaryButton = styled.TouchableOpacity`
-  flex: 1;
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
   border-radius: 16px;
   background-color: ${({ theme }) => theme.colors.grey_4};
-`;
-
-const SecondaryButton = styled.TouchableOpacity`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border-radius: 16px;
-  background-color: #fff;
-  margin-right: 10px;
 `;
