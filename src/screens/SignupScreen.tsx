@@ -12,7 +12,7 @@ import InfoBlock from '../components/InfoBlock';
 import TitleSubtitle from '../components/TitleSubtitle';
 import { Btn, BtnText } from '../components/Button';
 import ToastMessage from '../components/ToastMessage';
-import { useToastMessage } from '../hooks/useToastMessage';
+import { useToastMessage } from 'src/hooks/_index';
 import { useNavigation } from '@react-navigation/native';
 import GradientBackground from 'src/styles/GradientBackground';
 
@@ -33,6 +33,7 @@ const SignupScreen: React.FC = () => {
       nickname !== '' &&
       collectingExperience !== null &&
       isArtist !== null &&
+      Array.isArray(interests) &&
       interests.length > 0
     );
   };
@@ -47,6 +48,11 @@ const SignupScreen: React.FC = () => {
   };
 
   const toggleInterest = (interest: string) => {
+    if (!Array.isArray(interests)) {
+      setInterests([]); // 배열이 아닌 경우 빈 배열로 초기화
+      return;
+    }
+
     if (interests.includes(interest)) {
       setInterests(interests.filter((item) => item !== interest));
     } else if (interests.length < 2) {
@@ -120,7 +126,7 @@ const SignupScreen: React.FC = () => {
 
   const handleFormSubmit = () => {
     // 모든 폼 필드가 유효할 때 메인으로 네비게이트
-    navigation.navigate('MainTabs');
+    navigation.navigate('Tabs');
   };
 
   return (
@@ -152,7 +158,7 @@ const SignupScreen: React.FC = () => {
             }}
           >
             <InputField
-              placeholder="컬렉터님의 닉네임을 작성해 주세요"
+              placeholder='컬렉터님의 닉네임을 작성해 주세요'
               value={nickname}
               onChangeText={setNickname} // 상태 업데이트
             />
@@ -161,9 +167,10 @@ const SignupScreen: React.FC = () => {
             </ConfirmButton>
           </View>
           <InfoBlock
-            label="자기소개"
-            placeholder="컬렉터님의 자기 소개를 작성해 주세요"
+            label='자기소개'
+            placeholder='컬렉터님의 자기 소개를 작성해 주세요'
             maxLength={100}
+            value={''}
           />
 
           <InputLabel>
@@ -257,21 +264,19 @@ const SignupScreen: React.FC = () => {
               <RadioLabel selected={isArtist === 'no'}>아니에요!</RadioLabel>
             </RadioButton>
           </RadioSection>
-          <View style={{ marginBottom: 20 }} />
-          <Btn
-            onPress={handlePress}
-            style={{
-              backgroundColor: isFormValid()
-                ? theme.colors.redBlack
-                : theme.colors.grey_6,
-            }}
-          >
-            <BtnText>
-              {isFormValid() ? '회원가입 완료하기' : '필수 정보를 입력하세요'}
-            </BtnText>
-          </Btn>
-          <View style={{ marginBottom: 20 }} />
         </ScrollView>
+        <Btn
+          onPress={handlePress}
+          style={{
+            backgroundColor: isFormValid()
+              ? theme.colors.redBlack
+              : theme.colors.grey_6,
+          }}
+        >
+          <BtnText>
+            {isFormValid() ? '회원가입 완료하기' : '필수 정보를 입력하세요'}
+          </BtnText>
+        </Btn>
         <ToastMessage message={toastMessage} visible={toastVisible} />
       </Container>
     </SafeAreaView>
@@ -281,8 +286,8 @@ const SignupScreen: React.FC = () => {
 const Container = styled.View`
   flex: 1;
   background-color: ${(props) => props.theme.colors.white};
-  padding: 0 ${(props) => props.theme.spacing.s4};
-  padding-top: 60px;
+  padding: 60px ${(props) => props.theme.spacing.s4};
+  padding-bottom: 100px;
 `;
 
 const ConfirmButton = styled.TouchableOpacity`
