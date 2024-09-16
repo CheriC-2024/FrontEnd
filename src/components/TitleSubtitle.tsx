@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { H6, Caption } from '../styles/typography';
+import { H6, Caption, H4 } from '../styles/typography';
 
 const Container = styled.View`
   flex-direction: row;
@@ -17,6 +17,10 @@ const Title = styled(H6)`
   color: ${({ theme }) => theme.colors.redBlack};
 `;
 
+const TitleLarge = styled(H4)`
+  color: ${({ theme }) => theme.colors.redBlack};
+`;
+
 const Subtitle = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_8};
   padding-top: ${({ theme }) => theme.spacing.s1};
@@ -29,12 +33,14 @@ const Image = styled.Image`
 `;
 
 interface TitleSubtitleProps {
-  title: string | React.ReactNode;
+  titleLarge?: string | React.ReactNode;
+  title?: string | React.ReactNode;
   subtitle: string | React.ReactNode;
   imageSource?: { uri: string } | number;
 }
 
 const TitleSubtitle: React.FC<TitleSubtitleProps> = ({
+  titleLarge,
   title,
   subtitle,
   imageSource,
@@ -43,7 +49,12 @@ const TitleSubtitle: React.FC<TitleSubtitleProps> = ({
     <Container>
       {imageSource && <Image source={imageSource} />}
       <TextContainer hasImage={!!imageSource}>
-        <Title>{title}</Title>
+        {titleLarge ? (
+          <TitleLarge>{titleLarge}</TitleLarge>
+        ) : (
+          <Title>{title}</Title>
+        )}
+
         <Subtitle>{subtitle}</Subtitle>
       </TextContainer>
     </Container>
