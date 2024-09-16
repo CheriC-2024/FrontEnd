@@ -11,6 +11,7 @@ export const theme = {
     grey_6: '#B0ABAB',
     grey_4: '#F7F5F5',
     white: '#FFFFFF',
+    bg: '#FCFCFC',
     redBlack_alpha80: 'rgba(18, 0, 0, 0.8)',
     redBlack_alpha50: 'rgba(18, 0, 0, 0.5)',
     redBlack_alpha40: 'rgba(18, 0, 0, 0.4)',
