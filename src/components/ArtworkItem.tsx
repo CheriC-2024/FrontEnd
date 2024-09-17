@@ -12,13 +12,22 @@ interface ArtworkItemProps {
   onSelect: () => void;
 }
 
+// fileName이 URI인지 로컬 이미지인지 판단하는 임시 함수
+// TODO api 연결시 다시 맞춰서 수정
+const isUri = (fileName: string) => {
+  return fileName.startsWith('http://') || fileName.startsWith('https://');
+};
+
 const ArtworkItem: React.FC<ArtworkItemProps> = ({
   artwork,
   selected,
   selectedIndex,
   onSelect,
 }) => {
-  const artworkImage = imageAssets[artwork.fileName];
+  // fileName이 URI인지 아닌지를 판단
+  const artworkImage = isUri(artwork.fileName)
+    ? { uri: artwork.fileName } // URI일 경우
+    : imageAssets[artwork.fileName];
 
   return (
     <ArtworkItemWrapper selected={selected} onPress={onSelect}>
@@ -40,18 +49,17 @@ const ArtworkItem: React.FC<ArtworkItemProps> = ({
     </ArtworkItemWrapper>
   );
 };
-const ITEM_WIDTH = '120px';
+const ITEM_WIDTH = '110px';
 
 const ArtworkItemWrapper = styled.TouchableOpacity<{ selected: boolean }>`
-  width: 33%;
-  align-self: flex-start;
+  width: ${ITEM_WIDTH};
 `;
 
 const ArtworkImageWrapper = styled.View<{ selected: boolean }>`
   overflow: hidden;
   position: relative;
-  width: ${ITEM_WIDTH};
-  height: 150px;
+  width: 100%;
+  height: 130px;
   border-radius: ${({ theme }) => theme.radius.xs};
   background-color: ${({ selected }) =>
     selected ? 'rgba(0, 0, 0, 0.7)' : 'transparent'};
@@ -79,11 +87,11 @@ const SelectedIndex = styled.Text`
 const ArtworkInfoContainer = styled.View`
   flex-direction: column;
   align-items: flex-start;
-  width: ${ITEM_WIDTH};
   margin-top: ${({ theme }) => theme.margin.xs};
-  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
-const ArtworkName = styled(Subtitle2)``;
+const ArtworkName = styled(Subtitle2)`
+  width: 100%;
+`;
 
 export default ArtworkItem;
