@@ -50,4 +50,6 @@ export type CollectingStackParamList = {
   ArtCollecting: undefined;
   ArtistCollecting: undefined;
   ArtistProfile: undefined;
+  ArtworkInfo: undefined;
+  CreateCollection: undefined;
 };
