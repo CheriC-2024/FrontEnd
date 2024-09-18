@@ -6,10 +6,18 @@ import { Caption, Subtitle1 } from 'src/styles/typography';
 interface CollectionItemProps {
   selected: boolean;
   onPress: () => void;
-  imageSource: any;
+  imageSource: string | any; // imageSource가 URI 또는 로컬 이미지일 수 있음
   name: string;
   description: string;
 }
+
+// URI인지 로컬 이미지인지 판단하는 함수
+const isUri = (fileName: any) => {
+  return (
+    typeof fileName === 'string' &&
+    (fileName.startsWith('http://') || fileName.startsWith('https://'))
+  );
+};
 
 const CollectionItem: React.FC<CollectionItemProps> = ({
   selected,
@@ -24,7 +32,7 @@ const CollectionItem: React.FC<CollectionItemProps> = ({
         <CollectionImage>
           {imageSource && (
             <Image
-              source={imageSource}
+              source={isUri(imageSource) ? { uri: imageSource } : imageSource} // URI 또는 로컬 이미지 처리
               style={{
                 width: '100%',
                 height: '100%',
