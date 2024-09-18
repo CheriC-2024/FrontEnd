@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { H6, Caption, H4 } from '../styles/typography';
+import { ViewStyle, TextStyle } from 'react-native';
 
 const Container = styled.View`
   flex-direction: row;
@@ -13,16 +14,16 @@ const TextContainer = styled.View<{ hasImage: boolean }>`
   margin-top: ${({ hasImage, theme }) => (hasImage ? '0px' : theme.spacing.s4)};
 `;
 
-const Title = styled(H6)`
-  color: ${({ theme }) => theme.colors.redBlack};
+const Title = styled(H6)<{ color?: string }>`
+  color: ${({ theme, color }) => color || theme.colors.redBlack};
 `;
 
-const TitleLarge = styled(H4)`
-  color: ${({ theme }) => theme.colors.redBlack};
+const TitleLarge = styled(H4)<{ color?: string }>`
+  color: ${({ theme, color }) => color || theme.colors.redBlack};
 `;
 
-const Subtitle = styled(Caption)`
-  color: ${({ theme }) => theme.colors.grey_8};
+const Subtitle = styled(Caption)<{ color?: string }>`
+  color: ${({ theme, color }) => color || theme.colors.grey_8};
   padding-top: ${({ theme }) => theme.spacing.s1};
 `;
 
@@ -37,6 +38,7 @@ interface TitleSubtitleProps {
   title?: string | React.ReactNode;
   subtitle: string | React.ReactNode;
   imageSource?: { uri: string } | number;
+  style?: ViewStyle; // 전달받는 스타일 prop
 }
 
 const TitleSubtitle: React.FC<TitleSubtitleProps> = ({
@@ -44,18 +46,20 @@ const TitleSubtitle: React.FC<TitleSubtitleProps> = ({
   title,
   subtitle,
   imageSource,
+  style = {},
 }) => {
+  const textColor = (style as TextStyle).color || undefined; // style에서 color 추출
+
   return (
-    <Container>
+    <Container style={style}>
       {imageSource && <Image source={imageSource} />}
       <TextContainer hasImage={!!imageSource}>
         {titleLarge ? (
-          <TitleLarge>{titleLarge}</TitleLarge>
+          <TitleLarge color={textColor}>{titleLarge}</TitleLarge>
         ) : (
-          <Title>{title}</Title>
+          <Title color={textColor}>{title}</Title>
         )}
-
-        <Subtitle>{subtitle}</Subtitle>
+        <Subtitle color={textColor}>{subtitle}</Subtitle>
       </TextContainer>
     </Container>
   );
