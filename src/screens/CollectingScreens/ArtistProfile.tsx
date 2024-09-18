@@ -60,7 +60,8 @@ const ArtistProfile: React.FC = () => {
   }
 
   const handleSelectArtwork = (artwork: any) => {
-    console.log('Selected artwork:', artwork);
+    // 선택한 작품의 ID를 ArtworkInfo로 전달하며 이동
+    navigation.navigate('ArtworkInfo', { artworkId: artwork.id });
   };
 
   const handleFollowPress = () => {
