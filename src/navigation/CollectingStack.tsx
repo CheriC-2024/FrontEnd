@@ -7,6 +7,7 @@ import {
   ArtworkInfo,
   CollectingScreen,
   CreateCollection,
+  RequestArtwork,
 } from 'src/screens/_index';
 import { CollectingStackParamList } from './types';
 
@@ -24,6 +25,7 @@ const CollectingStack = () => {
       <Stack.Screen name='ArtistProfile' component={ArtistProfile} />
       <Stack.Screen name='ArtworkInfo' component={ArtworkInfo} />
       <Stack.Screen name='CreateCollection' component={CreateCollection} />
+      <Stack.Screen name='RequestArtwork' component={RequestArtwork} />
     </Stack.Navigator>
   );
 };
