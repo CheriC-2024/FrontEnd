@@ -1,16 +1,18 @@
 import React from 'react';
-import { Modal, View, TouchableOpacity, Text } from 'react-native';
+import { Modal } from 'react-native';
 import { ButtonText, H4, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 
 interface BottomSheetProps {
   onSelect: (mode: 'image' | 'artist' | 'both') => void;
   onClose: () => void;
+  selectedOption: 'image' | 'artist' | 'both'; // 선택된 상태를 부모로부터 전달받음
 }
 
 const ArtCollectingSheet: React.FC<BottomSheetProps> = ({
   onSelect,
   onClose,
+  selectedOption, // 부모로부터 선택된 옵션을 받음
 }) => {
   return (
     <Modal transparent={true} animationType='slide'>
@@ -20,14 +22,33 @@ const ArtCollectingSheet: React.FC<BottomSheetProps> = ({
           <SheetDescription>
             현재 보여지는 정보를 필터로 설정할 수 있어요!
           </SheetDescription>
-          <OptionButton onPress={() => onSelect('image')}>
-            <OptionText>이미지만 보기</OptionText>
+
+          {/* 각 옵션 버튼의 배경색을 선택된 상태에 따라 변경 */}
+          <OptionButton
+            selected={selectedOption === 'image'}
+            onPress={() => onSelect('image')}
+          >
+            <OptionText selected={selectedOption === 'image'}>
+              이미지만 보기
+            </OptionText>
           </OptionButton>
-          <OptionButton onPress={() => onSelect('artist')}>
-            <OptionText>작가만 보기</OptionText>
+
+          <OptionButton
+            selected={selectedOption === 'artist'}
+            onPress={() => onSelect('artist')}
+          >
+            <OptionText selected={selectedOption === 'artist'}>
+              작가만 보기
+            </OptionText>
           </OptionButton>
-          <OptionButton onPress={() => onSelect('both')}>
-            <OptionText>작가와 작품명까지 보기</OptionText>
+
+          <OptionButton
+            selected={selectedOption === 'both'}
+            onPress={() => onSelect('both')}
+          >
+            <OptionText selected={selectedOption === 'both'}>
+              작가와 작품명까지 보기
+            </OptionText>
           </OptionButton>
         </SheetContent>
       </SheetContainer>
@@ -35,6 +56,9 @@ const ArtCollectingSheet: React.FC<BottomSheetProps> = ({
   );
 };
 
+export default ArtCollectingSheet;
+
+// 스타일 정의
 const SheetContainer = styled.View`
   flex: 1;
   justify-content: flex-end;
@@ -57,17 +81,19 @@ const SheetDescription = styled(ButtonText)`
   color: ${({ theme }) => theme.colors.grey_8};
 `;
 
-const OptionButton = styled.TouchableOpacity`
+const OptionButton = styled.TouchableOpacity<{ selected: boolean }>`
   width: 100%;
   padding: 15px 0;
   margin-bottom: ${({ theme }) => theme.margin.m};
   border-radius: ${({ theme }) => theme.radius.l};
-  background-color: ${({ theme }) => theme.colors.redBlack};
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.colors.redBlack : theme.colors.grey_4};
 `;
 
-const OptionText = styled(Subtitle2)`
+// OptionText의 색상을 조건부로 설정
+const OptionText = styled(Subtitle2)<{ selected: boolean }>`
   text-align: center;
-  color: #fff;
+  color: ${({ selected }) => (selected ? '#fff' : '#000')};
 `;
 
 const CloseButton = styled.TouchableOpacity`
@@ -82,5 +108,3 @@ const CloseButtonText = styled.Text`
   color: black;
   text-align: center;
 `;
-
-export default ArtCollectingSheet;
