@@ -76,6 +76,7 @@ const CollectingScreen: React.FC = () => {
           data={artistData}
           keyExtractor={(item) => item.id}
           horizontal
+          initialNumToRender={2}
           showsHorizontalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={{ width: 16 }} />} // 아이템 사이 간격 설정
           contentContainerStyle={{ paddingHorizontal: 6 }}
@@ -94,6 +95,7 @@ const CollectingScreen: React.FC = () => {
           data={artistData}
           keyExtractor={(item) => item.id}
           horizontal
+          initialNumToRender={2}
           ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
           contentContainerStyle={{ paddingHorizontal: 6 }}
           showsHorizontalScrollIndicator={false}
@@ -121,6 +123,7 @@ const CollectingScreen: React.FC = () => {
         <FlatList
           data={artistData}
           keyExtractor={(item) => item.id}
+          initialNumToRender={3}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           renderItem={({ item }) => (
             <ArtistBioItem
@@ -136,6 +139,7 @@ const CollectingScreen: React.FC = () => {
       <FlatList
         data={artworkData}
         keyExtractor={(item, index) => index.toString()}
+        initialNumToRender={2}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <CategoryWrapper>
@@ -182,6 +186,7 @@ const CollectingScreen: React.FC = () => {
     <FlatList
       data={artworkData}
       keyExtractor={(item, index) => index.toString()}
+      initialNumToRender={5}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => (
         <CategoryWrapper>
@@ -207,9 +212,16 @@ const CollectingScreen: React.FC = () => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item: subItem }) => (
-                  <ImageWrapper>
-                    <StyledImage source={{ uri: subItem.image }} />
-                  </ImageWrapper>
+                  <TouchableOpacity
+                    // section.title을 ArtCollecting으로 전달
+                    onPress={() =>
+                      handleNavigation('ArtworkInfo', { artworkId: subItem.id })
+                    }
+                  >
+                    <ImageWrapper>
+                      <StyledImage source={{ uri: subItem.image }} />
+                    </ImageWrapper>
+                  </TouchableOpacity>
                 )}
               />
             </SectionWrapper>
