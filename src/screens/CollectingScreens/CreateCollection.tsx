@@ -31,12 +31,13 @@ const CreateCollection: React.FC = () => {
         onHeaderRightPress: handleComplete,
       }),
     );
-  }, [navigation]);
+  }, [navigation, collectionName, collectionDescription]); // collectionName과 collectionDescription이 변경될 때마다 헤더 업데이트
 
   const handleComplete = () => {
-    console.log('컬렉션 이름:', collectionName);
-    console.log('컬렉션 설명:', collectionDescription);
-    navigation.goBack(); // 완료 후 이전 화면으로 돌아가기
+    navigation.navigate('ArtworkInfo', {
+      newCollectionName: collectionName,
+      artworkId: artworkId,
+    });
   };
 
   return (
