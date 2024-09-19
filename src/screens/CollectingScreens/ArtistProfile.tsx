@@ -1,7 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, Animated, TouchableOpacity, Text } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  View,
+  FlatList,
+  Animated,
+  TouchableOpacity,
+  Text,
+  Image,
+  Alert,
+} from 'react-native';
 import styled from 'styled-components/native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  useFocusEffect,
+useNavigation,
+useRoute,
+} from '@react-navigation/native';
 import { ArtistImage } from 'src/components/_index';
 import { artistAndArtworkData } from '../data';
 import ArtworkGrid from 'src/components/ArtworkGrid';
@@ -41,6 +53,17 @@ const ArtistProfile: React.FC = () => {
       }),
     );
   }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      // requestSuccess가 true이면 알림을 띄움
+      if (route.params?.requestSuccess) {
+        Alert.alert('성공', '작가님께 작품 요청이 성공적으로 전달되었습니다!');
+        // 알림 후 params 초기화 (다시 들어왔을 때 알림 뜨지 않도록)
+        route.params.requestSuccess = false;
+      }
+    }, [route.params]),
+  );
 
   const handleTabPress = (index: number) => {
     setActiveTab(index);
