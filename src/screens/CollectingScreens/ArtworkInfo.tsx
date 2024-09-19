@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import { artistAndArtworkData } from '../data'; // 아티스트 및 작품 데이터 불러오기
 import { Container } from 'src/styles/layout';
 import {
@@ -23,7 +27,7 @@ import useToastMessage from 'src/hooks/useToastMessage'; // 토스트 훅
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { artworkId } = route.params; // 네비게이션으로부터 전달된 artworkId 받기
+  const { artworkId, newCollectionName } = route.params || {};
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<number | null>(
@@ -32,6 +36,19 @@ const ArtworkInfo: React.FC = () => {
 
   // 토스트 메시지 훅 사용
   const { toastVisible, toastMessage, showToast } = useToastMessage();
+
+  useFocusEffect(
+    useCallback(() => {
+      // CreateCollection에서 컬렉션 생성했다면 이에 대한 토스트 메시지 띄우기
+      if (newCollectionName) {
+        showToast(`'${newCollectionName}'에 작품이 추가되었어요!`);
+
+        // 토스트 표시 후 newCollectionName을 지우기 위해 params를 초기화
+        navigation.setParams({ newCollectionName: null });
+      }
+      setIsBottomSheetVisible(false);
+    }, [newCollectionName, navigation]),
+  );
 
   const handleOpenBottomSheet = () => {
     setIsBottomSheetVisible(true);
