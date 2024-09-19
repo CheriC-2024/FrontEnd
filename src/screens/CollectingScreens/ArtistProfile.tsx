@@ -11,8 +11,8 @@ import {
 import styled from 'styled-components/native';
 import {
   useFocusEffect,
-useNavigation,
-useRoute,
+  useNavigation,
+  useRoute,
 } from '@react-navigation/native';
 import { ArtistImage } from 'src/components/_index';
 import { artistAndArtworkData } from '../data';
@@ -27,6 +27,7 @@ import {
   Subtitle1,
   Subtitle2,
 } from 'src/styles/typography';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -91,6 +92,84 @@ const ArtistProfile: React.FC = () => {
     setIsFollowing(!isFollowing); // 팔로우 상태 토글
   };
 
+  const navigateToRequestArtwork = () => {
+    navigation.navigate('RequestArtwork', { artistId: artistId }); // RequestArtwork 화면으로 이동
+  };
+
+  // 작가 이력 탭 렌더링
+  const renderArtistHistory = () => {
+    return (
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <SocialMediaContainer>
+          <SocialMediaButton>
+            <Image source={require('src/assets/instagram-logo.png')} />
+          </SocialMediaButton>
+
+          <SocialMediaButton>
+            <Image source={require('src/assets/blog-logo.png')} />
+          </SocialMediaButton>
+
+          <SocialMediaButton onPress={navigateToRequestArtwork}>
+            <Image
+              source={require('src/assets/dm-logo.png')} // 이메일 아이콘 이미지 경로
+            />
+          </SocialMediaButton>
+        </SocialMediaContainer>
+        <HistoryContainer showsVerticalScrollIndicator={false}>
+          <Section>
+            <SectionTitle>학력</SectionTitle>
+            {artistHistory.education.map((item, index) => (
+              <HistoryText key={index}>- {item}</HistoryText>
+            ))}
+          </Section>
+
+          <Section>
+            <SectionTitle>개인전</SectionTitle>
+            {artistHistory.soloExhibitions.map((item, index) => (
+              <HistoryText key={index}>
+                {item.year} 《{item.title}》, {item.location}
+              </HistoryText>
+            ))}
+          </Section>
+
+          <Section>
+            <SectionTitle>단체전</SectionTitle>
+            {artistHistory.groupExhibitions.map((item, index) => (
+              <HistoryText key={index}>
+                {item.year} 《{item.title}》, {item.location}
+              </HistoryText>
+            ))}
+          </Section>
+
+          <Section>
+            <SectionTitle>작가의 작품 소장처</SectionTitle>
+            {artistHistory.collections.map((item, index) => (
+              <HistoryText key={index}>- {item}</HistoryText>
+            ))}
+          </Section>
+
+          <Section>
+            <SectionTitle>수상 및 선정</SectionTitle>
+            {artistHistory.awards.map((item, index) => (
+              <HistoryText key={index}>
+                {item.year} {item.title}
+              </HistoryText>
+            ))}
+          </Section>
+
+          <Section>
+            <SectionTitle>레지던시</SectionTitle>
+            {artistHistory.residency.map((item, index) => (
+              <HistoryText key={index}>
+                {item.year} {item.title}
+              </HistoryText>
+            ))}
+          </Section>
+        </HistoryContainer>
+      </ScrollView>
+    );
+  };
+
   return (
     <Container>
       <ProfileWrapper>
@@ -130,16 +209,48 @@ const ArtistProfile: React.FC = () => {
         />
       </TabWrapper>
 
-      <ArtworkGrid
-        artworks={artistData.artworks}
-        selectedArtworks={[]}
-        onSelect={handleSelectArtwork}
-      />
+      {/* 탭에 따른 콘텐츠 렌더링 */}
+      {activeTab === 0 && (
+        <ArtworkGrid
+          artworks={artistData.artworks}
+          selectedArtworks={[]}
+          onSelect={handleSelectArtwork}
+        />
+      )}
+      {activeTab === 1 && renderArtistHistory()}
+      {/* 추가 탭 콘텐츠는 여기서 구현 */}
     </Container>
   );
 };
 
-// 애니메이션 선 스타일
+// 작가 이력 로컬 데이터
+const artistHistory = {
+  education: [
+    '서울여자대학교, 산업디자인전공 학사',
+    '서울여자대학교 대학원, 산업디자인전공 석사',
+  ],
+  soloExhibitions: [
+    { year: '2024', title: 'Art OOOO 2024', location: 'OOOO, 서울' },
+    { year: '2022', title: '다시보는 World, 2022', location: 'OOOO, 서울' },
+  ],
+  groupExhibitions: [
+    { year: '2024', title: 'Art OOOO 2024', location: 'OOOO, 서울' },
+    { year: '2023', title: 'OOOO 2023', location: 'OOOO, 서울' },
+    { year: '2023', title: 'OOOO OOOO 2023', location: 'OO, 광주' },
+  ],
+  collections: [
+    '서울여자대학교 미술관',
+    'OOOO OOO 미술관',
+    'OOOOOOO아트 전시관',
+  ],
+  awards: [
+    { year: '2024', title: '제24회 OOOO OO전 입선' },
+    { year: '2021', title: '제12회 OOOO전 대상' },
+    { year: '2020', title: '제20회 공모전 수상' },
+  ],
+  residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
+};
+
 const AnimatedUnderline = styled(Animated.View)`
   position: absolute;
   bottom: 0;
@@ -174,7 +285,7 @@ const FollowSection = styled.View`
   justify-content: space-around;
   width: 75%;
   margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: ${({ theme }) => theme.spacing.s10};
+  margin-bottom: ${({ theme }) => theme.spacing.s8};
 `;
 
 const FollowersCount = styled(Subtitle2)``;
@@ -205,6 +316,47 @@ const TabButton = styled.TouchableOpacity<{ active?: boolean }>`
 
 const TabButtonText = styled(Subtitle2)<{ active?: boolean }>`
   color: ${({ active }) => (active ? '#120000' : '#B0ABAB')};
+`;
+
+const SocialMediaButton = styled(TouchableOpacity)`
+  width: 70px;
+  height: 70px;
+  border-radius: 40px;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  margin: 0 9px;
+  elevation: 3;
+`;
+
+const SocialMediaContainer = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 16px;
+`;
+
+const HistoryContainer = styled.View`
+  padding: 16px;
+`;
+
+const Section = styled.View`
+  margin-bottom: 20px;
+`;
+
+const SectionTitle = styled(Subtitle2)`
+  margin-bottom: 10px;
+  color: ${({ theme }) => theme.colors.grey_10};
+  align-self: flex-start;
+  border-bottom-width: 2px;
+  border-bottom-color: black;
+  padding-bottom: 4px;
+`;
+
+const HistoryText = styled(Caption)`
+  color: ${({ theme }) => theme.colors.grey_10};
+  margin-bottom: 4px;
 `;
 
 const ErrorMessage = styled.Text`
