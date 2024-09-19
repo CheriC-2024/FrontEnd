@@ -15,10 +15,15 @@ import { Caption, Subtitle1 } from 'src/styles/typography';
 
 const ArtCollecting: React.FC = () => {
   const navigation = useNavigation();
-  const [showDetails, setShowDetails] = useState<'image' | 'artist' | 'both'>(
-    'image',
-  );
   const [isSheetVisible, setIsSheetVisible] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<
+    'image' | 'artist' | 'both'
+  >('image'); // 선택된 상태를 부모에서 관리
+
+  const handleSelect = (mode: 'image' | 'artist' | 'both') => {
+    setSelectedOption(mode); // 선택된 값을 업데이트
+    setIsSheetVisible(false); // 바텀시트 닫기
+  };
 
   // useRoute로 categoryTitle과 categoryType 받아오기
   const route = useRoute();
@@ -38,11 +43,6 @@ const ArtCollecting: React.FC = () => {
     setIsSheetVisible(true);
   };
 
-  const changeViewMode = (mode: 'image' | 'artist' | 'both') => {
-    setShowDetails(mode);
-    setIsSheetVisible(false);
-  };
-
   const getAdjustedDimensions = (width: number, height: number) => {
     if (width > height) {
       return { width: width, height: height + 100 };
@@ -59,9 +59,9 @@ const ArtCollecting: React.FC = () => {
       <View style={{ flexDirection: 'row', marginTop: 32 }}>
         <TouchableOpacity onPress={openBottomSheet}>
           <ToggleText>
-            {showDetails === 'image'
+            {selectedOption === 'image'
               ? '이미지'
-              : showDetails === 'artist'
+              : selectedOption === 'artist'
                 ? '작가'
                 : '작가 + 작품'}
           </ToggleText>
@@ -90,13 +90,13 @@ const ArtCollecting: React.FC = () => {
           }}
           showsVerticalScrollIndicator={false}
           renderIndividualFooter={({ customData }) => {
-            if (showDetails === 'image') {
+            if (selectedOption === 'image') {
               return null;
             }
 
             return (
               <ImageInfoWrapper>
-                {showDetails === 'both' && (
+                {selectedOption === 'both' && (
                   <>
                     <ArtworkText>{customData.name}</ArtworkText>
                     <View style={{ flexDirection: 'row' }}>
@@ -108,7 +108,7 @@ const ArtCollecting: React.FC = () => {
                     </View>
                   </>
                 )}
-                {showDetails === 'artist' && (
+                {selectedOption === 'artist' && (
                   <View style={{ flexDirection: 'row' }}>
                     <ArtistImage
                       image={'https://via.placeholder.com/150x150'}
@@ -125,8 +125,9 @@ const ArtCollecting: React.FC = () => {
 
       {isSheetVisible && (
         <ArtCollectingSheet
-          onSelect={changeViewMode}
+          onSelect={handleSelect}
           onClose={() => setIsSheetVisible(false)}
+          selectedOption={selectedOption}
         />
       )}
     </Container>
@@ -136,7 +137,7 @@ const ArtCollecting: React.FC = () => {
 // Styled components
 const MasonryListWrapper = styled.View`
   flex: 1;
-  margin-horizontal: -16px; /* Remove the margins from MasonryList */
+  margin-horizontal: -16px;
 `;
 
 const ImageInfoWrapper = styled.View`
