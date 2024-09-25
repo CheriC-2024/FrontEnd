@@ -1,6 +1,6 @@
 export * from './AIRecommendation/_index';
+export * from './CollectingScreens/_index';
 export * from './ExhibitScreens/_index';
-export { default as CollectingScreen } from './CollectingScreen';
 export { default as HomeScreen } from './HomeScreen';
 export { default as LoginScreen } from './LoginScreen';
 export { default as MyCheriCScreen } from './MyCheriCScreen';

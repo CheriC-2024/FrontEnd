@@ -14,6 +14,8 @@ interface HeaderConfigOptions {
   headerRightDisabled?: boolean;
   onHeaderRightPress?: () => void;
   leftButtonText?: string;
+  headerBackgroundColor?: string; // 추가: 헤더 배경색
+  headerTitleColor?: string; // 추가: 헤더 타이틀 텍스트 색상
 }
 
 const createHeaderLeft = (
@@ -91,9 +93,12 @@ export const headerOptions = (
     : undefined,
   headerTitle: options.headerTitle || ' ',
   headerTitleAlign: options.headerTitleAlign,
+  headerStyle: {
+    backgroundColor: options.headerBackgroundColor || '#fff', // 헤더 배경색 설정
+  },
   headerTitleStyle: {
     fontSize: 16,
     fontFamily: 'PretendardBold',
-    color: options.iconColor,
+    color: options.headerTitleColor || options.iconColor, // 헤더 타이틀 색상 설정
   },
 });

@@ -15,7 +15,7 @@ const ArtworkPriceInfo: React.FC<Pick<Artwork, 'cherryNum' | 'register'>> = ({
         <CollectorOnlyImage
           source={require('../assets/images/collectorOnlyText.png')}
         />
-      ) : register === 'ARTIST' || cherryNum > 0 ? (
+      ) : register === 'ARTIST' && cherryNum > 0 ? (
         <PriceRow>
           <Icon />
           <PriceText>

@@ -8052,7 +8052,7 @@ prompts@2.4.2, prompts@^2.3.2, prompts@^2.4.2:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -8233,6 +8233,13 @@ react-native-linear-gradient@^2.8.3:
   resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz#9a116649f86d74747304ee13db325e20b21e564f"
   integrity sha512-KflAXZcEg54PXkLyflaSZQ3PJp4uC4whM7nT/Uot9m0e/qxFV3p6uor1983D1YOBJbJN7rrWdqIjq0T42jOJyA==
 
+react-native-masonry-list@^2.16.2:
+  version "2.16.2"
+  resolved "https://registry.yarnpkg.com/react-native-masonry-list/-/react-native-masonry-list-2.16.2.tgz#7f860b878cb3df3591954913ae64e188e32acdd9"
+  integrity sha512-n/660aX+6iMKJMHgEgn4K/VQRH8Fv59OdlYtLoj2zmLwHTz6+IZql81Wq8WVBdidF5i5ZXm2lWKn/qLlRpVUVg==
+  dependencies:
+    prop-types "^15.6.2"
+
 react-native-onboarding-swiper@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-native-onboarding-swiper/-/react-native-onboarding-swiper-1.3.0.tgz#a97f945f03a036845242b3e1f319c6fdb262bc2b"
@@ -8292,6 +8299,13 @@ react-native-vector-icons@^10.1.0:
   dependencies:
     prop-types "^15.7.2"
     yargs "^16.1.1"
+
+react-native-web-swiper@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/react-native-web-swiper/-/react-native-web-swiper-2.2.4.tgz#41c8d4b16746f8ee325cd74b37392df0bc162cec"
+  integrity sha512-Lq6fgCuVhEzxgWJU5t+wWhCoOfd0jfQ1Qdwyww/Kln4McPXFKQ6MaSuUHltnFOKYHej97R7avPchn+QB1wIFQg==
+  dependencies:
+    prop-types "^15.6.2"
 
 react-native@*:
   version "0.74.2"

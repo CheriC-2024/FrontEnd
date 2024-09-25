@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 export type RootStackParamList = {
   Tabs: undefined;
   Stack: undefined;
+  CollectingStack: undefined;
 };
 
 // 네비게이션 바 타입 정의
@@ -42,4 +43,13 @@ export type ExhibitStackParamList = {
   DescriptionSetting: undefined;
   CoverSetting: undefined;
   FinishSetting: undefined;
+};
+
+export type CollectingStackParamList = {
+  CollectingScreen: undefined;
+  ArtCollecting: undefined;
+  ArtistCollecting: undefined;
+  ArtistProfile: undefined;
+  ArtworkInfo: undefined;
+  CreateCollection: undefined;
 };

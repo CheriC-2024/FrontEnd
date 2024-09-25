@@ -49,8 +49,8 @@ const TabNavigator: React.FC = () => {
         tabBarInactiveTintColor: theme.colors.redBlack,
         tabBarLabelStyle: { fontSize: 10, fontFamily: theme.fonts.regular },
         tabBarStyle: {
-          height: 70, // 네비게이션 바의 높이
-          paddingBottom: 12, // 바텀 패딩
+          height: 74, // 네비게이션 바의 높이
+          paddingBottom: 14, // 바텀 패딩
           paddingTop: 12, // 탑 패딩
         },
       })}

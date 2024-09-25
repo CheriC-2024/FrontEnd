@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Image } from 'react-native';
 import {
   GoogleSignin,
   statusCodes,
@@ -6,33 +7,29 @@ import {
 import styled from 'styled-components/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/StackNavigator';
-import { H1 } from '../styles/typography';
+import { H1, Subtitle2 } from '../styles/typography';
 import { useNavigation } from '@react-navigation/native';
 
 const Container = styled.View`
   flex: 1;
-  justify-content: center;
   align-items: center;
   background-color: ${(props) => props.theme.colors.cherryRed_10};
 `;
 
 const Title = styled(H1)`
   color: ${(props) => props.theme.colors.white};
-  margin-bottom: ${(props) => props.theme.spacing.s10};
+  margin-top: 180px;
+  margin-bottom: 300px;
 `;
 
 const Button = styled.TouchableOpacity`
   background-color: ${(props) => props.theme.colors.white};
-  padding-horizontal: ${(props) => props.theme.spacing.s4};
-  padding-vertical: ${(props) => props.theme.spacing.s2};
-  border-radius: ${(props) => props.theme.radius.s};
+  padding: 12px 28px;
+  border-radius: ${(props) => props.theme.radius.l};
+  flex-direction: row;
 `;
 
-const ButtonText = styled.Text`
-  color: ${(props) => props.theme.colors.cherryRed_10};
-  font-size: ${(props) => props.theme.fontSizes.button};
-  font-family: ${(props) => props.theme.fonts.regular};
-`;
+const ButtonText = styled(Subtitle2)``;
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -73,7 +70,11 @@ const LoginScreen: React.FC = () => {
     <Container>
       <Title>CheriC</Title>
       <Button onPress={signInWithGoogle}>
-        <ButtonText>회원가입</ButtonText>
+        <Image
+          source={require('src/assets/google-logo.png')}
+          style={{ width: 24, height: 23 }}
+        />
+        <ButtonText>{`   `}Sign up with Google</ButtonText>
       </Button>
     </Container>
   );
