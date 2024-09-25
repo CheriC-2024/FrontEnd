@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal } from 'react-native';
+import { Modal, View } from 'react-native';
 import { ButtonText, H4, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 
@@ -18,10 +18,12 @@ const ArtCollectingSheet: React.FC<BottomSheetProps> = ({
     <Modal transparent={true} animationType='slide'>
       <SheetContainer>
         <SheetContent>
-          <SheetTitle>정보 필터 설정하기</SheetTitle>
-          <SheetDescription>
-            현재 보여지는 정보를 필터로 설정할 수 있어요!
-          </SheetDescription>
+          <View style={{ marginLeft: 8 }}>
+            <SheetTitle>정보 필터 설정하기</SheetTitle>
+            <SheetDescription>
+              현재 보여지는 정보를 필터로 설정할 수 있어요!
+            </SheetDescription>
+          </View>
 
           {/* 각 옵션 버튼의 배경색을 선택된 상태에 따라 변경 */}
           <OptionButton
