@@ -294,12 +294,13 @@ const CollectingScreen: React.FC = () => {
 
 const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: ${({ theme }) => theme.spacing.s7};
-  border-radius: 32px;
-  border: 1px solid #f7f5f5;
-  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
+  margin-bottom: ${({ theme }) => theme.margin.l};
+  border-radius: ${({ theme }) => theme.radius.l};
   justify-content: center;
-  z-index: 1;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
+    z-index: 10;
+  elevation: 4;
+  overflow: visible;
 `;
 
 const ButtonContent = styled.View`
