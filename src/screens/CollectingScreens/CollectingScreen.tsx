@@ -8,20 +8,20 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Swiper from 'react-native-web-swiper';
-import TitleSubtitle from 'src/components/TitleSubtitle';
-import { Container } from 'src/styles/layout';
-import { Caption, H5, H6, Subtitle1, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
-import { artistAndArtworkData, artistData, artworkData } from '../data';
+import { useNavigation } from '@react-navigation/native';
+import Swiper from 'react-native-web-swiper';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
   ArtistBioItem,
   ArtistCard,
   ArtistImage,
   ArtistWithArtworks,
+TitleSubtitle,
 } from 'src/components/_index';
-import { useNavigation } from '@react-navigation/native';
+import { Container } from 'src/styles/layout';
+import { Body2, H6, Subtitle1, Subtitle2 } from 'src/styles/typography';
+import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
