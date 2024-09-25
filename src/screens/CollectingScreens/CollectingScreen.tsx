@@ -249,6 +249,8 @@ const CollectingScreen: React.FC = () => {
                 marginBottom: 16,
                 width: '100%',
                 height: SCREEN_HEIGHT / 4,
+                overflow: 'hidden',
+                borderRadius: 16,
               }}
             >
               {images.map((image, index) => (
@@ -258,7 +260,6 @@ const CollectingScreen: React.FC = () => {
                     style={{
                       width: 'auto',
                       height: '100%',
-                      borderRadius: 16,
                       resizeMode: 'cover',
                     }}
                   />
@@ -298,7 +299,7 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   border-radius: ${({ theme }) => theme.radius.l};
   justify-content: center;
   background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
-    z-index: 10;
+  z-index: 10;
   elevation: 4;
   overflow: visible;
 `;
