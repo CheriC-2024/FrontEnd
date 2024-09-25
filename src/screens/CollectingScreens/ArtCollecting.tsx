@@ -63,7 +63,7 @@ const ArtCollecting: React.FC = () => {
               ? '이미지'
               : selectedOption === 'artist'
                 ? '작가'
-                : '작가 + 작품'}
+                : '작가+작품'}
           </ToggleText>
         </TouchableOpacity>
       </View>
@@ -154,9 +154,8 @@ const ArtistText = styled(Caption)`
 `;
 
 const ToggleText = styled(Caption)`
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-radius: ${({ theme }) => theme.radius.l};
-  font-family: ${({ theme }) => theme.fonts.bold};
   background-color: ${({ theme }) => theme.colors.redBlack};
   color: #fff;
 `;
