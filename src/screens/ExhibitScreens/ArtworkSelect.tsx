@@ -148,15 +148,13 @@ const ArtworkSelect: React.FC = () => {
     <Container>
       <ProgressBar currentStep={2} totalSteps={7} />
       <TitleSubtitle
-        title='어떤 컬렉션을 전시로 올릴까요?'
+        titleLarge='전시할 작품 선택하기'
         subtitle={
           <>
-            보유 중인 체리 {` `}
+            보유중인 체리 {` `}
             <Icon />
-            <CherryNum>
-              {` `}
-              {userCherries}
-            </CherryNum>
+            {` `}
+            {userCherries}
           </>
         }
         imageSource={require('src/assets/images/Character/character_surprised.png')}
@@ -261,11 +259,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ onPress }) => {
 };
 
 const Icon = styled(CherryIcon)`
-  fill: ${({ theme }) => theme.colors.cherryRed_10};
-`;
-
-const CherryNum = styled(Caption)`
-  color: ${({ theme }) => theme.colors.cherryRed_10};
+  fill: ${({ theme }) => theme.colors.redBlack};
 `;
 
 const CollectionTitleWrapper = styled.View`

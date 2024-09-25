@@ -67,7 +67,7 @@ const CollectionSelect: React.FC = () => {
       <ProgressBar currentStep={1} totalSteps={7} />
       <>
         <TitleSubtitle
-          title='어떤 컬렉션을 전시로 올릴까요?'
+          titleLarge='전시할 컬렉션 고르기'
           subtitle='전시로 만들고 싶은 컬렉션을 선택해보세요'
           imageSource={require('src/assets/images/Character/character_surprised.png')}
         />

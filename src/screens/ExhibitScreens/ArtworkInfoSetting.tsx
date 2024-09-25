@@ -98,7 +98,7 @@ const ArtworkInfoSetting: React.FC = () => {
     <Container>
       <ProgressBarComponent totalSteps={7} currentStep={4} />
       <TitleSubtitle
-        title='작품의 정보를 작성해주세요'
+        titleLarge='작품 정보 작성하기'
         subtitle='모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요'
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />

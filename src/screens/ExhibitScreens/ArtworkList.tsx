@@ -40,7 +40,7 @@ const ArtworkList: React.FC = () => {
   return (
     <Container>
       <TitleSubtitle
-        title='전시로 올려질 작품들이에요!'
+        titleLarge='전시로 올려질 작품들'
         subtitle='작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요'
       />
       <ScrollView showsVerticalScrollIndicator={false}>

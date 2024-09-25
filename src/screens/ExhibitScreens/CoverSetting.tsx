@@ -246,7 +246,7 @@ const CoverSetting: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <TitleSubtitle
-          title='전시 커버 설정하기'
+          titleLarge='전시 커버 설정하기'
           subtitle='전시와 어울리는 커버를 선택해주세요!'
           imageSource={require('src/assets/images/Character/character_happy.png')}
         />

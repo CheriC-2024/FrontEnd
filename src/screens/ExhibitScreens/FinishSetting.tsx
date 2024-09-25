@@ -181,7 +181,7 @@ const FinishSetting: React.FC = () => {
     <Container>
       <ProgressBar totalSteps={7} currentStep={7} />
       <TitleSubtitle
-        title='전시를 마무리해 볼까요?'
+        titleLarge='전시 마무리하기'
         subtitle='마지막으로 컬렉터님의 전시를 점검해주세요:)'
         imageSource={require('src/assets/images/Character/character_wink.png')}
       />

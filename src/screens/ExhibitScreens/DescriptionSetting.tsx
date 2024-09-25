@@ -54,7 +54,7 @@ const DescriptionSetting: React.FC = () => {
       <ProgressBarComponent totalSteps={7} currentStep={5} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <TitleSubtitle
-          title='전시 이름과 설명을 작성해주세요'
+          titleLarge='전시 이름과 설명 작성하기'
           subtitle='거의 다 왔어요! 조금만 더 힘내요'
           imageSource={require('src/assets/images/Character/character_happy.png')}
         />

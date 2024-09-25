@@ -5,7 +5,7 @@ import ProgressBarComponent from '../../components/ProgressBar';
 import AIRecommendBtn from '../../components/AIRecommendBtn';
 import GradientBackground from 'src/styles/GradientBackground';
 import TitleSubtitle from 'src/components/TitleSubtitle';
-import { Subtitle1, Subtitle2 } from 'src/styles/typography';
+import { Body2, Subtitle1, Subtitle2 } from 'src/styles/typography';
 import ToastMessage from 'src/components/ToastMessage';
 import TagButton from 'src/components/TagButton';
 import { useSelector, useDispatch } from 'react-redux';
@@ -55,7 +55,7 @@ const ThemeSetting: React.FC<{}> = ({}) => {
       <GradientBackground />
       <ProgressBarComponent totalSteps={7} currentStep={3} />
       <TitleSubtitle
-        title='전시의 테마를 알려주세요'
+        titleLarge='전시 테마 정하기'
         subtitle='어떤 전시인지 테마로 설명해주세요'
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />
@@ -66,7 +66,7 @@ const ThemeSetting: React.FC<{}> = ({}) => {
         <Hash>#</Hash>
         <ThemeInput
           placeholder='테마를 추가해주세요 (최대 3개)'
-          placeholderTextColor={`${({ theme }) => theme.colors.grey_8}`}
+          placeholderTextColor={`${({ theme }) => theme.colors.grey_6}`}
           value={inputText}
           onChangeText={setInputText}
           onSubmitEditing={handleAddTheme}
@@ -77,10 +77,10 @@ const ThemeSetting: React.FC<{}> = ({}) => {
       </ThemeInputContainer>
       <SelectedThemesHeader>
         <Subtitle2>설정한 테마</Subtitle2>
-        <Subtitle2>
+        <Body2>
           {selectedThemes.length}{' '}
           <Text style={{ color: theme.colors.grey_6 }}>/ 3</Text>
-        </Subtitle2>
+        </Body2>
       </SelectedThemesHeader>
       <SelectedThemes>
         {selectedThemes.map((themeName, index) => (
@@ -111,7 +111,7 @@ const AIButtonContainer = styled.View`
 
 const Hash = styled(Subtitle1)`
   margin-left: ${({ theme }) => theme.margin.m};
-  padding-right: ${({ theme }) => theme.padding.s};
+  padding-right: ${({ theme }) => theme.padding.xs};
 `;
 
 const ThemeInputContainer = styled.View`
@@ -128,7 +128,6 @@ const ThemeInput = styled.TextInput`
   font-family: ${({ theme }) => theme.fonts.regular};
   font-size: ${({ theme }) => theme.fontSizes.button};
   color: ${({ theme }) => theme.colors.redBlack};
-  letter-spacing: 1px;
 `;
 
 const SelectedThemesHeader = styled.View`
