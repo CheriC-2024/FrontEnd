@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   Dimensions,
   Image,
   Alert,
@@ -17,7 +16,7 @@ import {
   ArtistCard,
   ArtistImage,
   ArtistWithArtworks,
-TitleSubtitle,
+  TitleSubtitle,
 } from 'src/components/_index';
 import { Container } from 'src/styles/layout';
 import { Body2, H6, Subtitle1, Subtitle2 } from 'src/styles/typography';
@@ -184,13 +183,13 @@ const CollectingScreen: React.FC = () => {
 
   const renderArtworkSection = () => (
     <FlatList
-      data={artworkData}
+      data={artworkData.slice(1)} // 첫 번째 항목 (key) 제외, 이건 API 연결시 변경 예정
       keyExtractor={(item, index) => index.toString()}
       initialNumToRender={5}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => (
         <CategoryWrapper>
-          <SectionTitle>{item.categoryTitle}</SectionTitle>
+          <CategoryTitle>{item.categoryTitle}</CategoryTitle>
           {item.sections?.map((section) => (
             <SectionWrapper key={section.title}>
               <TouchableOpacity
@@ -201,8 +200,8 @@ const CollectingScreen: React.FC = () => {
                 // section.title을 ArtCollecting으로 전달
                 onPress={() => handleNavigation('ArtCollecting', section.title)}
               >
-                <CategoryTitle>{section.title}</CategoryTitle>
-                <Icon name='chevron-forward' size={20} color='#120000' />
+                <SectionTitle>{section.title}</SectionTitle>
+                <Icon name='chevron-forward' size={22} color='#120000' />
               </TouchableOpacity>
 
               {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
@@ -246,7 +245,7 @@ const CollectingScreen: React.FC = () => {
               timeout={2}
               controlsEnabled={false}
               containerStyle={{
-                marginTop: 8,
+                marginTop: 16,
                 marginBottom: 16,
                 width: '100%',
                 height: SCREEN_HEIGHT / 4,
@@ -259,7 +258,8 @@ const CollectingScreen: React.FC = () => {
                     style={{
                       width: 'auto',
                       height: '100%',
-                      resizeMode: 'contain',
+                      borderRadius: 16,
+                      resizeMode: 'cover',
                     }}
                   />
                 </View>
@@ -320,36 +320,36 @@ const ButtonIcon = styled(Icon)`
 
 const CategoryButtons = styled.View`
   flex-direction: row;
-  padding: 12px 0;
-  background-color: ${({ theme }) => theme.colors.bg};
+  padding-bottom: 12px;
+  background-color: ${({ theme }) =>
+    theme.colors.bg}; /* sticky header 였을때 텍스트 겹쳐 보이는걸 방지 */
 `;
 
 const CategoryTypeButton = styled.TouchableOpacity<{ selected?: boolean }>`
   margin-right: ${({ theme }) => theme.margin.s};
-  padding: 6px 18px;
+  padding: 4px 8px;
   border-radius: ${({ theme }) => theme.radius.l};
   background-color: ${(props) => (props.selected ? '#120000' : '#F7F5F5')};
 `;
 
-const CategoryTypeButtonText = styled(Subtitle1)<{ selected?: boolean }>`
-  font-family: ${({ theme }) => theme.fonts.bold};
-  color: ${(props) => (props.selected ? '#fff' : '#413333')};
+const CategoryTypeButtonText = styled(Body2)<{ selected?: boolean }>`
+  color: ${(props) => (props.selected ? '#fff' : '#B0ABAB')};
 `;
 
 const CategoryWrapper = styled.View`
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 `;
 
 const CategoryTitle = styled(H6)`
-  margin-bottom: ${({ theme }) => theme.spacing.s3};
+  margin-bottom: ${({ theme }) => theme.spacing.s2};
 `;
 
 const SectionWrapper = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.s8};
+  margin-bottom: ${({ theme }) => theme.spacing.s2};
 `;
 
-const SectionTitle = styled(H5)`
-  margin-bottom: ${({ theme }) => theme.spacing.s3};
+const SectionTitle = styled(Subtitle1)`
+  margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
 const ImageWrapper = styled.View`
