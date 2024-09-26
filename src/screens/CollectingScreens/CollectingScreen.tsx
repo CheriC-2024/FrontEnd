@@ -248,7 +248,7 @@ const CollectingScreen: React.FC = () => {
                 marginTop: 16,
                 marginBottom: 16,
                 width: '100%',
-                height: SCREEN_HEIGHT / 4,
+                height: 245,
                 overflow: 'hidden',
                 borderRadius: 16,
               }}
@@ -294,7 +294,7 @@ const CollectingScreen: React.FC = () => {
 };
 
 const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
-  margin-top: ${({ theme }) => theme.margin.m};
+  margin: 0 2px;
   margin-bottom: ${({ theme }) => theme.margin.l};
   border-radius: ${({ theme }) => theme.radius.l};
   justify-content: center;
@@ -322,14 +322,14 @@ const ButtonIcon = styled(Icon)`
 
 const CategoryButtons = styled.View`
   flex-direction: row;
-  padding-bottom: 12px;
+  padding: 12px 0;
   background-color: ${({ theme }) =>
     theme.colors.bg}; /* sticky header 였을때 텍스트 겹쳐 보이는걸 방지 */
 `;
 
 const CategoryTypeButton = styled.TouchableOpacity<{ selected?: boolean }>`
   margin-right: ${({ theme }) => theme.margin.s};
-  padding: 4px 8px;
+  padding: 2px 12px;
   border-radius: ${({ theme }) => theme.radius.l};
   background-color: ${(props) => (props.selected ? '#120000' : '#F7F5F5')};
 `;
@@ -355,9 +355,9 @@ const SectionTitle = styled(Subtitle1)`
 `;
 
 const ImageWrapper = styled.View`
-  width: 100px;
-  height: 130px;
-  margin-right: ${({ theme }) => theme.margin.s};
+  width: 115px;
+  height: 142px;
+  margin-right: ${({ theme }) => theme.spacing.s3};
 `;
 
 const StyledImage = styled.Image`
