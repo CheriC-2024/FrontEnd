@@ -94,7 +94,7 @@ export const headerOptions = (
   headerTitle: options.headerTitle || ' ',
   headerTitleAlign: options.headerTitleAlign,
   headerStyle: {
-    backgroundColor: options.headerBackgroundColor || '#fff', // 헤더 배경색 설정
+    backgroundColor: options.headerBackgroundColor || '#FCFCFC', // 헤더 배경색 설정
   },
   headerTitleStyle: {
     fontSize: 16,
