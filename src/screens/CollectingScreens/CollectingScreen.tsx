@@ -238,7 +238,7 @@ const CollectingScreen: React.FC = () => {
   );
 
   return (
-    <Container>
+    <Container removePadding>
       <FlatList
         data={artworkData}
         keyExtractor={(item, index) => index.toString()}
@@ -291,6 +291,7 @@ const CollectingScreen: React.FC = () => {
               </Button>
             </View>
             <TitleSubtitle
+              style={{ paddingHorizontal: 16 }}
               titleLarge='아트 컬렉팅하기'
               subtitle='체리시에서 컬렉터님만의 컬렉션을 만들어 보세요:)'
             />
