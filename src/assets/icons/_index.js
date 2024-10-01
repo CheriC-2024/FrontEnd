@@ -9,4 +9,5 @@ export { default as CherryIcon } from './cherry.svg';
 export { default as NoticeIcon } from './notice.svg';
 export { default as PencilIcon } from './pencil.svg';
 export { default as RefreshIcon } from './refresh.svg';
+export { default as SettingIcon } from './setting.svg';
 export { default as HeartIcon } from './heart.svg';

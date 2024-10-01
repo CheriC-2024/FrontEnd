@@ -12,6 +12,8 @@ import {
 import { images } from './data';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Caption, Subtitle1 } from 'src/styles/typography';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { SettingIcon } from 'src/assets/icons/_index';
 
 const ArtCollecting: React.FC = () => {
   const navigation = useNavigation();
@@ -59,11 +61,12 @@ const ArtCollecting: React.FC = () => {
       <View style={{ flexDirection: 'row', marginTop: 32 }}>
         <TouchableOpacity onPress={openBottomSheet}>
           <ToggleText>
+            <SettingIcon />
             {selectedOption === 'image'
-              ? '이미지'
+              ? ' 이미지'
               : selectedOption === 'artist'
-                ? '작가'
-                : '작가+작품'}
+                ? ' 작가'
+                : ' 작가+작품'}
           </ToggleText>
         </TouchableOpacity>
       </View>
