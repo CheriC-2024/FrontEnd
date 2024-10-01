@@ -43,8 +43,13 @@ const TabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={() => ({
         headerTitle: 'CheriC',
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
         headerRight: () => renderHeaderRight(),
+        headerStyle: { backgroundColor: theme.colors.bg }, // 헤더 배경 설정
+        headerTitleStyle: {
+          fontSize: 20,
+          fontFamily: theme.fonts.bold,
+        },
         tabBarActiveTintColor: theme.colors.cherryRed_10,
         tabBarInactiveTintColor: theme.colors.redBlack,
         tabBarLabelStyle: { fontSize: 10, fontFamily: theme.fonts.regular },
