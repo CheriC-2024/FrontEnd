@@ -189,7 +189,9 @@ const CollectingScreen: React.FC = () => {
       initialNumToRender={5}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => (
-        <CategoryWrapper>
+        <CategoryWrapper
+          is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
+        >
           <CategoryTitle>{item.categoryTitle}</CategoryTitle>
           {item.sections?.map((section) => (
             <SectionWrapper key={section.title}>
@@ -372,20 +374,26 @@ const CategoryTypeButtonText = styled(Body2)<{ selected?: boolean }>`
   color: ${(props) => (props.selected ? '#fff' : '#B0ABAB')};
 `;
 
-const CategoryWrapper = styled.View`
-  margin-bottom: 16px;
+const CategoryWrapper = styled.View<{ is2ndSection?: boolean }>`
+  padding-top: ${({ is2ndSection, theme }) =>
+    is2ndSection ? theme.padding.xs : theme.padding.m};
+  padding-left: ${({ theme }) => theme.padding.m};
+  padding-bottom: ${({ theme }) => theme.padding.m};
+  margin-bottom: 20px;
+  background-color: ${({ is2ndSection, theme }) =>
+    is2ndSection ? theme.colors.bg : theme.colors.grey_4};
 `;
 
 const CategoryTitle = styled(H6)`
-  margin-bottom: ${({ theme }) => theme.spacing.s2};
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const SectionWrapper = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.s2};
+  margin-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const SectionTitle = styled(Subtitle1)`
-  margin-bottom: ${({ theme }) => theme.spacing.s1};
+  margin-bottom: ${({ theme }) => theme.spacing.s2};
 `;
 
 const ImageWrapper = styled.View`
