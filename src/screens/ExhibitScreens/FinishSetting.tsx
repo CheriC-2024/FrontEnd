@@ -185,7 +185,7 @@ const FinishSetting: React.FC = () => {
         subtitle='마지막으로 컬렉터님의 전시를 점검해주세요:)'
         imageSource={require('src/assets/images/Character/character_wink.png')}
       />
-
+      <View style={{ marginBottom: 24 }} />
       <GradientContainer>
         {/* 이미지 업로드된 경우 우선적으로 이미지 표시 */}
         {selectedCoverImage ? (

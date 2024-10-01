@@ -102,6 +102,7 @@ const ArtworkInfoSetting: React.FC = () => {
         subtitle='모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요'
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />
+      <View style={{ marginBottom: 24 }} />
       <CircleSelector
         selectedArtworks={selectedArtworks}
         currentIndex={currentIndex}

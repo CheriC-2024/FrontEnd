@@ -250,6 +250,7 @@ const CoverSetting: React.FC = () => {
           subtitle='전시와 어울리는 커버를 선택해주세요!'
           imageSource={require('src/assets/images/Character/character_happy.png')}
         />
+        <View style={{ marginBottom: 24 }} />
         <CoverTitle>체리시가 제안하는 커버</CoverTitle>
         <CoverTextContainer>
           <CoverSubtitle>

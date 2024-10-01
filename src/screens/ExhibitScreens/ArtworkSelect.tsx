@@ -159,6 +159,7 @@ const ArtworkSelect: React.FC = () => {
         }
         imageSource={require('src/assets/images/Character/character_surprised.png')}
       />
+      <View style={{ marginBottom: 24 }} />
       <SearchBar
         placeholder='작품 검색하기'
         filterText={filterText}

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, ActivityIndicator, FlatList } from 'react-native';
+import { Text, ActivityIndicator, FlatList, View } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
@@ -71,6 +71,7 @@ const CollectionSelect: React.FC = () => {
           subtitle='전시로 만들고 싶은 컬렉션을 선택해보세요'
           imageSource={require('src/assets/images/Character/character_surprised.png')}
         />
+        <View style={{ marginBottom: 24 }} />
         <SearchBar
           placeholder='컬렉션 검색하기'
           filterText={filterText}
