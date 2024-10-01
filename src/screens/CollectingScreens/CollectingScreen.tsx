@@ -201,7 +201,12 @@ const CollectingScreen: React.FC = () => {
                 onPress={() => handleNavigation('ArtCollecting', section.title)}
               >
                 <SectionTitle>{section.title}</SectionTitle>
-                <Icon name='chevron-forward' size={22} color='#120000' />
+                <Icon
+                  name='chevron-forward'
+                  size={22}
+                  color='#120000'
+                  style={{ paddingBottom: 3 }}
+                />
               </TouchableOpacity>
 
               {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
