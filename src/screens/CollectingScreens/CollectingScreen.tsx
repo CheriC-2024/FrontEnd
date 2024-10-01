@@ -302,9 +302,9 @@ const CollectingScreen: React.FC = () => {
           }
         }}
         ListFooterComponent={
-          selectedCoverType === '작가'
-            ? renderArtistSection()
-            : renderArtworkSection()
+          selectedCoverType === '작품'
+            ? renderArtworkSection()
+            : renderArtistSection()
         }
       />
     </Container>
