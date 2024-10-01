@@ -354,7 +354,7 @@ const ButtonIcon = styled(Icon)`
 
 const CategoryButtons = styled.View`
   flex-direction: row;
-  padding: 12px 0;
+  padding: ${({ theme }) => theme.spacing.s3} ${({ theme }) => theme.padding.m};
   background-color: ${({ theme }) =>
     theme.colors.bg}; /* sticky header 였을때 텍스트 겹쳐 보이는걸 방지 */
 `;
@@ -362,8 +362,9 @@ const CategoryButtons = styled.View`
 const CategoryTypeButton = styled.TouchableOpacity<{ selected?: boolean }>`
   margin-right: ${({ theme }) => theme.margin.s};
   padding: 2px 12px;
+  border: 1px solid ${(props) => (props.selected ? undefined : '#F2F0F0')};
   border-radius: ${({ theme }) => theme.radius.l};
-  background-color: ${(props) => (props.selected ? '#120000' : '#F7F5F5')};
+  background-color: ${(props) => (props.selected ? '#120000' : '#FFF')};
 `;
 
 const CategoryTypeButtonText = styled(Body2)<{ selected?: boolean }>`
