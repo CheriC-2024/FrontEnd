@@ -21,6 +21,7 @@ import {
 import { Container } from 'src/styles/layout';
 import { Body2, H6, Subtitle1, Subtitle2 } from 'src/styles/typography';
 import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
+import LinearGradient from 'react-native-linear-gradient';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -245,39 +246,50 @@ const CollectingScreen: React.FC = () => {
         stickyHeaderIndices={[1]} // CategoryButtons가 고정되도록 설정
         ListHeaderComponent={
           <>
-            {/* Swiper 컴포넌트를 FlatList의 헤더로 추가 */}
-            <Swiper
-              loop
-              timeout={2}
-              controlsEnabled={false}
-              containerStyle={{
-                marginTop: 16,
-                marginBottom: 16,
-                width: '100%',
-                height: 245,
-                overflow: 'hidden',
-                borderRadius: 16,
+            <View
+              style={{
+                position: 'relative',
+                marginBottom: 18,
               }}
             >
-              {images.map((image, index) => (
-                <View key={index}>
-                  <Image
-                    source={image}
-                    style={{
-                      width: 'auto',
-                      height: '100%',
-                      resizeMode: 'cover',
-                    }}
+              {/* Swiper 컴포넌트는 배경 이미지만 스와이프 */}
+              <Swiper
+                loop
+                timeout={2}
+                controlsEnabled={false}
+                containerStyle={{
+                  width: '100%',
+                  height: 320,
+                }}
+              >
+                {images.map((image, index) => (
+                  <View key={index} style={{ position: 'relative' }}>
+                    <Image
+                      source={image}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        resizeMode: 'cover',
+                      }}
+                    />
+                    {/* 그라데이션 추가 */}
+                    <GradientOverlay />
+                  </View>
+                ))}
+              </Swiper>
+
+              {/* Swiper 외부에 고정된 버튼 */}
+              <Button onPress={() => Alert.alert('Button Pressed')}>
+                <ButtonContent>
+                  <ButtonText>내가 소장한 작품 등록하러 가기</ButtonText>
+                  <ButtonIcon
+                    name='chevron-forward'
+                    size={20}
+                    color='#120000'
                   />
-                </View>
-              ))}
-            </Swiper>
-            <Button onPress={() => Alert.alert('Button Pressed')}>
-              <ButtonContent>
-                <ButtonText>내가 소장한 작품 등록하러 가기</ButtonText>
-                <ButtonIcon name='chevron-forward' size={20} color='#120000' />
-              </ButtonContent>
-            </Button>
+                </ButtonContent>
+              </Button>
+            </View>
             <TitleSubtitle
               titleLarge='아트 컬렉팅하기'
               subtitle='체리시에서 컬렉터님만의 컬렉션을 만들어 보세요:)'
@@ -299,9 +311,23 @@ const CollectingScreen: React.FC = () => {
   );
 };
 
+const GradientOverlay = styled(LinearGradient).attrs({
+  colors: ['rgba(18, 0, 0, 0.2)', 'rgba(18, 0, 0, 0)'],
+  start: { x: 0, y: 1 },
+  end: { x: 0, y: 0.5 },
+})`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+`;
+
 const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
-  margin: 0 2px;
-  margin-bottom: ${({ theme }) => theme.margin.l};
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  right: 16px;
   border-radius: ${({ theme }) => theme.radius.l};
   justify-content: center;
   background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
