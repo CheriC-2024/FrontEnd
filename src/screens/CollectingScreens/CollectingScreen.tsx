@@ -232,6 +232,7 @@ const CollectingScreen: React.FC = () => {
           ))}
         </CategoryWrapper>
       )}
+      ListFooterComponent={<View style={{ height: 60 }} />} // 리스트 하단 여백 값
     />
   );
 
