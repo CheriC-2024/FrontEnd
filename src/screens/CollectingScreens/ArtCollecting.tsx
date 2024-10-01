@@ -58,7 +58,14 @@ const ArtCollecting: React.FC = () => {
   return (
     <Container>
       <ArtCategoryHeader categoryTitle={categoryTitle} categoryType='artwork' />
-      <View style={{ flexDirection: 'row', marginTop: 32 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: 20,
+        }}
+      >
         <TouchableOpacity onPress={openBottomSheet}>
           <ToggleText>
             <SettingIcon />
@@ -68,6 +75,12 @@ const ArtCollecting: React.FC = () => {
                 ? ' 작가'
                 : ' 작가+작품'}
           </ToggleText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center' }}
+        >
+          <Caption>최신순</Caption>
+          <Icon name='chevron-down' color='#120000' size={14} />
         </TouchableOpacity>
       </View>
 
@@ -88,7 +101,6 @@ const ArtCollecting: React.FC = () => {
           spacing={4}
           columns={2}
           imageContainerStyle={{
-            marginTop: 12,
             borderRadius: 16,
           }}
           showsVerticalScrollIndicator={false}
@@ -137,7 +149,6 @@ const ArtCollecting: React.FC = () => {
   );
 };
 
-// Styled components
 const MasonryListWrapper = styled.View`
   flex: 1;
   margin-horizontal: -16px;
