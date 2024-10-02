@@ -42,7 +42,6 @@ const ArtCategoryHeader: React.FC<{
 const HeaderWrapper = styled.View`
   flex-direction: row;
   align-items: flex-end;
-  margin-top: ${({ theme }) => theme.margin.s};
 `;
 
 const ImageWrapper = styled.View`
@@ -50,9 +49,9 @@ const ImageWrapper = styled.View`
 `;
 
 const HeaderImage = styled.Image<{ categoryType: 'artwork' | 'artist' }>`
-  width: ${({ categoryType }) => (categoryType === 'artist' ? '56px' : '70px')};
+  width: ${({ categoryType }) => (categoryType === 'artist' ? '56px' : '63px')};
   height: ${({ categoryType }) =>
-    categoryType === 'artist' ? '84px' : '82px'};
+    categoryType === 'artist' ? '84px' : '74px'};
 `;
 
 const TextWrapper = styled.View`
