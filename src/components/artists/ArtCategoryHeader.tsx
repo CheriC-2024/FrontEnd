@@ -1,14 +1,15 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { Caption, H3, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 
 const ArtCategoryHeader: React.FC<{
   categoryTitle: string;
   categoryType: 'artwork' | 'artist';
-}> = ({ categoryTitle, categoryType }) => {
+  style: ViewStyle;
+}> = ({ categoryTitle, categoryType, style }) => {
   return (
-    <HeaderWrapper>
+    <HeaderWrapper style={style}>
       <ImageWrapper>
         <HeaderImage
           source={
