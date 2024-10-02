@@ -208,7 +208,7 @@ const CollectingScreen: React.FC = () => {
                   name='chevron-forward'
                   size={22}
                   color='#120000'
-                  style={{ paddingBottom: 3 }}
+                  style={{ paddingBottom: 7 }}
                 />
               </TouchableOpacity>
 
