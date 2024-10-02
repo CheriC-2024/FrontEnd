@@ -42,6 +42,10 @@ const ArtCollecting: React.FC = () => {
     setIsSheetVisible(true);
   };
 
+  const handleNavigation = (destination: string, params?: object) => {
+    navigation.navigate(destination, params);
+  };
+
   const getAdjustedDimensions = (width: number, height: number) => {
     if (width > height) {
       return { width: width, height: height + 100 };
@@ -117,14 +121,22 @@ const ArtCollecting: React.FC = () => {
                         marginHorizontal: 6,
                       }}
                     >
-                      <Image
-                        source={{ uri: item.uri }}
-                        style={{
-                          width: '100%',
-                          aspectRatio: item.width / item.height,
-                          borderRadius: 16,
-                        }}
-                      />
+                      <TouchableOpacity
+                        onPress={() =>
+                          handleNavigation('ArtworkInfo', {
+                            artworkId: item.id,
+                          })
+                        }
+                      >
+                        <Image
+                          source={{ uri: item.uri }}
+                          style={{
+                            width: '100%',
+                            aspectRatio: item.width / item.height,
+                            borderRadius: 16,
+                          }}
+                        />
+                      </TouchableOpacity>
                       {selectedOption !== 'image' && (
                         <ImageInfoWrapper selectedOption={selectedOption}>
                           {selectedOption === 'both' && (
