@@ -61,7 +61,7 @@ const AddCollectionBottomSheet: React.FC<BottomSheetProps> = ({
               <CollectionItem
                 selected={selectedCollection === item.id}
                 onPress={() => onSelectCollection(item.id)}
-                imageSource={{ uri: item.image }}
+                imageSource={{ uri: 'https://i.ibb.co/QNCnwJB/IMG-8456.png' }}
                 name={item.name}
                 description={item.description}
               />
