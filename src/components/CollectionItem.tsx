@@ -56,7 +56,7 @@ const ItemContainer = styled.View<{ selected: boolean }>`
   align-items: center;
   margin-bottom: ${({ theme }) => theme.margin.m};
   margin-horizontal: ${({ theme }) => theme.spacing.s1};
-  padding: ${({ theme }) => theme.padding.s};
+  padding: 14px;
   background-color: white;
   border: 1.7px dashed
     ${({ selected, theme }) =>
