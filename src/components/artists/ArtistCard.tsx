@@ -1,5 +1,5 @@
 import React from 'react';
-import { Subtitle2 } from 'src/styles/typography';
+import { Caption, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 import ArtistImage from './ArtistImage';
 import { TouchableOpacity } from 'react-native';
@@ -10,6 +10,7 @@ interface ArtistCardProps {
   size?: number;
   name: string;
   artistId: number;
+  fontType?: string;
 }
 
 const ArtistCard: React.FC<ArtistCardProps> = ({
@@ -17,6 +18,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   size,
   name,
   artistId, // artistId를 prop으로 받아옴
+  fontType = 'Caption',
 }) => {
   const navigation = useNavigation();
 
@@ -32,7 +34,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
     <ArtistCardButton onPress={handlePress}>
       <ArtistImageWrapper>
         <ArtistImage image={image} size={size} />
-        <ArtistName>{name}</ArtistName>
+        <ArtistName fontType={fontType}>{name}</ArtistName>
       </ArtistImageWrapper>
     </ArtistCardButton>
   );
@@ -46,8 +48,18 @@ const ArtistImageWrapper = styled.View`
   align-items: center;
 `;
 
-const ArtistName = styled(Subtitle2)`
+const ArtistName = styled.Text<{ fontType: string }>`
   margin-top: ${({ theme }) => theme.margin.xs};
+  ${({ fontType }) =>
+    fontType === 'H6'
+      ? `
+    font-size: 18px;
+    font-family: PretendardBold;
+  `
+      : `
+    font-size: 12px;
+    font-family: PretendardRegular;
+  `}
 `;
 
 export default ArtistCard;
