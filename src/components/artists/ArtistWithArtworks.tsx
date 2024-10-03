@@ -31,16 +31,21 @@ const ArtistWithArtworks: React.FC<ArtistWithArtworksProps> = ({
         name={artist.name}
         size={84}
         artistId={artist.id}
+        fontType='H6'
       />
       <ArtworkListWrapper>
-        {artworks.map((artwork) => (
-          <ArtworkItem
+        {artworks.map((artwork, index) => (
+          <ArtworkItemWrapper
             key={artwork.id}
-            artwork={artwork}
-            selected={false}
-            selectedIndex={0}
-            onSelect={() => {}}
-          />
+            lastItem={index === artworks.length - 1}
+          >
+            <ArtworkItem
+              artwork={artwork}
+              selected={false}
+              selectedIndex={0}
+              onSelect={() => {}}
+            />
+          </ArtworkItemWrapper>
         ))}
       </ArtworkListWrapper>
     </ArtistWithArtworkWrapper>
@@ -55,6 +60,10 @@ const ArtistWithArtworkWrapper = styled.View`
 const ArtworkListWrapper = styled.View`
   flex-direction: row;
   margin-left: 16px;
+`;
+
+const ArtworkItemWrapper = styled.View<{ lastItem: boolean }>`
+  margin-right: ${({ lastItem }) => (lastItem ? '0px' : '8px')};
 `;
 
 export default ArtistWithArtworks;
