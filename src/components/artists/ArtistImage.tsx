@@ -31,7 +31,7 @@ const ImageWrapper = styled.View<{ size: number }>`
   width: ${({ size }) => size}px;
   height: ${({ size }) => size}px;
   border-radius: ${({ size }) => size / 2}px;
-  elevation: 5;
+  elevation: 2;
 `;
 
 const StyledArtistImage = styled.Image<{ size: number }>`
