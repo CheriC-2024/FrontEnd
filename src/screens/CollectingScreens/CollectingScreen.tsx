@@ -19,7 +19,14 @@ import {
   TitleSubtitle,
 } from 'src/components/_index';
 import { Container } from 'src/styles/layout';
-import { Body2, H6, Subtitle1, Subtitle2 } from 'src/styles/typography';
+import {
+  Body2,
+  Caption,
+  H5,
+  H6,
+  Subtitle1,
+  Subtitle2,
+} from 'src/styles/typography';
 import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -70,61 +77,71 @@ const CollectingScreen: React.FC = () => {
 
   const renderArtistSection = () => (
     <View>
-      <SectionWrapper>
-        <SectionTitle>새로 유입된 신진 작가</SectionTitle>
+      <ArtistSectionWrapper>
+        <CategoryTitle>새로 유입된 신진 작가</CategoryTitle>
         <FlatList
           data={artistData}
           keyExtractor={(item) => item.id}
           horizontal
           initialNumToRender={2}
           showsHorizontalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={{ width: 16 }} />} // 아이템 사이 간격 설정
-          contentContainerStyle={{ paddingHorizontal: 6 }}
+          ItemSeparatorComponent={() => <View style={{ width: 12 }} />} // 아이템 사이 간격 설정
+          contentContainerStyle={{ paddingHorizontal: 2 }}
           renderItem={({ item }) => (
             <ArtistCard
               image={item.image}
               name={item.name}
               artistId={item.id}
+              size={74}
             />
           )}
         />
-      </SectionWrapper>
-      <SectionWrapper>
-        <SectionTitle>내가 팔로우한 작가 소식</SectionTitle>
+      </ArtistSectionWrapper>
+      <SeparatorLine />
+      <ArtistSectionWrapper>
+        <H5>내가 팔로우한 작가 소식</H5>
         <FlatList
           data={artistData}
           keyExtractor={(item) => item.id}
           horizontal
           initialNumToRender={2}
           ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-          contentContainerStyle={{ paddingHorizontal: 6 }}
+          contentContainerStyle={{ paddingTop: 4 }}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <ArtistWrapper>
+            <FollowingArtistWrapper>
               <ArtistInfoWrapper>
-                <ArtistImage image={item.image} size={36} />
+                <ArtistImage
+                  image={item.image}
+                  size={36}
+                  style={{ elevation: 0 }}
+                />
                 <ArtistInfo>
                   <ArtistName>{item.name}</ArtistName>
                   <ArtistTime>08.27 22:00</ArtistTime>
                 </ArtistInfo>
               </ArtistInfoWrapper>
               <ArtworkImage
-                source={{ uri: 'https://via.placeholder.com/300x150' }}
+                source={{
+                  uri: 'https://i.ibb.co/7vMp7Cd/unsplash-5-NE6m-X0-WVf-Q.png',
+                }}
               />
               <ArtistDescription>
                 작가님의 새로운 작품이 추가되었습니다!
               </ArtistDescription>
-            </ArtistWrapper>
+            </FollowingArtistWrapper>
           )}
         />
-      </SectionWrapper>
-      <SectionWrapper>
-        <SectionTitle>HOT한 작가님들</SectionTitle>
+      </ArtistSectionWrapper>
+      <SeparatorLine />
+      <ArtistSectionWrapper>
+        <H5>HOT한 작가님들</H5>
         <FlatList
           data={artistData}
+          horizontal
           keyExtractor={(item) => item.id}
           initialNumToRender={3}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
           renderItem={({ item }) => (
             <ArtistBioItem
               image={item.image}
@@ -132,21 +149,25 @@ const CollectingScreen: React.FC = () => {
               category={item.description}
               bio={item.bio}
               artistId={item.id}
+              backgroundImage={
+                'https://i.ibb.co/zbJrkTn/unsplash-2-Qg4y32pd-Cc.png'
+              }
             />
           )}
+          contentContainerStyle={{ paddingTop: 8, paddingBottom: 20 }}
+          showsHorizontalScrollIndicator={false}
         />
-      </SectionWrapper>
+      </ArtistSectionWrapper>
       <FlatList
-        data={artworkData}
+        data={artworkData.slice(1)} // 첫 번째 항목 (key) 제외, 이건 API 연결시 변경 예정
         keyExtractor={(item, index) => index.toString()}
         initialNumToRender={2}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <CategoryWrapper>
-            {/* 카테고리 제목 */}
-            <SectionTitle>{item.categoryTitle}</SectionTitle>
-
-            {/* 카테고리 내의 여러 섹션 처리 */}
+          <CategoryWrapper
+            is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
+          >
+            <ArtistCategoryTitle>{item.categoryTitle}</ArtistCategoryTitle>
             {item.sections?.map((section) => (
               <SectionWrapper key={section.title}>
                 <TouchableOpacity
@@ -155,10 +176,14 @@ const CollectingScreen: React.FC = () => {
                     handleNavigation('ArtistCollecting', section.title)
                   }
                 >
-                  <CategoryTitle>{section.title}</CategoryTitle>
-                  <Icon name='chevron-forward' size={20} color='#120000' />
+                  <SectionTitle>{section.title}</SectionTitle>
+                  <Icon
+                    name='chevron-forward'
+                    size={20}
+                    color='#120000'
+                    style={{ paddingBottom: 7 }}
+                  />
                 </TouchableOpacity>
-
                 {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
                 <FlatList
                   data={artistAndArtworkData}
@@ -171,13 +196,14 @@ const CollectingScreen: React.FC = () => {
                       artworks={subItem.artworks}
                     />
                   )}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
-                  ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+                  contentContainerStyle={{ paddingHorizontal: 0 }}
+                  ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
                 />
               </SectionWrapper>
             ))}
           </CategoryWrapper>
         )}
+        ListFooterComponent={<View style={{ height: 60 }} />}
       />
     </View>
   );
@@ -206,7 +232,7 @@ const CollectingScreen: React.FC = () => {
                 <SectionTitle>{section.title}</SectionTitle>
                 <Icon
                   name='chevron-forward'
-                  size={22}
+                  size={20}
                   color='#120000'
                   style={{ paddingBottom: 7 }}
                 />
@@ -388,8 +414,24 @@ const CategoryTitle = styled(H6)`
   margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
+const ArtistCategoryTitle = styled(H5)`
+  margin-bottom: ${({ theme }) => theme.margin.s};
+`;
+
 const SectionWrapper = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.s3};
+`;
+
+const SeparatorLine = styled.View`
+  height: 1px;
+  background-color: #f2f0f0;
+  width: 90%;
+  align-self: center;
+  margin-vertical: 12px;
+`;
+
+const ArtistSectionWrapper = styled.View`
+  padding-left: ${({ theme }) => theme.padding.m};
 `;
 
 const SectionTitle = styled(Subtitle1)`
@@ -411,16 +453,15 @@ const StyledImage = styled.Image`
 const ArtistInfoWrapper = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 8px;
 `;
 
-const ArtistWrapper = styled.View`
-  width: 260px;
+const FollowingArtistWrapper = styled.View`
+  width: 290px;
 `;
 
-const ArtistTime = styled.Text`
-  font-size: 12px;
-  color: #999;
+const ArtistTime = styled(Caption)`
+  font-size: 10px;
+  color: #b0abab;
 `;
 
 const ArtistInfo = styled.View`
@@ -430,14 +471,15 @@ const ArtistInfo = styled.View`
 
 const ArtistName = styled(Subtitle2)``;
 
-const ArtistDescription = styled.Text`
-  color: #555;
+const ArtistDescription = styled(Body2)`
+  color: ${({ theme }) => theme.colors.grey_8};
   margin-top: 4px;
+  margin-left: 4px;
 `;
 
 const ArtworkImage = styled.Image`
   width: 100%;
-  height: 160px;
+  height: 184px;
   margin-top: 10px;
   border-radius: ${({ theme }) => theme.radius.m};
 `;
