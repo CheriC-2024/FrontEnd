@@ -6,7 +6,7 @@ import styled from 'styled-components/native';
 const ArtCategoryHeader: React.FC<{
   categoryTitle: string;
   categoryType: 'artwork' | 'artist';
-  style: ViewStyle;
+  style?: ViewStyle;
 }> = ({ categoryTitle, categoryType, style }) => {
   return (
     <HeaderWrapper style={style}>
@@ -49,9 +49,9 @@ const ImageWrapper = styled.View`
 `;
 
 const HeaderImage = styled.Image<{ categoryType: 'artwork' | 'artist' }>`
-  width: ${({ categoryType }) => (categoryType === 'artist' ? '56px' : '63px')};
+  width: ${({ categoryType }) => (categoryType === 'artist' ? '54px' : '63px')};
   height: ${({ categoryType }) =>
-    categoryType === 'artist' ? '84px' : '74px'};
+    categoryType === 'artist' ? '73px' : '74px'};
 `;
 
 const TextWrapper = styled.View`
