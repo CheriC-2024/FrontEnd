@@ -11,6 +11,7 @@ import { Container } from 'src/styles/layout';
 import { Caption, H5 } from 'src/styles/typography';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const ArtistCollecting: React.FC = () => {
   const navigation = useNavigation();
@@ -26,17 +27,33 @@ const ArtistCollecting: React.FC = () => {
       }),
     );
   }, [navigation]);
+
+  const handlePress = (artistId: number) => {
+    navigation.navigate('CollectingStack', {
+      screen: 'ArtistProfile', // CollectingStack 안의 ArtistProfile 화면으로 이동
+      params: { artistId }, // artistId를 전달
+    });
+  };
+
   // 각 아티스트와 작품을 렌더링하는 함수
   const renderArtistWithArtworks = ({ item }: { item: any }) => (
     <ArtistWithArtworksWrapper>
       {/* 아티스트 정보 */}
-      <ArtistInfo>
-        <ArtistImage image={item.artist.image} size={84} />
-        <View style={{ flexDirection: 'column' }}>
-          <ArtistName>{item.artist.name}</ArtistName>
-          <ArtistCategory>{item.artist.category}</ArtistCategory>
-        </View>
-      </ArtistInfo>
+      <TouchableOpacity onPress={() => handlePress(item.artist.id)}>
+        <ArtistInfo>
+          <ArtistImage image={item.artist.image} size={84} />
+          <View
+            style={{
+              flexDirection: 'column',
+              paddingBottom: 14,
+              marginLeft: 8,
+            }}
+          >
+            <ArtistName>{item.artist.name}</ArtistName>
+            <ArtistCategory>{item.artist.category}</ArtistCategory>
+          </View>
+        </ArtistInfo>
+      </TouchableOpacity>
       {/* 작품 리스트 */}
       <FlatList
         data={item.artworks}
@@ -52,29 +69,38 @@ const ArtistCollecting: React.FC = () => {
           />
         )}
         // 각 아이템 사이의 간격 설정
-        ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
       />
     </ArtistWithArtworksWrapper>
   );
 
   return (
-    <Container>
-      <View style={{ marginTop: 8, marginBottom: 32 }}>
-        <ArtCategoryHeader
-          categoryTitle={categoryTitle}
-          categoryType='artist'
-        />
-      </View>
+    <Container removePadding>
+      <ArtCategoryHeader
+        categoryTitle={categoryTitle}
+        categoryType='artist'
+        style={{ marginBottom: 16, paddingHorizontal: 16 }}
+      />
       <FlatList
         data={artistAndArtworkData}
         keyExtractor={(item) => item.artist.id.toString()}
         renderItem={renderArtistWithArtworks}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 4 }}
+        contentContainerStyle={{ paddingLeft: 16 }}
+        ItemSeparatorComponent={() => <SeparatorLine />}
       />
     </Container>
   );
 };
+
+const SeparatorLine = styled.View`
+  height: 1px;
+  background-color: #f2f0f0;
+  width: 95%;
+  align-self: center;
+  margin-right: 16px;
+  margin-bottom: 16px;
+`;
 
 const ArtistWithArtworksWrapper = styled.View`
   margin-bottom: 24px;
@@ -86,12 +112,8 @@ const ArtistInfo = styled.View`
   margin-bottom: 16px;
 `;
 
-const ArtistName = styled(H5)`
-  margin-left: 12px;
-`;
+const ArtistName = styled(H5)``;
 
-const ArtistCategory = styled(Caption)`
-  margin-left: 12px;
-`;
+const ArtistCategory = styled(Caption)``;
 
 export default ArtistCollecting;
