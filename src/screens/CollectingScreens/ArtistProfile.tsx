@@ -49,8 +49,7 @@ const ArtistProfile: React.FC = () => {
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'both',
-        leftButtonText: `작가 ${artistData.artist.name}님의 공간`,
+        leftButtonType: 'icon',
       }),
     );
   }, [navigation]);
