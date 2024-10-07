@@ -28,6 +28,7 @@ import {
   Subtitle2,
 } from 'src/styles/typography';
 import { ScrollView } from 'react-native-gesture-handler';
+import LinearGradient from 'react-native-linear-gradient';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -50,6 +51,7 @@ const ArtistProfile: React.FC = () => {
     navigation.setOptions(
       headerOptions(navigation, {
         leftButtonType: 'icon',
+        iconColor: '#fff',
         headerTransparent: true,
       }),
     );
@@ -171,12 +173,18 @@ const ArtistProfile: React.FC = () => {
   };
 
   return (
-    <Container>
-      <ProfileWrapper>
-        <ArtistImage image={artistData.artist.image} size={88} />
-        <ArtistName>{artistData.artist.name}</ArtistName>
-        <ArtistInfo>{artistData.artist.category}</ArtistInfo>
-        <ArtistBio>{artistData.artist.bio}</ArtistBio>
+    <>
+      <BackgroundImage source={{ uri: 'https://i.ibb.co/1vmZ82r/3.png' }} />
+      <HeaderOverlay />
+      <Container>
+        <ProfileImageContainer>
+          <ArtistImage image={artistData.artist.image} size={88} />
+        </ProfileImageContainer>
+        <ProfileWrapper>
+          <ArtistName>{artistData.artist.name}</ArtistName>
+          <ArtistInfo>{artistData.artist.category}</ArtistInfo>
+          <ArtistBio>{artistData.artist.bio}</ArtistBio>
+        </ProfileWrapper>
         <FollowSection>
           <FollowersCount>팔로워 {artistData.artist.followers}</FollowersCount>
           <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
@@ -185,41 +193,41 @@ const ArtistProfile: React.FC = () => {
             </FollowButtonText>
           </FollowButton>
         </FollowSection>
-      </ProfileWrapper>
 
-      {/* 탭 버튼 및 애니메이션 */}
-      <TabWrapper>
-        {tabs.map((tab, index) => (
-          <TabButton
-            key={index}
-            active={activeTab === index}
-            onPress={() => handleTabPress(index)}
-          >
-            <TabButtonText active={activeTab === index}>{tab}</TabButtonText>
-          </TabButton>
-        ))}
-        <AnimatedUnderline
-          style={{
-            width: `${100 / tabs.length}%`,
-            left: animationValue.interpolate({
-              inputRange: [0, 100],
-              outputRange: ['0%', '100%'],
-            }),
-          }}
-        />
-      </TabWrapper>
+        {/* 탭 버튼 및 애니메이션 */}
+        <TabWrapper>
+          {tabs.map((tab, index) => (
+            <TabButton
+              key={index}
+              active={activeTab === index}
+              onPress={() => handleTabPress(index)}
+            >
+              <TabButtonText active={activeTab === index}>{tab}</TabButtonText>
+            </TabButton>
+          ))}
+          <AnimatedUnderline
+            style={{
+              width: `${100 / tabs.length}%`,
+              left: animationValue.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['0%', '100%'],
+              }),
+            }}
+          />
+        </TabWrapper>
 
-      {/* 탭에 따른 콘텐츠 렌더링 */}
-      {activeTab === 0 && (
-        <ArtworkGrid
-          artworks={artistData.artworks}
-          selectedArtworks={[]}
-          onSelect={handleSelectArtwork}
-        />
-      )}
-      {activeTab === 1 && renderArtistHistory()}
-      {/* 추가 탭 콘텐츠는 여기서 구현 */}
-    </Container>
+        {/* 탭에 따른 콘텐츠 렌더링 */}
+        {activeTab === 0 && (
+          <ArtworkGrid
+            artworks={artistData.artworks}
+            selectedArtworks={[]}
+            onSelect={handleSelectArtwork}
+          />
+        )}
+        {activeTab === 1 && renderArtistHistory()}
+        {/* 추가 탭 콘텐츠는 여기서 구현 */}
+      </Container>
+    </>
   );
 };
 
@@ -251,6 +259,32 @@ const artistHistory = {
   residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
 };
 
+const BackgroundImage = styled.Image`
+  position: relative;
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+`;
+
+const HeaderOverlay = styled(LinearGradient).attrs({
+  colors: ['rgba(18, 0, 0, 0.3)', 'rgba(18, 0, 0, 0)'],
+  start: { x: 1, y: 0 },
+  end: { x: 1, y: 1 },
+})`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+`;
+
+const ProfileImageContainer = styled.View`
+  position: absolute;
+  top: -50px;
+  left: 16px;
+  z-index: 10;
+`;
+
 const AnimatedUnderline = styled(Animated.View)`
   position: absolute;
   bottom: 0;
@@ -259,31 +293,27 @@ const AnimatedUnderline = styled(Animated.View)`
 `;
 
 const ProfileWrapper = styled.View`
-  align-items: center;
-  margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: 24px;
+  align-items: flex-start;
+  padding-top: ${({ theme }) => theme.margin.xl};
 `;
 
 const ArtistName = styled(H4)`
-  margin-top: ${({ theme }) => theme.margin.s};
+  margin-top: ${({ theme }) => theme.spacing.s3};
 `;
 
-const ArtistInfo = styled(Subtitle2)`
+const ArtistInfo = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_8};
 `;
 
 const ArtistBio = styled(Caption)`
-  text-align: center;
-  margin-top: 4px;
-  padding: 0 60px;
-  color: ${({ theme }) => theme.colors.grey_8};
+  margin-top: ${({ theme }) => theme.margin.xs};
+  color: #7d7979;
 `;
 
 const FollowSection = styled.View`
   flex-direction: row;
   align-items: center;
-  justify-content: space-around;
-  width: 75%;
+  justify-content: space-between;
   margin-top: ${({ theme }) => theme.margin.m};
   margin-bottom: ${({ theme }) => theme.spacing.s8};
 `;
