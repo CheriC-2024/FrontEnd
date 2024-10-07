@@ -50,6 +50,7 @@ const ArtistProfile: React.FC = () => {
     navigation.setOptions(
       headerOptions(navigation, {
         leftButtonType: 'icon',
+        headerTransparent: true,
       }),
     );
   }, [navigation]);

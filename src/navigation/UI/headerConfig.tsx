@@ -16,6 +16,7 @@ interface HeaderConfigOptions {
   leftButtonText?: string;
   headerBackgroundColor?: string; // 추가: 헤더 배경색
   headerTitleColor?: string; // 추가: 헤더 타이틀 텍스트 색상
+  headerTransparent?: boolean;
 }
 
 const createHeaderLeft = (
@@ -101,4 +102,5 @@ export const headerOptions = (
     fontFamily: 'PretendardBold',
     color: options.headerTitleColor || options.iconColor, // 헤더 타이틀 색상 설정
   },
+  headerTransparent: options.headerTransparent || false,
 });
