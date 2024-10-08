@@ -298,7 +298,7 @@ const AnimatedUnderline = styled(Animated.View)`
   position: absolute;
   bottom: 0;
   height: 2px;
-  background-color: #4a0d66;
+  background-color: ${({ theme }) => theme.colors.redBlack};
 `;
 
 const ProfileWrapper = styled.View`
@@ -361,12 +361,13 @@ const TabWrapper = styled.View`
   flex-direction: row;
   justify-content: space-between;
   position: relative;
-  margin-bottom: ${({ theme }) => theme.spacing.s5};
+  margin-bottom: ${({ theme }) => theme.margin.m};
 `;
 
 const TabButton = styled.TouchableOpacity<{ active?: boolean }>`
   flex: 1;
   align-items: center;
+  justify-content: space-between;
   padding-bottom: ${({ theme }) => theme.padding.s};
 `;
 
