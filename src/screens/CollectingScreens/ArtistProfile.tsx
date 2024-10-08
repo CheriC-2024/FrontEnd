@@ -342,6 +342,9 @@ const FollowNumber = styled(ButtonText)`
 `;
 
 const FollowButton = styled.TouchableOpacity<{ isFollowing: boolean }>`
+  width: 104px;
+  justify-content: center;
+  align-items: center;
   background-color: ${({ isFollowing, theme }) =>
     isFollowing ? theme.colors.grey_6 : theme.colors.redBlack};
   padding: 8px 16px;
