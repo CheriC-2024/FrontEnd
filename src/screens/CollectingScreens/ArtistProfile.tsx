@@ -186,10 +186,19 @@ const ArtistProfile: React.FC = () => {
           <ArtistBio>{artistData.artist.bio}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
-          <FollowersCount>팔로워 {artistData.artist.followers}</FollowersCount>
+          <View style={{ flexDirection: 'row' }}>
+            <FollowCountItem>
+              <FollowLabel>팔로워</FollowLabel>
+              <FollowNumber>{artistData.artist.followers}</FollowNumber>
+            </FollowCountItem>
+            <FollowCountItem>
+              <FollowLabel>팔로잉</FollowLabel>
+              <FollowNumber>{artistData.artist.followers}</FollowNumber>
+            </FollowCountItem>
+          </View>
           <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
             <FollowButtonText>
-              {isFollowing ? '팔로잉 중' : '팔로우하기'}
+              {isFollowing ? '팔로우중' : '팔로우하기'}
             </FollowButtonText>
           </FollowButton>
         </FollowSection>
@@ -318,7 +327,19 @@ const FollowSection = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.s8};
 `;
 
-const FollowersCount = styled(Subtitle2)``;
+const FollowCountItem = styled.View`
+  align-items: center;
+  margin-right: ${({ theme }) => theme.spacing.s5};
+`;
+
+const FollowLabel = styled(Caption)`
+  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.grey_6};
+`;
+
+const FollowNumber = styled(ButtonText)`
+  color: ${({ theme }) => theme.colors.grey_6};
+`;
 
 const FollowButton = styled.TouchableOpacity<{ isFollowing: boolean }>`
   background-color: ${({ isFollowing, theme }) =>
