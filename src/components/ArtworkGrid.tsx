@@ -60,6 +60,7 @@ const GridContainer = styled.View`
 
 const ArtworkItemWrapper = styled.View`
   width: 32%;
+  margin-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const PlaceholderItem = styled.View`

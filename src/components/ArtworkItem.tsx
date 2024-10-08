@@ -49,7 +49,7 @@ const ArtworkItem: React.FC<ArtworkItemProps> = ({
     </ArtworkItemWrapper>
   );
 };
-const ITEM_WIDTH = '110px';
+const ITEM_WIDTH = '120px';
 
 const ArtworkItemWrapper = styled.TouchableOpacity<{ selected: boolean }>`
   width: ${ITEM_WIDTH};
@@ -59,7 +59,7 @@ const ArtworkImageWrapper = styled.View<{ selected: boolean }>`
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: 130px;
+  height: 142px;
   border-radius: ${({ theme }) => theme.radius.xs};
   background-color: ${({ selected }) =>
     selected ? 'rgba(0, 0, 0, 0.7)' : 'transparent'};
