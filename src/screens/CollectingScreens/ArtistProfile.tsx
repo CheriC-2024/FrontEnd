@@ -197,7 +197,7 @@ const ArtistProfile: React.FC = () => {
             </FollowCountItem>
           </View>
           <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
-            <FollowButtonText>
+            <FollowButtonText isFollowing={isFollowing}>
               {isFollowing ? '팔로우중' : '팔로우하기'}
             </FollowButtonText>
           </FollowButton>
@@ -346,13 +346,15 @@ const FollowButton = styled.TouchableOpacity<{ isFollowing: boolean }>`
   justify-content: center;
   align-items: center;
   background-color: ${({ isFollowing, theme }) =>
-    isFollowing ? theme.colors.grey_6 : theme.colors.redBlack};
+    isFollowing ? theme.colors.cherryRed_10 : 'transparent'};
   padding: 8px 16px;
   border-radius: ${({ theme }) => theme.radius.l};
+  border: 1.5px solid ${({ theme }) => theme.colors.cherryRed_10};
 `;
 
-const FollowButtonText = styled(Subtitle1)`
-  color: #fff;
+const FollowButtonText = styled(ButtonText)<{ isFollowing: boolean }>`
+  color: ${({ isFollowing, theme }) =>
+    isFollowing ? theme.colors.white : theme.colors.cherryRed_10};
 `;
 
 const TabWrapper = styled.View`
