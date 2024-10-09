@@ -1,11 +1,12 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 import { StackNavigationOptions } from '@react-navigation/stack';
-import { BackIcon } from 'src/assets/icons/_index';
+import { BackIcon, MenuIcon } from 'src/assets/icons/_index';
 import { Subtitle1 } from 'src/styles/typography';
 
 interface HeaderConfigOptions {
   leftButtonType?: 'text' | 'icon' | 'both';
+  rightButtonType?: 'text' | 'icon' | 'both';
   iconColor?: string;
   headerTitleAlign?: 'left' | 'center';
   headerRightText?: string;
@@ -56,7 +57,12 @@ const createHeaderRight = (
   onPress: () => void,
   options: HeaderConfigOptions = {},
 ) => {
-  const { iconColor = '#120000', headerRightDisabled = false } = options;
+  const {
+    rightButtonType = 'text',
+    iconColor = '#120000',
+    headerRightText = '다음',
+    headerRightDisabled = false,
+  } = options;
 
   return (
     <TouchableOpacity
@@ -69,9 +75,20 @@ const createHeaderRight = (
         opacity: headerRightDisabled ? 0.5 : 1,
       }}
     >
-      <Subtitle1 style={{ color: iconColor }}>
-        {options.headerRightText}
-      </Subtitle1>
+      {rightButtonType === 'icon' && (
+        <MenuIcon width={26} height={26} fill={iconColor} />
+      )}
+      {rightButtonType === 'text' && (
+        <Subtitle1 style={{ color: iconColor }}>{headerRightText}</Subtitle1>
+      )}
+      {rightButtonType === 'both' && (
+        <>
+          <MenuIcon width={26} height={26} fill={iconColor} />
+          <Subtitle1 style={{ color: iconColor, marginLeft: 8 }}>
+            {headerRightText}
+          </Subtitle1>
+        </>
+      )}
     </TouchableOpacity>
   );
 };
@@ -82,16 +99,17 @@ export const headerOptions = (
 ): StackNavigationOptions => ({
   headerShown: true,
   headerLeft: () => createHeaderLeft(() => navigation.goBack(), options),
-  headerRight: options.headerRightText
-    ? () =>
-        createHeaderRight(() => {
-          if (!options.headerRightDisabled && options.onHeaderRightPress) {
-            options.onHeaderRightPress();
-          } else if (!options.headerRightDisabled && options.nextScreenName) {
-            navigation.navigate(options.nextScreenName);
-          }
-        }, options)
-    : undefined,
+  headerRight:
+    options.headerRightText || options.rightButtonType
+      ? () =>
+          createHeaderRight(() => {
+            if (!options.headerRightDisabled && options.onHeaderRightPress) {
+              options.onHeaderRightPress();
+            } else if (!options.headerRightDisabled && options.nextScreenName) {
+              navigation.navigate(options.nextScreenName);
+            }
+          }, options)
+      : undefined,
   headerTitle: options.headerTitle || ' ',
   headerTitleAlign: options.headerTitleAlign,
   headerStyle: {
