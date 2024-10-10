@@ -41,6 +41,7 @@ const ArtistProfile: React.FC = () => {
   );
 
   const [activeTab, setActiveTab] = useState(0);
+  const AnimatedContainer = Animated.createAnimatedComponent(Container);
   const animationValue = useRef(new Animated.Value(0)).current;
 
   // 팔로우 상태 관리
@@ -51,7 +52,8 @@ const ArtistProfile: React.FC = () => {
     navigation.setOptions(
       headerOptions(navigation, {
         leftButtonType: 'icon',
-        iconColor: '#fff',
+        rightButtonType: 'icon',
+        iconColor: '#e100ff',
         headerTransparent: true,
       }),
     );
@@ -67,6 +69,54 @@ const ArtistProfile: React.FC = () => {
       }
     }, [route.params]),
   );
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const backgroundHeight = scrollY.interpolate({
+    inputRange: [0, 100], // 스크롤 범위
+    outputRange: [170, 110], // 높이가 170에서 110으로 줄어듦
+    extrapolate: 'clamp',
+  });
+  const backgroundLayerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 1], // 스크롤이 진행되면서 0에서 1로 투명도 변화
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 120], // 스크롤 범위
+    outputRange: [60, 0], // 50px 아래에서 시작해 0으로 이동
+    extrapolate: 'clamp', // 범위를 넘어가면 고정
+  });
+
+  const backgroundTranslateY = scrollY.interpolate({
+    inputRange: [0, 50],
+    outputRange: [0, -50],
+    extrapolate: 'clamp',
+  });
+
+  const backgroundOpacity = scrollY.interpolate({
+    inputRange: [0, 40],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const headerTextOpacity = scrollY.interpolate({
+    inputRange: [60, 100], // 스크롤 범위
+    outputRange: [0, 1], // 0에서 1로 투명도가 변화
+    extrapolate: 'clamp', // 범위를 넘어가면 고정
+  });
+
+  const profileImageTranslateY = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, -120],
+    extrapolate: 'clamp',
+  });
+
+  const contentTranslateY = scrollY.interpolate({
+    inputRange: [0, 100], // 배경 이미지가 줄어드는 스크롤 범위와 동일하게 설정
+    outputRange: [0, -100], // 배경 이미지의 높이 감소량만큼 위로 이동 (-60)
+    extrapolate: 'clamp',
+  });
 
   const handleTabPress = (index: number) => {
     setActiveTab(index);
@@ -117,7 +167,7 @@ const ArtistProfile: React.FC = () => {
             />
           </SocialMediaButton>
         </SocialMediaContainer>
-        <HistoryContainer showsVerticalScrollIndicator={false}>
+        <HistoryContainer>
           <Section>
             <SectionTitle>학력</SectionTitle>
             {artistHistory.education.map((item, index) => (
@@ -173,70 +223,132 @@ const ArtistProfile: React.FC = () => {
   };
 
   return (
-    <>
-      <BackgroundImage source={{ uri: 'https://i.ibb.co/1vmZ82r/3.png' }} />
-      <HeaderOverlay />
-      <Container>
-        <ProfileImageContainer>
-          <ArtistImage image={artistData.artist.image} size={88} />
-        </ProfileImageContainer>
-        <ProfileWrapper>
-          <ArtistName>{artistData.artist.name}</ArtistName>
-          <ArtistInfo>{artistData.artist.category}</ArtistInfo>
-          <ArtistBio>{artistData.artist.bio}</ArtistBio>
-        </ProfileWrapper>
-        <FollowSection>
-          <View style={{ flexDirection: 'row' }}>
-            <FollowCountItem>
-              <FollowLabel>팔로워</FollowLabel>
-              <FollowNumber>{artistData.artist.followers}</FollowNumber>
-            </FollowCountItem>
-            <FollowCountItem>
-              <FollowLabel>팔로잉</FollowLabel>
-              <FollowNumber>{artistData.artist.followers}</FollowNumber>
-            </FollowCountItem>
-          </View>
-          <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
-            <FollowButtonText isFollowing={isFollowing}>
-              {isFollowing ? '팔로우중' : '팔로우하기'}
-            </FollowButtonText>
-          </FollowButton>
-        </FollowSection>
-
-        {/* 탭 버튼 및 애니메이션 */}
-        <TabWrapper>
-          {tabs.map((tab, index) => (
-            <TabButton
-              key={index}
-              active={activeTab === index}
-              onPress={() => handleTabPress(index)}
-            >
-              <TabButtonText active={activeTab === index}>{tab}</TabButtonText>
-            </TabButton>
-          ))}
-          <AnimatedUnderline
-            style={{
-              width: `${100 / tabs.length}%`,
-              left: animationValue.interpolate({
-                inputRange: [0, 100],
-                outputRange: ['0%', '100%'],
-              }),
-            }}
-          />
-        </TabWrapper>
-
-        {/* 탭에 따른 콘텐츠 렌더링 */}
-        {activeTab === 0 && (
-          <ArtworkGrid
-            artworks={artistData.artworks}
-            selectedArtworks={[]}
-            onSelect={handleSelectArtwork}
-          />
+    <View style={{ flex: 1, position: 'relative' }}>
+      <AnimatedBackgroundImage
+        source={{ uri: 'https://i.ibb.co/1vmZ82r/3.png' }}
+        resizeMode='cover'
+        style={{
+          transform: [{ translateY: backgroundTranslateY }],
+          height: 170,
+          position: 'absolute', // 배경 이미지를 고정하여 스크롤 위에 있도록 설정
+          top: 0,
+          left: 0,
+          right: 0,
+        }}
+      />
+      {/* 배경 위의 검은색 반투명 레이어 */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 110,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', // 검은색 반투명 레이어
+          opacity: backgroundLayerOpacity, // 스크롤에 따라 투명도 변경
+        }}
+      />
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: 42,
+          left: 40,
+          right: 0,
+          height: 60,
+          opacity: headerTextOpacity, // 스크롤에 따라 투명도 변경
+          transform: [{ translateY: headerTranslateY }],
+        }}
+      >
+        <Text style={{ color: 'white', fontSize: 20 }}>
+          {artistData.artist.name}
+        </Text>
+      </Animated.View>
+      <ProfileImageContainer
+        style={{
+          transform: [
+            // { scale: profileImageScale },
+            { translateY: profileImageTranslateY },
+          ],
+          opacity: backgroundOpacity,
+        }}
+      >
+        <ArtistImage image={artistData.artist.image} size={88} />
+      </ProfileImageContainer>
+      <Animated.ScrollView
+        contentContainerStyle={{ paddingTop: 170 }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false },
         )}
-        {activeTab === 1 && renderArtistHistory()}
-        {/* 추가 탭 콘텐츠는 여기서 구현 */}
-      </Container>
-    </>
+        scrollEventThrottle={16}
+      >
+        <AnimatedContainer
+          style={{
+            transform: [{ translateY: contentTranslateY }],
+            zIndex: -5,
+          }}
+        >
+          <ProfileWrapper>
+            <ArtistName>{artistData.artist.name}</ArtistName>
+            <ArtistInfo>{artistData.artist.category}</ArtistInfo>
+            <ArtistBio>{artistData.artist.bio}</ArtistBio>
+          </ProfileWrapper>
+          <FollowSection>
+            <View style={{ flexDirection: 'row' }}>
+              <FollowCountItem>
+                <FollowLabel>팔로워</FollowLabel>
+                <FollowNumber>{artistData.artist.followers}</FollowNumber>
+              </FollowCountItem>
+              <FollowCountItem>
+                <FollowLabel>팔로잉</FollowLabel>
+                <FollowNumber>{artistData.artist.followers}</FollowNumber>
+              </FollowCountItem>
+            </View>
+            <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
+              <FollowButtonText isFollowing={isFollowing}>
+                {isFollowing ? '팔로우중' : '팔로우하기'}
+              </FollowButtonText>
+            </FollowButton>
+          </FollowSection>
+
+          {/* 탭 버튼 및 애니메이션 */}
+          <TabWrapper>
+            {tabs.map((tab, index) => (
+              <TabButton
+                key={index}
+                active={activeTab === index}
+                onPress={() => handleTabPress(index)}
+              >
+                <TabButtonText active={activeTab === index}>
+                  {tab}
+                </TabButtonText>
+              </TabButton>
+            ))}
+            <AnimatedUnderline
+              style={{
+                width: `${100 / tabs.length}%`,
+                left: animationValue.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                }),
+              }}
+            />
+          </TabWrapper>
+
+          {/* 탭에 따른 콘텐츠 렌더링 */}
+          {activeTab === 0 && (
+            <ArtworkGrid
+              artworks={artistData.artworks}
+              selectedArtworks={[]}
+              onSelect={handleSelectArtwork}
+            />
+          )}
+          {activeTab === 1 && renderArtistHistory()}
+          {/* 추가 탭 콘텐츠는 여기서 구현 */}
+          <View style={{ height: 200 }} />
+        </AnimatedContainer>
+      </Animated.ScrollView>
+    </View>
   );
 };
 
@@ -275,24 +387,33 @@ const BackgroundImage = styled.Image`
   object-fit: cover;
 `;
 
+const AnimatedBackgroundImage = styled(
+  Animated.createAnimatedComponent(styled.Image`
+    position: relative;
+    width: 100%;
+    height: 170px;
+    overflow: hidden;
+  `),
+)``;
+
 const HeaderOverlay = styled(LinearGradient).attrs({
-  colors: ['rgba(18, 0, 0, 0.3)', 'rgba(18, 0, 0, 0)'],
+  colors: ['rgba(18, 0, 0, 0.5)', 'rgba(18, 0, 0, 0)'],
   start: { x: 1, y: 0 },
   end: { x: 1, y: 1 },
 })`
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: 0%;
   top: 0;
   right: 0;
 `;
 
-const ProfileImageContainer = styled.View`
+const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`
   position: absolute;
-  top: -50px;
+  top: 120px;
   left: 16px;
-  z-index: 10;
-`;
+  z-index: 1;
+`);
 
 const AnimatedUnderline = styled(Animated.View)`
   position: absolute;
