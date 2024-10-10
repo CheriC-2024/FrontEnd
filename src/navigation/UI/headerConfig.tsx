@@ -33,7 +33,12 @@ const createHeaderLeft = (
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 14 }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 14,
+        zIndex: 100,
+      }}
     >
       {leftButtonType === 'icon' && (
         <BackIcon width={22} height={22} fill={iconColor} />
@@ -73,6 +78,7 @@ const createHeaderRight = (
         alignItems: 'center',
         marginRight: 16,
         opacity: headerRightDisabled ? 0.5 : 1,
+        zIndex: 100,
       }}
     >
       {rightButtonType === 'icon' && (
