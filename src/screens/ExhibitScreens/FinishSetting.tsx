@@ -104,7 +104,8 @@ const FinishSetting: React.FC = () => {
         </ArtworkTouchable>
         <ArtworkInfo>
           <Subtitle2>{item.name}</Subtitle2>
-          <ArtworkSubtitle>{item.artist}</ArtworkSubtitle>
+          {/*TODO: API 연결시 */}
+          <ArtworkSubtitle>작가 이름</ArtworkSubtitle>
           {item.cherryNum !== null && (
             <ArtworkCherry>
               {item.cherryNum === 0 ? (
