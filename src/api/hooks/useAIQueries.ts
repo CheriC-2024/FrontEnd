@@ -7,12 +7,15 @@ import { CloudVisionLabel } from 'src/interfaces/aiRecommend';
 export const useCloudVision = (
   artIds: number[],
   cloudRequestType: string,
-  enabled: boolean, // 직접 enabled를 전달 받음
+  enabled: boolean,
 ) => {
+  // ID 소팅 => 순서 바뀌어도 쿼리가 호출되지 않도록 방지
+  const sortedArtIds = [...artIds].sort((a, b) => a - b);
+
   return useQuery({
-    queryKey: ['cloudVision', artIds],
-    queryFn: () => extractProperties(artIds, cloudRequestType),
-    enabled: enabled && artIds.length > 0, // artIds가 있을 때만 호출하고 enabled 조건 추가
+    queryKey: ['cloudVision', sortedArtIds],
+    queryFn: () => extractProperties(sortedArtIds, cloudRequestType),
+    enabled: enabled && sortedArtIds.length > 0,
   });
 };
 
