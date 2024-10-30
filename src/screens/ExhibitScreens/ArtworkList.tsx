@@ -37,6 +37,13 @@ const ArtworkList: React.FC = () => {
     }
   };
 
+  // Calculate the number of placeholders needed
+  const numColumns = 3;
+  const totalItems = selectedArtworks.length;
+  const placeholdersNeeded =
+    (numColumns - (totalItems % numColumns)) % numColumns;
+  const placeholders = Array.from({ length: placeholdersNeeded });
+
   return (
     <Container>
       <View style={{ marginTop: 20 }} />
@@ -54,8 +61,7 @@ const ArtworkList: React.FC = () => {
               <ArtworkItem>
                 <ArtworkImage source={imageAssets[artwork.fileName]} />
                 <Subtitle2>{artwork.name}</Subtitle2>
-                {artwork.register === 'COLLECTOR' &&
-                artwork.cherryNum === null ? (
+                {artwork.cherryNum === null ? (
                   <CollectorOnlyImage
                     source={require('../../assets/images/collectorOnlyText.png')}
                   />
@@ -80,6 +86,13 @@ const ArtworkList: React.FC = () => {
                 )}
               </ArtworkItem>
             </ArtworkTouchable>
+          ))}
+          {/* Render placeholders to fill the empty spaces */}
+          {placeholders.map((_, index) => (
+            <PlaceholderItem
+              key={`placeholder-${index}`}
+              pointerEvents='none'
+            />
           ))}
         </ArtworkContainer>
       </ScrollView>
@@ -117,6 +130,11 @@ const ArtworkDescription = styled(Caption)`
 const CollectorOnlyImage = styled.Image`
   width: 80px;
   height: 15px;
+`;
+
+// Styled component for placeholders
+const PlaceholderItem = styled(ArtworkTouchable)`
+  opacity: 0;
 `;
 
 export default ArtworkList;
