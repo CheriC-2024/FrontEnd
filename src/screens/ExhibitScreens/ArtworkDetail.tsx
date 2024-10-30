@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
-import { ScrollView, Text, Image } from 'react-native';
+import { ScrollView, Text, Image, View } from 'react-native';
 import styled from 'styled-components/native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/types';
 import { imageAssets } from '../../assets/DB/imageAssets';
 import { Container } from 'src/styles/layout';
-import { Caption, H4, Subtitle1 } from 'src/styles/typography';
+import { Caption, H4, Subtitle1, Subtitle2 } from 'src/styles/typography';
 import { theme } from 'src/styles/theme';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { Table } from 'src/components/_index';
 
 type ArtworkDetailRouteProp = RouteProp<StackParamList, 'ArtworkDetail'>;
 
@@ -15,6 +16,15 @@ interface InfoItem {
   title: string;
   value: string;
 }
+
+const tableItems = [
+  { label: '작가', content: '네번째작가' },
+  { label: '시리즈', content: '아몬드 나무' },
+  { label: '작품 크기', content: '740mm * 920mm' },
+  { label: '재질(사용재료)', content: '캔버스에 유화' },
+  { label: '제작시기', content: '1890년' },
+  { label: '작품 분야', content: '회화, 서양화' },
+];
 
 const ArtworkDetail: React.FC = () => {
   const route = useRoute<ArtworkDetailRouteProp>();
@@ -28,6 +38,7 @@ const ArtworkDetail: React.FC = () => {
       headerOptions(navigation, {
         leftButtonType: 'both',
         leftButtonText: '작품의 상세 정보',
+        marginLeft: 0,
       }),
     );
   }, [navigation]);
@@ -43,7 +54,6 @@ const ArtworkDetail: React.FC = () => {
             />
           )}
         </ArtworkTitleContainer>
-        <Subtitle1>대표 이미지</Subtitle1>
         <ImageContainer>
           <MainImage source={imageSource} />
           <CharacterImage
@@ -53,10 +63,6 @@ const ArtworkDetail: React.FC = () => {
 
         {isCollectorOnly ? (
           <>
-            <Subtitle1>
-              실물 이미지
-              <Text style={{ color: theme.colors.cherryRed_10 }}> ★</Text>
-            </Subtitle1>
             <RealImagesContainer>
               <RealImage source={imageSource} />
               <RealImage source={imageSource} />
@@ -65,7 +71,7 @@ const ArtworkDetail: React.FC = () => {
           </>
         ) : (
           <>
-            <Subtitle1>작가의 작품 소개글</Subtitle1>
+            <Subtitle2>작가의 작품 소개</Subtitle2>
             <IntroTextContainer>
               <InfoText>
                 안녕하세요 저는 현재 10년 경력의 작가 네번째작가라고 합니다.
@@ -78,21 +84,13 @@ const ArtworkDetail: React.FC = () => {
           </>
         )}
 
-        <Subtitle1>작품 기본 정보</Subtitle1>
-        <InfoContainer>
-          {(isCollectorOnly ? collectorInfoItems : publicInfoItems).map(
-            (item, index) => (
-              <InfoRow key={index}>
-                <InfoTitle>{item.title}</InfoTitle>
-                <InfoText>{item.value}</InfoText>
-              </InfoRow>
-            ),
-          )}
-        </InfoContainer>
-
+        <Subtitle2>작품 기본 정보</Subtitle2>
+        <View style={{ marginTop: 8, marginBottom: 16 }}>
+          <Table items={tableItems} />
+        </View>
         {isCollectorOnly ? (
           <>
-            <Subtitle1>작품 소장 정보</Subtitle1>
+            <Subtitle2>작품 소장 정보</Subtitle2>
             <InfoContainer>
               {collectorOwnershipInfoItems.map((item, index) => (
                 <InfoRow key={index}>
@@ -104,7 +102,7 @@ const ArtworkDetail: React.FC = () => {
           </>
         ) : (
           <>
-            <Subtitle1>작품 이용 유의사항</Subtitle1>
+            <Subtitle2>작품 이용 유의사항</Subtitle2>
             <InfoContainer>
               {publicUsageInfoItems.map((item, index) => (
                 <InfoRow key={index}>
