@@ -296,9 +296,9 @@ const TagsContainer = styled.View`
 const Tag = styled(Caption)`
   color: #fff;
   background-color: ${({ theme }) => theme.colors.grey_8};
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: ${({ theme }) => theme.radius.l};
-  margin-right: ${({ theme }) => theme.margin.s};
+  margin-right: ${({ theme }) => theme.margin.xs};
   margin-bottom: ${({ theme }) => theme.margin.m};
   letter-spacing: 0.5px;
 `;

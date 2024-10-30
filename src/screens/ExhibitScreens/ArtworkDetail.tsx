@@ -115,6 +115,7 @@ const ArtworkDetail: React.FC = () => {
             </InfoContainer>
           </>
         )}
+        <View style={{ height: 120 }} />
       </ScrollView>
     </Container>
   );
@@ -187,15 +188,15 @@ const MainImage = styled.Image`
   width: 100%;
   height: 200px;
   border-radius: ${({ theme }) => theme.radius.xs};
-  margin-bottom: ${({ theme }) => theme.spacing.s3};
+  margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
 const CharacterImage = styled.Image`
   position: absolute;
-  top: -80px;
+  top: -75px;
   right: 18px;
   width: 55px;
-  height: 80px;
+  height: 75px;
 `;
 
 const RealImagesContainer = styled.View`
@@ -228,7 +229,7 @@ const InfoTitle = styled(Caption)`
 const IntroTextContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grey_4};
   border-radius: ${({ theme }) => theme.radius.m};
-  padding: 12px 20px;
+  padding: 20px 26px;
   margin-top: ${({ theme }) => theme.margin.xs};
   margin-bottom: ${({ theme }) => theme.margin.m};
   shadow-color: rgba(0, 0, 0, 0.3);

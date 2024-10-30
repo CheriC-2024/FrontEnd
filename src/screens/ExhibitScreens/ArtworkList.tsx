@@ -20,8 +20,8 @@ const ArtworkList: React.FC = () => {
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'both',
-        leftButtonText: '작품 전시 목록',
+        leftButtonType: 'icon',
+        marginLeft: 0,
       }),
     );
   }, [navigation]);
@@ -39,6 +39,7 @@ const ArtworkList: React.FC = () => {
 
   return (
     <Container>
+      <View style={{ marginTop: 20 }} />
       <TitleSubtitle
         titleLarge='전시로 올려질 작품들'
         subtitle='작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요'
@@ -94,7 +95,7 @@ const ArtworkContainer = styled.View`
 `;
 
 const ArtworkTouchable = styled(TouchableOpacity)`
-  width: 32%; /* 3줄 */
+  width: 32%;
   margin-bottom: 16px;
 `;
 
