@@ -18,6 +18,7 @@ interface HeaderConfigOptions {
   headerBackgroundColor?: string; // 추가: 헤더 배경색
   headerTitleColor?: string; // 추가: 헤더 타이틀 텍스트 색상
   headerTransparent?: boolean;
+  marginLeft?: number;
 }
 
 const createHeaderLeft = (
@@ -28,6 +29,7 @@ const createHeaderLeft = (
     leftButtonType = 'icon',
     iconColor = '#120000',
     leftButtonText = '이전',
+    marginLeft = 10,
   } = options;
 
   return (
@@ -36,7 +38,7 @@ const createHeaderLeft = (
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: 14,
+        marginLeft: marginLeft,
         zIndex: 100,
       }}
     >
@@ -44,7 +46,9 @@ const createHeaderLeft = (
         <BackIcon width={22} height={22} fill={iconColor} />
       )}
       {leftButtonType === 'text' && (
-        <Subtitle1 style={{ color: iconColor }}>{leftButtonText}</Subtitle1>
+        <Subtitle1 style={{ color: iconColor, marginLeft: 6 }}>
+          {leftButtonText}
+        </Subtitle1>
       )}
       {leftButtonType === 'both' && (
         <>
