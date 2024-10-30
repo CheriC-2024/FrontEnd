@@ -94,6 +94,10 @@ const ArtworkInfoSetting: React.FC = () => {
     artworkAppreciation: '',
   };
 
+  const placeholderText = `컬렉터님만의 작품을 소개해주세요\n
+ex) 그림 속 꽃의 모습이 봄의 활기를 생생히 표현되어
+작품만으로 봄을 만끽할 수 있습니다`;
+
   return (
     <Container>
       <ProgressBarComponent totalSteps={7} currentStep={4} />
@@ -138,7 +142,7 @@ const ArtworkInfoSetting: React.FC = () => {
         </ArtworkTitleContainer>
         <InfoBlock
           label='나만의 작품 소개글'
-          placeholder='컬렉터님만의 작품을 소개해주세요'
+          placeholder={placeholderText}
           maxLength={500}
           required
           value={currentArtworkInfo.artworkDescription}
@@ -168,7 +172,7 @@ const ArtworkInfoSetting: React.FC = () => {
           style={{ paddingBottom: parseInt(theme.padding.l) }}
         />
         <Btn onPress={handleNext}>
-          <BtnText>다음 작품 작성하기</BtnText>
+          <BtnText>전시 작품 정보 저장하기</BtnText>
         </Btn>
       </ScrollView>
     </Container>
