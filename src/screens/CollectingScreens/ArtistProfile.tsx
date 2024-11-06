@@ -13,13 +13,15 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { setArtistId } from 'src/slices/profileSlice';
-import { ArtistImage, TabButtons } from 'src/components/_index';
-import ArtworkGrid from 'src/components/ArtworkGrid';
+import {
+  AnimatedHeaderOverlay,
+  ArtistImage,
+  ArtworkItem,
+  TabButtons,
+} from 'src/components/_index';
 import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ButtonText, Caption, H4, Subtitle2 } from 'src/styles/typography';
-import LinearGradient from 'react-native-linear-gradient';
-import { BackIcon, MenuIcon } from 'src/assets/icons/_index';
 import { useArtistData } from 'src/api/hooks/useArtistQueries';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
@@ -49,7 +51,7 @@ const ArtistProfile: React.FC = () => {
       headerOptions(navigation, {
         leftButtonType: 'icon',
         rightButtonType: 'icon',
-        iconColor: '#120000',
+        iconColor: '#fff',
         headerTransparent: true,
       }),
     );
@@ -95,7 +97,7 @@ const ArtistProfile: React.FC = () => {
 
   const renderTabContent = () => {
     if (activeTab === 0) {
-      return artworks || [];
+      return artworks;
     } else if (activeTab === 1) {
       return [{ key: 'artistRecord' }]; // placeholder 아이템
     }
@@ -114,34 +116,10 @@ const ArtistProfile: React.FC = () => {
     );
   }
 
-  const backgroundLayerOpacity = scrollY.interpolate({
-    inputRange: [80, 110],
-    outputRange: [0, 1], // 스크롤이 진행되면서 0에서 1로 투명도 변화
-    extrapolate: 'clamp',
-  });
-
-  const headerTranslateY = scrollY.interpolate({
-    inputRange: [70, 140], // 스크롤 범위
-    outputRange: [70, 0], // 50px 아래에서 시작해 0으로 이동
-    extrapolate: 'clamp', // 범위를 넘어가면 고정
-  });
-
-  const backgroundTranslateY = scrollY.interpolate({
-    inputRange: [0, 90],
-    outputRange: [0, -50],
-    extrapolate: 'clamp',
-  });
-
   const backgroundOpacity = scrollY.interpolate({
     inputRange: [0, 40],
     outputRange: [1, 0],
     extrapolate: 'clamp',
-  });
-
-  const headerTextOpacity = scrollY.interpolate({
-    inputRange: [130, 170], // 스크롤 범위
-    outputRange: [0, 1], // 0에서 1로 투명도가 변화
-    extrapolate: 'clamp', // 범위를 넘어가면 고정
   });
 
   const profileImageTranslateY = scrollY.interpolate({
@@ -161,10 +139,11 @@ const ArtistProfile: React.FC = () => {
   const renderItem = ({ item }) => {
     if (activeTab === 0) {
       return (
-        <View style={{ paddingHorizontal: 16 }}>
-          <ArtworkGrid
-            artworks={[item]}
-            selectedArtworks={[]}
+        <View style={{ marginTop: 16, marginRight: 10 }}>
+          <ArtworkItem
+            artwork={item}
+            selected={false} // 선택 상태 설정 필요 시
+            selectedIndex={0} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
                 artworkId: item.id,
@@ -175,9 +154,8 @@ const ArtistProfile: React.FC = () => {
       );
     } else if (activeTab === 1) {
       return renderArtistRecord();
-    } else {
-      return null;
     }
+    return null;
   };
 
   const renderArtistRecord = () => {
@@ -245,96 +223,28 @@ const ArtistProfile: React.FC = () => {
   };
 
   return (
-    <View style={{ flex: 1, position: 'relative' }}>
-      <AnimatedBackgroundImage
-        source={{ uri: 'https://i.ibb.co/1vmZ82r/3.png' }}
-        resizeMode='cover'
-        style={{
-          transform: [{ translateY: backgroundTranslateY }],
-          height: 170,
-          position: 'absolute', // 배경 이미지를 고정하여 스크롤 위에 있도록 설정
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 2,
-        }}
+    <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
+      <AnimatedHeaderOverlay
+        artistName={artist.name}
+        artworkCount={artworks.length}
+        backgroundImage='https://i.ibb.co/1vmZ82r/3.png'
+        scrollY={scrollY}
       />
-      <Animated.View
+      <ProfileImageContainer
         style={{
+          transform: [
+            // { scale: profileImageScale },
+            { translateY: profileImageTranslateY },
+          ],
+          opacity: backgroundOpacity,
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 170,
-          transform: [{ translateY: backgroundTranslateY }], // 동일하게 backgroundTranslateY 적용
+          top: 110,
+          left: 20,
           zIndex: 3,
         }}
       >
-        <LinearGradient
-          colors={['rgba(0, 0, 0, 0.8)', 'rgba(0, 0, 0, 0)']} // 위는 어둡고 아래로 갈수록 투명해짐
-          style={{
-            height: '100%',
-            width: '100%',
-          }}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        />
-      </Animated.View>
-      {/* 배경 위의 검은색 반투명 레이어 */}
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 110,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)', // 검은색 반투명 레이어
-          opacity: backgroundLayerOpacity, // 스크롤에 따라 투명도 변경
-          zIndex: 2,
-        }}
-      />
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 42,
-          left: 40,
-          right: 0,
-          height: 60,
-          opacity: headerTextOpacity, // 스크롤에 따라 투명도 변경
-          transform: [{ translateY: headerTranslateY }],
-          zIndex: 3,
-        }}
-      >
-        <Text style={{ color: 'white', fontSize: 20 }}>{artist.name}</Text>
-        <Text style={{ color: 'white', fontSize: 12 }}>미술작품 9개</Text>
-      </Animated.View>
-      <View
-        style={{
-          position: 'absolute',
-          top: 44,
-          left: 16, // 좌측 아이콘 위치
-          right: 20, // 우측 아이콘 위치
-          flexDirection: 'row',
-          justifyContent: 'space-between', // 좌우 아이콘 위치
-          alignItems: 'center',
-          zIndex: 3,
-        }}
-      >
-        <BackIcon width={22} height={22} fill={'white'} />
-        <MenuIcon width={26} height={26} fill={'white'} />
-
-        <ProfileImageContainer
-          style={{
-            transform: [
-              // { scale: profileImageScale },
-              { translateY: profileImageTranslateY },
-            ],
-            opacity: backgroundOpacity,
-          }}
-        >
-          <ArtistImage image={artist.image} size={88} />
-        </ProfileImageContainer>
-      </View>
+        <ArtistImage image={artist.image} size={88} />
+      </ProfileImageContainer>
       <Animated.View
         style={{
           position: 'absolute',
@@ -374,8 +284,10 @@ const ArtistProfile: React.FC = () => {
       <FlatList
         data={renderTabContent()}
         extraData={activeTab}
+        key={activeTab === 0 ? '3-columns' : '1-column'}
         keyExtractor={(_, index) => index.toString()}
         renderItem={renderItem}
+        numColumns={activeTab === 0 ? 3 : 1}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false },
@@ -383,6 +295,14 @@ const ArtistProfile: React.FC = () => {
         ListHeaderComponent={renderTabButtons}
         stickyHeaderIndices={[0]}
         contentContainerStyle={{ marginTop: 110, paddingTop: 250, zIndex: 0 }}
+        columnWrapperStyle={
+          activeTab === 0
+            ? {
+                alignSelf: 'flex-start',
+                paddingLeft: 16,
+              }
+            : null
+        }
         ListFooterComponent={<View style={{ height: 620 }} />}
         scrollEventThrottle={16}
       />
@@ -417,15 +337,6 @@ const artistHistory = {
   ],
   residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
 };
-
-const AnimatedBackgroundImage = styled(
-  Animated.createAnimatedComponent(styled.Image`
-    position: relative;
-    width: 100%;
-    height: 170px;
-    overflow: hidden;
-  `),
-)``;
 
 const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`
   position: absolute;
