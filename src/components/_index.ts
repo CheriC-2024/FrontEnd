@@ -12,3 +12,4 @@ export * from './artists/_index';
 export * from './bottomSheets/_index';
 export * from './gradients/_index';
 export * from './modals/_index';
+export * from './profile/_index';

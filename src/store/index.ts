@@ -5,6 +5,7 @@ import {
   collectionReducer,
   coverReducer,
   exhibitReducer,
+  profileReducer,
   themeReducer,
 } from '../slices/_index';
 
@@ -15,6 +16,7 @@ const store = configureStore({
     collection: collectionReducer,
     cover: coverReducer,
     exhibit: exhibitReducer,
+    profile: profileReducer,
     theme: themeReducer,
   },
 });

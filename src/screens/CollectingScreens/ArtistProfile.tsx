@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   FlatList,
@@ -15,25 +9,15 @@ import {
   Alert,
 } from 'react-native';
 import styled from 'styled-components/native';
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import { ArtistImage } from 'src/components/_index';
-import { artistAndArtworkData } from '../data';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { setArtistId } from 'src/slices/profileSlice';
+import { ArtistImage, TabButtons } from 'src/components/_index';
 import ArtworkGrid from 'src/components/ArtworkGrid';
 import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-import {
-  Body2,
-  ButtonText,
-  Caption,
-  H4,
-  Subtitle1,
-  Subtitle2,
-} from 'src/styles/typography';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ButtonText, Caption, H4, Subtitle2 } from 'src/styles/typography';
 import LinearGradient from 'react-native-linear-gradient';
 import { BackIcon, MenuIcon } from 'src/assets/icons/_index';
 import { useArtistData } from 'src/api/hooks/useArtistQueries';
@@ -41,17 +25,18 @@ import { useArtistData } from 'src/api/hooks/useArtistQueries';
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
 const ArtistProfile: React.FC = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
 
   const [activeTab, setActiveTab] = useState(0);
-  const AnimatedContainer = Animated.createAnimatedComponent(Container);
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const artistId = route.params?.artistId;
-  console.log('Route params:', artistId);
+  const { artistId: routeArtistId } = route.params;
 
-  const { artist, artworks, isLoading, error } = useArtistData(artistId);
+  const artistId = useSelector((state: RootState) => state.profile.artistId);
+  console.log('Route params:', artistId);
+  const { artist, artworks, isLoading, error } = useArtistData(artistId!);
   console.log('Fetched artworks:', artworks);
   console.log('Fetched artist:', artist);
 
@@ -64,11 +49,18 @@ const ArtistProfile: React.FC = () => {
       headerOptions(navigation, {
         leftButtonType: 'icon',
         rightButtonType: 'icon',
-        iconColor: '#e100ff',
+        iconColor: '#120000',
         headerTransparent: true,
       }),
     );
   }, [navigation]);
+
+  useEffect(() => {
+    // route의 artistId가 변경되면 Redux의 artistId를 업데이트
+    if (routeArtistId && routeArtistId !== artistId) {
+      dispatch(setArtistId(routeArtistId));
+    }
+  }, [routeArtistId, artistId, dispatch]);
 
   useEffect(() => {
     if (route.params?.requestSuccess) {
@@ -92,52 +84,26 @@ const ArtistProfile: React.FC = () => {
     setActiveTab(index); // 상태 업데이트와 애니메이션 동시 실행을 위해 useEffect로 처리
   };
 
-  const renderTabButtons = useCallback(() => {
-    return (
-      <TabWrapper>
-        {tabs.map((tab, index) => (
-          <TabButton
-            key={index}
-            active={activeTab === index}
-            onPress={() => handleTabPress(index)}
-          >
-            <TabButtonText active={activeTab === index}>{tab}</TabButtonText>
-          </TabButton>
-        ))}
-        <AnimatedUnderline
-          style={{
-            width: `${100 / tabs.length}%`,
-            transform: [
-              {
-                translateX: animationValue.interpolate({
-                  inputRange: [0, tabs.length - 1],
-                  outputRange: [0, 100 * (tabs.length - 1)],
-                }),
-              },
-            ],
-          }}
-        />
-      </TabWrapper>
-    );
-  }, [activeTab, animationValue]);
+  const renderTabButtons = () => (
+    <TabButtons
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabPress={handleTabPress}
+      animationValue={animationValue}
+    />
+  );
 
-  // 훅을 조건문 밖에서 호출
-  const renderTabContent = useMemo(() => {
+  const renderTabContent = () => {
     if (activeTab === 0) {
-      return artworks;
+      return artworks || [];
     } else if (activeTab === 1) {
-      return [{ type: 'artistHistory' }];
-    } else {
-      return [];
+      return [{ key: 'artistRecord' }]; // placeholder 아이템
     }
-  }, [activeTab]);
+    return [];
+  };
 
   if (isLoading) {
-    return (
-      <Container>
-        <Text>로딩 중...</Text>
-      </Container>
-    );
+    return <Container></Container>;
   }
 
   if (error) {
@@ -148,19 +114,6 @@ const ArtistProfile: React.FC = () => {
     );
   }
 
-  // if (!data.artist) {
-  //   return (
-  //     <Container>
-  //       <Text>해당 작품의 정보를 찾을 수 없습니다.</Text>
-  //     </Container>
-  //   );
-  // }
-
-  const backgroundHeight = scrollY.interpolate({
-    inputRange: [0, 100], // 스크롤 범위
-    outputRange: [170, 110], // 높이가 170에서 110으로 줄어듦
-    extrapolate: 'clamp',
-  });
   const backgroundLayerOpacity = scrollY.interpolate({
     inputRange: [80, 110],
     outputRange: [0, 1], // 스크롤이 진행되면서 0에서 1로 투명도 변화
@@ -197,11 +150,6 @@ const ArtistProfile: React.FC = () => {
     extrapolate: 'clamp',
   });
 
-  const handleSelectArtwork = (artwork: any) => {
-    // 선택한 작품의 ID를 ArtworkInfo로 전달하며 이동
-    navigation.navigate('ArtworkInfo', { artworkId: artworks.id });
-  };
-
   const handleFollowPress = () => {
     setIsFollowing(!isFollowing); // 팔로우 상태 토글
   };
@@ -219,7 +167,7 @@ const ArtistProfile: React.FC = () => {
             selectedArtworks={[]}
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
-                artworkId: artworks.id,
+                artworkId: item.id,
               })
             }
           />
@@ -424,9 +372,9 @@ const ArtistProfile: React.FC = () => {
       </Animated.View>
 
       <FlatList
-        data={renderTabContent}
+        data={renderTabContent()}
         extraData={activeTab}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(_, index) => index.toString()}
         renderItem={renderItem}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -470,13 +418,6 @@ const artistHistory = {
   residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
 };
 
-const BackgroundImage = styled.Image`
-  position: relative;
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-`;
-
 const AnimatedBackgroundImage = styled(
   Animated.createAnimatedComponent(styled.Image`
     position: relative;
@@ -486,30 +427,11 @@ const AnimatedBackgroundImage = styled(
   `),
 )``;
 
-const HeaderOverlay = styled(LinearGradient).attrs({
-  colors: ['rgba(18, 0, 0, 0.5)', 'rgba(18, 0, 0, 0)'],
-  start: { x: 1, y: 0 },
-  end: { x: 1, y: 1 },
-})`
-  position: absolute;
-  width: 100%;
-  height: 0%;
-  top: 0;
-  right: 0;
-`;
-
 const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`
   position: absolute;
   top: 70px;
   z-index: 1;
 `);
-
-const AnimatedUnderline = styled(Animated.View)`
-  position: absolute;
-  bottom: 0;
-  height: 2px;
-  background-color: ${({ theme }) => theme.colors.redBlack};
-`;
 
 const ProfileWrapper = styled.View`
   align-items: flex-start;
@@ -569,25 +491,6 @@ const FollowButtonText = styled(ButtonText)<{ isFollowing: boolean }>`
     isFollowing ? theme.colors.white : theme.colors.cherryRed_10};
 `;
 
-const TabWrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  position: relative;
-  margin-bottom: ${({ theme }) => theme.margin.m};
-  background-color: #f7f5f5;
-`;
-
-const TabButton = styled.TouchableOpacity<{ active?: boolean }>`
-  flex: 1;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: ${({ theme }) => theme.padding.s};
-`;
-
-const TabButtonText = styled(Subtitle2)<{ active?: boolean }>`
-  color: ${({ active }) => (active ? '#120000' : '#B0ABAB')};
-`;
-
 const SocialMediaButton = styled(TouchableOpacity)`
   width: 70px;
   height: 70px;
@@ -627,26 +530,6 @@ const SectionTitle = styled(Subtitle2)`
 const HistoryText = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_10};
   margin-bottom: 4px;
-`;
-
-const ErrorMessage = styled.Text`
-  font-size: 18px;
-  color: red;
-  text-align: center;
-  margin-top: 50px;
-`;
-
-const ArtworkItemWrapper = styled.View`
-  padding: 16px;
-  border-bottom-width: 1px;
-  border-bottom-color: #ddd;
-`;
-
-const ArtworkImage = styled.Image`
-  width: 100%;
-  height: 150px;
-  margin-top: 8px;
-  border-radius: 8px;
 `;
 
 export default ArtistProfile;
