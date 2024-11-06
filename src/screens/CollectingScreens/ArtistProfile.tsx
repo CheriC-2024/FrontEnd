@@ -238,8 +238,8 @@ const ArtistProfile: React.FC = () => {
           ],
           opacity: backgroundOpacity,
           position: 'absolute',
-          top: 110,
-          left: 20,
+          top: 120,
+          left: 16,
           zIndex: 3,
         }}
       >
@@ -253,7 +253,6 @@ const ArtistProfile: React.FC = () => {
             outputRange: [150, -110], // 스크롤에 따라 위로 이동
             extrapolate: 'clamp',
           }),
-          left: 16,
           zIndex: 1,
         }}
       >
@@ -346,8 +345,12 @@ const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`
 
 const ProfileWrapper = styled.View`
   align-items: flex-start;
-  padding-top: ${({ theme }) => theme.margin.xl};
+  padding-top: 56px;
+  padding-left: 24px;
   z-index: -1;
+  background-color: ${({ theme }) => theme.colors.bg};
+  flex-direction: column;
+  flex-wrap: wrap;
 `;
 
 const ArtistName = styled(H4)`
@@ -364,12 +367,15 @@ const ArtistBio = styled(Caption)`
 `;
 
 const FollowSection = styled.View`
-  width: 96%;
+  width: 100%;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: ${({ theme }) => theme.spacing.s8};
+  padding-top: ${({ theme }) => theme.margin.m};
+  padding-left: 24px;
+  padding-right: 16px;
+  margin-bottom: ${({ theme }) => theme.spacing.s};
+  background-color: ${({ theme }) => theme.colors.bg};
 `;
 
 const FollowCountItem = styled.View`
