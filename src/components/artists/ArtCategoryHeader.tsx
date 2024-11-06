@@ -15,7 +15,7 @@ const ArtCategoryHeader: React.FC<{
           source={
             categoryType === 'artist'
               ? require('src/assets/images/Character/character_front.png')
-              : require('src/assets/images/ExhibitPage/empty_collection.png')
+              : require('src/assets/images/CollectingPage/cherry.png')
           }
           categoryType={categoryType}
         />
@@ -49,7 +49,7 @@ const ImageWrapper = styled.View`
 `;
 
 const HeaderImage = styled.Image<{ categoryType: 'artwork' | 'artist' }>`
-  width: ${({ categoryType }) => (categoryType === 'artist' ? '54px' : '63px')};
+  width: ${({ categoryType }) => (categoryType === 'artist' ? '54px' : '64px')};
   height: ${({ categoryType }) =>
     categoryType === 'artist' ? '73px' : '74px'};
 `;

@@ -193,7 +193,7 @@ const ArtCollecting: React.FC = () => {
             <ArtCategoryHeader
               categoryTitle={categoryTitle}
               categoryType='artwork'
-              style={{ paddingHorizontal: 6, marginBottom: 12 }}
+              style={{ paddingHorizontal: 6, marginTop: 8, marginBottom: 12 }}
             />
           }
           stickyHeaderIndices={[1]} // 두 번째 아이템인 스티키 헤더를 고정
