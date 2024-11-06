@@ -121,6 +121,7 @@ export default ArtCollectingSheet;
 const SheetContainer = styled.View`
   flex: 1;
   justify-content: flex-end;
+  background-color: ${({ theme }) => theme.colors.redBlack_alpha50};
 `;
 
 const SheetContent = styled.View`
