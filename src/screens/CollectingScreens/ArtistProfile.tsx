@@ -43,25 +43,21 @@ const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작�
 const ArtistProfile: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { data, isLoading, isError } = useArtistData(1);
 
   const [activeTab, setActiveTab] = useState(0);
   const AnimatedContainer = Animated.createAnimatedComponent(Container);
   const animationValue = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const artistId = route.params?.artistId;
+  console.log('Route params:', artistId);
+
+  const { artist, artworks, isLoading, error } = useArtistData(artistId);
+  console.log('Fetched artworks:', artworks);
+  console.log('Fetched artist:', artist);
 
   // 팔로우 상태 관리
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const { artist, artworks } = data;
-  const { artistId = 1 } = route.params || {};
-  //const artist = artistAndArtworkData.find((artist) => artist.id === 1);
-  if (!artist) {
-    return (
-      <Container>
-        <ErrorMessage>해당 작품의 정보를 찾을 수 없습니다.</ErrorMessage>
-      </Container>
-    );
-  }
   // 헤더 설정
   useEffect(() => {
     navigation.setOptions(
@@ -74,56 +70,14 @@ const ArtistProfile: React.FC = () => {
     );
   }, [navigation]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (route.params?.requestSuccess) {
-        Alert.alert('성공', '작가님께 작품 요청이 성공적으로 전달되었습니다!');
-        navigation.setParams({ requestSuccess: false }); // 직접 수정 대신 setParams 사용
-      }
-    }, [route.params]),
-  );
+  useEffect(() => {
+    if (route.params?.requestSuccess) {
+      Alert.alert('성공', '작가님께 작품 요청이 성공적으로 전달되었습니다!');
+      navigation.setParams({ requestSuccess: false });
+    }
+    // No else block or return statement here
+  }, [route.params?.requestSuccess]);
 
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const backgroundHeight = scrollY.interpolate({
-    inputRange: [0, 100], // 스크롤 범위
-    outputRange: [170, 110], // 높이가 170에서 110으로 줄어듦
-    extrapolate: 'clamp',
-  });
-  const backgroundLayerOpacity = scrollY.interpolate({
-    inputRange: [80, 110],
-    outputRange: [0, 1], // 스크롤이 진행되면서 0에서 1로 투명도 변화
-    extrapolate: 'clamp',
-  });
-
-  const headerTranslateY = scrollY.interpolate({
-    inputRange: [70, 140], // 스크롤 범위
-    outputRange: [70, 0], // 50px 아래에서 시작해 0으로 이동
-    extrapolate: 'clamp', // 범위를 넘어가면 고정
-  });
-
-  const backgroundTranslateY = scrollY.interpolate({
-    inputRange: [0, 90],
-    outputRange: [0, -50],
-    extrapolate: 'clamp',
-  });
-
-  const backgroundOpacity = scrollY.interpolate({
-    inputRange: [0, 40],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-
-  const headerTextOpacity = scrollY.interpolate({
-    inputRange: [130, 170], // 스크롤 범위
-    outputRange: [0, 1], // 0에서 1로 투명도가 변화
-    extrapolate: 'clamp', // 범위를 넘어가면 고정
-  });
-
-  const profileImageTranslateY = scrollY.interpolate({
-    inputRange: [0, 80],
-    outputRange: [0, -120],
-    extrapolate: 'clamp',
-  });
   // 상태 관리와 애니메이션 값을 연결하기 위해 useEffect 사용
   useEffect(() => {
     // activeTab 상태가 변경되었을 때 애니메이션 실행
@@ -167,19 +121,6 @@ const ArtistProfile: React.FC = () => {
     );
   }, [activeTab, animationValue]);
 
-  const handleSelectArtwork = (artwork: any) => {
-    // 선택한 작품의 ID를 ArtworkInfo로 전달하며 이동
-    navigation.navigate('ArtworkInfo', { artworkId: artwork.id });
-  };
-
-  const handleFollowPress = () => {
-    setIsFollowing(!isFollowing); // 팔로우 상태 토글
-  };
-
-  const navigateToRequestArtwork = () => {
-    navigation.navigate('RequestArtwork', { artistId: artistId }); // RequestArtwork 화면으로 이동
-  };
-
   // 훅을 조건문 밖에서 호출
   const renderTabContent = useMemo(() => {
     if (activeTab === 0) {
@@ -191,6 +132,84 @@ const ArtistProfile: React.FC = () => {
     }
   }, [activeTab]);
 
+  if (isLoading) {
+    return (
+      <Container>
+        <Text>로딩 중...</Text>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Text>데이터를 가져오는 중 오류가 발생했습니다.</Text>
+      </Container>
+    );
+  }
+
+  // if (!data.artist) {
+  //   return (
+  //     <Container>
+  //       <Text>해당 작품의 정보를 찾을 수 없습니다.</Text>
+  //     </Container>
+  //   );
+  // }
+
+  const backgroundHeight = scrollY.interpolate({
+    inputRange: [0, 100], // 스크롤 범위
+    outputRange: [170, 110], // 높이가 170에서 110으로 줄어듦
+    extrapolate: 'clamp',
+  });
+  const backgroundLayerOpacity = scrollY.interpolate({
+    inputRange: [80, 110],
+    outputRange: [0, 1], // 스크롤이 진행되면서 0에서 1로 투명도 변화
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [70, 140], // 스크롤 범위
+    outputRange: [70, 0], // 50px 아래에서 시작해 0으로 이동
+    extrapolate: 'clamp', // 범위를 넘어가면 고정
+  });
+
+  const backgroundTranslateY = scrollY.interpolate({
+    inputRange: [0, 90],
+    outputRange: [0, -50],
+    extrapolate: 'clamp',
+  });
+
+  const backgroundOpacity = scrollY.interpolate({
+    inputRange: [0, 40],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const headerTextOpacity = scrollY.interpolate({
+    inputRange: [130, 170], // 스크롤 범위
+    outputRange: [0, 1], // 0에서 1로 투명도가 변화
+    extrapolate: 'clamp', // 범위를 넘어가면 고정
+  });
+
+  const profileImageTranslateY = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, -120],
+    extrapolate: 'clamp',
+  });
+
+  const handleSelectArtwork = (artwork: any) => {
+    // 선택한 작품의 ID를 ArtworkInfo로 전달하며 이동
+    navigation.navigate('ArtworkInfo', { artworkId: artworks.id });
+  };
+
+  const handleFollowPress = () => {
+    setIsFollowing(!isFollowing); // 팔로우 상태 토글
+  };
+
+  const navigateToRequestArtwork = () => {
+    navigation.navigate('RequestArtwork', { artistId: artistId }); // RequestArtwork 화면으로 이동
+  };
+
   const renderItem = ({ item }) => {
     if (activeTab === 0) {
       return (
@@ -199,7 +218,9 @@ const ArtistProfile: React.FC = () => {
             artworks={[item]}
             selectedArtworks={[]}
             onSelect={() =>
-              navigation.navigate('ArtworkInfo', { artworkId: artwork.id })
+              navigation.navigate('ArtworkInfo', {
+                artworkId: artworks.id,
+              })
             }
           />
         </View>
@@ -404,7 +425,8 @@ const ArtistProfile: React.FC = () => {
 
       <FlatList
         data={renderTabContent}
-        keyExtractor={(item, index) => `${item.id || index}`}
+        extraData={activeTab}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
