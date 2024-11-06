@@ -121,11 +121,13 @@ const CollectingScreen: React.FC = () => {
                   <ArtistTime>08.27 22:00</ArtistTime>
                 </ArtistInfo>
               </ArtistInfoWrapper>
-              <ArtworkImage
-                source={{
-                  uri: 'https://i.ibb.co/7vMp7Cd/unsplash-5-NE6m-X0-WVf-Q.png',
-                }}
-              />
+              <TouchableOpacity onPress={() => {}}>
+                <ArtworkImage
+                  source={{
+                    uri: 'https://i.ibb.co/7vMp7Cd/unsplash-5-NE6m-X0-WVf-Q.png',
+                  }}
+                />
+              </TouchableOpacity>
               <ArtistDescription>
                 작가님의 새로운 작품이 추가되었습니다!
               </ArtistDescription>
