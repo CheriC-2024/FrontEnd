@@ -14,7 +14,7 @@ const ArtCategoryHeader: React.FC<{
         <HeaderImage
           source={
             categoryType === 'artist'
-              ? require('src/assets/images/Character/character_front.png')
+              ? require('src/assets/images/Character/artist_front.png')
               : require('src/assets/images/CollectingPage/cherry.png')
           }
           categoryType={categoryType}
