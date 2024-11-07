@@ -1,36 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, ScrollView, Dimensions, Image, TouchableOpacity, Animated } from 'react-native';
+import {
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
-import { theme } from '../styles/theme';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { Body2, ButtonText, H3 } from 'src/styles/typography';
 import { BtnText } from 'src/components/Button';
 
 const { width } = Dimensions.get('window');
-
-const pages = [
-  {
-    title: '아트 컬렉팅',
-    subtitle: `체리시에 온라인 아트 컬렉팅을 해보아요.${'\n'}신진 작가분들의 유료, 무료 작품들을 만날 수 있어요!`,
-    image: require('../assets/images/Character/character_front.png'),
-  },
-  {
-    title: '소장 작품 등록',
-    subtitle: `이미 미술 작품을 소유하고 계시나요?${'\n'}체리시에 소장 인증하고 전시까지 진행해보아요`,
-    image: require('../assets/images/Character/character_front.png'),
-  },
-  {
-    title: '온라인 컬렉션 전시',
-    subtitle: `너의 취향을 담은 컬렉션으로 전시를 만들고${'\n'}다른 컬렉터들과 컬렉션 전시로 소통해요!`,
-    image: require('../assets/images/Character/character_front.png'),
-  },
-  {
-    title: '작품 수익창출',
-    subtitle: `작가님들은 체리시에 작품을 등록하여${'\n'}수익을 낼 수 있어요!`,
-    image: require('../assets/images/Character/character_front.png'),
-    isLastPage: true, // 마지막 페이지인지 여부를 나타내는 필드 추가
-  },
-];
 
 const OnboardingScreen: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -94,7 +75,7 @@ const OnboardingScreen: React.FC = () => {
         {pages.map((page, i) => (
           <Page key={i}>
             <ImageContainer>
-              <StyledImage source={page.image} />
+              <StyledImage source={page.image} resizeMode='contain' />
             </ImageContainer>
             <TextContainer>
               <Title>{page.title}</Title>
@@ -106,23 +87,55 @@ const OnboardingScreen: React.FC = () => {
 
       {/* currentPage가 마지막 페이지가 아닐 때만 SkipButton을 렌더링 */}
       {!pages[currentPage].isLastPage ? (
-        <SkipButton onPress={handleSkip}> 
-          <SkipButtonText>SKIP ></SkipButtonText>
+        <SkipButton onPress={handleSkip}>
+          <SkipButtonText>SKIP </SkipButtonText>
+          <Icon
+            name='chevron-forward'
+            size={18}
+            color='#B0ABAB'
+            style={{ paddingTop: 2 }}
+          />
         </SkipButton>
-      ) : isButtonVisible && (
-        <AnimatedButtonWrapper style={{ opacity }}>
-          <TouchableOpacity onPress={handleLogin}>
-            <BtnText>CheriC 로그인 하기</BtnText>
-          </TouchableOpacity>
-        </AnimatedButtonWrapper>
+      ) : (
+        isButtonVisible && (
+          <AnimatedButtonWrapper style={{ opacity }}>
+            <TouchableOpacity onPress={handleLogin}>
+              <BtnText>CheriC 로그인 하기</BtnText>
+            </TouchableOpacity>
+          </AnimatedButtonWrapper>
+        )
       )}
     </Container>
   );
 };
 
+const pages = [
+  {
+    title: '아트 컬렉팅',
+    subtitle: `체리시에 온라인 아트 컬렉팅을 해보아요.${'\n'}신진 작가분들의 유료, 무료 작품들을 만날 수 있어요!`,
+    image: require('../assets/images/Onboarding/1.png'),
+  },
+  {
+    title: '소장 작품 등록',
+    subtitle: `이미 미술 작품을 소유하고 계시나요?${'\n'}체리시에 소장 인증하고 전시까지 진행해보아요`,
+    image: require('../assets/images/Onboarding/2.png'),
+  },
+  {
+    title: '온라인 컬렉션 전시',
+    subtitle: `너의 취향을 담은 컬렉션으로 전시를 만들고${'\n'}다른 컬렉터들과 컬렉션 전시로 소통해요!`,
+    image: require('../assets/images/Onboarding/3.png'),
+  },
+  {
+    title: '작품 수익창출',
+    subtitle: `작가님들은 체리시에 작품을 등록하여${'\n'}수익을 낼 수 있어요!`,
+    image: require('../assets/images/Onboarding/4.png'),
+    isLastPage: true,
+  },
+];
+
 const Container = styled.View`
   flex: 1;
-  background-color: ${props => props.theme.colors.grey_4};
+  background-color: ${({ theme }) => theme.colors.grey_4};
   position: relative;
 `;
 
@@ -136,11 +149,12 @@ const DotsWrapper = styled.View`
 `;
 
 const Dots = styled.View<{ selected: boolean }>`
-  width: ${props => props.theme.spacing.s3};
-  height: ${props => props.theme.spacing.s3};
-  border-radius: ${props => props.theme.spacing.s3};
-  margin-horizontal: ${props => props.theme.spacing.s3};
-  background-color: ${props => (props.selected ? theme.colors.cherryRed_10 : theme.colors.white)};
+  width: ${({ theme }) => theme.spacing.s3};
+  height: ${({ theme }) => theme.spacing.s3};
+  border-radius: ${({ theme }) => theme.spacing.s3};
+  margin: 0 ${({ theme }) => theme.spacing.s3};
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.colors.cherryRed_10 : theme.colors.white};
 `;
 
 const Page = styled.View`
@@ -150,15 +164,17 @@ const Page = styled.View`
 `;
 
 const StyledImage = styled.Image`
-  width: 175px;
-  height: 250px;
+  width: 100%;
+  height: 100%;
 `;
 
 const ImageContainer = styled.View`
+  width: 300px;
+  height: 300px;
   margin-top: 100px;
   margin-bottom: 80px;
   align-items: center;
-  background-color: ${({theme})=>theme.colors.grey_4};
+  background-color: ${({ theme }) => theme.colors.grey_4};
 `;
 
 const TextContainer = styled.View`
@@ -166,37 +182,39 @@ const TextContainer = styled.View`
   height: 400px;
   padding-top: 50px;
   align-items: center;
-  background-color: ${({theme})=>theme.colors.white};
+  background-color: ${({ theme }) => theme.colors.white};
 `;
 
 const Title = styled(H3)`
-  margin-bottom: ${props => props.theme.spacing.s5};
+  margin-bottom: ${({ theme }) => theme.spacing.s5};
 `;
 
 const Subtitle = styled(Body2)`
-  color: ${props => props.theme.colors.grey_8};
+  color: ${({ theme }) => theme.colors.grey_8};
   text-align: center;
-  padding: 0 ${props => props.theme.spacing.s8};
+  padding: 0 ${({ theme }) => theme.spacing.s8};
 `;
 
 const AnimatedButtonWrapper = styled(Animated.View)`
   position: absolute;
-  bottom: 140px;
+  bottom: 120px;
   right: 115px;
   align-items: center;
   padding: 12px 20px;
-  border-radius: ${({theme})=>theme.radius.l};
-  background-color: ${({theme})=>theme.colors.redBlack};
+  border-radius: ${({ theme }) => theme.radius.l};
+  background-color: ${({ theme }) => theme.colors.redBlack};
 `;
 
 const SkipButton = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
   position: absolute;
-  bottom: 160px;
+  bottom: 140px;
   right: 180px;
 `;
 
 const SkipButtonText = styled(ButtonText)`
-  color: ${props => props.theme.colors.grey_6};
+  color: ${({ theme }) => theme.colors.grey_6};
 `;
 
 export default OnboardingScreen;
