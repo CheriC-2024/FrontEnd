@@ -41,12 +41,13 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { artworkId, newCollectionName } = route.params || {};
+  const { artworkId = 101, newCollectionName } = route.params || {}; //101 임시 id
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<number | null>(
     null,
   );
+  const [liked, setLiked] = useState(false);
 
   // 토스트 메시지 훅 사용
   const { toastVisible, toastMessage, showToast } = useToastMessage();
@@ -63,6 +64,10 @@ const ArtworkInfo: React.FC = () => {
       setIsBottomSheetVisible(false);
     }, [newCollectionName, navigation]),
   );
+
+  const toggleLike = () => {
+    setLiked((prev) => !prev);
+  };
 
   const handleOpenBottomSheet = () => {
     setIsBottomSheetVisible(true);
@@ -105,14 +110,14 @@ const ArtworkInfo: React.FC = () => {
 
   // artworkId에 맞는 작품과 아티스트 데이터를 필터링
   const artworkData = artistAndArtworkData
-    .flatMap((artist) => artist.artworks)
+    .flatMap((item) => item.artworks)
     .find((artwork) => artwork.id === artworkId);
 
   const artistData = artistAndArtworkData.find((artist) =>
     artist.artworks.some((artwork) => artwork.id === artworkId),
   );
 
-  if (!artworkData || !artistData) {
+  if (!artworkData) {
     return (
       <Container>
         <ErrorMessage>해당 작품의 정보를 찾을 수 없습니다.</ErrorMessage>
@@ -138,7 +143,12 @@ const ArtworkInfo: React.FC = () => {
             <CategoryTag>회화</CategoryTag>
           </TagsWrapper>
           <TagsWrapper>
-            <HeartIcon />
+            <TouchableOpacity onPress={toggleLike}>
+              <HeartIcon
+                fill={liked ? '#E52C32' : 'none'}
+                stroke={liked ? null : '#120000'}
+              />
+            </TouchableOpacity>
             <LikeText>{artworkData.cherryNum + 100}</LikeText>
           </TagsWrapper>
         </ArtworkCategoryWrapper>
@@ -269,7 +279,7 @@ const ArtworkInfo: React.FC = () => {
           }}
         />
       </ScrollView>
-      <Btn onPress={handleOpenBottomSheet}>
+      <Btn onPress={handleOpenBottomSheet} style={{ marginHorizontal: 16 }}>
         <BtnText>내 컬렉션에 추가하기</BtnText>
       </Btn>
       {isBottomSheetVisible && (
