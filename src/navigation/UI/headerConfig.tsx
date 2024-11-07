@@ -19,6 +19,7 @@ interface HeaderConfigOptions {
   headerTitleColor?: string; // 추가: 헤더 타이틀 텍스트 색상
   headerTransparent?: boolean;
   marginLeft?: number;
+  marginRight?: number;
 }
 
 const createHeaderLeft = (
@@ -71,6 +72,7 @@ const createHeaderRight = (
     iconColor = '#120000',
     headerRightText = '다음',
     headerRightDisabled = false,
+    marginRight = 16,
   } = options;
 
   return (
@@ -80,7 +82,7 @@ const createHeaderRight = (
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: 16,
+        marginRight: marginRight,
         opacity: headerRightDisabled ? 0.5 : 1,
         zIndex: 100,
       }}
