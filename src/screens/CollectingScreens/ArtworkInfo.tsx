@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  FlatList,
-  ViewStyle,
-} from 'react-native';
+import { View, ScrollView, FlatList } from 'react-native';
 import styled from 'styled-components/native';
 import {
   useFocusEffect,
@@ -15,20 +8,13 @@ import {
 } from '@react-navigation/native';
 import { artistAndArtworkData } from '../data'; // 아티스트 및 작품 데이터 불러오기
 import { Container } from 'src/styles/layout';
-import {
-  ButtonText,
-  Caption,
-  H3,
-  H4,
-  H5,
-  H6,
-  Subtitle2,
-} from 'src/styles/typography';
+import { Caption, H4, H6, Subtitle2 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index.js';
 import {
   AddCollectionSheet,
   ArtistImage,
   ArtworkItem,
+  Table,
 } from 'src/components/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Btn, BtnText } from 'src/components/Button';
@@ -44,9 +30,12 @@ const ArtworkInfo: React.FC = () => {
   const { artworkId = 101, newCollectionName } = route.params || {}; //101 임시 id
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState<number | null>(
-    null,
+  const [selectedCollections, setSelectedCollections] = useState<Array<number>>(
+    [],
   );
+  const [previousSelectedCollections, setPreviousSelectedCollections] =
+    useState<Array<number>>([]);
+
   const [liked, setLiked] = useState(false);
 
   // 토스트 메시지 훅 사용
@@ -74,28 +63,25 @@ const ArtworkInfo: React.FC = () => {
   };
 
   const handleCloseBottomSheet = () => {
-    if (selectedCollection !== null) {
-      // 선택된 컬렉션이 있을 때 토스트 메시지 출력
-      const selectedCollectionName = collections.find(
-        (collection) => collection.id === selectedCollection,
-      )?.name;
-      if (selectedCollectionName) {
-        showToast(
-          `컬렉션 '${selectedCollectionName}'에 작품이 추가되었습니다.`,
-        );
-      }
+    const newSelections = selectedCollections.filter(
+      (id) => !previousSelectedCollections.includes(id),
+    );
+
+    if (newSelections.length > 0) {
+      const newCollectionNames = collections
+        .filter((collection) => newSelections.includes(collection.id))
+        .map((collection) => collection.name)
+        .join(', ');
+
+      showToast(`컬렉션 '${newCollectionNames}'에 작품이 추가되었습니다.`);
     }
+
+    setPreviousSelectedCollections(selectedCollections);
     setIsBottomSheetVisible(false);
   };
 
-  const handleSelectCollection = (collectionId: number) => {
-    if (selectedCollection === collectionId) {
-      // 이미 선택된 항목을 다시 누르면 선택 해제
-      setSelectedCollection(null);
-    } else {
-      // 새로운 항목 선택
-      setSelectedCollection(collectionId);
-    }
+  const handleSelectCollection = (collectionIds: Array<number>) => {
+    setSelectedCollections(collectionIds);
   };
 
   // 헤더 설정
@@ -185,14 +171,7 @@ const ArtworkInfo: React.FC = () => {
           </ArtworkBio>
         </ArtworkInfoCard>
         <SectionTitle>작품 기본 정보</SectionTitle>
-        <Table>
-          <TableItem label='작가' content='네번째작가' />
-          <TableItem label='시리즈' content='아몬드 나무' />
-          <TableItem label='작품 크기' content='740mm * 920mm' />
-          <TableItem label='재질(사용재료)' content='캔버스에 유화' />
-          <TableItem label='제작시기' content='1890년' />
-          <TableItem label='작품 분야' content='회화, 서양화' />
-        </Table>
+        <Table items={tableItems} />
         <SectionContainer>
           {/* 작품 이용 유의사항 섹션 */}
           <SectionTitle>작품 이용 유의사항</SectionTitle>
@@ -286,18 +265,25 @@ const ArtworkInfo: React.FC = () => {
         <AddCollectionSheet
           onClose={handleCloseBottomSheet}
           collections={collections}
-          selectedCollection={selectedCollection}
+          selectedCollections={selectedCollections}
           onSelectCollection={handleSelectCollection}
           artworkId={artworkId}
           artworkImage={artworkData.fileName}
         />
       )}
-
-      {/* 토스트 메시지 표시 */}
       <ToastMessage message={toastMessage} visible={toastVisible} />
     </Container>
   );
 };
+
+const tableItems = [
+  { label: '작가', content: '네번째작가' },
+  { label: '시리즈', content: '아몬드 나무' },
+  { label: '작품 크기', content: '740mm * 920mm' },
+  { label: '재질(사용재료)', content: '캔버스에 유화' },
+  { label: '제작시기', content: '1890년' },
+  { label: '작품 분야', content: '회화, 서양화' },
+];
 
 const ArtworkImage = styled.Image`
   width: 100%;
@@ -355,8 +341,6 @@ const ArtistInfo = styled.View`
   padding-bottom: ${({ theme }) => theme.padding.s};
 `;
 
-const ArtistCategory = styled(Caption)``;
-
 const ArtworkBio = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_8};
   line-height: 25px;
@@ -368,46 +352,7 @@ const SectionContainer = styled.View`
 
 const SectionTitle = styled(Subtitle2)`
   margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: ${({ theme }) => theme.margin.xs};
-`;
-
-const TableItem: React.FC<{
-  label: string;
-  content: string;
-}> = ({ label, content }) => (
-  <TableRow>
-    <TableCellLabel>{label}</TableCellLabel>
-    <TableCellContent>{content}</TableCellContent>
-  </TableRow>
-);
-
-const Table = styled.View`
-  width: 100%;
-  border-width: 1px;
-  border-color: #f2f0f0;
-  border-radius: 24px;
-  background-color: #fff;
-  overflow: hidden;
-`;
-
-const TableRow = styled.View`
-  flex-direction: row;
-  padding: 8px;
-  border-bottom-width: 1px;
-  border-color: #f2f0f0;
-`;
-
-const TableCellLabel = styled(Caption)`
-  flex: 1;
-  font-weight: bold;
-  text-align: center;
-  color: ${({ theme }) => theme.colors.grey_8};
-`;
-
-const TableCellContent = styled(Caption)`
-  flex: 2;
-  text-align: center;
-  color: ${({ theme }) => theme.colors.grey_8};
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const InfoItem: React.FC<{
