@@ -5,7 +5,7 @@ import InfoBlock from 'src/components/InfoBlock';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Container } from 'src/styles/layout';
-import { Subtitle1, Subtitle2 } from 'src/styles/typography';
+import { Body1, Subtitle1, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 
 const RequestArtwork: React.FC = () => {
@@ -83,7 +83,8 @@ const RequestArtwork: React.FC = () => {
 export default RequestArtwork;
 
 const Content = styled(ScrollView)`
-  margin-top: 32px;
+  padding-top: 32px;
+  height: 100vh;
 `;
 
 const SectionTitle = styled(Subtitle2)`
@@ -110,9 +111,10 @@ const SubmitButton = styled.TouchableOpacity<{ isEnabled: boolean }>`
   border-radius: ${({ theme }) => theme.radius.l};
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 16px 0;
+  margin-top: 48px;
 `;
 
-const ButtonText = styled(Subtitle1)`
+const ButtonText = styled(Body1)`
   color: white;
 `;
