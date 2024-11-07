@@ -117,33 +117,34 @@ const Title = styled(H5)`
 
 const Body = styled.View`
   margin-bottom: 40px;
-  align-items: start;
+  align-items: flex-start;
 `;
 
 const BodyText = styled(Body1)`
   text-align: left;
   line-height: 22px;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   color: #b0abab;
 `;
 
 const ButtonContainer = styled.View`
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
 `;
 
 const CancelButton = styled.TouchableOpacity`
-  width: 120px;
+  width: 48%;
   background-color: #fcf9f9;
   border-radius: ${({ theme }) => theme.radius.l};
-  padding: 12px 28px;
+  padding: 12px;
 `;
 
 const ConfirmButton = styled.TouchableOpacity`
+  width: 48%;
   background-color: ${({ theme }) => theme.colors.redBlack};
   border-radius: ${({ theme }) => theme.radius.l};
-  padding: 12px 28px;
+  padding: 12px;
 `;
 
 const CancelButtonText = styled(Body1)`
@@ -153,6 +154,7 @@ const CancelButtonText = styled(Body1)`
 
 const ConfirmButtonText = styled(Body1)`
   color: #fff;
+  text-align: center;
 `;
 
 export default CustomModal;
