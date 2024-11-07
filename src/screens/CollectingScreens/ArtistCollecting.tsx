@@ -65,11 +65,16 @@ const ArtistCollecting: React.FC = () => {
             artwork={artwork}
             selected={false}
             selectedIndex={0}
-            onSelect={() => {}}
+            onSelect={() => {
+              navigation.navigate('ArtworkInfo', {
+                artworkId: artwork.id.toString(),
+              });
+              console.log(artwork.id);
+            }}
           />
         )}
         // 각 아이템 사이의 간격 설정
-        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+        ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
       />
     </ArtistWithArtworksWrapper>
   );
