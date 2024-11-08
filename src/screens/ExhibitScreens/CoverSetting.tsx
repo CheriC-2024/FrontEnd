@@ -22,11 +22,7 @@ import {
   setSelectedCover,
 } from 'src/slices/coverSlice';
 import { useCloudVision } from 'src/api/hooks/useAIQueries';
-import {
-  AngularGradientComponent,
-  DiamondGradientComponent,
-  RadialGradientComponent,
-} from '../../components/gradients/_index';
+import { Artwork } from 'src/interfaces/collection';
 
 const CoverSetting: React.FC = () => {
   const dispatch = useDispatch();
@@ -45,7 +41,6 @@ const CoverSetting: React.FC = () => {
     selectedCover,
   } = useSelector((state: RootState) => state.cover);
 
-  const [isReversed, setIsReversed] = useState(false);
   const [selectedGradient, setSelectedGradient] = useState<number | null>(null);
   const [prevSelectedArtworks, setPrevSelectedArtworks] = useState<Artwork[]>(
     [],
@@ -103,7 +98,7 @@ const CoverSetting: React.FC = () => {
 
   // 헤더 설정
   useEffect(() => {
-    const isNextEnabled = selectedCover.length > 0;
+    const isNextEnabled = selectedCover.length > 0 || selectedCoverImage;
     navigation.setOptions(
       headerOptions(navigation, {
         leftButtonType: 'text',
@@ -112,7 +107,7 @@ const CoverSetting: React.FC = () => {
         headerRightDisabled: !isNextEnabled,
       }),
     );
-  }, [navigation, selectedCover]);
+  }, [navigation, selectedCover, selectedCoverImage]);
 
   // 팔레트가 3개 이하일 경우 placeholder로 빈 자리를 채우는 함수
   const fillWithPlaceholders = (
@@ -187,10 +182,6 @@ const CoverSetting: React.FC = () => {
     dispatch(setSelectedCover(selectedPalette));
   };
 
-  const handleReverseGradient = () => {
-    setIsReversed(!isReversed);
-  };
-
   const handleGradientSelect = (index: number) => {
     setSelectedGradient(selectedGradient === index ? null : index);
   };
@@ -215,16 +206,17 @@ const CoverSetting: React.FC = () => {
     dispatch(setCoverType('gradient'));
   };
 
-  const handleCoverTypeChange = (type: 'gradient' | 'solid') => {
-    if (selectedCoverImage) return;
-
+  const handleCoverTypeChange = (type: 'gradient' | 'solid' | 'image') => {
     dispatch(setCoverType(type));
     if (type === 'solid') {
       dispatch(setCoverColors([selectedCover[0]]));
+      setSelectedGradient(null);
     } else if (type === 'gradient') {
       dispatch(setCoverColors(selectedCover));
+      setSelectedGradient(null);
+    } else if (type === 'image') {
+      //handleImageUpload();
     }
-    setSelectedGradient(null);
   };
 
   const handleShufflePalettes = () => {
@@ -292,39 +284,47 @@ const CoverSetting: React.FC = () => {
           <CoverTypeToggle
             coverType={coverType}
             onCoverTypeChange={handleCoverTypeChange}
-            onReverseGradient={handleReverseGradient}
-            showReverseButton={coverType === 'gradient'}
             isImageUploaded={!!selectedCoverImage}
           />
         </CoverTypeButtonContainer>
-        {coverType === 'gradient' ? (
-          isCloudVisionLoading ? (
+        {coverType === 'gradient' &&
+          (isCloudVisionLoading ? (
             <LoadingText>추출 중 ...</LoadingText>
           ) : (
             <CoverGrid>
               {[
-                LinearGradient,
-                RadialGradientComponent,
-                AngularGradientComponent,
-                DiamondGradientComponent,
-              ].map((GradientComponent, index) => (
+                // Vertical Gradient (Normal)
+                {
+                  colors: selectedCover,
+                  start: { x: 0, y: 0 },
+                  end: { x: 0, y: 1 },
+                },
+                // Vertical Gradient (Reversed)
+                {
+                  colors: [...selectedCover].reverse(),
+                  start: { x: 0, y: 0 },
+                  end: { x: 0, y: 1 },
+                },
+                // Diagonal Gradient (Normal)
+                {
+                  colors: selectedCover,
+                  start: { x: 0, y: 0 },
+                  end: { x: 1, y: 1 },
+                },
+                // Diagonal Gradient (Reversed)
+                {
+                  colors: [...selectedCover].reverse(),
+                  start: { x: 0, y: 0 },
+                  end: { x: 1, y: 1 },
+                },
+              ].map((gradientProps, index) => (
                 <CoverOption
                   key={index}
                   onPress={() => handleGradientSelect(index)}
                 >
-                  <GradientComponent
-                    colors={
-                      isReversed
-                        ? [
-                            ...(selectedCover.length >= 2
-                              ? selectedCover
-                              : [selectedCover[0], selectedCover[0]]),
-                          ].reverse()
-                        : selectedCover.length >= 2
-                          ? selectedCover
-                          : [selectedCover[0], selectedCover[0]] // 색상이 하나만 있을 경우 중복 처리
-                    }
-                    style={[styles.gradient, selectedGradient === index]}
+                  <LinearGradient
+                    {...gradientProps}
+                    style={{ width: 180, height: 180, borderRadius: 16 }}
                   />
                   {selectedGradient === index && (
                     <SelectedOverlay>
@@ -334,9 +334,9 @@ const CoverSetting: React.FC = () => {
                 </CoverOption>
               ))}
             </CoverGrid>
-          )
-        ) : coverType === 'solid' ? (
-          isCloudVisionLoading ? (
+          ))}
+        {coverType === 'solid' &&
+          (isCloudVisionLoading ? (
             <LoadingContainer>
               <LoadingText>추출 중 ...</LoadingText>
             </LoadingContainer>
@@ -350,7 +350,12 @@ const CoverSetting: React.FC = () => {
                     dispatch(setCoverColors([color]));
                   }}
                 >
-                  <View style={[styles.gradient, { backgroundColor: color }]}>
+                  <View
+                    style={[
+                      styles.gradient,
+                      { backgroundColor: color, width: 180, height: 180 },
+                    ]}
+                  >
                     {selectedGradient === index && (
                       <SelectedOverlay>
                         <Icon name='checkmark' size={32} color='#fff' />
@@ -360,45 +365,26 @@ const CoverSetting: React.FC = () => {
                 </CoverOption>
               ))}
             </CoverGrid>
-          )
-        ) : (
-          <CoverGrid>
-            {selectedPalette.map((color, index) => (
-              <CoverOption
-                key={index}
-                onPress={() => {
-                  setSelectedGradient(index);
-                  dispatch(setCoverColors([color]));
-                }}
-              >
-                <View style={[styles.gradient, { backgroundColor: color }]}>
-                  {selectedGradient === index && (
-                    <SelectedOverlay>
-                      <Icon name='checkmark' size={32} color='#fff' />
-                    </SelectedOverlay>
-                  )}
-                </View>
-              </CoverOption>
-            ))}
-          </CoverGrid>
+          ))}
+        {coverType === 'image' && (
+          <UploadSection>
+            <UploadTitle>직접 커버 이미지 추가하기</UploadTitle>
+            <UploadButton onPress={handleImageUpload}>
+              <UploadPlaceholder>
+                {selectedCoverImage ? (
+                  <>
+                    <UploadedImage source={{ uri: selectedCoverImage }} />
+                    <DeleteIcon onPress={handleImageRemove}>
+                      <Icon name='close' size={24} color='#fff' />
+                    </DeleteIcon>
+                  </>
+                ) : (
+                  <Icon name='add' size={40} color='#999' />
+                )}
+              </UploadPlaceholder>
+            </UploadButton>
+          </UploadSection>
         )}
-        <UploadSection>
-          <UploadTitle>직접 커버 이미지 추가하기</UploadTitle>
-          <UploadButton onPress={handleImageUpload}>
-            <UploadPlaceholder>
-              {selectedCoverImage ? (
-                <>
-                  <UploadedImage source={{ uri: selectedCoverImage }} />
-                  <DeleteIcon onPress={handleImageRemove}>
-                    <Icon name='close' size={24} color='#fff' />
-                  </DeleteIcon>
-                </>
-              ) : (
-                <Icon name='add' size={40} color='#999' />
-              )}
-            </UploadPlaceholder>
-          </UploadButton>
-        </UploadSection>
       </ScrollView>
     </Container>
   );
@@ -406,17 +392,9 @@ const CoverSetting: React.FC = () => {
 
 const CoverTypeToggle: React.FC<{
   coverType: 'gradient' | 'solid' | 'image';
-  onCoverTypeChange: (type: 'gradient' | 'solid') => void;
-  onReverseGradient: () => void;
-  showReverseButton: boolean;
+  onCoverTypeChange: (type: 'gradient' | 'solid' | 'image') => void;
   isImageUploaded: boolean;
-}> = ({
-  coverType,
-  onCoverTypeChange,
-  onReverseGradient,
-  showReverseButton,
-  isImageUploaded,
-}) => (
+}> = ({ coverType, onCoverTypeChange, isImageUploaded }) => (
   <>
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <CoverTypeButton
@@ -443,16 +421,15 @@ const CoverTypeToggle: React.FC<{
           단색 커버
         </CoverTypeButtonText>
       </CoverTypeButton>
+      <CoverTypeButton
+        selected={coverType === 'image'}
+        onPress={() => onCoverTypeChange('image')}
+      >
+        <CoverTypeButtonText selected={coverType === 'image'}>
+          이미지 커버
+        </CoverTypeButtonText>
+      </CoverTypeButton>
     </View>
-    {showReverseButton && (
-      <TouchableOpacity onPress={onReverseGradient} disabled={isImageUploaded}>
-        <Icon
-          name='swap-horizontal-outline'
-          size={22}
-          color={isImageUploaded ? '#ccc' : '#120000'}
-        />
-      </TouchableOpacity>
-    )}
   </>
 );
 
@@ -535,14 +512,15 @@ const CoverTypeButtonContainer = styled.View`
 
 const CoverTypeButton = styled.TouchableOpacity<{ selected?: boolean }>`
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 32px;
   margin-right: 8px;
-  border: 1px ${(props) => (props.selected ? 'transparent' : '#F7F5F5')};
-  background-color: ${(props) => (props.selected ? '#120000' : '#ffffff')};
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.colors.redBlack : theme.colors.grey_4};
 `;
 
 const CoverTypeButtonText = styled(Caption)<{ selected?: boolean }>`
-  color: ${(props) => (props.selected ? '#fff' : '#120000')};
+  color: ${({ selected, theme }) =>
+    selected ? theme.colors.white : theme.colors.grey_6};
 `;
 
 const CoverOption = styled.TouchableOpacity`
@@ -554,7 +532,7 @@ const CoverGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
   margin-bottom: ${({ theme }) => theme.spacing.s5};
 `;
 
@@ -581,8 +559,8 @@ const UploadTitle = styled(Subtitle2)`
 `;
 
 const UploadButton = styled.TouchableOpacity`
-  width: 155px;
-  height: 155px;
+  width: 100%;
+  height: 400px;
   background-color: ${({ theme }) => theme.colors.grey_4};
   border-radius: ${({ theme }) => theme.radius.s};
   justify-content: center;
