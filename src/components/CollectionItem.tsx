@@ -56,21 +56,21 @@ const ItemContainer = styled.View<{ selected: boolean }>`
   align-items: center;
   margin-bottom: ${({ theme }) => theme.margin.m};
   margin-horizontal: ${({ theme }) => theme.spacing.s1};
-  padding: 14px;
+  padding: 12px;
   background-color: white;
   border: 1.7px dashed
     ${({ selected, theme }) =>
       selected ? theme.colors.cherryRed_10 : 'transparent'};
-  border-radius: 60px;
+  border-radius: 100px;
   elevation: 4;
 `;
 
 const CollectionImage = styled.View`
   overflow: hidden;
-  width: 100px;
-  height: 100px;
+  width: 116px;
+  height: 116px;
   margin-right: ${({ theme }) => theme.margin.m};
-  border-radius: 50px;
+  border-radius: 100px;
 `;
 
 const CollectionName = styled(Subtitle1)`
