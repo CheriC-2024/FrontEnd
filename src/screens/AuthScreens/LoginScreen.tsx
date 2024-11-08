@@ -6,9 +6,9 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/StackNavigator';
+import { RootStackParamList } from '../../navigation/StackNavigator';
 import { GoogleIcon } from 'src/assets/icons/_index';
-import { H1, Subtitle2 } from '../styles/typography';
+import { H1, Subtitle2 } from '../../styles/typography';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,

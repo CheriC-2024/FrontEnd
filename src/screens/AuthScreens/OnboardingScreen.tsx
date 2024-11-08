@@ -113,22 +113,22 @@ const pages = [
   {
     title: '아트 컬렉팅',
     subtitle: `체리시에 온라인 아트 컬렉팅을 해보아요.${'\n'}신진 작가분들의 유료, 무료 작품들을 만날 수 있어요!`,
-    image: require('../assets/images/Onboarding/1.png'),
+    image: require('src/assets/images/Onboarding/1.png'),
   },
   {
     title: '소장 작품 등록',
     subtitle: `이미 미술 작품을 소유하고 계시나요?${'\n'}체리시에 소장 인증하고 전시까지 진행해보아요`,
-    image: require('../assets/images/Onboarding/2.png'),
+    image: require('src/assets/images/Onboarding/2.png'),
   },
   {
     title: '온라인 컬렉션 전시',
     subtitle: `너의 취향을 담은 컬렉션으로 전시를 만들고${'\n'}다른 컬렉터들과 컬렉션 전시로 소통해요!`,
-    image: require('../assets/images/Onboarding/3.png'),
+    image: require('src/assets/images/Onboarding/3.png'),
   },
   {
     title: '작품 수익창출',
     subtitle: `작가님들은 체리시에 작품을 등록하여${'\n'}수익을 낼 수 있어요!`,
-    image: require('../assets/images/Onboarding/4.png'),
+    image: require('src/assets/images/Onboarding/4.png'),
     isLastPage: true,
   },
 ];
