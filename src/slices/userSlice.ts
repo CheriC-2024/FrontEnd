@@ -3,11 +3,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface UserState {
   nickname: string;
   bio: string;
+  interests: string[];
 }
 
 const initialState: UserState = {
   nickname: '',
   bio: '',
+  interests: [],
 };
 
 const userSlice = createSlice({
@@ -20,8 +22,11 @@ const userSlice = createSlice({
     setBio: (state, action: PayloadAction<string>) => {
       state.bio = action.payload;
     },
+    setInterests: (state, action: PayloadAction<string[]>) => {
+      state.interests = action.payload;
+    },
   },
 });
 
-export const { setNickname, setBio } = userSlice.actions;
+export const { setNickname, setBio, setInterests } = userSlice.actions;
 export default userSlice.reducer;
