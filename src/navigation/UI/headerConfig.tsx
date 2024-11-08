@@ -127,6 +127,7 @@ export const headerOptions = (
   headerStyle: {
     backgroundColor: options.headerBackgroundColor || '#FCFCFC', // 헤더 배경색 설정
   },
+  headerShadowVisible: false,
   headerTitleStyle: {
     fontSize: 16,
     fontFamily: 'PretendardBold',
