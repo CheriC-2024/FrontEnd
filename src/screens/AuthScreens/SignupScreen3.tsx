@@ -44,7 +44,7 @@ const SignupScreen3: React.FC = () => {
     return collectingExperience !== null && isArtist !== null;
   };
 
-  // onPress 핸들러 함수
+  // TODO: 유저 정보 POST API 연결
   const handlePress = () => {
     if (!isFormValid()) {
       showToast('필수 정보를 입력하세요.');
