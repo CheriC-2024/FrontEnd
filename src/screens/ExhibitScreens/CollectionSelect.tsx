@@ -23,11 +23,11 @@ import {
 const CollectionSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: collectionsData, isLoading, error } = useUserCollection(2); // 임시 유저ID
+  const { data: collectionsData, isLoading, error } = useUserCollection(1); // 임시 유저ID API 연결 예정
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
-  // 헤더 설정 (최소 하나의 컬렉션이 선택되어야 '다음' 버튼 활성화)
+  // 헤더 설정
   useEffect(() => {
     const isNextEnabled = activeCollections.length > 0;
     navigation.setOptions(
@@ -48,6 +48,7 @@ const CollectionSelect: React.FC = () => {
   }
 
   if (error) {
+    console.log(error);
     return <Text>로드 발생</Text>;
   }
 
