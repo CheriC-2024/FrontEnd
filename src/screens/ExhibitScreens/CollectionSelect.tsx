@@ -39,6 +39,11 @@ const CollectionSelect: React.FC = () => {
     );
   }, [navigation, activeCollections]);
 
+  // 컴포넌트가 처음 마운트될 때 filterText 초기화
+  useEffect(() => {
+    dispatch(setFilterText('')); // filterText를 빈 문자열로 초기화
+  }, [dispatch]);
+
   if (isLoading) {
     return (
       <LoadingContainer>
