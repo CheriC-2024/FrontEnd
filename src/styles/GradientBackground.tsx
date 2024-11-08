@@ -2,7 +2,7 @@ import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
 
 const GradientBackground = styled(LinearGradient as any).attrs({
-  colors: ['rgb(255, 255, 255)', 'rgba(229, 44, 50, 0.1)'],
+  colors: ['rgb(252, 252, 252)', 'rgba(229, 44, 50, 0.1)'],
   start: { x: 0.5, y: 0.7 },
   end: { x: 0.5, y: 1 },
 })`
