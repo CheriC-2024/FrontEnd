@@ -7,6 +7,7 @@ export { default as BackIcon } from './backArrow.svg';
 export { default as BlogIcon } from './blog.svg';
 export { default as ForwardIcon } from './frontArrow.svg';
 export { default as ForwardIconWhite } from './frontArrowWhite.svg';
+export { default as GoogleIcon } from './google.svg';
 export { default as CherryIcon } from './cherry.svg';
 export { default as EmailIcon } from './email.svg';
 export { default as NoticeIcon } from './notice.svg';
