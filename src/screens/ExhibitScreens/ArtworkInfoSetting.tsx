@@ -17,14 +17,7 @@ import { Btn, BtnText } from 'src/components/Button';
 import { updateArtworkInfoInput } from 'src/slices/artworkSlice';
 import { Artwork } from 'src/interfaces/collection';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-
-interface CircleSelectorProps {
-  selectedArtworks: Artwork[];
-  currentIndex: number;
-  onCirclePress: (index: number) => void;
-  isDescriptionFilled: (index: number) => boolean;
-  scrollViewRef: React.RefObject<ScrollView>;
-}
+import { CircleSlider } from 'src/components/_index';
 
 const ArtworkInfoSetting: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -107,11 +100,11 @@ ex) 그림 속 꽃의 모습이 봄의 활기를 생생히 표현되어
         imageSource={require('src/assets/images/Character/character_smile.png')}
       />
       <View style={{ marginBottom: 24 }} />
-      <CircleSelector
+      <CircleSlider
         selectedArtworks={selectedArtworks}
         currentIndex={currentIndex}
         onCirclePress={handleCirclePress}
-        isDescriptionFilled={(index: number) =>
+        isDescriptionFilled={(index) =>
           artworkInfoInput[index]?.artworkDescription?.length > 0
         }
         scrollViewRef={scrollViewRef}
@@ -179,34 +172,6 @@ ex) 그림 속 꽃의 모습이 봄의 활기를 생생히 표현되어
   );
 };
 
-const CircleSelector: React.FC<CircleSelectorProps> = ({
-  selectedArtworks,
-  currentIndex,
-  onCirclePress,
-  isDescriptionFilled,
-  scrollViewRef,
-}) => (
-  <View style={{ marginBottom: parseInt(theme.spacing.s3) }}>
-    <CircleScrollView ref={scrollViewRef}>
-      {selectedArtworks.map((artwork, index) => (
-        <TouchableOpacity key={index} onPress={() => onCirclePress(index)}>
-          <Circle isActive={currentIndex === index}>
-            {artwork.fileName && (
-              <CircleImage source={imageAssets[artwork.fileName]} />
-            )}
-            {isDescriptionFilled(index) && <Overlay />}
-            {isDescriptionFilled(index) && (
-              <OverlayImage
-                source={require('../../assets/images/complete_face.png')}
-              />
-            )}
-          </Circle>
-        </TouchableOpacity>
-      ))}
-    </CircleScrollView>
-  </View>
-);
-
 const scrollToPosition = (
   ref: React.RefObject<ScrollView>,
   xPosition: number,
@@ -217,55 +182,6 @@ const scrollToPosition = (
 const scrollToTop = (ref: React.RefObject<ScrollView>) => {
   ref.current?.scrollTo({ y: 0, animated: true });
 };
-
-const Circle = styled.View<{ isActive: boolean }>`
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 60px;
-  margin-right: 10px;
-  background-color: transparent;
-  padding: ${(props) => (props.isActive ? '1.5px' : '0px')};
-  border: 1.7px dashed
-    ${(props) => (props.isActive ? '#E52C32' : 'transparent')};
-  position: relative;
-`;
-
-const CircleImage = styled.Image`
-  width: 100%;
-  height: 100%;
-  border-radius: 60px;
-`;
-
-const Overlay = styled.View`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 60px;
-`;
-
-const OverlayImage = styled.Image`
-  position: absolute;
-  width: 22px;
-  height: 27px;
-  border-radius: 60px;
-`;
-
-const CircleScrollView = React.forwardRef<
-  ScrollView,
-  { children: React.ReactNode }
->((props, ref) => (
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    ref={ref}
-    style={{ flexDirection: 'row' }}
-  >
-    {props.children}
-  </ScrollView>
-));
 
 const ImagePreview = styled.Image`
   width: 100%;

@@ -1,5 +1,6 @@
 export { default as ArtworkGrid } from './ArtworkGrid';
 export { default as ArtworkItem } from './ArtworkItem';
+export { default as CircleSlider } from './CircleSlider';
 export { default as CollectionItem } from './CollectionItem';
 export { default as InfoBlock } from './InfoBlock';
 export { default as ProgressBar } from './ProgressBar';
