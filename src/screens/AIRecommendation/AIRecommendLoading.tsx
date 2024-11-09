@@ -61,22 +61,29 @@ const AIRecommendLoading: React.FC = () => {
     }
   }, [selectedArtIds, hasSelectedArtChanged, dispatch]);
 
-  // 2초 로딩 유지
+  // TODO: 로딩 상태 유지 후 페이지 이동 ----일단 이동----API 연결시에 고치도록...
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    const timer = setTimeout(() => {
+      setLoading(false);
+      if (source === 'ThemeSetting') {
+        navigation.navigate('AIRecommendTheme', { source });
+      } else if (source === 'DescriptionSetting') {
+        navigation.navigate('AIRecommendDescription', { source });
+      }
+    }, 2000);
 
+    return () => clearTimeout(timer);
+  }, [navigation, source]);
   // Cloud Vision API 호출
   const { data: cloudVisionData } = useCloudVision(
     missingArtIds,
     'LABEL',
-    missingArtIds.length > 0,
+    true,
   );
 
   // Cloud Vision API 데이터를 Redux 상태에 저장 및 확인
   useEffect(() => {
-    if (cloudVisionData && missingArtIds.length > 0) {
+    if (cloudVisionData) {
       console.log('Cloud Vision API 호출 성공:', cloudVisionData);
       dispatch(
         setCloudVisionLabels([...cloudVisionLabels, ...cloudVisionData]),
