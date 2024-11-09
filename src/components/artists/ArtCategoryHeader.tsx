@@ -1,20 +1,21 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { Caption, H3, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 
 const ArtCategoryHeader: React.FC<{
   categoryTitle: string;
   categoryType: 'artwork' | 'artist';
-}> = ({ categoryTitle, categoryType }) => {
+  style?: ViewStyle;
+}> = ({ categoryTitle, categoryType, style }) => {
   return (
-    <HeaderWrapper>
+    <HeaderWrapper style={style}>
       <ImageWrapper>
         <HeaderImage
           source={
             categoryType === 'artist'
-              ? require('src/assets/images/Character/character_front.png')
-              : require('src/assets/images/ExhibitPage/empty_collection.png')
+              ? require('src/assets/images/Character/artist_front.png')
+              : require('src/assets/images/CollectingPage/cherry.png')
           }
           categoryType={categoryType}
         />
@@ -41,7 +42,6 @@ const ArtCategoryHeader: React.FC<{
 const HeaderWrapper = styled.View`
   flex-direction: row;
   align-items: flex-end;
-  margin-top: ${({ theme }) => theme.margin.s};
 `;
 
 const ImageWrapper = styled.View`
@@ -49,9 +49,9 @@ const ImageWrapper = styled.View`
 `;
 
 const HeaderImage = styled.Image<{ categoryType: 'artwork' | 'artist' }>`
-  width: ${({ categoryType }) => (categoryType === 'artist' ? '56px' : '70px')};
+  width: ${({ categoryType }) => (categoryType === 'artist' ? '54px' : '64px')};
   height: ${({ categoryType }) =>
-    categoryType === 'artist' ? '84px' : '82px'};
+    categoryType === 'artist' ? '73px' : '74px'};
 `;
 
 const TextWrapper = styled.View`

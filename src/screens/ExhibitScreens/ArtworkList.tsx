@@ -20,8 +20,8 @@ const ArtworkList: React.FC = () => {
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'both',
-        leftButtonText: '작품 전시 목록',
+        leftButtonType: 'icon',
+        marginLeft: 0,
       }),
     );
   }, [navigation]);
@@ -37,10 +37,18 @@ const ArtworkList: React.FC = () => {
     }
   };
 
+  // Calculate the number of placeholders needed
+  const numColumns = 3;
+  const totalItems = selectedArtworks.length;
+  const placeholdersNeeded =
+    (numColumns - (totalItems % numColumns)) % numColumns;
+  const placeholders = Array.from({ length: placeholdersNeeded });
+
   return (
     <Container>
+      <View style={{ marginTop: 20 }} />
       <TitleSubtitle
-        title='전시로 올려질 작품들이에요!'
+        titleLarge='전시로 올려질 작품들'
         subtitle='작품을 클릭하면, 더 상세한 정보를 확인할 수 있어요'
       />
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -53,8 +61,7 @@ const ArtworkList: React.FC = () => {
               <ArtworkItem>
                 <ArtworkImage source={imageAssets[artwork.fileName]} />
                 <Subtitle2>{artwork.name}</Subtitle2>
-                {artwork.register === 'COLLECTOR' &&
-                artwork.cherryNum === null ? (
+                {artwork.cherryNum === null ? (
                   <CollectorOnlyImage
                     source={require('../../assets/images/collectorOnlyText.png')}
                   />
@@ -80,6 +87,13 @@ const ArtworkList: React.FC = () => {
               </ArtworkItem>
             </ArtworkTouchable>
           ))}
+          {/* Render placeholders to fill the empty spaces */}
+          {placeholders.map((_, index) => (
+            <PlaceholderItem
+              key={`placeholder-${index}`}
+              pointerEvents='none'
+            />
+          ))}
         </ArtworkContainer>
       </ScrollView>
     </Container>
@@ -94,7 +108,7 @@ const ArtworkContainer = styled.View`
 `;
 
 const ArtworkTouchable = styled(TouchableOpacity)`
-  width: 32%; /* 3줄 */
+  width: 32%;
   margin-bottom: 16px;
 `;
 
@@ -116,6 +130,11 @@ const ArtworkDescription = styled(Caption)`
 const CollectorOnlyImage = styled.Image`
   width: 80px;
   height: 15px;
+`;
+
+// Styled component for placeholders
+const PlaceholderItem = styled(ArtworkTouchable)`
+  opacity: 0;
 `;
 
 export default ArtworkList;

@@ -13,7 +13,7 @@ import { TitleSubtitle, TagButton, ToastMessage } from 'src/components/_index';
 import { Btn, BtnText } from 'src/components/Button';
 import { Container } from 'src/styles/layout';
 import { RefreshIcon } from '../../assets/icons/_index.js';
-import { Caption, Subtitle2 } from 'src/styles/typography';
+import { Caption, Subtitle1, Subtitle2 } from 'src/styles/typography';
 
 const AIRecommendTheme: React.FC = () => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
@@ -29,13 +29,13 @@ const AIRecommendTheme: React.FC = () => {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const { toastVisible, toastMessage, showToast } = useToastMessage();
 
-  navigation.setOptions(
-    headerOptions(navigation, {
-      leftButtonType: null,
-      headerTitle: '전시 테마 AI 추천',
-      headerTitleAlign: 'left',
-    }),
-  );
+  // navigation.setOptions(
+  //   headerOptions(navigation, {
+  //     leftButtonType: null,
+  //     headerTitle: '전시 테마 AI 추천',
+  //     headerTitleAlign: 'left',
+  //   }),
+  // );
 
   const [animations, setAnimations] = useState<{
     [key: string]: Animated.Value;
@@ -100,11 +100,13 @@ const AIRecommendTheme: React.FC = () => {
   return (
     <>
       <Container>
+        <HeaderText>전시 테마 AI 추천</HeaderText>
         <TitleSubtitle
-          title='AI가 전시 테마를 만들었어요!'
-          subtitle='원하는 전시 테마를 선택해주세요'
+          titleLarge='AI가 만든 전시 테마'
+          subtitle='원하는 전시 테마를 선택해 주세요'
+          style={{ marginBottom: 12 }}
         />
-        <RefreshIcon />
+        <RefreshIcon size={30} />
         <ThemeScrollViewContainer>
           <ThemeScrollView horizontal showsHorizontalScrollIndicator={false}>
             {aiThemes.map((theme, index) => (
@@ -156,11 +158,9 @@ const AIRecommendTheme: React.FC = () => {
             </ReasonTextContainer>
           ) : (
             <ReasonTextContainer>
-              <ReasonTitle>
-                테마를 클릭하면 추천 이유를 볼 수 있어요!
-              </ReasonTitle>
+              <ReasonTitle>테마를 클릭하고 추천 이유 보기</ReasonTitle>
               <ReasonText>
-                컬렉터님이 설정한 작품들로 테마를 만들었습니다:)
+                컬렉터님이 선택한 작품들로 테마를 만들었어요!
               </ReasonText>
             </ReasonTextContainer>
           )}
@@ -185,8 +185,8 @@ const AIRecommendTheme: React.FC = () => {
             />
           ))}
         </SelectedThemes>
-        <Btn onPress={handleComplete}>
-          <BtnText>완료하기</BtnText>
+        <Btn onPress={handleComplete} style={{ marginHorizontal: 16 }}>
+          <BtnText>설정 완료하기</BtnText>
         </Btn>
       </Container>
 
@@ -195,10 +195,15 @@ const AIRecommendTheme: React.FC = () => {
   );
 };
 
+const HeaderText = styled(Subtitle1)`
+  margin: 16px 0;
+`;
+
 const ThemeScrollViewContainer = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  margin-top: 30px;
   height: 150px;
 `;
 

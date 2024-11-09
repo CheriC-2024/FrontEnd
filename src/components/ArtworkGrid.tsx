@@ -38,7 +38,7 @@ const ArtworkGrid: React.FC<ArtworkGridProps> = ({
         );
 
         return (
-          <ArtworkItemWrapper key={artwork.artId}>
+          <ArtworkItemWrapper key={`${artwork.artId}-${index}`}>
             <ArtworkItem
               artwork={artwork}
               selected={selected}
@@ -60,6 +60,7 @@ const GridContainer = styled.View`
 
 const ArtworkItemWrapper = styled.View`
   width: 32%;
+  margin-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const PlaceholderItem = styled.View`

@@ -8,6 +8,7 @@ import {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Body1, H5 } from 'src/styles/typography';
 
 interface CustomModalProps {
   visible: boolean;
@@ -51,31 +52,40 @@ const CustomModal: React.FC<CustomModalProps> = ({
   });
 
   return (
-    <Modal transparent visible={visible} animationType="none">
-      <CenteredView>
-        <Animated.View style={[animatedStyle]}>
-          <ModalContainer>
-            <CloseButton onPress={onClose}>
-              <Icon name="close" size={24} color="#000" />
-            </CloseButton>
-            <Title>{title}</Title>
-            <Body>
-              {typeof body === 'string' ? <BodyText>{body}</BodyText> : body}
-            </Body>
-            <ButtonContainer>
-              <CancelButton onPress={onClose}>
-                <CancelButtonText>{cancelButtonText}</CancelButtonText>
-              </CancelButton>
-              <ConfirmButton onPress={onConfirm}>
-                <ConfirmButtonText>{confirmButtonText}</ConfirmButtonText>
-              </ConfirmButton>
-            </ButtonContainer>
-          </ModalContainer>
-        </Animated.View>
-      </CenteredView>
+    <Modal transparent visible={visible} animationType='none'>
+      <BackgroundView>
+        <CenteredView>
+          <Animated.View style={[animatedStyle]}>
+            <ModalContainer>
+              <CloseButton onPress={onClose}>
+                <Icon name='close' size={24} color='#000' />
+              </CloseButton>
+              <Title>{title}</Title>
+              <Body>
+                {typeof body === 'string' ? <BodyText>{body}</BodyText> : body}
+              </Body>
+              <ButtonContainer>
+                <CancelButton onPress={onClose}>
+                  <CancelButtonText>{cancelButtonText}</CancelButtonText>
+                </CancelButton>
+                <ConfirmButton onPress={onConfirm}>
+                  <ConfirmButtonText>{confirmButtonText}</ConfirmButtonText>
+                </ConfirmButton>
+              </ButtonContainer>
+            </ModalContainer>
+          </Animated.View>
+        </CenteredView>
+      </BackgroundView>
     </Modal>
   );
 };
+
+const BackgroundView = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(18, 0, 0, 0.5);
+`;
 
 const CenteredView = styled.View`
   flex: 1;
@@ -87,7 +97,7 @@ const CenteredView = styled.View`
 const ModalContainer = styled.View`
   flex-direction: column;
   margin: 15px;
-  padding: 60px 35px;
+  padding: 50px 35px;
   background-color: white;
   border-radius: 20px;
   align-items: start;
@@ -96,60 +106,55 @@ const ModalContainer = styled.View`
 
 const CloseButton = styled.TouchableOpacity`
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 30px;
+  right: 20px;
 `;
 
-const Title = styled.Text`
-  font-family: 'Bold';
-  font-size: 22px;
+const Title = styled(H5)`
   text-align: left;
   margin-bottom: 15px;
 `;
 
 const Body = styled.View`
-  margin-bottom: 25px;
-  align-items: start;
+  margin-bottom: 40px;
+  align-items: flex-start;
 `;
 
-const BodyText = styled.Text`
+const BodyText = styled(Body1)`
   text-align: left;
-  font-family: 'Regular';
-  font-size: 16px;
   line-height: 22px;
+  margin-bottom: 30px;
   color: #b0abab;
 `;
 
 const ButtonContainer = styled.View`
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
 `;
 
 const CancelButton = styled.TouchableOpacity`
-  background-color: #fff;
-  border-radius: 20px;
-  padding: 12px 27px;
-  border: 1.5px solid #f7f5f5;
+  width: 48%;
+  background-color: #fcf9f9;
+  border-radius: ${({ theme }) => theme.radius.l};
+  padding: 12px;
 `;
 
 const ConfirmButton = styled.TouchableOpacity`
-  background-color: #f7f5f5;
-  border-radius: 20px;
-  padding: 12px 27px;
+  width: 48%;
+  background-color: ${({ theme }) => theme.colors.redBlack};
+  border-radius: ${({ theme }) => theme.radius.l};
+  padding: 12px;
 `;
 
-const CancelButtonText = styled.Text`
-  font-family: 'Regular';
-  font-size: 16px;
-  color: #b0abab;
+const CancelButtonText = styled(Body1)`
+  color: ${({ theme }) => theme.colors.grey_6};
   text-align: center;
 `;
 
-const ConfirmButtonText = styled.Text`
-  font-family: 'Regular';
-  font-size: 16px;
-  color: #120000;
+const ConfirmButtonText = styled(Body1)`
+  color: #fff;
+  text-align: center;
 `;
 
 export default CustomModal;

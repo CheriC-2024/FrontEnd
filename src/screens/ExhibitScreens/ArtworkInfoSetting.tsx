@@ -3,7 +3,11 @@ import styled from 'styled-components/native';
 import { ScrollView, TouchableOpacity, View, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import {
+  NavigationProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import { ExhibitStackParamList } from 'src/navigation/types';
 import { imageAssets } from '../../assets/DB/imageAssets';
 import TitleSubtitle from 'src/components/TitleSubtitle';
@@ -17,16 +21,11 @@ import { Btn, BtnText } from 'src/components/Button';
 import { updateArtworkInfoInput } from 'src/slices/artworkSlice';
 import { Artwork } from 'src/interfaces/collection';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-
-interface CircleSelectorProps {
-  selectedArtworks: Artwork[];
-  currentIndex: number;
-  onCirclePress: (index: number) => void;
-  isDescriptionFilled: (index: number) => boolean;
-  scrollViewRef: React.RefObject<ScrollView>;
-}
+import { CircleSlider } from 'src/components/_index';
 
 const ArtworkInfoSetting: React.FC = () => {
+  const route = useRoute();
+  const editMode = route.params?.editMode ?? false;
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const contentScrollViewRef = useRef<ScrollView>(null);
@@ -47,8 +46,9 @@ const ArtworkInfoSetting: React.FC = () => {
     const isNextEnabled = allDescriptionFilled();
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'text',
-        headerRightText: '다음',
+        editMode: true,
+        leftButtonType: editMode ? 'icon' : 'text',
+        headerRightText: editMode ? undefined : '다음',
         nextScreenName: 'DescriptionSetting',
         headerRightDisabled: !isNextEnabled,
       }),
@@ -60,6 +60,11 @@ const ArtworkInfoSetting: React.FC = () => {
     setCurrentIndex(nextIndex);
     scrollToPosition(scrollViewRef, nextIndex * 60);
     scrollToTop(contentScrollViewRef);
+  };
+
+  const handleSave = () => {
+    navigation.replace('FinishSetting');
+    navigation.goBack();
   };
 
   const handleCirclePress = (index: number) => setCurrentIndex(index);
@@ -94,19 +99,32 @@ const ArtworkInfoSetting: React.FC = () => {
     artworkAppreciation: '',
   };
 
+  const placeholderText = `컬렉터님만의 작품을 소개해주세요\n
+ex) 그림 속 꽃의 모습이 봄의 활기를 생생히 표현되어
+작품만으로 봄을 만끽할 수 있습니다`;
+
   return (
     <Container>
-      <ProgressBarComponent totalSteps={7} currentStep={4} />
+      {!editMode && <ProgressBarComponent totalSteps={7} currentStep={4} />}
       <TitleSubtitle
-        title='작품의 정보를 작성해주세요'
-        subtitle='모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요'
-        imageSource={require('src/assets/images/Character/character_smile.png')}
+        titleLarge={editMode ? '작품의 정보 수정하기' : '작품 정보 작성하기'}
+        subtitle={
+          editMode
+            ? '수정하신 후에 꼭 저장해주세요:)'
+            : '모든 작품의 정보를 작성해야 다음으로 넘어갈 수 있어요'
+        }
+        imageSource={
+          editMode
+            ? undefined
+            : require('src/assets/images/Character/character_smile.png')
+        }
       />
-      <CircleSelector
+      <View style={{ marginBottom: 24 }} />
+      <CircleSlider
         selectedArtworks={selectedArtworks}
         currentIndex={currentIndex}
         onCirclePress={handleCirclePress}
-        isDescriptionFilled={(index: number) =>
+        isDescriptionFilled={(index) =>
           artworkInfoInput[index]?.artworkDescription?.length > 0
         }
         scrollViewRef={scrollViewRef}
@@ -137,7 +155,7 @@ const ArtworkInfoSetting: React.FC = () => {
         </ArtworkTitleContainer>
         <InfoBlock
           label='나만의 작품 소개글'
-          placeholder='컬렉터님만의 작품을 소개해주세요'
+          placeholder={placeholderText}
           maxLength={500}
           required
           value={currentArtworkInfo.artworkDescription}
@@ -166,41 +184,23 @@ const ArtworkInfoSetting: React.FC = () => {
           }
           style={{ paddingBottom: parseInt(theme.padding.l) }}
         />
-        <Btn onPress={handleNext}>
-          <BtnText>다음 작품 작성하기</BtnText>
-        </Btn>
+        {!editMode && (
+          <Btn onPress={handleNext}>
+            <BtnText>전시 작품 정보 저장하기</BtnText>
+          </Btn>
+        )}
+        {editMode && (
+          <Btn
+            style={{ position: 'relative', marginTop: 16 }}
+            onPress={handleSave}
+          >
+            <BtnText>수정한 내용 저장하기</BtnText>
+          </Btn>
+        )}
       </ScrollView>
     </Container>
   );
 };
-
-const CircleSelector: React.FC<CircleSelectorProps> = ({
-  selectedArtworks,
-  currentIndex,
-  onCirclePress,
-  isDescriptionFilled,
-  scrollViewRef,
-}) => (
-  <View style={{ marginBottom: parseInt(theme.spacing.s3) }}>
-    <CircleScrollView ref={scrollViewRef}>
-      {selectedArtworks.map((artwork, index) => (
-        <TouchableOpacity key={index} onPress={() => onCirclePress(index)}>
-          <Circle isActive={currentIndex === index}>
-            {artwork.fileName && (
-              <CircleImage source={imageAssets[artwork.fileName]} />
-            )}
-            {isDescriptionFilled(index) && <Overlay />}
-            {isDescriptionFilled(index) && (
-              <OverlayImage
-                source={require('../../assets/images/complete_face.png')}
-              />
-            )}
-          </Circle>
-        </TouchableOpacity>
-      ))}
-    </CircleScrollView>
-  </View>
-);
 
 const scrollToPosition = (
   ref: React.RefObject<ScrollView>,
@@ -212,55 +212,6 @@ const scrollToPosition = (
 const scrollToTop = (ref: React.RefObject<ScrollView>) => {
   ref.current?.scrollTo({ y: 0, animated: true });
 };
-
-const Circle = styled.View<{ isActive: boolean }>`
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 60px;
-  margin-right: 10px;
-  background-color: transparent;
-  padding: ${(props) => (props.isActive ? '1.5px' : '0px')};
-  border: 1.7px dashed
-    ${(props) => (props.isActive ? '#E52C32' : 'transparent')};
-  position: relative;
-`;
-
-const CircleImage = styled.Image`
-  width: 100%;
-  height: 100%;
-  border-radius: 60px;
-`;
-
-const Overlay = styled.View`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 60px;
-`;
-
-const OverlayImage = styled.Image`
-  position: absolute;
-  width: 22px;
-  height: 27px;
-  border-radius: 60px;
-`;
-
-const CircleScrollView = React.forwardRef<
-  ScrollView,
-  { children: React.ReactNode }
->((props, ref) => (
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    ref={ref}
-    style={{ flexDirection: 'row' }}
-  >
-    {props.children}
-  </ScrollView>
-));
 
 const ImagePreview = styled.Image`
   width: 100%;

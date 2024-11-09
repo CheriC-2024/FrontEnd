@@ -1,229 +1,294 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  View,
-  FlatList,
-  Animated,
-  TouchableOpacity,
-  Text,
-  Image,
-  Alert,
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, FlatList, Animated, Text } from 'react-native';
 import styled from 'styled-components/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'src/store';
 import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import { ArtistImage } from 'src/components/_index';
-import { artistAndArtworkData } from '../data';
-import ArtworkGrid from 'src/components/ArtworkGrid';
+  setArtistId,
+  setInitialFollowers,
+  toggleFollow,
+  unFollow,
+} from 'src/slices/profileSlice';
+import {
+  AnimatedHeaderOverlay,
+  ArtistImage,
+  ArtistRecord,
+  ArtworkItem,
+  RequestArtworkSheet,
+  TabButtons,
+} from 'src/components/_index';
+import CustomModal from 'src/components/Modal';
 import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-import {
-  Body2,
-  ButtonText,
-  Caption,
-  H4,
-  Subtitle1,
-  Subtitle2,
-} from 'src/styles/typography';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ButtonText, Caption, H4 } from 'src/styles/typography';
+import { useArtistData } from 'src/api/hooks/useArtistQueries';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
 const ArtistProfile: React.FC = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { artistId } = route.params;
-  const artistData = artistAndArtworkData.find(
-    (artist) => artist.artist.id === artistId,
-  );
-
+  const [isRequestSheetVisible, setRequestSheetVisible] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const animationValue = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const { artistId: routeArtistId } = route.params;
+
+  const artistId = useSelector((state: RootState) => state.profile.artistId);
+  const followers = useSelector((state: RootState) => state.profile.followers);
+
+  console.log('Route params:', artistId);
+  const { artist, artworks, isLoading, error } = useArtistData(artistId!);
+  console.log('Fetched artworks:', artworks);
+  console.log('Fetched artist:', artist);
 
   // 팔로우 상태 관리
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const handleCloseRequestSheet = () => {
+    setRequestSheetVisible(false);
+  };
 
   // 헤더 설정
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'both',
-        leftButtonText: `작가 ${artistData.artist.name}님의 공간`,
+        leftButtonType: 'icon',
+        rightButtonType: 'icon',
+        iconColor: '#fff',
+        headerTransparent: true,
+        onHeaderRightPress: () => setRequestSheetVisible(true),
       }),
     );
   }, [navigation]);
 
-  useFocusEffect(
-    useCallback(() => {
-      // requestSuccess가 true이면 알림을 띄움
-      if (route.params?.requestSuccess) {
-        Alert.alert('성공', '작가님께 작품 요청이 성공적으로 전달되었습니다!');
-        // 알림 후 params 초기화 (다시 들어왔을 때 알림 뜨지 않도록)
-        route.params.requestSuccess = false;
-      }
-    }, [route.params]),
-  );
+  useEffect(() => {
+    // route의 artistId가 변경되면 Redux의 artistId를 업데이트
+    if (routeArtistId && routeArtistId !== artistId) {
+      dispatch(setArtistId(routeArtistId));
+    }
+    if (artist) {
+      dispatch(setInitialFollowers(artist.followers));
+    }
+  }, [routeArtistId, artistId, artist, dispatch]);
+
+  useEffect(() => {
+    if (route.params?.requestSuccess) {
+      setModalVisible(true);
+      navigation.setParams({ requestSuccess: false });
+    }
+    // No else block or return statement here
+  }, [route.params?.requestSuccess]);
+
+  // 상태 관리와 애니메이션 값을 연결하기 위해 useEffect 사용
+  useEffect(() => {
+    // activeTab 상태가 변경되었을 때 애니메이션 실행
+    Animated.timing(animationValue, {
+      toValue: activeTab * (100 / tabs.length), // 각 탭의 위치로 애니메이션 이동
+      duration: 300, // 애니메이션 지속 시간 (밀리초)
+      useNativeDriver: true, // width와 관련된 애니메이션에는 false 사용
+    }).start();
+  }, [activeTab]);
 
   const handleTabPress = (index: number) => {
-    setActiveTab(index);
-    Animated.timing(animationValue, {
-      toValue: index * (100 / tabs.length), // 각 탭의 위치로 애니메이션 이동
-      duration: 300, // 애니메이션 지속 시간 (밀리초)
-      useNativeDriver: false,
-    }).start();
+    setActiveTab(index); // 상태 업데이트와 애니메이션 동시 실행을 위해 useEffect로 처리
   };
 
-  if (!artistData) {
+  const renderTabButtons = () => (
+    <TabButtons
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabPress={handleTabPress}
+      animationValue={animationValue}
+    />
+  );
+
+  const renderTabContent = () => {
+    if (activeTab === 0) {
+      return artworks;
+    } else if (activeTab === 1) {
+      return [{ key: 'artistRecord' }]; // placeholder 아이템
+    }
+    return [];
+  };
+
+  if (isLoading) {
+    return <Container></Container>;
+  }
+
+  if (error) {
     return (
       <Container>
-        <ErrorMessage>해당 아티스트의 정보를 찾을 수 없습니다.</ErrorMessage>
+        <Text>데이터를 가져오는 중 오류가 발생했습니다.</Text>
       </Container>
     );
   }
 
-  const handleSelectArtwork = (artwork: any) => {
-    // 선택한 작품의 ID를 ArtworkInfo로 전달하며 이동
-    navigation.navigate('ArtworkInfo', { artworkId: artwork.id });
-  };
+  const backgroundOpacity = scrollY.interpolate({
+    inputRange: [0, 40],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const profileImageTranslateY = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, -120],
+    extrapolate: 'clamp',
+  });
 
   const handleFollowPress = () => {
-    setIsFollowing(!isFollowing); // 팔로우 상태 토글
+    setIsFollowing(!isFollowing);
+    if (isFollowing) {
+      dispatch(unFollow());
+    } else {
+      dispatch(toggleFollow());
+    }
   };
 
-  const navigateToRequestArtwork = () => {
-    navigation.navigate('RequestArtwork', { artistId: artistId }); // RequestArtwork 화면으로 이동
+  const handleConfirm = () => {
+    setModalVisible(false);
+    //navigation.navigate('SomeOtherScreen');
   };
 
-  // 작가 이력 탭 렌더링
-  const renderArtistHistory = () => {
-    return (
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <SocialMediaContainer>
-          <SocialMediaButton>
-            <Image source={require('src/assets/instagram-logo.png')} />
-          </SocialMediaButton>
+  const handleModalClose = () => {
+    setModalVisible(false);
+  };
 
-          <SocialMediaButton>
-            <Image source={require('src/assets/blog-logo.png')} />
-          </SocialMediaButton>
-
-          <SocialMediaButton onPress={navigateToRequestArtwork}>
-            <Image
-              source={require('src/assets/dm-logo.png')} // 이메일 아이콘 이미지 경로
-            />
-          </SocialMediaButton>
-        </SocialMediaContainer>
-        <HistoryContainer showsVerticalScrollIndicator={false}>
-          <Section>
-            <SectionTitle>학력</SectionTitle>
-            {artistHistory.education.map((item, index) => (
-              <HistoryText key={index}>- {item}</HistoryText>
-            ))}
-          </Section>
-
-          <Section>
-            <SectionTitle>개인전</SectionTitle>
-            {artistHistory.soloExhibitions.map((item, index) => (
-              <HistoryText key={index}>
-                {item.year} 《{item.title}》, {item.location}
-              </HistoryText>
-            ))}
-          </Section>
-
-          <Section>
-            <SectionTitle>단체전</SectionTitle>
-            {artistHistory.groupExhibitions.map((item, index) => (
-              <HistoryText key={index}>
-                {item.year} 《{item.title}》, {item.location}
-              </HistoryText>
-            ))}
-          </Section>
-
-          <Section>
-            <SectionTitle>작가의 작품 소장처</SectionTitle>
-            {artistHistory.collections.map((item, index) => (
-              <HistoryText key={index}>- {item}</HistoryText>
-            ))}
-          </Section>
-
-          <Section>
-            <SectionTitle>수상 및 선정</SectionTitle>
-            {artistHistory.awards.map((item, index) => (
-              <HistoryText key={index}>
-                {item.year} {item.title}
-              </HistoryText>
-            ))}
-          </Section>
-
-          <Section>
-            <SectionTitle>레지던시</SectionTitle>
-            {artistHistory.residency.map((item, index) => (
-              <HistoryText key={index}>
-                {item.year} {item.title}
-              </HistoryText>
-            ))}
-          </Section>
-        </HistoryContainer>
-      </ScrollView>
-    );
+  const renderItem = ({ item }) => {
+    if (activeTab === 0) {
+      return (
+        <View style={{ marginTop: 16, marginRight: 10 }}>
+          <ArtworkItem
+            artwork={item}
+            selected={false} // 선택 상태 설정 필요 시
+            selectedIndex={0} // 선택 인덱스 설정 필요 시
+            onSelect={() =>
+              navigation.navigate('ArtworkInfo', {
+                artworkId: item.id,
+              })
+            }
+          />
+        </View>
+      );
+    }
+    if (activeTab === 1) {
+      return <ArtistRecord artistHistory={artistHistory} />;
+    }
+    return null;
   };
 
   return (
-    <Container>
-      <ProfileWrapper>
-        <ArtistImage image={artistData.artist.image} size={88} />
-        <ArtistName>{artistData.artist.name}</ArtistName>
-        <ArtistInfo>{artistData.artist.category}</ArtistInfo>
-        <ArtistBio>{artistData.artist.bio}</ArtistBio>
+    <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
+      <AnimatedHeaderOverlay
+        artistName={artist.name}
+        artworkCount={artworks.length}
+        backgroundImage='https://i.ibb.co/1vmZ82r/3.png'
+        scrollY={scrollY}
+      />
+      <ProfileImageContainer
+        style={{
+          transform: [
+            // { scale: profileImageScale },
+            { translateY: profileImageTranslateY },
+          ],
+          opacity: backgroundOpacity,
+          position: 'absolute',
+          top: 120,
+          left: 16,
+          zIndex: 3,
+        }}
+      >
+        <ArtistImage image={artist.image} size={88} />
+      </ProfileImageContainer>
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: scrollY.interpolate({
+            inputRange: [0, 230], // 스크롤 범위
+            outputRange: [150, -120], // 스크롤에 따라 위로 이동
+            extrapolate: 'clamp',
+          }),
+          zIndex: 1,
+        }}
+      >
+        <ProfileWrapper>
+          <ArtistName>{artist.name}</ArtistName>
+          <ArtistInfo>{artist.category}</ArtistInfo>
+          <ArtistBio>{artist.bio}</ArtistBio>
+        </ProfileWrapper>
         <FollowSection>
-          <FollowersCount>팔로워 {artistData.artist.followers}</FollowersCount>
+          <View style={{ flexDirection: 'row' }}>
+            <FollowCountItem>
+              <FollowLabel>팔로워</FollowLabel>
+              <FollowNumber>{followers}</FollowNumber>
+            </FollowCountItem>
+            <FollowCountItem>
+              <FollowLabel>팔로잉</FollowLabel>
+              <FollowNumber>{artist.followers}</FollowNumber>
+            </FollowCountItem>
+          </View>
           <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
-            <FollowButtonText>
-              {isFollowing ? '팔로잉 중' : '팔로우하기'}
+            <FollowButtonText isFollowing={isFollowing}>
+              {isFollowing ? '팔로우중' : '팔로우하기'}
             </FollowButtonText>
           </FollowButton>
         </FollowSection>
-      </ProfileWrapper>
-
-      {/* 탭 버튼 및 애니메이션 */}
-      <TabWrapper>
-        {tabs.map((tab, index) => (
-          <TabButton
-            key={index}
-            active={activeTab === index}
-            onPress={() => handleTabPress(index)}
-          >
-            <TabButtonText active={activeTab === index}>{tab}</TabButtonText>
-          </TabButton>
-        ))}
-        <AnimatedUnderline
-          style={{
-            width: `${100 / tabs.length}%`,
-            left: animationValue.interpolate({
-              inputRange: [0, 100],
-              outputRange: ['0%', '100%'],
-            }),
-          }}
-        />
-      </TabWrapper>
-
-      {/* 탭에 따른 콘텐츠 렌더링 */}
-      {activeTab === 0 && (
-        <ArtworkGrid
-          artworks={artistData.artworks}
-          selectedArtworks={[]}
-          onSelect={handleSelectArtwork}
+      </Animated.View>
+      <FlatList
+        data={renderTabContent()}
+        extraData={activeTab}
+        key={activeTab === 0 ? '3-columns' : '1-column'}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={renderItem}
+        numColumns={activeTab === 0 ? 3 : 1}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false },
+        )}
+        ListHeaderComponent={renderTabButtons}
+        stickyHeaderIndices={[0]}
+        contentContainerStyle={{ marginTop: 110, paddingTop: 280, zIndex: 2 }}
+        columnWrapperStyle={
+          activeTab === 0
+            ? {
+                alignSelf: 'flex-start',
+                paddingLeft: 16,
+              }
+            : null
+        }
+        ListFooterComponent={
+          <View
+            style={{
+              height:
+                artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
+            }}
+          />
+        }
+        scrollEventThrottle={16}
+      />
+      {isRequestSheetVisible && (
+        <RequestArtworkSheet
+          onClose={handleCloseRequestSheet}
+          artistId={artistId}
         />
       )}
-      {activeTab === 1 && renderArtistHistory()}
-      {/* 추가 탭 콘텐츠는 여기서 구현 */}
-    </Container>
+      <CustomModal
+        visible={isModalVisible}
+        onClose={handleConfirm}
+        title={`컬렉터님의 작품 요청을${'\n'}작가님께 전달드렸어요!`}
+        body='보내신 작품 요청은 마이체리시 > 내가 보낸 작품 요청에서 확인하실 수 있습니다.'
+        confirmButtonText='알겠습니다'
+        cancelButtonText='확인하러 가기'
+        onConfirm={handleModalClose}
+      />
+    </View>
   );
 };
 
-// 작가 이력 로컬 데이터
+// 작가 이력 로컬 데이터 TODO: API 연결
 const artistHistory = {
   education: [
     '서울여자대학교, 산업디자인전공 학사',
@@ -251,119 +316,76 @@ const artistHistory = {
   residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
 };
 
-const AnimatedUnderline = styled(Animated.View)`
+const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`
   position: absolute;
-  bottom: 0;
-  height: 2px;
-  background-color: #4a0d66;
-`;
+  top: 70px;
+  z-index: 1;
+`);
 
 const ProfileWrapper = styled.View`
-  align-items: center;
-  margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: 24px;
+  align-items: flex-start;
+  padding-top: 56px;
+  padding-left: 24px;
+  z-index: -1;
+  background-color: ${({ theme }) => theme.colors.bg};
+  flex-direction: column;
+  flex-wrap: wrap;
 `;
 
 const ArtistName = styled(H4)`
-  margin-top: ${({ theme }) => theme.margin.s};
+  margin-top: ${({ theme }) => theme.spacing.s3};
 `;
 
-const ArtistInfo = styled(Subtitle2)`
+const ArtistInfo = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_8};
 `;
 
 const ArtistBio = styled(Caption)`
-  text-align: center;
-  margin-top: 4px;
-  padding: 0 60px;
-  color: ${({ theme }) => theme.colors.grey_8};
+  margin-top: ${({ theme }) => theme.margin.xs};
+  padding-right: 8px;
+  color: #7d7979;
 `;
 
 const FollowSection = styled.View`
+  width: 100%;
   flex-direction: row;
   align-items: center;
-  justify-content: space-around;
-  width: 75%;
-  margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: ${({ theme }) => theme.spacing.s8};
+  justify-content: space-between;
+  padding-top: ${({ theme }) => theme.margin.m};
+  padding-left: 24px;
+  padding-right: 16px;
+  padding-bottom: 24px;
+  background-color: ${({ theme }) => theme.colors.bg};
 `;
 
-const FollowersCount = styled(Subtitle2)``;
+const FollowCountItem = styled.View`
+  align-items: center;
+  margin-right: ${({ theme }) => theme.spacing.s5};
+`;
+
+const FollowLabel = styled(Caption)`
+  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.grey_6};
+`;
+
+const FollowNumber = styled(ButtonText)`
+  color: ${({ theme }) => theme.colors.grey_6};
+`;
 
 const FollowButton = styled.TouchableOpacity<{ isFollowing: boolean }>`
+  width: 104px;
+  justify-content: center;
+  align-items: center;
   background-color: ${({ isFollowing, theme }) =>
-    isFollowing ? theme.colors.grey_6 : theme.colors.redBlack};
-  padding: 8px 16px;
+    isFollowing ? theme.colors.cherryRed_10 : 'transparent'};
+  padding: 8px;
   border-radius: ${({ theme }) => theme.radius.l};
+  border: 1.5px solid ${({ theme }) => theme.colors.cherryRed_10};
 `;
 
-const FollowButtonText = styled(Subtitle1)`
-  color: #fff;
-`;
-
-const TabWrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  position: relative;
-  margin-bottom: ${({ theme }) => theme.spacing.s5};
-`;
-
-const TabButton = styled.TouchableOpacity<{ active?: boolean }>`
-  flex: 1;
-  align-items: center;
-  padding-bottom: ${({ theme }) => theme.padding.s};
-`;
-
-const TabButtonText = styled(Subtitle2)<{ active?: boolean }>`
-  color: ${({ active }) => (active ? '#120000' : '#B0ABAB')};
-`;
-
-const SocialMediaButton = styled(TouchableOpacity)`
-  width: 70px;
-  height: 70px;
-  border-radius: 40px;
-  background-color: white;
-  justify-content: center;
-  align-items: center;
-  margin: 0 9px;
-  elevation: 3;
-`;
-
-const SocialMediaContainer = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 16px;
-`;
-
-const HistoryContainer = styled.View`
-  padding: 16px;
-`;
-
-const Section = styled.View`
-  margin-bottom: 20px;
-`;
-
-const SectionTitle = styled(Subtitle2)`
-  margin-bottom: 10px;
-  color: ${({ theme }) => theme.colors.grey_10};
-  align-self: flex-start;
-  border-bottom-width: 2px;
-  border-bottom-color: black;
-  padding-bottom: 4px;
-`;
-
-const HistoryText = styled(Caption)`
-  color: ${({ theme }) => theme.colors.grey_10};
-  margin-bottom: 4px;
-`;
-
-const ErrorMessage = styled.Text`
-  font-size: 18px;
-  color: red;
-  text-align: center;
-  margin-top: 50px;
+const FollowButtonText = styled(ButtonText)<{ isFollowing: boolean }>`
+  color: ${({ isFollowing, theme }) =>
+    isFollowing ? theme.colors.white : theme.colors.cherryRed_10};
 `;
 
 export default ArtistProfile;

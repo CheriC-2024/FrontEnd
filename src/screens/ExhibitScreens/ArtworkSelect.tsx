@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components/native';
-import { Text, View, FlatList, TouchableOpacity } from 'react-native';
+import {
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../store';
@@ -78,6 +84,11 @@ const ArtworkSelect: React.FC = () => {
     );
   }, [navigation, selectedArtworks]);
 
+  // 컴포넌트가 처음 마운트될 때 filterText 초기화
+  useEffect(() => {
+    dispatch(setFilterText('')); // filterText를 빈 문자열로 초기화
+  }, [dispatch]);
+
   // 사용자가 해당 화면 나가면 상태 초기화
   useEffect(() => {
     // 'beforeRemove' 이벤트는 화면이 뒤로 가기 전에 트리거
@@ -99,7 +110,18 @@ const ArtworkSelect: React.FC = () => {
     }
   }, [artworkListData, dispatch]);
 
-  if (isLoading) return <Text>Loading...</Text>;
+  useEffect(() => {
+    const artIds = selectedArtworks.map((artwork) => artwork.artId);
+    console.log('ArtworkSelect화면-Updated selectedArtworks:', artIds);
+  }, [selectedArtworks]);
+
+  if (isLoading)
+    // 임시 로딩 화면
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size='large' color='#E52C32' />
+      </View>
+    );
   if (error) return <Text>Error: {error.message}</Text>;
 
   // 작품 검색 필터링
@@ -148,19 +170,18 @@ const ArtworkSelect: React.FC = () => {
     <Container>
       <ProgressBar currentStep={2} totalSteps={7} />
       <TitleSubtitle
-        title='어떤 컬렉션을 전시로 올릴까요?'
+        titleLarge='전시할 작품 선택하기'
         subtitle={
           <>
-            보유 중인 체리 {` `}
+            보유중인 체리 {` `}
             <Icon />
-            <CherryNum>
-              {` `}
-              {userCherries}
-            </CherryNum>
+            {` `}
+            {userCherries}
           </>
         }
         imageSource={require('src/assets/images/Character/character_surprised.png')}
       />
+      <View style={{ marginBottom: 24 }} />
       <SearchBar
         placeholder='작품 검색하기'
         filterText={filterText}
@@ -182,11 +203,10 @@ const ArtworkSelect: React.FC = () => {
           paddingBottom: 60,
         }}
       />
-
-      {/* CherryUsageModal을 렌더링 */}
       <CherryUsageModal
         visible={isModalVisible}
         onClose={() => setModalVisible(false)}
+        userCherries={userCherries}
         {...modalProps} // 모달에 필요한 텍스트 및 액션 전달
       />
     </Container>
@@ -261,11 +281,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ onPress }) => {
 };
 
 const Icon = styled(CherryIcon)`
-  fill: ${({ theme }) => theme.colors.cherryRed_10};
-`;
-
-const CherryNum = styled(Caption)`
-  color: ${({ theme }) => theme.colors.cherryRed_10};
+  fill: ${({ theme }) => theme.colors.redBlack};
 `;
 
 const CollectionTitleWrapper = styled.View`

@@ -6,12 +6,10 @@ import { ViewStyle, TextStyle } from 'react-native';
 const Container = styled.View`
   flex-direction: row;
   align-items: flex-end;
-  margin-bottom: ${({ theme }) => theme.spacing.s4};
 `;
 
 const TextContainer = styled.View<{ hasImage: boolean }>`
   flex-direction: column;
-  margin-top: ${({ hasImage, theme }) => (hasImage ? '0px' : theme.spacing.s4)};
 `;
 
 const Title = styled(H6)<{ color?: string }>`

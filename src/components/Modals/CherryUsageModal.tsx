@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { Modal } from 'react-native';
-import { CherryIcon } from 'src/assets/icons/_index';
+import { CherryIcon, XIcon } from 'src/assets/icons/_index';
 import { H5, Subtitle2, Body1 } from 'src/styles/typography';
 
 interface CherryUsageModalProps {
@@ -39,7 +39,7 @@ const CherryUsageModal: React.FC<CherryUsageModalProps> = ({
       <ModalOverlay>
         <ModalContainer>
           <CloseButton onPress={onClose}>
-            <CloseButtonText>✕</CloseButtonText>
+            <XIcon fill='#120000' width={24} height={24} />
           </CloseButton>
           <TitleWrapper>
             <H5>{title}</H5>
@@ -55,18 +55,18 @@ const CherryUsageModal: React.FC<CherryUsageModalProps> = ({
             </CherryCountWrapper>
           )}
           <CherryCountWrapper>
-            <Subtitle2>보유중인 체리 </Subtitle2>
+            <Subtitle2 style={{ color: '#B0ABAB' }}>보유중인 체리 </Subtitle2>
             <Icon />
             <UserCherries>{userCherries}</UserCherries>
           </CherryCountWrapper>
           <ButtonGroup>
             {secondaryButtonText && (
               <SecondaryButton onPress={onSecondaryAction}>
-                <Body1>{secondaryButtonText}</Body1>
+                <SecondaryText>{secondaryButtonText}</SecondaryText>
               </SecondaryButton>
             )}
             <PrimaryButton onPress={onAction}>
-              <Body1>{buttonText}</Body1>
+              <PrimaryText>{buttonText}</PrimaryText>
             </PrimaryButton>
           </ButtonGroup>
         </ModalContainer>
@@ -81,7 +81,7 @@ const ModalOverlay = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: ${({ theme }) => theme.colors.redBlack_alpha50};
 `;
 
 const ModalContainer = styled.View`
@@ -89,19 +89,14 @@ const ModalContainer = styled.View`
   align-items: flex-start;
   width: 90%;
   padding: 65px 34px;
-  border-radius: 16px;
+  border-radius: ${({ theme }) => theme.radius.m};
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
 const CloseButton = styled.TouchableOpacity`
   position: absolute;
-  top: 20px;
+  top: 30px;
   right: 25px;
-`;
-
-const CloseButtonText = styled.Text`
-  font-size: 20px;
-  color: ${({ theme }) => theme.colors.grey_8};
 `;
 
 const TitleWrapper = styled.View`
@@ -140,18 +135,24 @@ const ButtonGroup = styled.View`
 const PrimaryButton = styled.TouchableOpacity`
   flex: 1;
   align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border-radius: 16px;
-  background-color: ${({ theme }) => theme.colors.grey_4};
+  padding: 10px 16px;
+  border-radius: ${({ theme }) => theme.radius.m};
+  background-color: ${({ theme }) => theme.colors.redBlack};
+`;
+
+const PrimaryText = styled(Body1)`
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const SecondaryButton = styled.TouchableOpacity`
   flex: 1;
   align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border-radius: 16px;
-  background-color: #fff;
-  margin-right: 10px;
+  padding: 10px 16px;
+  border-radius: ${({ theme }) => theme.radius.m};
+  background-color: ${({ theme }) => theme.colors.grey_4};
+  margin-right: 16px;
+`;
+
+const SecondaryText = styled(Body1)`
+  color: ${({ theme }) => theme.colors.grey_6};
 `;

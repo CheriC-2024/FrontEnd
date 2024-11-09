@@ -43,15 +43,22 @@ const TabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={() => ({
         headerTitle: 'CheriC',
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
         headerRight: () => renderHeaderRight(),
+        headerStyle: { backgroundColor: theme.colors.bg }, // 헤더 배경 설정
+        headerTitleStyle: {
+          fontSize: 20,
+          fontFamily: theme.fonts.bold,
+        },
         tabBarActiveTintColor: theme.colors.cherryRed_10,
         tabBarInactiveTintColor: theme.colors.redBlack,
         tabBarLabelStyle: { fontSize: 10, fontFamily: theme.fonts.regular },
         tabBarStyle: {
-          height: 74, // 네비게이션 바의 높이
-          paddingBottom: 14, // 바텀 패딩
-          paddingTop: 12, // 탑 패딩
+          height: 86, // 네비게이션 바의 높이
+          paddingBottom: 20, // 바텀 패딩
+          paddingTop: 16, // 탑 패딩
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
         },
       })}
     >
@@ -102,7 +109,7 @@ const TabNavigator: React.FC = () => {
         component={MyCheriCScreen}
         options={{
           tabBarIcon: ({ color }) => (
-            <MyChericIcon stroke={color} fill={color} width={30} height={24} />
+            <MyChericIcon stroke={color} fill={color} width={32} height={28} />
           ),
           tabBarLabel: '마이체리시',
         }}

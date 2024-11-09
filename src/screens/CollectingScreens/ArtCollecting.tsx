@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import MasonryList from 'react-native-masonry-list';
-import { Container } from 'src/styles/layout';
-import { View, TouchableOpacity } from 'react-native';
+import { FlatList, View, TouchableOpacity, Image } from 'react-native';
 import styled from 'styled-components/native';
+import StaggeredList from '@mindinventory/react-native-stagger-view';
 import {
   ArtCategoryHeader,
   ArtCollectingSheet,
@@ -12,24 +11,24 @@ import {
 import { images } from './data';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Caption, Subtitle1 } from 'src/styles/typography';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { SettingIcon } from 'src/assets/icons/_index';
+import { Container } from 'src/styles/layout';
 
 const ArtCollecting: React.FC = () => {
   const navigation = useNavigation();
   const [isSheetVisible, setIsSheetVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState<
     'image' | 'artist' | 'both'
-  >('image'); // 선택된 상태를 부모에서 관리
+  >('image');
 
   const handleSelect = (mode: 'image' | 'artist' | 'both') => {
-    setSelectedOption(mode); // 선택된 값을 업데이트
-    setIsSheetVisible(false); // 바텀시트 닫기
+    setSelectedOption(mode);
   };
 
-  // useRoute로 categoryTitle과 categoryType 받아오기
   const route = useRoute();
   const { categoryTitle } = route.params;
 
-  // 헤더 설정
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
@@ -43,6 +42,10 @@ const ArtCollecting: React.FC = () => {
     setIsSheetVisible(true);
   };
 
+  const handleNavigation = (destination: string, params?: object) => {
+    navigation.navigate(destination, params);
+  };
+
   const getAdjustedDimensions = (width: number, height: number) => {
     if (width > height) {
       return { width: width, height: height + 100 };
@@ -53,110 +56,196 @@ const ArtCollecting: React.FC = () => {
     }
   };
 
+  const adjustedImages = images.map((item) => {
+    const adjusted = getAdjustedDimensions(item.width, item.height);
+    return {
+      id: item.id.toString(),
+      uri: item.uri,
+      width: adjusted.width,
+      height: adjusted.height,
+      customData: { name: item.name, artist: item.artist },
+    };
+  });
+
+  const flatListData = [
+    { key: 'stickyView' },
+    { key: 'staggeredList', data: adjustedImages },
+  ];
+
   return (
     <Container>
-      <ArtCategoryHeader categoryTitle={categoryTitle} categoryType='artwork' />
-      <View style={{ flexDirection: 'row', marginTop: 32 }}>
-        <TouchableOpacity onPress={openBottomSheet}>
-          <ToggleText>
-            {selectedOption === 'image'
-              ? '이미지'
-              : selectedOption === 'artist'
-                ? '작가'
-                : '작가 + 작품'}
-          </ToggleText>
-        </TouchableOpacity>
-      </View>
-
-      <MasonryListWrapper>
-        <MasonryList
-          images={images.map((item) => {
-            const adjusted = getAdjustedDimensions(item.width, item.height);
-            return {
-              id: item.id.toString(),
-              uri: item.uri,
-              dimensions: {
-                width: adjusted.width,
-                height: adjusted.height,
-              },
-              customData: { name: item.name, artist: item.artist }, // customData에 name, artist 추가
-            };
-          })}
-          spacing={4}
-          columns={2}
-          imageContainerStyle={{
-            marginTop: 12,
-            borderRadius: 16,
-          }}
-          showsVerticalScrollIndicator={false}
-          renderIndividualFooter={({ customData }) => {
-            if (selectedOption === 'image') {
+      <ListWrapper>
+        <FlatList
+          data={flatListData}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => {
+            if (item.key === 'stickyView') {
+              return (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: '#FCFCFC',
+                    paddingHorizontal: 6,
+                    paddingVertical: 8,
+                  }}
+                >
+                  <TouchableOpacity onPress={openBottomSheet}>
+                    <ToggleText>
+                      <SettingIcon />
+                      {selectedOption === 'image'
+                        ? ' 이미지'
+                        : selectedOption === 'artist'
+                          ? ' 작가'
+                          : ' 작가+작품'}
+                    </ToggleText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                  >
+                    <Caption>최신순</Caption>
+                    <Icon name='chevron-down' color='#120000' size={14} />
+                  </TouchableOpacity>
+                </View>
+              );
+            } else if (item.key === 'staggeredList') {
+              return (
+                <StaggeredList
+                  data={item.data}
+                  renderItem={({ item, index }) => (
+                    <View
+                      key={item.id}
+                      style={{
+                        marginBottom: selectedOption === 'image' ? 16 : 8,
+                        marginHorizontal: 6,
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() =>
+                          handleNavigation('ArtworkInfo', {
+                            artworkId: item.id,
+                          })
+                        }
+                      >
+                        <Image
+                          source={{ uri: item.uri }}
+                          style={{
+                            width: '100%',
+                            aspectRatio: item.width / item.height,
+                            borderRadius: 16,
+                          }}
+                        />
+                      </TouchableOpacity>
+                      {selectedOption !== 'image' && (
+                        <ImageInfoWrapper selectedOption={selectedOption}>
+                          {selectedOption === 'both' && (
+                            <>
+                              <ArtworkText>{item.customData.name}</ArtworkText>
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <ArtistImage
+                                  image={'https://via.placeholder.com/150x150'}
+                                  size={18}
+                                  style={{ elevation: 0 }}
+                                />
+                                <ArtistText selectedOption={selectedOption}>
+                                  {item.customData.artist}
+                                </ArtistText>
+                              </View>
+                            </>
+                          )}
+                          {selectedOption === 'artist' && (
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <ArtistImage
+                                image={'https://via.placeholder.com/150x150'}
+                                size={18}
+                                style={{ elevation: 0 }}
+                              />
+                              <ArtistText selectedOption={selectedOption}>
+                                {item.customData.artist}
+                              </ArtistText>
+                            </View>
+                          )}
+                        </ImageInfoWrapper>
+                      )}
+                    </View>
+                  )}
+                  numColumns={2}
+                  animationType={'SLIDE_DOWN'}
+                  showsVerticalScrollIndicator={false}
+                />
+              );
+            } else {
               return null;
             }
-
-            return (
-              <ImageInfoWrapper>
-                {selectedOption === 'both' && (
-                  <>
-                    <ArtworkText>{customData.name}</ArtworkText>
-                    <View style={{ flexDirection: 'row' }}>
-                      <ArtistImage
-                        image={'https://via.placeholder.com/150x150'}
-                        size={18}
-                      />
-                      <ArtistText>{customData.artist}</ArtistText>
-                    </View>
-                  </>
-                )}
-                {selectedOption === 'artist' && (
-                  <View style={{ flexDirection: 'row' }}>
-                    <ArtistImage
-                      image={'https://via.placeholder.com/150x150'}
-                      size={18}
-                    />
-                    <ArtistText>{customData.artist}</ArtistText>
-                  </View>
-                )}
-              </ImageInfoWrapper>
-            );
           }}
+          ListHeaderComponent={
+            <ArtCategoryHeader
+              categoryTitle={categoryTitle}
+              categoryType='artwork'
+              style={{ paddingHorizontal: 6, marginTop: 8, marginBottom: 12 }}
+            />
+          }
+          stickyHeaderIndices={[1]} // 두 번째 아이템인 스티키 헤더를 고정
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
         />
-      </MasonryListWrapper>
 
-      {isSheetVisible && (
-        <ArtCollectingSheet
-          onSelect={handleSelect}
-          onClose={() => setIsSheetVisible(false)}
-          selectedOption={selectedOption}
-        />
-      )}
+        {isSheetVisible && (
+          <ArtCollectingSheet
+            onSelect={handleSelect}
+            onClose={() => setIsSheetVisible(false)}
+            selectedOption={selectedOption}
+          />
+        )}
+      </ListWrapper>
     </Container>
   );
 };
 
-// Styled components
-const MasonryListWrapper = styled.View`
+const ListWrapper = styled.View`
   flex: 1;
-  margin-horizontal: -16px;
+  margin-horizontal: -6px;
 `;
 
-const ImageInfoWrapper = styled.View`
+const ImageInfoWrapper = styled.View<{
+  selectedOption: 'both' | 'artist' | 'image';
+}>`
   flex-direction: column;
-  margin-left: ${({ theme }) => theme.spacing.s3};
+  margin-left: ${({ theme }) => theme.spacing.s2};
+  margin-top: ${({ selectedOption }) =>
+    selectedOption === 'both'
+      ? '8px'
+      : selectedOption === 'artist'
+        ? '4px'
+        : '0px'};
 `;
 
 const ArtworkText = styled(Subtitle1)`
   margin-top: -${({ theme }) => theme.margin.s};
 `;
 
-const ArtistText = styled(Caption)`
+const ArtistText = styled(Caption)<{
+  selectedOption: 'both' | 'artist' | 'image';
+}>`
   margin-left: ${({ theme }) => theme.margin.xs};
+  font-family: ${({ theme, selectedOption }) =>
+    selectedOption === 'both' ? theme.fonts.regular : theme.fonts.bold};
 `;
 
 const ToggleText = styled(Caption)`
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-radius: ${({ theme }) => theme.radius.l};
-  font-family: ${({ theme }) => theme.fonts.bold};
   background-color: ${({ theme }) => theme.colors.redBlack};
   color: #fff;
 `;

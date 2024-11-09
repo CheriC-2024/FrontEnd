@@ -88,7 +88,7 @@ const ContentWrapper = styled.View`
   background-color: white;
   padding: 16px;
   width: 100%;
-  height: 100%;
+  height: 800px;
   margin-top: 140px;
   border-top-left-radius: 150px;
   border-top-right-radius: 150px;

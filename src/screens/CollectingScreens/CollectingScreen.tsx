@@ -1,27 +1,34 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   Dimensions,
   Image,
   Alert,
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Swiper from 'react-native-web-swiper';
-import TitleSubtitle from 'src/components/TitleSubtitle';
-import { Container } from 'src/styles/layout';
-import { Caption, H5, H6, Subtitle1, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
-import { artistAndArtworkData, artistData, artworkData } from '../data';
+import { useNavigation } from '@react-navigation/native';
+import Swiper from 'react-native-web-swiper';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
   ArtistBioItem,
   ArtistCard,
   ArtistImage,
   ArtistWithArtworks,
+  TitleSubtitle,
 } from 'src/components/_index';
-import { useNavigation } from '@react-navigation/native';
+import { Container } from 'src/styles/layout';
+import {
+  Body2,
+  Caption,
+  H5,
+  H6,
+  Subtitle1,
+  Subtitle2,
+} from 'src/styles/typography';
+import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
+import LinearGradient from 'react-native-linear-gradient';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -70,61 +77,73 @@ const CollectingScreen: React.FC = () => {
 
   const renderArtistSection = () => (
     <View>
-      <SectionWrapper>
-        <SectionTitle>새로 유입된 신진 작가</SectionTitle>
+      <ArtistSectionWrapper>
+        <CategoryTitle>새로 유입된 신진 작가</CategoryTitle>
         <FlatList
           data={artistData}
           keyExtractor={(item) => item.id}
           horizontal
           initialNumToRender={2}
           showsHorizontalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={{ width: 16 }} />} // 아이템 사이 간격 설정
-          contentContainerStyle={{ paddingHorizontal: 6 }}
+          ItemSeparatorComponent={() => <View style={{ width: 12 }} />} // 아이템 사이 간격 설정
+          contentContainerStyle={{ paddingHorizontal: 2 }}
           renderItem={({ item }) => (
             <ArtistCard
               image={item.image}
               name={item.name}
               artistId={item.id}
+              size={74}
             />
           )}
         />
-      </SectionWrapper>
-      <SectionWrapper>
-        <SectionTitle>내가 팔로우한 작가 소식</SectionTitle>
+      </ArtistSectionWrapper>
+      <SeparatorLine />
+      <ArtistSectionWrapper>
+        <H5>내가 팔로우한 작가 소식</H5>
         <FlatList
           data={artistData}
           keyExtractor={(item) => item.id}
           horizontal
           initialNumToRender={2}
           ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-          contentContainerStyle={{ paddingHorizontal: 6 }}
+          contentContainerStyle={{ paddingTop: 4 }}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <ArtistWrapper>
+            <FollowingArtistWrapper>
               <ArtistInfoWrapper>
-                <ArtistImage image={item.image} size={36} />
+                <ArtistImage
+                  image={item.image}
+                  size={36}
+                  style={{ elevation: 0 }}
+                />
                 <ArtistInfo>
                   <ArtistName>{item.name}</ArtistName>
                   <ArtistTime>08.27 22:00</ArtistTime>
                 </ArtistInfo>
               </ArtistInfoWrapper>
-              <ArtworkImage
-                source={{ uri: 'https://via.placeholder.com/300x150' }}
-              />
+              <TouchableOpacity onPress={() => {}}>
+                <ArtworkImage
+                  source={{
+                    uri: 'https://i.ibb.co/7vMp7Cd/unsplash-5-NE6m-X0-WVf-Q.png',
+                  }}
+                />
+              </TouchableOpacity>
               <ArtistDescription>
                 작가님의 새로운 작품이 추가되었습니다!
               </ArtistDescription>
-            </ArtistWrapper>
+            </FollowingArtistWrapper>
           )}
         />
-      </SectionWrapper>
-      <SectionWrapper>
-        <SectionTitle>HOT한 작가님들</SectionTitle>
+      </ArtistSectionWrapper>
+      <SeparatorLine />
+      <ArtistSectionWrapper>
+        <H5>HOT한 작가님들</H5>
         <FlatList
           data={artistData}
+          horizontal
           keyExtractor={(item) => item.id}
           initialNumToRender={3}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
           renderItem={({ item }) => (
             <ArtistBioItem
               image={item.image}
@@ -132,21 +151,25 @@ const CollectingScreen: React.FC = () => {
               category={item.description}
               bio={item.bio}
               artistId={item.id}
+              backgroundImage={
+                'https://i.ibb.co/zbJrkTn/unsplash-2-Qg4y32pd-Cc.png'
+              }
             />
           )}
+          contentContainerStyle={{ paddingTop: 8, paddingBottom: 20 }}
+          showsHorizontalScrollIndicator={false}
         />
-      </SectionWrapper>
+      </ArtistSectionWrapper>
       <FlatList
-        data={artworkData}
+        data={artworkData.slice(1)} // 첫 번째 항목 (key) 제외, 이건 API 연결시 변경 예정
         keyExtractor={(item, index) => index.toString()}
         initialNumToRender={2}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <CategoryWrapper>
-            {/* 카테고리 제목 */}
-            <SectionTitle>{item.categoryTitle}</SectionTitle>
-
-            {/* 카테고리 내의 여러 섹션 처리 */}
+          <CategoryWrapper
+            is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
+          >
+            <ArtistCategoryTitle>{item.categoryTitle}</ArtistCategoryTitle>
             {item.sections?.map((section) => (
               <SectionWrapper key={section.title}>
                 <TouchableOpacity
@@ -155,10 +178,14 @@ const CollectingScreen: React.FC = () => {
                     handleNavigation('ArtistCollecting', section.title)
                   }
                 >
-                  <CategoryTitle>{section.title}</CategoryTitle>
-                  <Icon name='chevron-forward' size={20} color='#120000' />
+                  <SectionTitle>{section.title}</SectionTitle>
+                  <Icon
+                    name='chevron-forward'
+                    size={20}
+                    color='#120000'
+                    style={{ paddingBottom: 7 }}
+                  />
                 </TouchableOpacity>
-
                 {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
                 <FlatList
                   data={artistAndArtworkData}
@@ -171,26 +198,29 @@ const CollectingScreen: React.FC = () => {
                       artworks={subItem.artworks}
                     />
                   )}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
-                  ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+                  contentContainerStyle={{ paddingHorizontal: 0 }}
+                  ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
                 />
               </SectionWrapper>
             ))}
           </CategoryWrapper>
         )}
+        ListFooterComponent={<View style={{ height: 60 }} />}
       />
     </View>
   );
 
   const renderArtworkSection = () => (
     <FlatList
-      data={artworkData}
+      data={artworkData.slice(1)} // 첫 번째 항목 (key) 제외, 이건 API 연결시 변경 예정
       keyExtractor={(item, index) => index.toString()}
       initialNumToRender={5}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => (
-        <CategoryWrapper>
-          <SectionTitle>{item.categoryTitle}</SectionTitle>
+        <CategoryWrapper
+          is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
+        >
+          <CategoryTitle>{item.categoryTitle}</CategoryTitle>
           {item.sections?.map((section) => (
             <SectionWrapper key={section.title}>
               <TouchableOpacity
@@ -201,8 +231,13 @@ const CollectingScreen: React.FC = () => {
                 // section.title을 ArtCollecting으로 전달
                 onPress={() => handleNavigation('ArtCollecting', section.title)}
               >
-                <CategoryTitle>{section.title}</CategoryTitle>
-                <Icon name='chevron-forward' size={20} color='#120000' />
+                <SectionTitle>{section.title}</SectionTitle>
+                <Icon
+                  name='chevron-forward'
+                  size={20}
+                  color='#120000'
+                  style={{ paddingBottom: 7 }}
+                />
               </TouchableOpacity>
 
               {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
@@ -228,11 +263,12 @@ const CollectingScreen: React.FC = () => {
           ))}
         </CategoryWrapper>
       )}
+      ListFooterComponent={<View style={{ height: 60 }} />} // 리스트 하단 여백 값
     />
   );
 
   return (
-    <Container>
+    <Container removePadding>
       <FlatList
         data={artworkData}
         keyExtractor={(item, index) => index.toString()}
@@ -240,38 +276,52 @@ const CollectingScreen: React.FC = () => {
         stickyHeaderIndices={[1]} // CategoryButtons가 고정되도록 설정
         ListHeaderComponent={
           <>
-            {/* Swiper 컴포넌트를 FlatList의 헤더로 추가 */}
-            <Swiper
-              loop
-              timeout={2}
-              controlsEnabled={false}
-              containerStyle={{
-                marginTop: 8,
-                marginBottom: 16,
-                width: '100%',
-                height: SCREEN_HEIGHT / 4,
+            <View
+              style={{
+                position: 'relative',
+                marginBottom: 18,
               }}
             >
-              {images.map((image, index) => (
-                <View key={index}>
-                  <Image
-                    source={image}
-                    style={{
-                      width: 'auto',
-                      height: '100%',
-                      resizeMode: 'contain',
-                    }}
+              {/* Swiper 컴포넌트는 배경 이미지만 스와이프 */}
+              <Swiper
+                loop
+                timeout={2}
+                controlsEnabled={false}
+                containerStyle={{
+                  width: '100%',
+                  height: 320,
+                }}
+              >
+                {images.map((image, index) => (
+                  <View key={index} style={{ position: 'relative' }}>
+                    <Image
+                      source={image}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        resizeMode: 'cover',
+                      }}
+                    />
+                    {/* 그라데이션 추가 */}
+                    <GradientOverlay />
+                  </View>
+                ))}
+              </Swiper>
+
+              {/* Swiper 외부에 고정된 버튼 */}
+              <Button onPress={() => Alert.alert('Button Pressed')}>
+                <ButtonContent>
+                  <ButtonText>내가 소장한 작품 등록하러 가기</ButtonText>
+                  <ButtonIcon
+                    name='chevron-forward'
+                    size={20}
+                    color='#120000'
                   />
-                </View>
-              ))}
-            </Swiper>
-            <Button onPress={() => Alert.alert('Button Pressed')}>
-              <ButtonContent>
-                <ButtonText>내가 소장한 작품 등록하러 가기</ButtonText>
-                <ButtonIcon name='chevron-forward' size={20} color='#120000' />
-              </ButtonContent>
-            </Button>
+                </ButtonContent>
+              </Button>
+            </View>
             <TitleSubtitle
+              style={{ paddingHorizontal: 16 }}
               titleLarge='아트 컬렉팅하기'
               subtitle='체리시에서 컬렉터님만의 컬렉션을 만들어 보세요:)'
             />
@@ -283,23 +333,38 @@ const CollectingScreen: React.FC = () => {
           }
         }}
         ListFooterComponent={
-          selectedCoverType === '작가'
-            ? renderArtistSection()
-            : renderArtworkSection()
+          selectedCoverType === '작품'
+            ? renderArtworkSection()
+            : renderArtistSection()
         }
       />
     </Container>
   );
 };
 
+const GradientOverlay = styled(LinearGradient).attrs({
+  colors: ['rgba(18, 0, 0, 0.2)', 'rgba(18, 0, 0, 0)'],
+  start: { x: 0, y: 1 },
+  end: { x: 0, y: 0.5 },
+})`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+`;
+
 const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
-  margin-top: ${({ theme }) => theme.margin.m};
-  margin-bottom: ${({ theme }) => theme.spacing.s7};
-  border-radius: 32px;
-  border: 1px solid #f7f5f5;
-  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  right: 16px;
+  border-radius: ${({ theme }) => theme.radius.l};
   justify-content: center;
-  z-index: 1;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'white')};
+  z-index: 10;
+  elevation: 4;
+  overflow: visible;
 `;
 
 const ButtonContent = styled.View`
@@ -320,42 +385,65 @@ const ButtonIcon = styled(Icon)`
 
 const CategoryButtons = styled.View`
   flex-direction: row;
-  padding: 12px 0;
-  background-color: ${({ theme }) => theme.colors.bg};
+  padding: ${({ theme }) => theme.spacing.s3} ${({ theme }) => theme.padding.m};
+  background-color: ${({ theme }) =>
+    theme.colors.bg}; /* sticky header 였을때 텍스트 겹쳐 보이는걸 방지 */
 `;
 
 const CategoryTypeButton = styled.TouchableOpacity<{ selected?: boolean }>`
   margin-right: ${({ theme }) => theme.margin.s};
-  padding: 6px 18px;
+  padding: 2px 12px;
+  border: 1px solid ${(props) => (props.selected ? undefined : '#F2F0F0')};
   border-radius: ${({ theme }) => theme.radius.l};
-  background-color: ${(props) => (props.selected ? '#120000' : '#F7F5F5')};
+  background-color: ${(props) => (props.selected ? '#120000' : '#FFF')};
 `;
 
-const CategoryTypeButtonText = styled(Subtitle1)<{ selected?: boolean }>`
-  font-family: ${({ theme }) => theme.fonts.bold};
-  color: ${(props) => (props.selected ? '#fff' : '#413333')};
+const CategoryTypeButtonText = styled(Body2)<{ selected?: boolean }>`
+  color: ${(props) => (props.selected ? '#fff' : '#B0ABAB')};
 `;
 
-const CategoryWrapper = styled.View`
+const CategoryWrapper = styled.View<{ is2ndSection?: boolean }>`
+  padding-top: ${({ is2ndSection, theme }) =>
+    is2ndSection ? theme.padding.xs : theme.padding.m};
+  padding-left: ${({ theme }) => theme.padding.m};
+  padding-bottom: ${({ theme }) => theme.padding.m};
   margin-bottom: 20px;
+  background-color: ${({ is2ndSection, theme }) =>
+    is2ndSection ? theme.colors.bg : theme.colors.grey_4};
 `;
 
 const CategoryTitle = styled(H6)`
-  margin-bottom: ${({ theme }) => theme.spacing.s3};
+  margin-bottom: ${({ theme }) => theme.margin.s};
+`;
+
+const ArtistCategoryTitle = styled(H5)`
+  margin-bottom: ${({ theme }) => theme.margin.s};
 `;
 
 const SectionWrapper = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.s8};
-`;
-
-const SectionTitle = styled(H5)`
   margin-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
+const SeparatorLine = styled.View`
+  height: 1px;
+  background-color: #f2f0f0;
+  width: 90%;
+  align-self: center;
+  margin-vertical: 12px;
+`;
+
+const ArtistSectionWrapper = styled.View`
+  padding-left: ${({ theme }) => theme.padding.m};
+`;
+
+const SectionTitle = styled(Subtitle1)`
+  margin-bottom: ${({ theme }) => theme.spacing.s2};
+`;
+
 const ImageWrapper = styled.View`
-  width: 100px;
-  height: 130px;
-  margin-right: ${({ theme }) => theme.margin.s};
+  width: 115px;
+  height: 142px;
+  margin-right: ${({ theme }) => theme.spacing.s3};
 `;
 
 const StyledImage = styled.Image`
@@ -367,16 +455,15 @@ const StyledImage = styled.Image`
 const ArtistInfoWrapper = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 8px;
 `;
 
-const ArtistWrapper = styled.View`
-  width: 260px;
+const FollowingArtistWrapper = styled.View`
+  width: 290px;
 `;
 
-const ArtistTime = styled.Text`
-  font-size: 12px;
-  color: #999;
+const ArtistTime = styled(Caption)`
+  font-size: 10px;
+  color: #b0abab;
 `;
 
 const ArtistInfo = styled.View`
@@ -386,14 +473,15 @@ const ArtistInfo = styled.View`
 
 const ArtistName = styled(Subtitle2)``;
 
-const ArtistDescription = styled.Text`
-  color: #555;
+const ArtistDescription = styled(Body2)`
+  color: ${({ theme }) => theme.colors.grey_8};
   margin-top: 4px;
+  margin-left: 4px;
 `;
 
 const ArtworkImage = styled.Image`
   width: 100%;
-  height: 160px;
+  height: 184px;
   margin-top: 10px;
   border-radius: ${({ theme }) => theme.radius.m};
 `;

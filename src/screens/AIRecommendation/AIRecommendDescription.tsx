@@ -10,8 +10,15 @@ import { Container } from 'src/styles/layout';
 import CustomModal from '../../components/Modal';
 import { TitleSubtitle } from 'src/components/_index';
 import { Btn, BtnText } from 'src/components/Button';
-import { ButtonText, Caption, Subtitle2 } from 'src/styles/typography';
+import {
+  ButtonText,
+  Caption,
+  Subtitle1,
+  Subtitle2,
+} from 'src/styles/typography';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { RefreshIcon } from 'src/assets/icons/_index';
+import { View } from 'react-native';
 
 const AIRecommendDescription: React.FC = () => {
   const navigation = useNavigation();
@@ -22,14 +29,6 @@ const AIRecommendDescription: React.FC = () => {
   );
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  navigation.setOptions(
-    headerOptions(navigation, {
-      leftButtonType: null,
-      headerTitle: '전시명 AI 추천',
-      headerTitleAlign: 'left',
-    }),
-  );
 
   useEffect(() => {
     navigation.getParent()?.setOptions({
@@ -68,11 +67,14 @@ const AIRecommendDescription: React.FC = () => {
 
   return (
     <Container>
+      <HeaderText>전시 테마 AI 추천</HeaderText>
       <TitleSubtitle
-        title='AI가 전시 이름을 만들었어요!'
+        titleLarge='AI가 만든 전시 이름'
         subtitle='원하는 전시 이름을 선택해 주세요'
+        style={{ marginBottom: 12 }}
       />
-      <Icon name='sync-outline' size={20} color='#120000' />
+      <RefreshIcon />
+      <View style={{ marginBottom: 27 }} />
       <ThemeScrollView horizontal showsHorizontalScrollIndicator={false}>
         {aiTitles.map((title, index) => (
           <ThemeCard
@@ -103,14 +105,14 @@ const AIRecommendDescription: React.FC = () => {
           </ReasonTextContainer>
         ) : (
           <InitialReasonContainer>
-            <ReasonTitle>결과를 클릭하면 추천 이유를 볼 수 있어요!</ReasonTitle>
+            <ReasonTitle>테마를 클릭하고 추천 이유 보기</ReasonTitle>
             <InitialSubText>
-              컬렉터님이 설정한 작품들로 이름을 만들었습니다:)
+              컬렉터님이 선택한 작품들로 테마를 만들었어요!
             </InitialSubText>
           </InitialReasonContainer>
         )}
       </ReasonContainer>
-      <Btn onPress={handleComplete}>
+      <Btn onPress={handleComplete} style={{ marginHorizontal: 16 }}>
         <BtnText>설정 완료하기</BtnText>
       </Btn>
       <CustomModal
@@ -125,6 +127,10 @@ const AIRecommendDescription: React.FC = () => {
     </Container>
   );
 };
+
+const HeaderText = styled(Subtitle1)`
+  margin: 16px 0;
+`;
 
 const ThemeScrollView = styled.ScrollView`
   flex-grow: 0;

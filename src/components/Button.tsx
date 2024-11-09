@@ -1,3 +1,4 @@
+import { Body1 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 
 export const Btn = styled.TouchableOpacity<{ disabled?: boolean }>`
@@ -11,12 +12,9 @@ export const Btn = styled.TouchableOpacity<{ disabled?: boolean }>`
   border-radius: ${({ theme }) => theme.radius.l};
   align-items: center;
   justify-content: center;
-  margin: 0 ${({ theme }) => theme.margin.m};
 `;
 
-export const BtnText = styled.Text<{ disabled?: boolean }>`
+export const BtnText = styled(Body1)<{ disabled?: boolean }>`
   color: ${({ theme, disabled }) =>
     disabled ? theme.colors.grey_2 : theme.colors.white};
-  font-family: ${({ theme }) => theme.fonts.bold};
-  font-size: ${({ theme }) => theme.fontSizes.subtitle1};
 `;

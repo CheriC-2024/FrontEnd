@@ -8,6 +8,11 @@ interface CoverState {
   coverType: 'gradient' | 'solid' | 'image';
   selectedPalette: string[]; // 선택된 팔레트 상태 추가
   coverColors: string[]; // 선택된 커버 색상 추가
+  selectedGradientConfig: {
+    colors: string[];
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+  } | null;
 }
 
 const initialState: CoverState = {
@@ -18,6 +23,7 @@ const initialState: CoverState = {
   coverType: 'gradient',
   selectedPalette: [],
   coverColors: [],
+  selectedGradientConfig: null,
 };
 
 const coverSlice = createSlice({
@@ -51,6 +57,12 @@ const coverSlice = createSlice({
     setCoverColors: (state, action: PayloadAction<string[]>) => {
       state.coverColors = action.payload;
     },
+    setSelectedGradientConfig: (
+      state,
+      action: PayloadAction<CoverState['selectedGradientConfig']>,
+    ) => {
+      state.selectedGradientConfig = action.payload;
+    },
   },
 });
 
@@ -62,6 +74,7 @@ export const {
   setCoverType,
   setSelectedPalette,
   setCoverColors,
+  setSelectedGradientConfig,
 } = coverSlice.actions;
 
 export default coverSlice.reducer;

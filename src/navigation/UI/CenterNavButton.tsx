@@ -13,12 +13,12 @@ export const CenterNavButton = ({ onPress }) => {
         top: -5, // 탭 바 위로 떠오르게 설정
         justifyContent: 'center',
         alignItems: 'center',
-        width: 56,
-        height: 56,
+        width: 60,
+        height: 60,
         marginHorizontal: 10,
         borderRadius: 30,
         backgroundColor: theme.colors.cherryRed_10,
-        elevation: 4,
+        elevation: 3,
       }}
     >
       <PlusIcon width={20} height={16} />
