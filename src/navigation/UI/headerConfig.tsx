@@ -20,6 +20,7 @@ interface HeaderConfigOptions {
   headerTransparent?: boolean;
   marginLeft?: number;
   marginRight?: number;
+  editMode?: boolean;
 }
 
 const createHeaderLeft = (
@@ -110,7 +111,13 @@ export const headerOptions = (
   options: HeaderConfigOptions = {},
 ): StackNavigationOptions => ({
   headerShown: true,
-  headerLeft: () => createHeaderLeft(() => navigation.goBack(), options),
+  headerLeft: () =>
+    createHeaderLeft(() => {
+      if (options.editMode) {
+        navigation.replace('FinishSetting'); // TODO: 로직 더 고민해보기
+      }
+      navigation.goBack();
+    }, options),
   headerRight:
     options.headerRightText || options.rightButtonType
       ? () =>

@@ -66,7 +66,7 @@ const FinishSetting: React.FC = () => {
 
   const { isModalVisible, modalProps, handleNext, setModalVisible } =
     useCherryFinishModal(userCherries, totalCherries, () => {
-      // 확인했을 때 실행될 POST 요청, 체리 차감 API 등 추가 예정
+      // TODO: 확인했을 때 실행될 POST 요청, 체리 차감 API 등 추가 예정
       navigation.reset({
         index: 0, // 첫 번째 스크린으로 설정
         routes: [{ name: 'Tabs' }], // Tabs 화면으로 이동
@@ -103,6 +103,12 @@ const FinishSetting: React.FC = () => {
           <ArtworkImage source={artworkImage} />
         </ArtworkTouchable>
         <ArtworkInfo>
+          <TouchableOpacity
+            onPress={() => handleEditPress('ArtworkInfoSetting')}
+            style={{ paddingBottom: 4 }}
+          >
+            <PencilIcon width={14} height={14} />
+          </TouchableOpacity>
           <Subtitle2>{item.name}</Subtitle2>
           {/*TODO: API 연결시 */}
           <ArtworkSubtitle>작가 이름</ArtworkSubtitle>
@@ -140,10 +146,19 @@ const FinishSetting: React.FC = () => {
     dispatch(setSelectedArtworks([...data]));
   };
 
-  const handleEditPress = () => {
-    setTimeout(() => {
-      navigation.navigate('Exhibit', { step: 4 });
-    }, 0);
+  const handleEditPress = (targetScreen: string) => {
+    if (
+      [
+        'DescriptionSetting',
+        'CoverSetting',
+        'ThemeSetting',
+        'ArtworkInfoSetting',
+      ].includes(targetScreen)
+    ) {
+      navigation.push(targetScreen, { editMode: true });
+    } else {
+      console.warn(`Unknown target screen: ${targetScreen}`);
+    }
   };
 
   const openMusicSheet = () => setMusicSheetVisible(true);
@@ -158,11 +173,21 @@ const FinishSetting: React.FC = () => {
             {selectedMusic ? selectedMusic : '아직 음악이 없습니다'}
           </MusicText>
         </MusicTextContainer>
-        <PencilIcon width={16} height={16} />
+        <TouchableOpacity
+          onPress={() => handleEditPress('CoverSetting')}
+          style={{ marginLeft: 4, paddingTop: 4 }}
+        >
+          <PencilIcon width={16} height={16} />
+        </TouchableOpacity>
       </MusicContainer>
       <SectionTitleContainer>
         <H5 style={{ fontFamily: selectedFont }}>{exhibitTitle}</H5>
-        <PencilIcon width={16} height={16} onPress={handleEditPress} />
+        <TouchableOpacity
+          onPress={() => handleEditPress('DescriptionSetting')}
+          style={{ marginLeft: 4, paddingTop: 4 }}
+        >
+          <PencilIcon width={16} height={16} />
+        </TouchableOpacity>
       </SectionTitleContainer>
       <ExhibitDescriptionContainer>
         <Caption numberOfLines={1} ellipsizeMode='tail'>
@@ -173,7 +198,12 @@ const FinishSetting: React.FC = () => {
         {selectedThemes.map((theme, index) => (
           <Tag key={index}>#{theme}</Tag>
         ))}
-        <PencilIcon width={16} height={16} />
+        <TouchableOpacity
+          onPress={() => handleEditPress('ThemeSetting')}
+          style={{ marginLeft: 4, paddingTop: 4 }}
+        >
+          <PencilIcon width={16} height={16} />
+        </TouchableOpacity>
       </TagsContainer>
     </>
   );
@@ -227,7 +257,7 @@ const FinishSetting: React.FC = () => {
           onDragEnd={handleDragEnd}
         />
       </InnerContainer>
-
+      {/* UI 수정 필요 */}
       <MusicSelectionSheet
         isVisible={isMusicSheetVisible}
         onClose={closeMusicSheet}
@@ -272,14 +302,8 @@ const MusicText = styled(Caption)`
 
 const SectionTitleContainer = styled.View`
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: ${({ theme }) => theme.margin.s};
-`;
-
-const SectionTitle = styled.Text`
-  font-size: 20px;
-  font-family: 'Bold';
-  color: #120000;
 `;
 
 const ExhibitDescriptionContainer = styled.View`

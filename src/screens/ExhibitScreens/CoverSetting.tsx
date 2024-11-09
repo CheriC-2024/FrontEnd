@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { RootState } from 'src/store';
 import { useDispatch, useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -23,10 +23,13 @@ import {
 } from 'src/slices/coverSlice';
 import { useCloudVision } from 'src/api/hooks/useAIQueries';
 import { Artwork } from 'src/interfaces/collection';
+import { Btn, BtnText } from 'src/components/Button';
 
 const CoverSetting: React.FC = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const route = useRoute();
+  const editMode = route.params?.editMode ?? false;
 
   // Redux 상태를 가져옴
   const selectedArtworks = useSelector(
@@ -101,8 +104,9 @@ const CoverSetting: React.FC = () => {
     const isNextEnabled = selectedCover.length > 0 || selectedCoverImage;
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'text',
-        headerRightText: '다음',
+        editMode: true,
+        leftButtonType: editMode ? 'icon' : 'text',
+        headerRightText: editMode ? undefined : '다음',
         nextScreenName: 'FinishSetting',
         headerRightDisabled: !isNextEnabled,
       }),
@@ -224,6 +228,11 @@ const CoverSetting: React.FC = () => {
     dispatch(setRandomPalettes(shuffledPalettes));
   };
 
+  const handleSave = () => {
+    navigation.replace('FinishSetting');
+    navigation.goBack();
+  };
+
   const arePalettesEqual = (palette1: string[], palette2: string[]) => {
     if (palette1.length !== palette2.length) return false;
     return palette1.every((color, index) => color === palette2[index]);
@@ -232,15 +241,23 @@ const CoverSetting: React.FC = () => {
   return (
     <Container>
       <GradientBackground />
-      <ProgressBar totalSteps={7} currentStep={6} />
+      {!editMode && <ProgressBar totalSteps={7} currentStep={6} />}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
         <TitleSubtitle
-          titleLarge='전시 커버 설정하기'
-          subtitle='전시와 어울리는 커버를 선택해주세요!'
-          imageSource={require('src/assets/images/Character/character_happy.png')}
+          titleLarge={editMode ? '전시 커버 수정하기' : '전시 커버 설정하기'}
+          subtitle={
+            editMode
+              ? '수정하신 후에 꼭 저장해주세요:)'
+              : '전시와 어울리는 커버를 선택해주세요!'
+          }
+          imageSource={
+            editMode
+              ? null
+              : require('src/assets/images/Character/character_happy.png')
+          }
         />
         <View style={{ marginBottom: 24 }} />
         <CoverTitle>체리시가 제안하는 커버</CoverTitle>
@@ -398,6 +415,14 @@ const CoverSetting: React.FC = () => {
               </UploadPlaceholder>
             </UploadButton>
           </UploadSection>
+        )}
+        {editMode && (
+          <Btn
+            style={{ position: 'relative', marginTop: 16 }}
+            onPress={handleSave}
+          >
+            <BtnText>수정한 내용 저장하기</BtnText>
+          </Btn>
         )}
       </ScrollView>
     </Container>
