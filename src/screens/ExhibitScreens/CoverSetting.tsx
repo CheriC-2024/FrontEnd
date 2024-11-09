@@ -20,6 +20,7 @@ import {
   setCoverType,
   setSelectedCoverImage,
   setSelectedCover,
+  setSelectedGradientConfig,
 } from 'src/slices/coverSlice';
 import { useCloudVision } from 'src/api/hooks/useAIQueries';
 import { Artwork } from 'src/interfaces/collection';
@@ -188,6 +189,46 @@ const CoverSetting: React.FC = () => {
 
   const handleGradientSelect = (index: number) => {
     setSelectedGradient(selectedGradient === index ? null : index);
+
+    const gradientConfigurations = [
+      {
+        colors:
+          selectedCover.length >= 2
+            ? selectedCover
+            : [selectedCover[0], selectedCover[0]],
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: 1 },
+      },
+      {
+        colors: [
+          ...(selectedCover.length >= 2
+            ? selectedCover
+            : [selectedCover[0], selectedCover[0]]),
+        ].reverse(),
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: 1 },
+      },
+      {
+        colors:
+          selectedCover.length >= 2
+            ? selectedCover
+            : [selectedCover[0], selectedCover[0]],
+        start: { x: 0, y: 0 },
+        end: { x: 1, y: 1 },
+      },
+      {
+        colors: [
+          ...(selectedCover.length >= 2
+            ? selectedCover
+            : [selectedCover[0], selectedCover[0]]),
+        ].reverse(),
+        start: { x: 0, y: 0 },
+        end: { x: 1, y: 1 },
+      },
+    ];
+
+    const selectedConfig = gradientConfigurations[index];
+    dispatch(setSelectedGradientConfig(selectedConfig));
   };
 
   const handleImageUpload = async () => {

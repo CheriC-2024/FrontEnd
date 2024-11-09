@@ -37,9 +37,12 @@ const FinishSetting: React.FC = () => {
   const { exhibitTitle, exhibitDescription, selectedFont } = useSelector(
     (state: RootState) => state.exhibit,
   );
-  const { selectedCover, coverType, selectedCoverImage } = useSelector(
-    (state: RootState) => state.cover,
-  );
+  const {
+    selectedCover,
+    coverType,
+    selectedCoverImage,
+    selectedGradientConfig,
+  } = useSelector((state: RootState) => state.cover);
 
   const { selectedThemes } = useSelector((state: RootState) => state.theme);
   const { selectedArtworks, totalCherries } = useSelector(
@@ -229,12 +232,16 @@ const FinishSetting: React.FC = () => {
           </ImageBackground>
         ) : (
           <>
-            {coverType === 'gradient' && (
-              <LinearGradient colors={selectedCover} style={{ padding: 16 }}>
+            {coverType === 'gradient' && selectedGradientConfig && (
+              <LinearGradient
+                colors={selectedGradientConfig.colors}
+                start={selectedGradientConfig.start}
+                end={selectedGradientConfig.end}
+                style={{ padding: 16 }}
+              >
                 {renderCoverContent()}
               </LinearGradient>
             )}
-
             {coverType === 'solid' && (
               <View style={{ backgroundColor: selectedCover[0], padding: 16 }}>
                 {renderCoverContent()}
