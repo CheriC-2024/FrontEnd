@@ -31,7 +31,7 @@ const useSlideAnimation = (initialHeightOffset = 0.5, duration = 500) => {
     slideIn();
   }, []);
 
-  return { slideAnim, slideOut };
+  return { slideAnim, slideOut, slideIn };
 };
 
 export default useSlideAnimation;
