@@ -295,25 +295,39 @@ const CoverSetting: React.FC = () => {
               {[
                 // Vertical Gradient (Normal)
                 {
-                  colors: selectedCover,
+                  colors:
+                    selectedCover.length >= 2
+                      ? selectedCover
+                      : [selectedCover[0], selectedCover[0]],
                   start: { x: 0, y: 0 },
                   end: { x: 0, y: 1 },
                 },
                 // Vertical Gradient (Reversed)
                 {
-                  colors: [...selectedCover].reverse(),
+                  colors: [
+                    ...(selectedCover.length >= 2
+                      ? selectedCover
+                      : [selectedCover[0], selectedCover[0]]),
+                  ].reverse(),
                   start: { x: 0, y: 0 },
                   end: { x: 0, y: 1 },
                 },
                 // Diagonal Gradient (Normal)
                 {
-                  colors: selectedCover,
+                  colors:
+                    selectedCover.length >= 2
+                      ? selectedCover
+                      : [selectedCover[0], selectedCover[0]],
                   start: { x: 0, y: 0 },
                   end: { x: 1, y: 1 },
                 },
                 // Diagonal Gradient (Reversed)
                 {
-                  colors: [...selectedCover].reverse(),
+                  colors: [
+                    ...(selectedCover.length >= 2
+                      ? selectedCover
+                      : [selectedCover[0], selectedCover[0]]),
+                  ].reverse(),
                   start: { x: 0, y: 0 },
                   end: { x: 1, y: 1 },
                 },
