@@ -5,6 +5,7 @@ export type RootStackParamList = {
   Tabs: undefined;
   Stack: undefined;
   CollectingStack: undefined;
+  Exhibit: undefined;
 };
 
 // 네비게이션 바 타입 정의

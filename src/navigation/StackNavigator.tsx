@@ -10,6 +10,8 @@ import {
   AIRecommendDescription,
   ArtworkDetail,
   ArtworkList,
+  SignupScreen2,
+  SignupScreen3,
 } from '../screens/_index';
 import { StackParamList } from './types';
 
@@ -26,24 +28,23 @@ const StackNavigator = () => {
         <Stack.Screen name='Login' component={LoginScreen} />
         <Stack.Screen name='Signup' component={SignupScreen} />
         <Stack.Screen
+          name='Signup2'
+          component={SignupScreen2}
+          options={{ animation: 'none' }}
+        />
+        <Stack.Screen
+          name='Signup3'
+          component={SignupScreen3}
+          options={{ animation: 'none' }}
+        />
+        <Stack.Screen
           name='AIRecommendLoading'
           component={AIRecommendLoading}
         />
-        <Stack.Screen
-          name='AIRecommendTheme'
-          component={AIRecommendTheme}
-          options={{
-            headerLeft: () => null,
-            headerBackVisible: false,
-          }}
-        />
+        <Stack.Screen name='AIRecommendTheme' component={AIRecommendTheme} />
         <Stack.Screen
           name='AIRecommendDescription'
           component={AIRecommendDescription}
-          options={{
-            headerLeft: () => null,
-            headerBackVisible: false,
-          }}
         />
         <Stack.Screen name='ArtworkDetail' component={ArtworkDetail} />
         <Stack.Screen name='ArtworkList' component={ArtworkList} />
