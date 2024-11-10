@@ -104,6 +104,7 @@ const TitleContainer = styled.View`
 
 const Title = styled(H4)`
   height: 96px;
+  color: #fff;
 `;
 
 const TagsContainer = styled.View`
