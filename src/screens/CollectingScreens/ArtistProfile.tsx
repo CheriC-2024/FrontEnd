@@ -4,17 +4,13 @@ import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import {
-  setArtistId,
-  setInitialFollowers,
-  toggleFollow,
-  unFollow,
-} from 'src/slices/profileSlice';
+import { setArtistId, toggleFollow, unFollow } from 'src/slices/profileSlice';
 import {
   AnimatedHeaderOverlay,
   ArtistImage,
   ArtistRecord,
   ArtworkItem,
+  FollowButton,
   RequestArtworkSheet,
   TabButtons,
 } from 'src/components/_index';
@@ -23,6 +19,10 @@ import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
 import { useArtistData } from 'src/api/hooks/useArtistQueries';
+import {
+  setCurrentProfileId,
+  setInitialFollowers,
+} from 'src/slices/followSlice';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -37,7 +37,9 @@ const ArtistProfile: React.FC = () => {
   const { artistId: routeArtistId } = route.params;
 
   const artistId = useSelector((state: RootState) => state.profile.artistId);
-  const followers = useSelector((state: RootState) => state.profile.followers);
+  const followers = useSelector(
+    (state: RootState) => state.follow.followers[routeArtistId] || 0,
+  );
 
   console.log('Route params:', artistId);
   const { artist, artworks, isLoading, error } = useArtistData(artistId!);
@@ -74,6 +76,20 @@ const ArtistProfile: React.FC = () => {
       dispatch(setInitialFollowers(artist.followers));
     }
   }, [routeArtistId, artistId, artist, dispatch]);
+
+  useEffect(() => {
+    if (routeArtistId !== null) {
+      dispatch(setCurrentProfileId(routeArtistId));
+    }
+    if (artist) {
+      dispatch(
+        setInitialFollowers({
+          userId: routeArtistId,
+          followers: artist.followers,
+        }),
+      );
+    }
+  }, [routeArtistId, artist, dispatch]);
 
   useEffect(() => {
     if (route.params?.requestSuccess) {
@@ -230,11 +246,7 @@ const ArtistProfile: React.FC = () => {
               <FollowNumber>{artist.followers}</FollowNumber>
             </FollowCountItem>
           </View>
-          <FollowButton isFollowing={isFollowing} onPress={handleFollowPress}>
-            <FollowButtonText isFollowing={isFollowing}>
-              {isFollowing ? '팔로우중' : '팔로우하기'}
-            </FollowButtonText>
-          </FollowButton>
+          <FollowButton userId={routeArtistId} />
         </FollowSection>
       </Animated.View>
       <FlatList
@@ -370,22 +382,6 @@ const FollowLabel = styled(Caption)`
 
 const FollowNumber = styled(ButtonText)`
   color: ${({ theme }) => theme.colors.grey_6};
-`;
-
-const FollowButton = styled.TouchableOpacity<{ isFollowing: boolean }>`
-  width: 104px;
-  justify-content: center;
-  align-items: center;
-  background-color: ${({ isFollowing, theme }) =>
-    isFollowing ? theme.colors.cherryRed_10 : 'transparent'};
-  padding: 8px;
-  border-radius: ${({ theme }) => theme.radius.l};
-  border: 1.5px solid ${({ theme }) => theme.colors.cherryRed_10};
-`;
-
-const FollowButtonText = styled(ButtonText)<{ isFollowing: boolean }>`
-  color: ${({ isFollowing, theme }) =>
-    isFollowing ? theme.colors.white : theme.colors.cherryRed_10};
 `;
 
 export default ArtistProfile;
