@@ -5,6 +5,7 @@ export { default as CollectionItem } from './CollectionItem';
 export { default as InfoBlock } from './InfoBlock';
 export { default as ProgressBar } from './ProgressBar';
 export { default as SearchBar } from './SearchBar';
+export { default as SeparatorLine } from './SeparatorLine';
 export { default as Table } from './Table';
 export { default as TagButton } from './TagButton';
 export { default as TitleSubtitle } from './TitleSubtitle';
