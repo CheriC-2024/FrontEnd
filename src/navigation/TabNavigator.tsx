@@ -42,7 +42,7 @@ const TabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={() => ({
-        headerTitle: 'CheriC',
+        headerTitle: '', // headerTitle: 'CheriC',
         headerTitleAlign: 'left',
         headerRight: () => renderHeaderRight(),
         headerStyle: { backgroundColor: theme.colors.bg }, // 헤더 배경 설정
@@ -66,6 +66,7 @@ const TabNavigator: React.FC = () => {
         name='Home'
         component={HomeScreen}
         options={{
+          headerTransparent: true,
           tabBarIcon: ({ color }) => (
             <HomeIcon fill={color} width={24} height={24} />
           ),
