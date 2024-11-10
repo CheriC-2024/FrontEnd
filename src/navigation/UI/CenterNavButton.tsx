@@ -21,7 +21,7 @@ export const CenterNavButton = ({ onPress }) => {
         elevation: 3,
       }}
     >
-      <PlusIcon width={20} height={16} />
+      <PlusIcon width={20} height={16} fill={'#fff'} />
     </TouchableOpacity>
   );
 };
