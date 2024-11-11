@@ -1,12 +1,16 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Image } from 'react-native';
 import { StackNavigationOptions } from '@react-navigation/stack';
-import { BackIcon, MenuIcon } from 'src/assets/icons/_index';
+import {
+  BackIcon,
+  CollectorOnlyHeader,
+  MenuIcon,
+} from 'src/assets/icons/_index';
 import { Subtitle1 } from 'src/styles/typography';
 
 interface HeaderConfigOptions {
   leftButtonType?: 'text' | 'icon' | 'both';
-  rightButtonType?: 'text' | 'icon' | 'both';
+  rightButtonType?: 'text' | 'icon' | 'both' | 'collectorOnly';
   iconColor?: string;
   headerTitleAlign?: 'left' | 'center';
   headerRightText?: string;
@@ -88,6 +92,7 @@ const createHeaderRight = (
         zIndex: 100,
       }}
     >
+      {rightButtonType === 'collectorOnly' && <CollectorOnlyHeader />}
       {rightButtonType === 'icon' && (
         <MenuIcon width={26} height={26} fill={iconColor} />
       )}
