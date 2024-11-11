@@ -33,7 +33,12 @@ const HomeScreen: React.FC = () => {
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <Background source={require('src/assets/home_bg.png')}>
-        <TouchableOpacity style={{ paddingLeft: 16 }}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('HomeStack', { screen: 'ExhibitList' })
+          }
+          style={{ paddingLeft: 16 }}
+        >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <H4>컬렉션 전시 둘러보기</H4>
             <ForwardIcon width={28} height={28} />
