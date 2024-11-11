@@ -25,6 +25,7 @@ import { artistData, homeExhibitData, privateArtworkData } from '../data';
 import { Caption, H4, H6 } from 'src/styles/typography';
 
 const HomeScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
 
   const openBottomSheet = () => setBottomSheetVisible(true);
@@ -79,6 +80,9 @@ const HomeScreen: React.FC = () => {
               flexDirection: 'row',
               alignItems: 'center',
             }}
+            onPress={() =>
+              navigation.navigate('HomeStack', { screen: 'PrivateArtworkList' })
+            }
           >
             <CategoryTitle>NEW! 소장작품</CategoryTitle>
             <View style={{ paddingTop: 10 }}>
