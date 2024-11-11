@@ -9,6 +9,7 @@ export { default as ForwardIcon } from './frontArrow.svg';
 export { default as ForwardIconWhite } from './frontArrowWhite.svg';
 export { default as GoogleIcon } from './google.svg';
 export { default as CherryIcon } from './cherry.svg';
+export { default as CollectorOnlyHeader } from './collector_only_header.svg';
 export { default as CollectorOnlyCircle } from './collectorOnlyCircle.svg';
 export { default as EmailIcon } from './email.svg';
 export { default as NoticeIcon } from './notice.svg';
