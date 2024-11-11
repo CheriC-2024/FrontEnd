@@ -503,6 +503,16 @@ export const homeExhibitData = [
     favorites: 70,
     tags: ['Hi', 'Hello', 'Sleep'],
   },
+  {
+    id: '4',
+    imageSource: 'https://i.ibb.co/0DXj42m/2-image-1.png',
+    title: 'Happiness',
+    collectorName: '김작가',
+    profileImage: 'https://i.ibb.co/HtpR5VL/image.png',
+    likes: 10,
+    favorites: 70,
+    tags: ['Hi', 'Hello', 'Sleep'],
+  },
 ];
 
 export const privateArtworkData = [

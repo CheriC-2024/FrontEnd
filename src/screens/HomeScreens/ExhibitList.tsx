@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { FlatList, TouchableOpacity } from 'react-native';
+import { FlatList, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
-import { ArtCategoryHeader } from 'src/components/_index';
+import { ArtCategoryHeader, ExhibitListCard } from 'src/components/_index';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Caption } from 'src/styles/typography';
 import { Container } from 'src/styles/layout';
+import { homeExhibitData } from '../data';
 
 const ExhibitList: React.FC = () => {
   const navigation = useNavigation();
@@ -22,19 +23,16 @@ const ExhibitList: React.FC = () => {
     );
   }, [navigation]);
 
+  const data = [{ key: 'header' }, ...homeExhibitData];
+
   return (
     <Container>
-      <ListWrapper>
-        <FlatList
-          data={[]} // 데이터 추가
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => <></>}
-          ListHeaderComponent={
-            <>
-              <ArtCategoryHeader
-                categoryType='exhibit'
-                style={{ paddingHorizontal: 6, marginTop: 8, marginBottom: 12 }}
-              />
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => item.key || index.toString()}
+        renderItem={({ item }) => {
+          if (item.key === 'header') {
+            return (
               <HeaderContainer>
                 <ButtonContainer>
                   <ToggleButton
@@ -59,20 +57,34 @@ const ExhibitList: React.FC = () => {
                   <Icon name='chevron-down' color='#120000' size={14} />
                 </SortButton>
               </HeaderContainer>
-            </>
+            );
+          } else {
+            return (
+              <ExhibitListCard
+                imageSource={item.imageSource}
+                title={item.title}
+                collectorName={item.collectorName}
+                profileImage={item.profileImage}
+                likes={item.likes}
+                favorites={item.favorites}
+                tags={item.tags}
+              />
+            );
           }
-          stickyHeaderIndices={[1]} // 첫 번째 아이템을 스티키 헤더로 고정
-          showsVerticalScrollIndicator={false}
-        />
-      </ListWrapper>
+        }}
+        ListHeaderComponent={
+          <ArtCategoryHeader
+            categoryType='exhibit'
+            style={{ paddingHorizontal: 6, marginTop: 8, marginBottom: 12 }}
+          />
+        }
+        ListFooterComponent={<View style={{ height: 60 }} />}
+        stickyHeaderIndices={[1]} // HeaderContainer만 스티키로 설정
+        showsVerticalScrollIndicator={false}
+      />
     </Container>
   );
 };
-
-const ListWrapper = styled.View`
-  flex: 1;
-  margin-horizontal: -6px;
-`;
 
 const HeaderContainer = styled.View`
   flex-direction: row;
