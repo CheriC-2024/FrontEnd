@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Stack: undefined;
   CollectingStack: undefined;
   Exhibit: undefined;
+  HomeStack: undefined;
 };
 
 // 네비게이션 바 타입 정의
@@ -54,4 +55,13 @@ export type CollectingStackParamList = {
   ArtworkInfo: undefined;
   CreateCollection: undefined;
   RequestArtwork: undefined;
+};
+
+export type HomeStackParamList = {
+  HomeScreen: undefined;
+  PrivateArtworkList: undefined;
+  ExhibitList: undefined;
+  CollectorProfile: undefined;
+  PrivateArtworkInfo: undefined;
+  // 전시 부분 설계는 더 고민해보기
 };
