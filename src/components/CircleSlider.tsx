@@ -22,7 +22,12 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
   const theme = useTheme();
 
   return (
-    <View style={{ marginBottom: parseInt(theme.spacing.s3) }}>
+    <View
+      style={{
+        paddingBottom: parseInt(theme.spacing.s3),
+        backgroundColor: '#fcfcfc',
+      }}
+    >
       <CircleScrollView ref={scrollViewRef}>
         {selectedArtworks.map((artwork, index) => (
           <TouchableOpacity key={index} onPress={() => onCirclePress(index)}>

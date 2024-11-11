@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
-import { ArtCategoryHeader, ExhibitListCard } from 'src/components/_index';
+import {
+  ArtCategoryHeader,
+  CircleSlider,
+  ExhibitListCard,
+} from 'src/components/_index';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Caption } from 'src/styles/typography';
@@ -14,6 +18,7 @@ const ExhibitList: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'모두보기' | '팔로우'>(
     '모두보기',
   );
+  const [showCircleSlider, setShowCircleSlider] = useState(false);
 
   useEffect(() => {
     navigation.setOptions(
@@ -22,6 +27,11 @@ const ExhibitList: React.FC = () => {
       }),
     );
   }, [navigation]);
+
+  const handleFollowToggle = () => {
+    setSelectedTab('팔로우');
+    setShowCircleSlider(!showCircleSlider);
+  };
 
   const data = [{ key: 'header' }, ...homeExhibitData];
 
@@ -33,30 +43,43 @@ const ExhibitList: React.FC = () => {
         renderItem={({ item }) => {
           if (item.key === 'header') {
             return (
-              <HeaderContainer>
-                <ButtonContainer>
-                  <ToggleButton
-                    selected={selectedTab === '모두보기'}
-                    onPress={() => setSelectedTab('모두보기')}
-                  >
-                    <ToggleText selected={selectedTab === '모두보기'}>
-                      모두보기
-                    </ToggleText>
-                  </ToggleButton>
-                  <ToggleButton
-                    selected={selectedTab === '팔로우'}
-                    onPress={() => setSelectedTab('팔로우')}
-                  >
-                    <ToggleText selected={selectedTab === '팔로우'}>
-                      팔로우
-                    </ToggleText>
-                  </ToggleButton>
-                </ButtonContainer>
-                <SortButton>
-                  <Caption>최신순</Caption>
-                  <Icon name='chevron-down' color='#120000' size={14} />
-                </SortButton>
-              </HeaderContainer>
+              <>
+                <HeaderContainer>
+                  <ButtonContainer>
+                    <ToggleButton
+                      selected={selectedTab === '모두보기'}
+                      onPress={() => {
+                        setSelectedTab('모두보기');
+                        setShowCircleSlider(false);
+                      }}
+                    >
+                      <ToggleText selected={selectedTab === '모두보기'}>
+                        모두보기
+                      </ToggleText>
+                    </ToggleButton>
+                    <ToggleButton
+                      selected={selectedTab === '팔로우'}
+                      onPress={handleFollowToggle}
+                    >
+                      <ToggleText selected={selectedTab === '팔로우'}>
+                        팔로우
+                      </ToggleText>
+                    </ToggleButton>
+                  </ButtonContainer>
+                  <SortButton>
+                    <Caption>최신순</Caption>
+                    <Icon name='chevron-down' color='#120000' size={14} />
+                  </SortButton>
+                </HeaderContainer>
+                {showCircleSlider && (
+                  <CircleSlider
+                    selectedArtworks={homeExhibitData} // 필요한 데이터로 대체
+                    currentIndex={0}
+                    onCirclePress={(index) => console.log(index)}
+                    scrollViewRef={React.createRef()}
+                  />
+                )}
+              </>
             );
           } else {
             return (
