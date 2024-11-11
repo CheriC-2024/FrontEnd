@@ -120,7 +120,7 @@ const PrivateArtworkList: React.FC = () => {
                     >
                       <TouchableOpacity
                         onPress={() =>
-                          handleNavigation('ArtworkInfo', {
+                          handleNavigation('PrivateArtworkInfo', {
                             artworkId: item.id,
                           })
                         }

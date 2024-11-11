@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { PrivateArtworkList } from 'src/screens/_index';
+import { PrivateArtworkInfo, PrivateArtworkList } from 'src/screens/_index';
 import { HomeStackParamList } from './types';
 
 const Stack = createStackNavigator<HomeStackParamList>();
@@ -13,6 +13,7 @@ const CollectingStack = () => {
       }}
     >
       <Stack.Screen name='PrivateArtworkList' component={PrivateArtworkList} />
+      <Stack.Screen name='PrivateArtworkInfo' component={PrivateArtworkInfo} />
     </Stack.Navigator>
   );
 };
