@@ -16,6 +16,7 @@ import {
   ArtistCard,
   ArtistImage,
   ArtistWithArtworks,
+  SeparatorLine,
   TitleSubtitle,
 } from 'src/components/_index';
 import { Container } from 'src/styles/layout';
@@ -422,14 +423,6 @@ const ArtistCategoryTitle = styled(H5)`
 
 const SectionWrapper = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.s3};
-`;
-
-const SeparatorLine = styled.View`
-  height: 1px;
-  background-color: #f2f0f0;
-  width: 90%;
-  align-self: center;
-  margin-vertical: 12px;
 `;
 
 const ArtistSectionWrapper = styled.View`

@@ -22,11 +22,10 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 }) => {
   const navigation = useNavigation();
 
-  // onPress 시 ArtistProfile로 이동하며 artistId를 전달
   const handlePress = () => {
-    navigation.navigate('CollectingStack', {
-      screen: 'ArtistProfile', // CollectingStack 안의 ArtistProfile 화면으로 이동
-      params: { artistId }, // artistId를 전달
+    navigation.navigate('HomeStack', {
+      screen: 'CollectorProfile', // TODO: 이거 작가인지, 컬렉터인지 판단하고 ArtistProfile 혹은 CollectorProfile로 가게 로직 수정해야 함
+      params: { artistId },
     });
   };
 

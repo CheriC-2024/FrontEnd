@@ -5,6 +5,7 @@ import Stack from './StackNavigator';
 import { RootStackParamList } from './types';
 import CollectingStack from './CollectingStack';
 import ExhibitStack from './ExhibitStack';
+import HomeStack from './HomeStack';
 
 const Nav = createNativeStackNavigator<RootStackParamList>();
 
@@ -18,6 +19,7 @@ const RootNavigator: React.FC = () => {
       <Nav.Screen name='Stack' component={Stack} />
       <Nav.Screen name='CollectingStack' component={CollectingStack} />
       <Nav.Screen name='Exhibit' component={ExhibitStack} />
+      <Nav.Screen name='HomeStack' component={HomeStack} />
     </Nav.Navigator>
   );
 };

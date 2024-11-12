@@ -364,6 +364,20 @@ export const artistAndArtworkData = [
         cherryNum: 3,
         register: 'ARTIST',
       },
+      {
+        id: 1003,
+        name: '소장 작품입니다',
+        fileName: 'https://via.placeholder.com/100',
+        cherryNum: null,
+        register: 'ARTIST',
+      },
+      {
+        id: 1004,
+        name: '나는 소장 작품',
+        fileName: 'https://via.placeholder.com/100',
+        cherryNum: null,
+        register: 'ARTIST',
+      },
     ],
   },
   {
@@ -469,5 +483,69 @@ export const artistAndArtworkData = [
         register: 'ARTIST',
       },
     ],
+  },
+];
+
+export const homeExhibitData = [
+  {
+    id: '1',
+    imageSource: 'https://i.ibb.co/yhqhcZ8/2-image-0.png',
+    title: '컬렉션 전시 이름 1',
+    collectorName: '컬렉터 닉네임 1',
+    profileImage: 'https://i.ibb.co/HtpR5VL/image.png',
+    likes: 123,
+    favorites: 123,
+    tags: ['선택한', '선택한', '선택한'],
+  },
+  {
+    id: '2',
+    imageSource: 'https://i.ibb.co/kHWp08n/IMG-8454.png',
+    title: '컬렉션 전시 이름이고 30자까지만 앗',
+    collectorName: '컬렉터 닉네임 2',
+    profileImage: 'https://i.ibb.co/HtpR5VL/image.png',
+    likes: 150,
+    favorites: 80,
+    tags: ['선택한', '선택한'],
+  },
+  {
+    id: '3',
+    imageSource: 'https://i.ibb.co/pKw9gZK/9-image-3.jpg',
+    title: 'Happiness',
+    collectorName: '김작가',
+    profileImage: 'https://i.ibb.co/HtpR5VL/image.png',
+    likes: 10,
+    favorites: 70,
+    tags: ['Hi', 'Hello', 'Sleep'],
+  },
+  {
+    id: '4',
+    imageSource: 'https://i.ibb.co/0DXj42m/2-image-1.png',
+    title: 'Happiness',
+    collectorName: '김작가',
+    profileImage: 'https://i.ibb.co/HtpR5VL/image.png',
+    likes: 10,
+    favorites: 70,
+    tags: ['Hi', 'Hello', 'Sleep'],
+  },
+];
+
+export const privateArtworkData = [
+  {
+    id: '1',
+    image: 'https://i.ibb.co/0DXj42m/2-image-1.png',
+    collectorName: '김작가',
+    collectorImage: 'https://i.ibb.co/HtpR5VL/image.png',
+  },
+  {
+    id: '2',
+    image: 'https://i.ibb.co/sQb0Zv0/8-image-4.jpg',
+    collectorName: '박작가',
+    collectorImage: 'https://i.ibb.co/HtpR5VL/image.png',
+  },
+  {
+    id: '3',
+    image: 'https://i.ibb.co/ZYW3VTp/4-image-0.png',
+    collectorName: '이작가',
+    collectorImage: 'https://i.ibb.co/HtpR5VL/image.png',
   },
 ];
