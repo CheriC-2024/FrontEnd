@@ -364,6 +364,20 @@ export const artistAndArtworkData = [
         cherryNum: 3,
         register: 'ARTIST',
       },
+      {
+        id: 1003,
+        name: '소장 작품입니다',
+        fileName: 'https://via.placeholder.com/100',
+        cherryNum: null,
+        register: 'ARTIST',
+      },
+      {
+        id: 1004,
+        name: '나는 소장 작품',
+        fileName: 'https://via.placeholder.com/100',
+        cherryNum: null,
+        register: 'ARTIST',
+      },
     ],
   },
   {
