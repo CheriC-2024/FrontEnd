@@ -116,7 +116,6 @@ const InfoContainer = styled.View`
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  background-color: #fff;
 `;
 
 const ProfileSection = styled.View`
