@@ -18,3 +18,20 @@ export const signInWithGoogleToken = async (idToken) => {
     throw error;
   }
 };
+
+export const checkNicknameAvailability = async (nickname) => {
+  try {
+    const response = await axiosInstance.get('/users/name', {
+      params: { name: nickname },
+    });
+
+    if (response.data.code === 200 && response.data.message === 'OK') {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error('Error checking nickname availability:', error);
+    throw error;
+  }
+};

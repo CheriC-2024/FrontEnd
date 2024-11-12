@@ -15,6 +15,7 @@ import { useToastMessage } from 'src/hooks/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Container } from 'src/styles/layout';
 import { Subtitle2, Body2, Caption } from '../../styles/typography';
+import { checkNicknameAvailability } from 'src/api/googleLoginApi';
 
 const SignupScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -42,14 +43,22 @@ const SignupScreen: React.FC = () => {
   }, [nickname, bio]);
 
   // TODO: 닉네임 중복 확인 API
-  const handleNicknameConfirm = () => {
+  const handleNicknameConfirm = async () => {
     if (nickname === '') {
       showToast('닉네임을 입력해주세요.');
     } else {
-      // 닉네임이 유효하면 확인 상태로 설정
-      dispatch(setNickname(nickname)); // 닉네임 저장
-      setNicknameConfirmed(true);
-      showToast('닉네임이 확인되었습니다.');
+      try {
+        const isAvailable = await checkNicknameAvailability(nickname);
+        if (isAvailable) {
+          dispatch(setNickname(nickname)); // Save nickname in Redux
+          setNicknameConfirmed(true);
+          showToast('닉네임이 확인되었습니다.');
+        } else {
+          showToast('이미 사용 중인 닉네임입니다.');
+        }
+      } catch (error) {
+        showToast('닉네임 확인에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
