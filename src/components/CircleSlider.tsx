@@ -5,7 +5,9 @@ import { Artwork } from 'src/interfaces/collection';
 import { imageAssets } from '../assets/DB/imageAssets';
 
 interface CircleSliderProps {
-  selectedArtworks: Artwork[];
+  // 전시 보기 때문에 추가함 -> 추후에 리팩토링해야될 듯,,
+  selectedArtworks?: Artwork[];
+  selectedFollowers?: { profileImage: string }[]; // 팔로워 데이터 추가
   currentIndex: number;
   onCirclePress: (index: number) => void;
   isDescriptionFilled?: (index: number) => boolean;
@@ -14,6 +16,7 @@ interface CircleSliderProps {
 
 const CircleSlider: React.FC<CircleSliderProps> = ({
   selectedArtworks,
+  selectedFollowers,
   currentIndex,
   onCirclePress,
   isDescriptionFilled = () => false,
@@ -29,8 +32,11 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
       }}
     >
       <CircleScrollView ref={scrollViewRef}>
-        {selectedArtworks.map((artwork, index) => (
-          <TouchableOpacity key={index} onPress={() => onCirclePress(index)}>
+        {selectedArtworks?.map((artwork, index) => (
+          <TouchableOpacity
+            key={`artwork-${index}`}
+            onPress={() => onCirclePress(index)}
+          >
             <Circle isActive={currentIndex === index}>
               {artwork.fileName && (
                 <CircleImage source={imageAssets[artwork.fileName]} />
@@ -41,6 +47,16 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
                   source={require('src/assets/images/complete_face.png')}
                 />
               )}
+            </Circle>
+          </TouchableOpacity>
+        ))}
+        {selectedFollowers?.map((follower, index) => (
+          <TouchableOpacity
+            key={`follower-${index}`}
+            onPress={() => onCirclePress(index)}
+          >
+            <Circle isActive={currentIndex === index}>
+              <CircleImage source={{ uri: follower.profileImage }} />
             </Circle>
           </TouchableOpacity>
         ))}
