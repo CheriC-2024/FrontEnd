@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import {
   aiRecommendReducer,
   artworkReducer,
+  authReducer,
   collectionReducer,
   coverReducer,
   followReducer,
@@ -15,6 +16,7 @@ const store = configureStore({
   reducer: {
     aiRecommend: aiRecommendReducer,
     artwork: artworkReducer,
+    auth: authReducer,
     collection: collectionReducer,
     cover: coverReducer,
     follow: followReducer,

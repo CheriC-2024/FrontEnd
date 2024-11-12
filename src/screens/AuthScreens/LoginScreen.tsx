@@ -1,3 +1,4 @@
+// LoginScreen.js
 import React, { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
@@ -5,10 +6,15 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import { WEB_CLIENT_ID } from '@env';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/StackNavigator';
 import { GoogleIcon } from 'src/assets/icons/_index';
 import { H1, Subtitle2 } from '../../styles/typography';
+import { signInWithGoogleToken } from 'src/api/googleLoginApi';
+import { setTokens } from 'src/slices/authSlice';
+import { useDispatch } from 'react-redux';
+import store from 'src/store';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -17,32 +23,46 @@ type LoginScreenNavigationProp = StackNavigationProp<
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: 'YOUR_WEB_CLIENT_ID', // Add your web client ID here
+      webClientId: WEB_CLIENT_ID,
     });
   }, []);
 
   const signInWithGoogle = async () => {
-    // API 연결 전 우선 회원가입으로 이동
-    navigation.replace('Signup');
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.idToken;
 
-    // try {
-    //   await GoogleSignin.hasPlayServices();
-    //   const userInfo = await GoogleSignin.signIn();
-    //   console.log(userInfo);
-    // } catch (error) {
-    //   if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-    //     // user cancelled the login flow
-    //   } else if (error.code === statusCodes.IN_PROGRESS) {
-    //     // operation (f.e. sign in) is in progress already
-    //   } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-    //     // play services not available or outdated
-    //   } else {
-    //     // some other error happened
-    //   }
-    // }
+      try {
+        const { accessToken, refreshToken, firstLogin } =
+          await signInWithGoogleToken(idToken);
+
+        // Redux에 토큰값 저장
+        dispatch(setTokens({ accessToken, refreshToken }));
+
+        if (firstLogin) {
+          navigation.replace('Signup');
+        } else {
+          navigation.replace('Tabs');
+        }
+      } catch (apiError) {
+        console.error('API error during sign-in:', apiError);
+      }
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('Google sign-in was cancelled');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Google sign-in is in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Google Play services not available or outdated');
+      } else {
+        console.error('Error signing in with Google:', error);
+      }
+    }
   };
 
   return (
