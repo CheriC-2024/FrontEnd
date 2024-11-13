@@ -16,6 +16,19 @@ import LinearGradient from 'react-native-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
+// 상수 정의
+const INITIAL_WIDTH = 350;
+const INITIAL_HEIGHT = 400;
+const MAX_EXPANDED_WIDTH = width + 100;
+const MAX_EXPANDED_HEIGHT = height + 150;
+const CHARACTER_SCALE_UP = 1.05;
+const ANIMATION_DURATION = 500;
+const INITIAL_BORDER_WIDTH = 1;
+const INITIAL_TOP_LEFT_RADIUS = 300;
+const INITIAL_LEFT_POSITION = -120;
+const FINAL_LEFT_POSITION = -10;
+const DRAG_THRESHOLD = -230;
+
 const ExhibitList: React.FC = () => {
   const navigation = useNavigation();
   const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
@@ -26,16 +39,21 @@ const ExhibitList: React.FC = () => {
   // 캐릭터 위치, 바운스 효과, 크기, 테두리 너비, 위치에 대한 애니메이션 값
   const characterPosition = useRef(new Animated.Value(0)).current;
   const characterScale = useRef(new Animated.Value(1)).current; // 바운스 효과를 위한 초기 크기
-  const exhibitOpacityWidth = useRef(new Animated.Value(350)).current; // 초기 너비
-  const exhibitOpacityHeight = useRef(new Animated.Value(400)).current; // 초기 높이
+  const exhibitOpacityWidth = useRef(new Animated.Value(INITIAL_WIDTH)).current; // 초기 너비
+  const exhibitOpacityHeight = useRef(
+    new Animated.Value(INITIAL_HEIGHT),
+  ).current; // 초기 높이
 
-  const borderWidth = useRef(new Animated.Value(1)).current; // 초기 테두리 너비
-  const borderTopLeftRadius = useRef(new Animated.Value(300)).current; // 초기 테두리 반경
-  const leftPosition = useRef(new Animated.Value(-120)).current; // 초기 왼쪽 위치
+  const borderWidth = useRef(new Animated.Value(INITIAL_BORDER_WIDTH)).current; // 초기 테두리 너비
+  const borderTopLeftRadius = useRef(
+    new Animated.Value(INITIAL_TOP_LEFT_RADIUS),
+  ).current; // 초기 테두리 반경
+  const leftPosition = useRef(
+    new Animated.Value(INITIAL_LEFT_POSITION),
+  ).current; // 초기 왼쪽 위치
 
   // 최대 확장점에 도달했는지 여부를 추적하는 상태
   const [expanded, setExpanded] = useState(false);
-  let newWidth = 350; // 계산된 새 크기를 추적
 
   // 캐릭터 드래그를 처리하기 위한 PanResponder
   const panResponder = useRef(
@@ -55,13 +73,13 @@ const ExhibitList: React.FC = () => {
       },
       onPanResponderRelease: (e, gestureState) => {
         // 새로운 크기가 540에 도달했을 때만 바운스 및 확장 적용
-        if (gestureState.dx <= -230) {
+        if (gestureState.dx <= DRAG_THRESHOLD) {
           setExpanded(true);
 
           // 캐릭터에 부드러운 바운스 애니메이션 적용
           Animated.sequence([
             Animated.spring(characterScale, {
-              toValue: 1.05, // 약간 확대
+              toValue: CHARACTER_SCALE_UP, // 약간 확대
               friction: 2,
               tension: 140,
               useNativeDriver: false,
@@ -78,28 +96,28 @@ const ExhibitList: React.FC = () => {
             // 최종 너비와 높이로 `exhibitOpacity` 확장
             Animated.parallel([
               Animated.timing(exhibitOpacityWidth, {
-                toValue: width + 100, // 최종 확장 너비
-                duration: 500,
+                toValue: MAX_EXPANDED_WIDTH, // 최종 확장 너비
+                duration: ANIMATION_DURATION,
                 useNativeDriver: false,
               }),
               Animated.timing(exhibitOpacityHeight, {
-                toValue: height + 150, // 최종 확장 높이
-                duration: 500,
+                toValue: MAX_EXPANDED_HEIGHT, // 최종 확장 높이
+                duration: ANIMATION_DURATION,
                 useNativeDriver: false,
               }),
               Animated.timing(leftPosition, {
-                toValue: -10, // 왼쪽으로 10 이동
-                duration: 500,
+                toValue: FINAL_LEFT_POSITION, // 왼쪽으로 10 이동
+                duration: ANIMATION_DURATION,
                 useNativeDriver: false,
               }),
               Animated.timing(borderTopLeftRadius, {
                 toValue: 0, // 상단 왼쪽 반경을 0으로 설정
-                duration: 500,
+                duration: ANIMATION_DURATION,
                 useNativeDriver: false,
               }),
               Animated.timing(borderWidth, {
                 toValue: 0, // 테두리 너비를 0으로 애니메이션
-                duration: 500,
+                duration: ANIMATION_DURATION,
                 useNativeDriver: false,
               }),
             ]).start();
@@ -107,7 +125,7 @@ const ExhibitList: React.FC = () => {
             // 지연 후 캐릭터를 화면 왼쪽으로 이동
             Animated.timing(characterPosition, {
               toValue: -width, // 캐릭터를 화면 왼쪽으로 이동
-              duration: 500,
+              duration: ANIMATION_DURATION,
               useNativeDriver: false,
             }).start();
           }, 1000); // 확장 및 화면 밖으로 이동하기 전에 1초 지연
@@ -119,27 +137,27 @@ const ExhibitList: React.FC = () => {
           }).start();
 
           Animated.spring(exhibitOpacityWidth, {
-            toValue: 350, // 초기 너비로 재설정
+            toValue: INITIAL_WIDTH, // 초기 너비로 재설정
             useNativeDriver: false,
           }).start();
 
           Animated.spring(exhibitOpacityHeight, {
-            toValue: 400, // 초기 높이로 재설정
+            toValue: INITIAL_HEIGHT, // 초기 높이로 재설정
             useNativeDriver: false,
           }).start();
 
           Animated.spring(borderWidth, {
-            toValue: 1, // 테두리 너비 초기값으로 재설정
+            toValue: INITIAL_BORDER_WIDTH, // 테두리 너비 초기값으로 재설정
             useNativeDriver: false,
           }).start();
 
           Animated.spring(borderTopLeftRadius, {
-            toValue: 300, // 테두리 반경 초기값으로 재설정
+            toValue: INITIAL_TOP_LEFT_RADIUS, // 테두리 반경 초기값으로 재설정
             useNativeDriver: false,
           }).start();
 
           Animated.spring(leftPosition, {
-            toValue: -120, // 초기 왼쪽 위치로 재설정
+            toValue: INITIAL_LEFT_POSITION, // 초기 왼쪽 위치로 재설정
             useNativeDriver: false,
           }).start();
         }
