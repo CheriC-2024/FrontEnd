@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import {
   CollectorProfile,
+  ExhibitEntrance,
   ExhibitList,
   PrivateArtworkInfo,
   PrivateArtworkList,
@@ -18,6 +19,7 @@ const CollectingStack = () => {
       }}
     >
       <Stack.Screen name='CollectorProfile' component={CollectorProfile} />
+      <Stack.Screen name='ExhibitEntrance' component={ExhibitEntrance} />
       <Stack.Screen name='ExhibitList' component={ExhibitList} />
       <Stack.Screen name='PrivateArtworkList' component={PrivateArtworkList} />
       <Stack.Screen name='PrivateArtworkInfo' component={PrivateArtworkInfo} />

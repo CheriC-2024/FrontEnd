@@ -12,7 +12,7 @@ const Nav = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator: React.FC = () => {
   return (
     <Nav.Navigator
-      initialRouteName='Stack'
+      //initialRouteName='Stack'
       screenOptions={{ headerShown: false }}
     >
       <Nav.Screen name='Tabs' component={Tabs} />

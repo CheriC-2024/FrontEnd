@@ -490,12 +490,12 @@ export const homeExhibitData = [
   {
     id: '1',
     imageSource: 'https://i.ibb.co/yhqhcZ8/2-image-0.png',
-    title: '컬렉션 전시 이름 1',
-    collectorName: '컬렉터 닉네임 1',
-    profileImage: 'https://i.ibb.co/HtpR5VL/image.png',
+    title: '평온과 위태의 경계에서',
+    collectorName: '체리시',
+    profileImage: 'https://i.ibb.co/vvC9pvw/test-profile.png',
     likes: 123,
     favorites: 123,
-    tags: ['선택한', '선택한', '선택한'],
+    tags: ['선택한 테마 1', '선택한 테마 2', '선택한 테마 3'],
   },
   {
     id: '2',
