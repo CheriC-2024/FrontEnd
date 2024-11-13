@@ -35,3 +35,13 @@ export const checkNicknameAvailability = async (nickname) => {
     throw error;
   }
 };
+
+export const signUp = async (signupData) => {
+  try {
+    const response = await axiosInstance.post('/users', signupData);
+    return response.data;
+  } catch (error) {
+    console.error('Error during signup:', error);
+    throw error;
+  }
+};
