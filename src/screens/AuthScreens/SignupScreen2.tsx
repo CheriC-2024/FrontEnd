@@ -40,16 +40,23 @@ const SignupScreen2: React.FC = () => {
     navigation.navigate('Signup3');
   };
 
-  const toggleInterest = (interest: string) => {
+  const toggleInterest = (label: string) => {
+    const interest = interestOptions.find((option) => option.label === label);
+
+    if (!interest) return;
+
+    const interestValue = interest.value;
     let updatedInterests;
-    if (interests.includes(interest)) {
-      updatedInterests = interests.filter((item) => item !== interest);
+
+    if (interests.includes(interestValue)) {
+      updatedInterests = interests.filter((item) => item !== interestValue);
     } else if (interests.length < 2) {
-      updatedInterests = [...interests, interest];
+      updatedInterests = [...interests, interestValue];
     } else {
       showToast('관심 분야는 최대 2개까지 선택 가능합니다.');
       return;
     }
+
     dispatch(setInterests(updatedInterests));
     console.log('Updated interests:', updatedInterests);
   };
@@ -89,13 +96,13 @@ const SignupScreen2: React.FC = () => {
                     return (
                       <InterestButton
                         key={interest.label}
-                        selected={interests.includes(interest.label)}
+                        selected={interests.includes(interest.value)}
                         onPress={() => toggleInterest(interest.label)}
                       >
                         <InterestButtonImage source={interest.image}>
                           <Overlay
                             overlayColor={overlayColor}
-                            selected={interests.includes(interest.label)}
+                            selected={interests.includes(interest.value)}
                           />
                           <InterestText>{interest.label}</InterestText>
                         </InterestButtonImage>
@@ -112,38 +119,47 @@ const SignupScreen2: React.FC = () => {
   );
 };
 
+// TODO: 관심 분야 픽스되고 서버 재배포시에 수정할 예정
 const interestOptions = [
   {
     label: '뉴미디어',
     image: require('src/assets/images/SignUpPage/interest1.png'),
+    value: 'MODIFY1',
   },
   {
     label: '동양화',
     image: require('src/assets/images/SignUpPage/interest2.png'),
+    value: 'MODIFY2',
   },
   {
     label: '드로잉',
     image: require('src/assets/images/SignUpPage/interest3.png'),
+    value: 'MODIFY3',
   },
   {
     label: '디자인',
     image: require('src/assets/images/SignUpPage/interest4.png'),
+    value: 'MODIFY4',
   },
   {
     label: '수채화',
     image: require('src/assets/images/SignUpPage/interest5.png'),
+    value: 'WATER_PAINTING',
   },
   {
     label: '유화',
     image: require('src/assets/images/SignUpPage/interest6.png'),
+    value: 'OIL_PAINTING',
   },
   {
     label: '판화',
     image: require('src/assets/images/SignUpPage/interest7.png'),
+    value: 'MODIFY5',
   },
   {
     label: '회화',
     image: require('src/assets/images/SignUpPage/interest8.png'),
+    value: 'MODIFY6',
   },
 ];
 

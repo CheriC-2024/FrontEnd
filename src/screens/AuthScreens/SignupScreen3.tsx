@@ -14,14 +14,14 @@ import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ProgressBar } from 'src/components/_index';
 import { Container } from 'src/styles/layout';
 import { OIcon, XIcon } from 'src/assets/icons/_index';
+import { signUp } from 'src/api/googleLoginApi';
 
 const SignupScreen3: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { collectingExperience, isArtist } = useSelector(
-    (state: RootState) => state.user,
-  );
+  const { nickname, bio, interests, collectingExperience, isArtist } =
+    useSelector((state: RootState) => state.user);
   const { toastVisible, toastMessage, showToast } = useToastMessage();
 
   // 헤더 설정
@@ -44,12 +44,28 @@ const SignupScreen3: React.FC = () => {
     return collectingExperience !== null && isArtist !== null;
   };
 
-  // TODO: 유저 정보 POST API 연결
-  const handlePress = () => {
+  const handlePress = async () => {
     if (!isFormValid()) {
       showToast('필수 정보를 입력하세요.');
-    } else {
+    }
+    const signupData = {
+      name: nickname,
+      info: bio,
+      profileImgUrl: 'https://i.ibb.co/NxM5XzJ/p-image-1.jpg', // 임시 프로필 이미지
+      backgroundImgUrl: 'https://i.ibb.co/Snq9KNh/chericBg.png', // 임시 배경 이미지
+      haveExperience: collectingExperience,
+      isArtist: isArtist,
+      userPartRequests: interests,
+    };
+
+    try {
+      const response = await signUp(signupData); // 회원가입 API 호출
+      console.log('회원가입 성공:', response);
+
+      // 회원가입 성공 후 다음 화면으로 이동
       navigation.navigate('Tabs');
+    } catch (error) {
+      console.error('회원가입 실패:', error);
     }
   };
 
