@@ -40,6 +40,7 @@ const LoginScreen: React.FC = () => {
       try {
         const { accessToken, refreshToken, firstLogin } =
           await signInWithGoogleToken(idToken);
+        console.log('isFirstLogin', firstLogin);
 
         // Redux에 토큰값 저장
         dispatch(setTokens({ accessToken, refreshToken }));
