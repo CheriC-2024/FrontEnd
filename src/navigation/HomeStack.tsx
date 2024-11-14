@@ -4,6 +4,7 @@ import {
   CollectorProfile,
   ExhibitEntrance,
   ExhibitList,
+  ExhibitLoading,
   PrivateArtworkInfo,
   PrivateArtworkList,
 } from 'src/screens/_index';
@@ -21,6 +22,7 @@ const CollectingStack = () => {
       <Stack.Screen name='CollectorProfile' component={CollectorProfile} />
       <Stack.Screen name='ExhibitEntrance' component={ExhibitEntrance} />
       <Stack.Screen name='ExhibitList' component={ExhibitList} />
+      <Stack.Screen name='ExhibitLoading' component={ExhibitLoading} />
       <Stack.Screen name='PrivateArtworkList' component={PrivateArtworkList} />
       <Stack.Screen name='PrivateArtworkInfo' component={PrivateArtworkInfo} />
     </Stack.Navigator>
