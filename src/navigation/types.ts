@@ -64,5 +64,6 @@ export type HomeStackParamList = {
   CollectorProfile: undefined;
   PrivateArtworkInfo: undefined;
   ExhibitEntrance: undefined;
+  ExhibitLoading: undefined;
   // 전시 부분 설계는 더 고민해보기
 };
