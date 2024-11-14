@@ -29,7 +29,7 @@ const INITIAL_LEFT_POSITION = -120;
 const FINAL_LEFT_POSITION = -10;
 const DRAG_THRESHOLD = -230;
 
-const ExhibitList: React.FC = () => {
+const ExhibitEntrance: React.FC = () => {
   const navigation = useNavigation();
   const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
 
@@ -127,7 +127,9 @@ const ExhibitList: React.FC = () => {
               toValue: -width, // 캐릭터를 화면 왼쪽으로 이동
               duration: ANIMATION_DURATION,
               useNativeDriver: false,
-            }).start();
+            }).start(() => {
+              navigation.navigate('ExhibitLoading'); // ExhibitLoading 화면으로 이동
+            });
           }, 1000); // 확장 및 화면 밖으로 이동하기 전에 1초 지연
         } else {
           // 임계값에 도달하지 않으면 원래 위치와 크기로 재설정
@@ -231,9 +233,8 @@ const ExhibitList: React.FC = () => {
   );
 };
 
-export default ExhibitList;
+export default ExhibitEntrance;
 
-// 스타일링된 컴포넌트
 const GradientBackground = styled(LinearGradient).attrs({
   colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
   start: { x: 0.5, y: 0 },
