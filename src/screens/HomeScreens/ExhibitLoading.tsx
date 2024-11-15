@@ -26,6 +26,13 @@ const ExhibitLoading: React.FC = () => {
       duration: 1000, // 1초 동안 애니메이션 실행
       useNativeDriver: true,
     }).start();
+
+    const timer = setTimeout(() => {
+      navigation.replace('ExhibitIntro');
+    }, 3000);
+
+    // 컴포넌트 언마운트 시 타이머 정리
+    return () => clearTimeout(timer);
   }, [navigation, fadeAnim]);
 
   return (
