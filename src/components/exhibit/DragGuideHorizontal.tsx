@@ -6,13 +6,17 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface DragGuideHorizontalProps {
   style?: ViewStyle;
+  isReversed?: boolean; // 좌우 반전 여부
 }
 
-const DragGuideHorizontal: React.FC<DragGuideHorizontalProps> = ({ style }) => {
+const DragGuideHorizontal: React.FC<DragGuideHorizontalProps> = ({
+  style,
+  isReversed = false,
+}) => {
   const shimmerAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // 효과 계속 진행 되도록 루핑 (loop)
+    // 효과 계속 진행되도록 루핑 (loop)
     Animated.loop(
       Animated.sequence([
         Animated.timing(shimmerAnimation, {
@@ -36,47 +40,62 @@ const DragGuideHorizontal: React.FC<DragGuideHorizontalProps> = ({ style }) => {
   });
 
   return (
-    <GuideContainer style={style}>
-      <AnimatedLinearGradient
-        colors={[
-          'rgba(255,255,255,1)',
-          'rgba(255,255,255,0.7)',
-          'rgba(255,255,255,0.3)',
-          'transparent',
-        ]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-        style={{ opacity: shimmerOpacity }}
-      >
-        <IconContainer>
-          <Ionicons name='chevron-back-outline' size={32} color='#ffffff' />
-          <Ionicons
-            name='chevron-back-outline'
-            size={32}
-            color='#ffffff'
-            style={{ marginLeft: -18, paddingRight: 50 }}
-          />
-        </IconContainer>
-      </AnimatedLinearGradient>
-    </GuideContainer>
+    <BorderContainer style={style}>
+      <GuideContainer>
+        <AnimatedLinearGradient
+          colors={[
+            'rgba(255,255,255,1)',
+            'rgba(255,255,255,0.7)',
+            'rgba(255,255,255,0.3)',
+            'transparent',
+          ]}
+          start={isReversed ? { x: 1, y: 0.5 } : { x: 0, y: 0.5 }}
+          end={isReversed ? { x: 0, y: 0.5 } : { x: 1, y: 0.5 }}
+          style={{ opacity: shimmerOpacity }}
+        >
+          <IconContainer isReversed={isReversed}>
+            <Ionicons
+              name={
+                isReversed ? 'chevron-forward-outline' : 'chevron-back-outline'
+              }
+              size={32}
+              color='#ffffff'
+            />
+            <Ionicons
+              name={
+                isReversed ? 'chevron-forward-outline' : 'chevron-back-outline'
+              }
+              size={32}
+              color='#ffffff'
+              style={{ marginLeft: -18, paddingRight: 110 }}
+            />
+          </IconContainer>
+        </AnimatedLinearGradient>
+      </GuideContainer>
+    </BorderContainer>
   );
 };
 
 export default DragGuideHorizontal;
 
-const GuideContainer = styled(Animated.View)`
+const BorderContainer = styled.View`
   width: 155px;
   height: 45px;
   border-radius: 300px;
   overflow: hidden;
-  align-items: flex-start;
+`;
+
+const GuideContainer = styled(Animated.View)`
+  flex: 1;
+  align-items: center;
   justify-content: center;
 `;
 
-const IconContainer = styled.View`
+const IconContainer = styled.View<{ isReversed: boolean }>`
   flex-direction: row;
   align-items: center;
   padding: 8px 0;
+  ${({ isReversed }) => isReversed && 'transform: scaleX(-1);'}
 `;
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
