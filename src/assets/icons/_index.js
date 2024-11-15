@@ -19,6 +19,8 @@ export { default as SettingIcon } from './setting.svg';
 export { default as HeartIcon } from './heart.svg';
 export { default as InstagramIcon } from './instagram.svg';
 export { default as MenuIcon } from './menu.svg';
+export { default as MusicOffIcon } from './music-off.svg';
+export { default as MusicOnIcon } from './music-on.svg';
 export { default as ViewsIcon } from './views.svg';
 export { default as OIcon } from './O.svg';
 export { default as XIcon } from './X.svg';
