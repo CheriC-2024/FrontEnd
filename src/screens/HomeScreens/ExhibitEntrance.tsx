@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
   Animated,
   PanResponder,
@@ -55,6 +55,19 @@ const ExhibitEntrance: React.FC = () => {
   // 최대 확장점에 도달했는지 여부를 추적하는 상태
   const [expanded, setExpanded] = useState(false);
 
+  // 화면 진입 시 상태 초기화
+  useFocusEffect(() => {
+    // 상태 초기화
+    setExpanded(false); // 드래그 가능 상태로 초기화
+    characterPosition.setValue(0); // 캐릭터 위치 초기화
+    characterScale.setValue(1); // 스케일 초기화
+    exhibitOpacityWidth.setValue(INITIAL_WIDTH); // 초기 너비
+    exhibitOpacityHeight.setValue(INITIAL_HEIGHT); // 초기 높이
+    borderWidth.setValue(INITIAL_BORDER_WIDTH); // 테두리 초기화
+    borderTopLeftRadius.setValue(INITIAL_TOP_LEFT_RADIUS); // 반경 초기화
+    leftPosition.setValue(INITIAL_LEFT_POSITION); // 왼쪽 위치 초기화
+  });
+
   // 캐릭터 드래그를 처리하기 위한 PanResponder
   const panResponder = useRef(
     PanResponder.create({
@@ -74,8 +87,8 @@ const ExhibitEntrance: React.FC = () => {
       onPanResponderRelease: (e, gestureState) => {
         // 새로운 크기가 540에 도달했을 때만 바운스 및 확장 적용
         if (gestureState.dx <= DRAG_THRESHOLD) {
-          setExpanded(true);
-
+          // 캐릭터를 드래그 위치에 고정
+          characterPosition.setValue(gestureState.dx);
           // 캐릭터에 부드러운 바운스 애니메이션 적용
           Animated.sequence([
             Animated.spring(characterScale, {
@@ -90,7 +103,9 @@ const ExhibitEntrance: React.FC = () => {
               tension: 140,
               useNativeDriver: false,
             }),
-          ]).start();
+          ]).start(() => {
+            setExpanded(true);
+          });
 
           setTimeout(() => {
             // 최종 너비와 높이로 `exhibitOpacity` 확장
