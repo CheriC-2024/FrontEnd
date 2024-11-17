@@ -14,7 +14,7 @@ import { ButtonText } from 'src/styles/typography';
 import { DragGuideHorizontal } from 'src/components/_index';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
-const ExhibitLoading: React.FC = () => {
+const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
   const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
 
@@ -30,7 +30,7 @@ const ExhibitLoading: React.FC = () => {
   const [isDragGuideVisible, setIsDragGuideVisible] = useState(true); // DragGuideHorizontal의 가시성 상태
   const [showDragGuide, setShowDragGuide] = useState(false); // DragGuideHorizontal 표시 여부
 
-  // 헤더 설정 및 애니메이션 시작
+  // 헤더 설정
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
@@ -90,10 +90,7 @@ const ExhibitLoading: React.FC = () => {
   };
 
   return (
-    <TouchableWithoutFeedback
-      onPress={handleScreenPress}
-      shouldCancelWhenOutside={false}
-    >
+    <TouchableWithoutFeedback onPress={handleScreenPress}>
       <PanGestureHandler
         onHandlerStateChange={(event) => {
           if (event.nativeEvent.state === State.END) {
@@ -139,7 +136,7 @@ const ExhibitLoading: React.FC = () => {
                 style={{
                   opacity: fadeAnimGuide,
                   position: 'absolute',
-                  bottom: 360,
+                  bottom: 50,
                   right: 16,
                   zIndex: 1,
                 }}
@@ -154,7 +151,7 @@ const ExhibitLoading: React.FC = () => {
   );
 };
 
-export default ExhibitLoading;
+export default ExhibitIntro;
 
 const GradientBackground = styled(LinearGradient).attrs({
   colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
