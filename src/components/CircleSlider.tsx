@@ -3,15 +3,17 @@ import styled, { useTheme } from 'styled-components/native';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { Artwork } from 'src/interfaces/collection';
 import { imageAssets } from '../assets/DB/imageAssets';
+import { Subtitle2 } from 'src/styles/typography';
 
 interface CircleSliderProps {
-  // 전시 보기 때문에 추가함 -> 추후에 리팩토링해야될 듯,,
   selectedArtworks?: Artwork[];
-  selectedFollowers?: { profileImage: string }[]; // 팔로워 데이터 추가
+  selectedFollowers?: { profileImage: string }[];
   currentIndex: number;
   onCirclePress: (index: number) => void;
   isDescriptionFilled?: (index: number) => boolean;
   scrollViewRef: React.RefObject<ScrollView>;
+  backgroundColor?: string;
+  showEndButton?: boolean;
 }
 
 const CircleSlider: React.FC<CircleSliderProps> = ({
@@ -21,6 +23,8 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
   onCirclePress,
   isDescriptionFilled = () => false,
   scrollViewRef,
+  backgroundColor = '#fcfcfc',
+  showEndButton = false,
 }) => {
   const theme = useTheme();
 
@@ -28,7 +32,7 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
     <View
       style={{
         paddingBottom: parseInt(theme.spacing.s3),
-        backgroundColor: '#fcfcfc',
+        backgroundColor,
       }}
     >
       <CircleScrollView ref={scrollViewRef}>
@@ -38,7 +42,9 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
             onPress={() => onCirclePress(index)}
           >
             <Circle isActive={currentIndex === index}>
-              {artwork.fileName && (
+              {artwork.fileName && /^https?:\/\//.test(artwork.fileName) ? (
+                <CircleImage source={{ uri: artwork.fileName }} />
+              ) : (
                 <CircleImage source={imageAssets[artwork.fileName]} />
               )}
               {isDescriptionFilled(index) && <Overlay />}
@@ -50,20 +56,37 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
             </Circle>
           </TouchableOpacity>
         ))}
-        {selectedFollowers?.map((follower, index) => (
+        {showEndButton && (
           <TouchableOpacity
-            key={`follower-${index}`}
-            onPress={() => onCirclePress(index)}
+            key='end-button'
+            onPress={() => {
+              console.log('END 버튼 클릭');
+              // 마지막 페이지 로직 추가 예정
+            }}
           >
-            <Circle isActive={currentIndex === index}>
-              <CircleImage source={{ uri: follower.profileImage }} />
-            </Circle>
+            <EndCircle>
+              <EndText>END</EndText>
+            </EndCircle>
           </TouchableOpacity>
-        ))}
+        )}
       </CircleScrollView>
     </View>
   );
 };
+
+const EndCircle = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 60px;
+  background-color: ${({ theme }) => theme.colors.redBlack};
+  margin-right: 10px;
+`;
+
+const EndText = styled(Subtitle2)`
+  color: #fff;
+`;
 
 const Circle = styled.View<{ isActive: boolean }>`
   align-items: center;
