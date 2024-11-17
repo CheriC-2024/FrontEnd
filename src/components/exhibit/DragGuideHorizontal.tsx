@@ -94,7 +94,7 @@ const GuideContainer = styled(Animated.View)`
 const IconContainer = styled.View<{ isReversed: boolean }>`
   flex-direction: row;
   align-items: center;
-  padding: 8px 0;
+  padding: 6px 0 8px 0;
   ${({ isReversed }) => isReversed && 'transform: scaleX(-1);'}
 `;
 
