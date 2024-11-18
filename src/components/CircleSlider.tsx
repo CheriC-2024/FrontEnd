@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled, { useTheme } from 'styled-components/native';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { Artwork } from 'src/interfaces/collection';
@@ -39,7 +39,7 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
         {selectedArtworks?.map((artwork, index) => (
           <TouchableOpacity
             key={`artwork-${index}`}
-            onPress={() => onCirclePress(index)}
+            onPress={() => onCirclePress(index)} // Regular circle press
           >
             <Circle isActive={currentIndex === index}>
               {artwork.fileName && /^https?:\/\//.test(artwork.fileName) ? (
@@ -59,13 +59,12 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
         {showEndButton && (
           <TouchableOpacity
             key='end-button'
-            onPress={() => {
-              console.log('END 버튼 클릭');
-              // 마지막 페이지 로직 추가 예정
-            }}
+            onPress={() => onCirclePress(selectedArtworks.length)}
           >
-            <EndCircle>
-              <EndText>END</EndText>
+            <EndCircle isActive={currentIndex === selectedArtworks.length}>
+              <EndText isActive={currentIndex === selectedArtworks.length}>
+                END
+              </EndText>
             </EndCircle>
           </TouchableOpacity>
         )}
@@ -74,19 +73,21 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
   );
 };
 
-const EndCircle = styled.View`
+const EndCircle = styled.View<{ isActive: boolean }>`
   align-items: center;
   justify-content: center;
   width: 50px;
   height: 50px;
-  border: solid 1.5px #fff;
   border-radius: 60px;
-  background-color: transparent;
   margin-right: 10px;
+  background-color: transparent;
+  border-style: ${({ isActive }) => (isActive ? 'dashed' : 'solid')};
+  border-color: ${({ isActive }) => (isActive ? '#FF5555' : '#fff')};
+  border-width: 1.7px;
 `;
 
-const EndText = styled(Subtitle2)`
-  color: #fff;
+const EndText = styled(Subtitle2)<{ isActive: boolean }>`
+  color: ${({ isActive }) => (isActive ? '#FF5555' : '#fff')};
 `;
 
 const Circle = styled.View<{ isActive: boolean }>`
