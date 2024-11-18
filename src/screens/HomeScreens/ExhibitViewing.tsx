@@ -6,7 +6,7 @@ import {
   Dimensions,
   ScrollView,
   SafeAreaView,
-  StatusBar,
+  Image,
   View,
   ImageBackground,
 } from 'react-native';
@@ -31,7 +31,7 @@ import {
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
 // 더미 데이터
-const dummyData = {
+export const dummyData = {
   artist: {
     id: 1,
     image: 'https://i.ibb.co/HtpR5VL/image.png',
@@ -76,13 +76,27 @@ const ExhibitViewing: React.FC = () => {
   const fadeAnimOverlay = useRef(new Animated.Value(1)).current;
   const fadeAnimContent = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [isMusicOn, setIsMusicOn] = useState(true);
+  const [showEndSlide, setShowEndSlide] = useState(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState(true);
   const [currentVerticalIndex, setCurrentVerticalIndex] = useState(0); // 세로 스크롤 인덱스
   const [currentHorizontalIndex, setCurrentHorizontalIndex] = useState(0); // 가로 캐러셀 인덱스
 
   const selectedArtworks = dummyData.artworks; // 더미 데이터에서 artworks 가져오기
-  const images = selectedArtworks.map((artwork) => artwork.fileName); // Carousel에 사용할 이미지 배열
+  const images = [
+    ...dummyData.artworks.map((artwork) => artwork.fileName),
+    ...(showEndSlide ? ['endSlide'] : []),
+  ];
+
+  // Handle END button click
+  const handleEndButtonClick = () => {
+    setShowEndSlide(true);
+    setTimeout(() => {
+      carouselRef.current?.scrollTo({
+        index: images.length - 1,
+        animated: true,
+      });
+    }, 200); // Slight delay to ensure re-render
+  };
 
   // 헤더 설정
   React.useEffect(() => {
@@ -147,8 +161,8 @@ const ExhibitViewing: React.FC = () => {
   };
 
   const handleImagePress = (artworkId: number) => {
-    // 페이지로 이동
-    navigation.navigate('HomeScreen');
+    // 페이지로 이동, artworkId 전달
+    navigation.navigate('ExhibitViewingDetail', { artworkId });
   };
 
   const handleScroll = (event: any) => {
@@ -226,7 +240,6 @@ const ExhibitViewing: React.FC = () => {
         style={{ flex: 1 }}
         resizeMode='cover'
       >
-        {/* 반투명 오버레이 */}
         <Overlay />
         <TouchableWithoutFeedback onPress={handleScreenPress}>
           <View>
@@ -248,18 +261,29 @@ const ExhibitViewing: React.FC = () => {
                   width={screenWidth}
                   height={screenHeight}
                   data={images}
-                  renderItem={({ item, index }) => (
-                    <TouchableWithoutFeedback
-                      onPress={() =>
-                        handleImagePress(selectedArtworks[index].id)
-                      }
-                    >
-                      <BackgroundImage
-                        source={{ uri: item }}
-                        resizeMode='cover'
-                      />
-                    </TouchableWithoutFeedback>
-                  )}
+                  renderItem={({ item, index }) =>
+                    item === 'endSlide' ? (
+                      <EndSlide>
+                        <EndSlideText>
+                          전시를 관람해주셔서 감사합니다!
+                        </EndSlideText>
+                        <EndSlideImage
+                          source={require('src/assets/images/character.png')}
+                        />
+                      </EndSlide>
+                    ) : (
+                      <TouchableWithoutFeedback
+                        onPress={() =>
+                          handleImagePress(selectedArtworks[index].id)
+                        }
+                      >
+                        <BackgroundImage
+                          source={{ uri: item }}
+                          resizeMode='cover'
+                        />
+                      </TouchableWithoutFeedback>
+                    )
+                  }
                   onSnapToItem={handleSnapToItem}
                 />
               </Page>
@@ -331,7 +355,9 @@ const ExhibitViewing: React.FC = () => {
               </BannerContainer>
               <TouchableOpacity onPress={handleButtonPress}>
                 <Button>
-                  <ButtonText style={{ color: '#fff' }}>상세보기</ButtonText>
+                  <ButtonText style={{ color: '#fff' }}>
+                    컬렉터의 작품설명 보기
+                  </ButtonText>
                 </Button>
               </TouchableOpacity>
             </TitleWrapper>
@@ -342,18 +368,26 @@ const ExhibitViewing: React.FC = () => {
                 />
                 <ContentContainer style={{ opacity: fadeAnimContent }}>
                   <GuideContainer>
+                    <ClickGuideImage
+                      source={require('src/assets/images/click_guide.png')}
+                    />
                     <GuideWrapperColumn>
                       <GuideText>다음 작품 보기</GuideText>
                       <DragGuideHorizontal isReversed />
                     </GuideWrapperColumn>
-                    <GuideWrapperRow>
+                    {/* <GuideWrapperRow>
                       <GuideText>작품의 정보 보기</GuideText>
                       <DragGuideVertical isReversed />
-                    </GuideWrapperRow>
+                    </GuideWrapperRow> */}
                   </GuideContainer>
                 </ContentContainer>
               </>
             )}
+            {/* {currentVerticalIndex === 1 && (
+              <GuideContainer>
+                <DragGuideVertical isReversed />
+              </GuideContainer>
+            )} */}
           </View>
         </TouchableWithoutFeedback>
       </ImageBackground>
@@ -486,4 +520,31 @@ const GuideText = styled(ButtonText)`
 
 const Red = styled.Text`
   color: ${({ theme }) => theme.colors.cherryRed_6};
+`;
+
+const ClickGuideImage = styled.Image`
+  position: absolute;
+  bottom: ${screenHeight / 2.5}px;
+  right: 146px;
+  width: 77px;
+  height: 71px;
+`;
+
+const EndSlide = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+`;
+
+const EndSlideText = styled.Text`
+  font-size: 24px;
+  color: white;
+  margin-bottom: 20px;
+`;
+
+const EndSlideImage = styled.Image`
+  width: ${screenWidth * 0.8}px;
+  height: ${screenHeight * 0.4}px;
+  margin-bottom: 20px;
 `;
