@@ -66,5 +66,6 @@ export type HomeStackParamList = {
   ExhibitEntrance: undefined;
   ExhibitLoading: undefined;
   ExhibitIntro: undefined;
+  ExhibitViewing: undefined;
   // 전시 부분 설계는 더 고민해보기
 };
