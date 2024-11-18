@@ -79,8 +79,9 @@ const EndCircle = styled.View`
   justify-content: center;
   width: 50px;
   height: 50px;
+  border: solid 1.5px #fff;
   border-radius: 60px;
-  background-color: ${({ theme }) => theme.colors.redBlack};
+  background-color: transparent;
   margin-right: 10px;
 `;
 
