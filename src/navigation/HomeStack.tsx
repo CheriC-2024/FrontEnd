@@ -7,6 +7,7 @@ import {
   ExhibitList,
   ExhibitLoading,
   ExhibitViewing,
+  ExhibitViewingDetail,
   PrivateArtworkInfo,
   PrivateArtworkList,
 } from 'src/screens/_index';
@@ -27,6 +28,10 @@ const CollectingStack = () => {
       <Stack.Screen name='ExhibitList' component={ExhibitList} />
       <Stack.Screen name='ExhibitLoading' component={ExhibitLoading} />
       <Stack.Screen name='ExhibitViewing' component={ExhibitViewing} />
+      <Stack.Screen
+        name='ExhibitViewingDetail'
+        component={ExhibitViewingDetail}
+      />
       <Stack.Screen name='PrivateArtworkList' component={PrivateArtworkList} />
       <Stack.Screen name='PrivateArtworkInfo' component={PrivateArtworkInfo} />
     </Stack.Navigator>
