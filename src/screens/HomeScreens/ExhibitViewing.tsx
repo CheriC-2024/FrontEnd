@@ -285,7 +285,7 @@ const ExhibitViewing: React.FC = () => {
                       <EndSlide>
                         <EndSlideBackground
                           source={{
-                            uri: 'https://i.ibb.co/6ZtyGHn/2-image-3.png',
+                            uri: 'https://i.ibb.co/yhqhcZ8/2-image-0.png',
                           }}
                           resizeMode='cover'
                         />
