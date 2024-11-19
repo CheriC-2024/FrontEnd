@@ -16,15 +16,19 @@ import {
   CircleSlider,
   DragGuideHorizontal,
   DragGuideVertical,
+  ExhibitEndCard,
 } from 'src/components/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import {
+  Body1,
   ButtonText,
   Caption,
+  H5,
   H6,
   Subtitle1,
   Subtitle2,
 } from 'src/styles/typography';
+import { HeartIcon } from 'src/assets/icons/_index';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
@@ -279,14 +283,51 @@ const ExhibitViewing: React.FC = () => {
                   renderItem={({ item, index }) =>
                     item === 'endSlide' ? (
                       <EndSlide>
-                        <EndSlideText>
-                          전시를 관람해주셔서 감사합니다!
-                        </EndSlideText>
-                        <EndSlideImage
+                        <EndSlideBackground
                           source={{
-                            uri: 'https://i.ibb.co/bBm2V6M/IMG-8458-2.png',
+                            uri: 'https://i.ibb.co/6ZtyGHn/2-image-3.png',
                           }}
+                          resizeMode='cover'
                         />
+                        <Overlay />
+                        <EndSlide style={{ zIndex: 10 }}>
+                          <ThanksText>
+                            전시를 관람해주셔서 감사합니다!
+                          </ThanksText>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              marginBottom: 12,
+                            }}
+                          >
+                            <HeartIcon stroke={'#fff'} />
+                            <HeartNum>101</HeartNum>
+                          </View>
+                          <EndSlideText>이 전시를 만든 컬렉터는</EndSlideText>
+                          <ExhibitEndCard
+                            artistName='닉네임'
+                            artistImage='https://i.ibb.co/dPbrz7F/Rectangle.png'
+                            infoText='컬렉터 닉네임님께서 유화 8작, 회화 3작을 보유중이며 지금까지 체리시에 총 5개의 컬렉션 전시를 선보였습니다. 컬렉터 닉네임님의 이번 전시는 닉네임 컬렉터님의 5번째 컬렉션 전시입니다'
+                            category={['유화', '회화']}
+                            comment='매번 전시 테마부터 작품까지 센스가 좋으십니다 항상 잘보고 있어요'
+                            artistId={0}
+                          />
+                          <CommentButton
+                            onPress={() =>
+                              navigation.navigate('ExhibitComments', {
+                                exhibitId: 1,
+                              })
+                            }
+                          >
+                            <Body1>전시 후기, 정보 보러가기</Body1>
+                          </CommentButton>
+                          <ExitButton>
+                            <Body1 style={{ color: '#B0ABAB' }}>
+                              컬렉션 전시 나가기
+                            </Body1>
+                          </ExitButton>
+                        </EndSlide>
                       </EndSlide>
                     ) : (
                       <TouchableWithoutFeedback
@@ -441,7 +482,7 @@ const Overlay = styled.View`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(18, 0, 0, 0.7);
+  background-color: rgba(18, 0, 0, 0.8);
 `;
 
 const ScrollTextTitle = styled(Subtitle2)`
@@ -553,17 +594,40 @@ const EndSlide = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  position: relative;
 `;
 
-const EndSlideText = styled.Text`
-  font-size: 24px;
+const EndSlideBackground = styled(ImageBackground)`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+`;
+
+const ThanksText = styled(H5)`
+  margin-bottom: 12px;
   color: white;
-  margin-bottom: 20px;
 `;
 
-const EndSlideImage = styled.Image`
-  width: ${screenWidth * 0.8}px;
-  height: ${screenHeight * 0.4}px;
-  margin-bottom: 20px;
+const HeartNum = styled(H6)`
+  color: white;
+`;
+
+const EndSlideText = styled(ButtonText)`
+  margin-bottom: 8px;
+  color: white;
+`;
+
+const CommentButton = styled.TouchableOpacity`
+  margin-top: 40px;
+  padding: 12px;
+  border-radius: 32px;
+  background-color: #fff;
+`;
+
+const ExitButton = styled.TouchableOpacity`
+  margin-top: 8px;
 `;
