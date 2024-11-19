@@ -6,14 +6,12 @@ import {
   Dimensions,
   ScrollView,
   SafeAreaView,
-  Image,
   View,
   ImageBackground,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import Carousel from 'react-native-reanimated-carousel';
-import { MusicOffIcon, MusicOnIcon } from 'src/assets/icons/_index.js';
 import {
   CircleSlider,
   DragGuideHorizontal,
@@ -84,25 +82,35 @@ const ExhibitViewing: React.FC = () => {
   const selectedArtworks = dummyData.artworks; // 더미 데이터에서 artworks 가져오기
   const images = [
     ...dummyData.artworks.map((artwork) => artwork.fileName),
-    ...(showEndSlide ? ['endSlide'] : []),
+    ...['endSlide'], // endSlide 추가
   ];
 
-  // Handle END button click
   const handleEndButtonClick = () => {
-    setShowEndSlide(true);
-    setTimeout(() => {
-      carouselRef.current?.scrollTo({
-        index: images.length - 1,
-        animated: true,
-      });
-    }, 200); // Slight delay to ensure re-render
+    if (!showEndSlide) {
+      setShowEndSlide(true);
+    }
+
+    //세로 인덱스 스크롤 초기화
+    scrollViewRef.current?.scrollTo({
+      y: 0,
+      animated: false,
+    });
+    setCurrentVerticalIndex(0);
+
+    // 가로 인덱스 마지막으로 이동
+    const endIndex = images.length - 1;
+    carouselRef.current?.scrollTo({
+      index: endIndex,
+      animated: true,
+    });
+    setCurrentHorizontalIndex(endIndex);
   };
 
   // 헤더 설정
   React.useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
-        leftButtonType: 'icon',
+        leftButtonType: undefined,
         iconColor: 'transparent',
         headerTransparent: true,
       }),
@@ -136,9 +144,14 @@ const ExhibitViewing: React.FC = () => {
   };
 
   const handleCirclePress = (index: number) => {
-    setCurrentHorizontalIndex(index);
-    // CircleSlider 선택 시 Carousel로 이동
-    carouselRef.current?.scrollTo({ index, animated: true });
+    if (index === selectedArtworks.length) {
+      // Handle "END" button press
+      handleEndButtonClick();
+    } else {
+      // Navigate to the selected artwork
+      setCurrentHorizontalIndex(index);
+      carouselRef.current?.scrollTo({ index, animated: true });
+    }
   };
 
   const handleButtonPress = () => {
@@ -234,9 +247,11 @@ const ExhibitViewing: React.FC = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#120000' }}>
       <ImageBackground
-        source={{
-          uri: selectedArtworks[currentHorizontalIndex]?.fileName,
-        }}
+        source={
+          currentHorizontalIndex === images.length - 1 //endSlide인 경우
+            ? { uri: 'https://i.ibb.co/7YvsNd7/2.jpg' }
+            : { uri: selectedArtworks[currentHorizontalIndex]?.fileName }
+        }
         style={{ flex: 1 }}
         resizeMode='cover'
       >
@@ -268,7 +283,9 @@ const ExhibitViewing: React.FC = () => {
                           전시를 관람해주셔서 감사합니다!
                         </EndSlideText>
                         <EndSlideImage
-                          source={require('src/assets/images/character.png')}
+                          source={{
+                            uri: 'https://i.ibb.co/bBm2V6M/IMG-8458-2.png',
+                          }}
                         />
                       </EndSlide>
                     ) : (
@@ -345,22 +362,24 @@ const ExhibitViewing: React.FC = () => {
               />
             </CircleSliderWrapper>
             {/* 작품 제목 표시 */}
-            <TitleWrapper>
-              <BannerContainer>
-                <BannerBackground>
-                  <Subtitle1>
-                    {selectedArtworks[currentHorizontalIndex]?.name}
-                  </Subtitle1>
-                </BannerBackground>
-              </BannerContainer>
-              <TouchableOpacity onPress={handleButtonPress}>
-                <Button>
-                  <ButtonText style={{ color: '#fff' }}>
-                    컬렉터의 작품설명 보기
-                  </ButtonText>
-                </Button>
-              </TouchableOpacity>
-            </TitleWrapper>
+            {currentHorizontalIndex !== images.length - 1 && (
+              <TitleWrapper>
+                <BannerContainer>
+                  <BannerBackground>
+                    <Subtitle1>
+                      {selectedArtworks[currentHorizontalIndex]?.name}
+                    </Subtitle1>
+                  </BannerBackground>
+                </BannerContainer>
+                <TouchableOpacity onPress={handleButtonPress}>
+                  <Button>
+                    <ButtonText style={{ color: '#fff' }}>
+                      컬렉터의 작품설명 보기
+                    </ButtonText>
+                  </Button>
+                </TouchableOpacity>
+              </TitleWrapper>
+            )}
             {isOverlayVisible && (
               <>
                 <AnimatedOverlayBackground
