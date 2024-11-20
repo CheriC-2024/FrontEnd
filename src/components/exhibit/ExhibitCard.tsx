@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableWithoutFeedback } from 'react-native';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
 import { HeartIcon, ViewsIcon } from 'src/assets/icons/_index';
 import styled from 'styled-components/native';
@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
 
 export interface ExhibitCardProps {
   imageSource: string;
@@ -30,6 +31,7 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
   tags,
   isCurrent,
 }) => {
+  const navigation = useNavigation();
   // 텍스트 애니메이션 스타일
   const textStyle = useAnimatedStyle(() => {
     const opacity = withTiming(isCurrent ? 1 : 0, { duration: 400 });
@@ -37,43 +39,48 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
   });
 
   return (
-    <CardWrapper>
-      <CardContainer>
-        <BackgroundContainer source={{ uri: imageSource }}>
-          <Animated.View style={textStyle}>
-            <TitleContainer>
-              <Title>{title}</Title>
-            </TitleContainer>
-            <TagsContainer>
-              {tags.map((tag, idx) => (
-                <Tag key={idx}># {tag}</Tag>
-              ))}
-            </TagsContainer>
-          </Animated.View>
-        </BackgroundContainer>
-      </CardContainer>
-      <Animated.View style={textStyle}>
-        <InfoContainer>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <ProfileImage source={{ uri: profileImage }} />
-            <CollectorName>{collectorName}</CollectorName>
-          </View>
-          <StatsContainer>
-            <ViewsIcon />
-            <StatText>{likes}</StatText>
-            <View style={{ width: 4 }} />
-            <HeartIcon fill={'#413333'} stroke={''} width={16} height={16} />
-            <StatText>{favorites}</StatText>
-          </StatsContainer>
-        </InfoContainer>
-      </Animated.View>
-    </CardWrapper>
+    <TouchableWithoutFeedback // TODO: 전시 아이디 params로 넘기기
+      onPress={() => {
+        navigation.navigate('HomeStack', { screen: 'ExhibitEntrance' });
+      }}
+    >
+      <CardWrapper>
+        <CardContainer>
+          <BackgroundContainer source={{ uri: imageSource }}>
+            <Animated.View style={textStyle}>
+              <TitleContainer>
+                <Title>{title}</Title>
+              </TitleContainer>
+              <TagsContainer>
+                {tags.map((tag, idx) => (
+                  <Tag key={idx}># {tag}</Tag>
+                ))}
+              </TagsContainer>
+            </Animated.View>
+          </BackgroundContainer>
+        </CardContainer>
+        <Animated.View style={textStyle}>
+          <InfoContainer>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <ProfileImage source={{ uri: profileImage }} />
+              <CollectorName>{collectorName}</CollectorName>
+            </View>
+            <StatsContainer>
+              <ViewsIcon />
+              <StatText>{likes}</StatText>
+              <View style={{ width: 4 }} />
+              <HeartIcon fill={'#413333'} stroke={''} width={16} height={16} />
+              <StatText>{favorites}</StatText>
+            </StatsContainer>
+          </InfoContainer>
+        </Animated.View>
+      </CardWrapper>
+    </TouchableWithoutFeedback>
   );
 };
 
 export default ExhibitCard;
 
-// 스타일 정의
 const CardWrapper = styled.View`
   width: 240px;
 `;

@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled, { useTheme } from 'styled-components/native';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { Artwork } from 'src/interfaces/collection';
 import { imageAssets } from '../assets/DB/imageAssets';
+import { Subtitle2 } from 'src/styles/typography';
 
 interface CircleSliderProps {
-  // 전시 보기 때문에 추가함 -> 추후에 리팩토링해야될 듯,,
   selectedArtworks?: Artwork[];
-  selectedFollowers?: { profileImage: string }[]; // 팔로워 데이터 추가
+  selectedFollowers?: { profileImage: string }[];
   currentIndex: number;
   onCirclePress: (index: number) => void;
   isDescriptionFilled?: (index: number) => boolean;
   scrollViewRef: React.RefObject<ScrollView>;
+  backgroundColor?: string;
+  showEndButton?: boolean;
 }
 
 const CircleSlider: React.FC<CircleSliderProps> = ({
@@ -21,6 +23,8 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
   onCirclePress,
   isDescriptionFilled = () => false,
   scrollViewRef,
+  backgroundColor = '#fcfcfc',
+  showEndButton = false,
 }) => {
   const theme = useTheme();
 
@@ -28,17 +32,19 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
     <View
       style={{
         paddingBottom: parseInt(theme.spacing.s3),
-        backgroundColor: '#fcfcfc',
+        backgroundColor,
       }}
     >
       <CircleScrollView ref={scrollViewRef}>
         {selectedArtworks?.map((artwork, index) => (
           <TouchableOpacity
             key={`artwork-${index}`}
-            onPress={() => onCirclePress(index)}
+            onPress={() => onCirclePress(index)} // Regular circle press
           >
             <Circle isActive={currentIndex === index}>
-              {artwork.fileName && (
+              {artwork.fileName && /^https?:\/\//.test(artwork.fileName) ? (
+                <CircleImage source={{ uri: artwork.fileName }} />
+              ) : (
                 <CircleImage source={imageAssets[artwork.fileName]} />
               )}
               {isDescriptionFilled(index) && <Overlay />}
@@ -50,20 +56,39 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
             </Circle>
           </TouchableOpacity>
         ))}
-        {selectedFollowers?.map((follower, index) => (
+        {showEndButton && (
           <TouchableOpacity
-            key={`follower-${index}`}
-            onPress={() => onCirclePress(index)}
+            key='end-button'
+            onPress={() => onCirclePress(selectedArtworks.length)}
           >
-            <Circle isActive={currentIndex === index}>
-              <CircleImage source={{ uri: follower.profileImage }} />
-            </Circle>
+            <EndCircle isActive={currentIndex === selectedArtworks.length}>
+              <EndText isActive={currentIndex === selectedArtworks.length}>
+                END
+              </EndText>
+            </EndCircle>
           </TouchableOpacity>
-        ))}
+        )}
       </CircleScrollView>
     </View>
   );
 };
+
+const EndCircle = styled.View<{ isActive: boolean }>`
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 60px;
+  margin-right: 10px;
+  background-color: transparent;
+  border-style: ${({ isActive }) => (isActive ? 'dashed' : 'solid')};
+  border-color: ${({ isActive }) => (isActive ? '#FF5555' : '#fff')};
+  border-width: 1.7px;
+`;
+
+const EndText = styled(Subtitle2)<{ isActive: boolean }>`
+  color: ${({ isActive }) => (isActive ? '#FF5555' : '#fff')};
+`;
 
 const Circle = styled.View<{ isActive: boolean }>`
   align-items: center;

@@ -10,6 +10,7 @@ import {
   profileReducer,
   themeReducer,
   userReducer,
+  commentReducer,
 } from '../slices/_index';
 
 const store = configureStore({
@@ -18,6 +19,7 @@ const store = configureStore({
     artwork: artworkReducer,
     auth: authReducer,
     collection: collectionReducer,
+    comment: commentReducer,
     cover: coverReducer,
     follow: followReducer,
     exhibit: exhibitReducer,
