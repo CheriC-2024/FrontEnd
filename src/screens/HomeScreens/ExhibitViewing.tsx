@@ -320,7 +320,7 @@ const ExhibitViewing: React.FC = () => {
                               })
                             }
                           >
-                            <Body1>전시 후기, 정보 보러가기</Body1>
+                            <Body1>방명록 남기러 가기</Body1>
                           </CommentButton>
                           <ExitButton>
                             <Body1 style={{ color: '#B0ABAB' }}>
