@@ -4,33 +4,32 @@ import {
   ImageBackground,
   PanResponder,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import styled from 'styled-components/native';
 import { useNavigation } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import TitleSubtitle from 'src/components/TitleSubtitle';
-import { Body1, ButtonText } from 'src/styles/typography';
-
-const commentsRow1 = [
-  '미술작품 보시는 센스가 돋보이는 전시였습니다. 잘봤습니다.',
-  '미술작품 보시는 센스가 돋보이는 전시였습니다.',
-  '전시 정말 재미있게 봤어요!',
-];
-
-const commentsRow2 = [
-  '예술적 감각이 뛰어난 전시였습니다.',
-  '정말 영감을 많이 받았어요!',
-  '미술작품 감상하는 시간이 좋았습니다.',
-];
+import { Body1, ButtonText, Caption } from 'src/styles/typography';
+import {
+  CommentIcon,
+  MenuIcon,
+  ThumbsUpIcon,
+  ThumbsUpIconFilled,
+} from 'src/assets/icons/_index';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
 
 const ExhibitComments: React.FC = () => {
-  const row1Anim = useRef(new Animated.Value(0)).current;
-  const row2Anim = useRef(new Animated.Value(-300)).current; // 두번째 줄
+  const navigation = useNavigation();
+  const comments = useSelector((state: RootState) => state.comment.comments);
 
   const sensitivity = 0.1; // 민감도
-  const movementLimit = 200; // 드래그 범위
+  const movementLimit = 180 * comments.length; // 드래그 범위
   const animationDuration = 10000; // 애니메이션 재생시간
-  const navigation = useNavigation();
+
+  const row1Anim = useRef(new Animated.Value(0)).current;
+  const row2Anim = useRef(new Animated.Value(-movementLimit + 200)).current; // 두번째 줄
 
   // 헤더 설정
   useEffect(() => {
@@ -49,7 +48,7 @@ const ExhibitComments: React.FC = () => {
   const animateRow1 = () => {
     Animated.loop(
       Animated.timing(row1Anim, {
-        toValue: -300, // 좌측 이동
+        toValue: -movementLimit, // 좌측 이동
         duration: animationDuration,
         useNativeDriver: true,
       }),
@@ -85,7 +84,6 @@ const ExhibitComments: React.FC = () => {
     },
   });
 
-  // PanResponder for Row 2
   const panResponderRow2 = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
@@ -97,8 +95,13 @@ const ExhibitComments: React.FC = () => {
     },
   });
 
-  const handleCardPress = (comment: string) => {
-    navigation.navigate('ExhibitCommentsDetail', { comment });
+  const handleCardPress = (commentId: string) => {
+    const selectedComment = comments.find((c) => c.id === commentId);
+    if (selectedComment) {
+      navigation.navigate('ExhibitCommentsDetail', {
+        comment: selectedComment,
+      });
+    }
   };
 
   const handleAddCommentPress = () => {
@@ -121,13 +124,30 @@ const ExhibitComments: React.FC = () => {
       />
       <RowContainer {...panResponderRow1.panHandlers}>
         <AnimatedRow style={{ transform: [{ translateX: row1Anim }] }}>
-          {commentsRow1.map((comment, index) => (
+          {comments.map((comment, index) => (
             <TouchableOpacity
-              key={index}
-              onPress={() => handleCardPress(comment)}
+              key={comment.id}
+              onPress={() => handleCardPress(comment.id)}
             >
               <CommentCard>
-                <CommentText>{comment}</CommentText>
+                <TruncatedText numberOfLines={5} ellipsizeMode='tail'>
+                  {comment.text}
+                </TruncatedText>
+                <CommentIconsContainer>
+                  <IconWrapper>
+                    <CommentIcon />
+                    <IconText>2</IconText>
+                  </IconWrapper>
+                  <IconWrapper>
+                    <View style={{ paddingBottom: 4 }}>
+                      <ThumbsUpIconFilled />
+                    </View>
+                    <IconText>2</IconText>
+                  </IconWrapper>
+                  <IconWrapper style={{ marginLeft: 0 }}>
+                    <MenuIcon fill={'#B0ABAB'} />
+                  </IconWrapper>
+                </CommentIconsContainer>
               </CommentCard>
             </TouchableOpacity>
           ))}
@@ -135,13 +155,30 @@ const ExhibitComments: React.FC = () => {
       </RowContainer>
       <RowContainer {...panResponderRow2.panHandlers}>
         <AnimatedRow style={{ transform: [{ translateX: row2Anim }] }}>
-          {commentsRow2.map((comment, index) => (
+          {comments.map((comment, index) => (
             <TouchableOpacity
-              key={index}
-              onPress={() => handleCardPress(comment)}
+              key={comment.id}
+              onPress={() => handleCardPress(comment.id)}
             >
               <CommentCard>
-                <CommentText>{comment}</CommentText>
+                <TruncatedText numberOfLines={5} ellipsizeMode='tail'>
+                  {comment.text}
+                </TruncatedText>
+                <CommentIconsContainer>
+                  <IconWrapper>
+                    <CommentIcon />
+                    <IconText>2</IconText>
+                  </IconWrapper>
+                  <IconWrapper>
+                    <View style={{ paddingBottom: 4 }}>
+                      <ThumbsUpIconFilled />
+                    </View>
+                    <IconText>2</IconText>
+                  </IconWrapper>
+                  <IconWrapper style={{ marginLeft: 0 }}>
+                    <MenuIcon fill={'#B0ABAB'} />
+                  </IconWrapper>
+                </CommentIconsContainer>
               </CommentCard>
             </TouchableOpacity>
           ))}
@@ -195,14 +232,39 @@ const CommentCard = styled.View`
   width: 200px;
   height: 200px;
   margin: 0 14px;
-  padding: 20px;
+  padding: 16px;
   background-color: white;
   justify-content: center;
   align-items: center;
+  elevation: 3;
+  position: relative;
 `;
 
-const CommentText = styled(ButtonText)`
+const CommentIconsContainer = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  position: absolute; /* Position icons at the bottom */
+  bottom: 16px; /* Adjust as needed for spacing */
+  width: 110%; /* Adjust width to control icon spacing */
+`;
+
+const TruncatedText = styled(ButtonText)`
   color: ${({ theme }) => theme.colors.redBlack};
+  text-align: center; /* Center the text inside the card */
+  margin-bottom: 24px; /* Add space between text and icons */
+  line-height: 22px;
+`;
+
+const IconWrapper = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-left: 8px; /* Add spacing between each icon group */
+`;
+
+const IconText = styled(Caption)`
+  color: ${({ theme }) => theme.colors.grey_6}; /* Set text color */
+  margin-left: 4px; /* Space between icon and number */
 `;
 
 const FloatingButton = styled.TouchableOpacity`
