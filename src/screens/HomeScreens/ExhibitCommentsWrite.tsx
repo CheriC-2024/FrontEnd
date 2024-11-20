@@ -3,12 +3,15 @@ import { ImageBackground } from 'react-native';
 import styled from 'styled-components/native';
 import { useNavigation } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { useDispatch } from 'react-redux';
+import { addComment } from 'src/slices/commentSlice';
 
 const BACKGROUND_IMAGE = { uri: 'https://i.ibb.co/yhqhcZ8/2-image-0.png' };
 
 const ExhibitCommentsWrite: React.FC = () => {
   const [comment, setComment] = useState('');
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   // 헤더 설정
   useEffect(() => {
@@ -22,11 +25,11 @@ const ExhibitCommentsWrite: React.FC = () => {
         headerTransparent: true,
       }),
     );
-  }, [navigation]);
+  }, [navigation, comment]);
 
   const handleComplete = () => {
-    if (comment.trim()) {
-      console.log('Comment Submitted:', comment);
+    if (comment) {
+      dispatch(addComment(comment.trim()));
       navigation.goBack();
     } else {
       console.log('Empty comment, no action taken.');
@@ -44,7 +47,10 @@ const ExhibitCommentsWrite: React.FC = () => {
             placeholderTextColor='#888'
             multiline
             value={comment}
-            onChangeText={(text) => setComment(text)}
+            onChangeText={(text) => {
+              console.log('Input value:', text);
+              setComment(text);
+            }}
             maxLength={150}
           />
         </CommentInputContainer>
