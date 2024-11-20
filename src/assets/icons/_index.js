@@ -19,6 +19,7 @@ export { default as PencilIcon } from './pencil.svg';
 export { default as RefreshIcon } from './refresh.svg';
 export { default as SendIcon } from './send.svg';
 export { default as SettingIcon } from './setting.svg';
+export { default as SplashIcon } from './splash.svg';
 export { default as ThumbsUpIcon } from './thumbs_up.svg';
 export { default as ThumbsUpIconFilled } from './thumbs_up_fill.svg';
 export { default as HeartIcon } from './heart.svg';

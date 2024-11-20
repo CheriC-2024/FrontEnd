@@ -1,4 +1,3 @@
-// LoginScreen.js
 import React, { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
@@ -9,12 +8,11 @@ import {
 import { WEB_CLIENT_ID } from '@env';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/StackNavigator';
-import { GoogleIcon } from 'src/assets/icons/_index';
-import { H1, Subtitle2 } from '../../styles/typography';
+import { GoogleIcon, SplashIcon } from 'src/assets/icons/_index';
+import { Subtitle1 } from '../../styles/typography';
 import { signInWithGoogleToken } from 'src/api/googleLoginApi';
 import { setTokens } from 'src/slices/authSlice';
 import { useDispatch } from 'react-redux';
-import store from 'src/store';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -68,7 +66,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <Container>
-      <Title>CheriC</Title>
+      <SplashIcon />
       <Button onPress={signInWithGoogle}>
         <GoogleIcon />
         <ButtonText>{`   `}Sign up with Google</ButtonText>
@@ -80,22 +78,21 @@ const LoginScreen: React.FC = () => {
 const Container = styled.View`
   flex: 1;
   align-items: center;
+  justify-content: center;
+  padding-top: 120px;
   background-color: ${({ theme }) => theme.colors.cherryRed_10};
-`;
-
-const Title = styled(H1)`
-  margin-top: 250px;
-  margin-bottom: 350px;
-  color: ${({ theme }) => theme.colors.white};
 `;
 
 const Button = styled.TouchableOpacity`
   flex-direction: row;
-  padding: 12px 32px;
+  justify-content: center;
+  width: 75%;
+  padding: 16px 28px;
+  margin-top: 206px;
   border-radius: ${({ theme }) => theme.radius.l};
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
-const ButtonText = styled(Subtitle2)``;
+const ButtonText = styled(Subtitle1)``;
 
 export default LoginScreen;
