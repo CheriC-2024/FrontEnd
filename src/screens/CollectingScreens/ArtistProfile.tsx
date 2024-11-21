@@ -10,6 +10,7 @@ import {
   ArtistImage,
   ArtistRecord,
   ArtworkItem,
+  ExhibitListCard,
   FollowButton,
   RequestArtworkSheet,
   TabButtons,
@@ -23,6 +24,7 @@ import {
   setCurrentProfileId,
   setInitialFollowers,
 } from 'src/slices/followSlice';
+import { homeExhibitData } from '../data';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -123,10 +125,12 @@ const ArtistProfile: React.FC = () => {
   );
 
   const renderTabContent = () => {
-    if (activeTab === 0) {
+    if (activeTab === 0 || activeTab === 3) {
       return artworks;
     } else if (activeTab === 1) {
       return [{ key: 'artistRecord' }]; // placeholder 아이템
+    } else if (activeTab === 2) {
+      return homeExhibitData;
     }
     return [];
   };
@@ -193,6 +197,37 @@ const ArtistProfile: React.FC = () => {
     if (activeTab === 1) {
       return <ArtistRecord artistHistory={artistHistory} />;
     }
+    if (activeTab === 2) {
+      return (
+        <View style={{ marginVertical: 6, marginHorizontal: 16 }}>
+          <ExhibitListCard
+            imageSource={item.imageSource}
+            title={item.title}
+            collectorName={item.collectorName}
+            profileImage={item.profileImage}
+            likes={item.likes}
+            favorites={item.favorites}
+            tags={item.tags}
+          />
+        </View>
+      );
+    }
+    if (activeTab === 3) {
+      return (
+        <View style={{ marginTop: 16, marginRight: 10 }}>
+          <ArtworkItem
+            artwork={item}
+            selected={false} // 선택 상태 설정 필요 시
+            selectedIndex={0} // 선택 인덱스 설정 필요 시
+            onSelect={() =>
+              navigation.navigate('ArtworkInfo', {
+                artworkId: item.id,
+              })
+            }
+          />
+        </View>
+      );
+    }
     return null;
   };
 
@@ -252,10 +287,10 @@ const ArtistProfile: React.FC = () => {
       <FlatList
         data={renderTabContent()}
         extraData={activeTab}
-        key={activeTab === 0 ? '3-columns' : '1-column'}
+        key={activeTab === 0 || activeTab === 3 ? '3-columns' : '1-column'}
         keyExtractor={(_, index) => index.toString()}
         renderItem={renderItem}
-        numColumns={activeTab === 0 ? 3 : 1}
+        numColumns={activeTab === 0 || activeTab === 3 ? 3 : 1}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false },
@@ -264,7 +299,7 @@ const ArtistProfile: React.FC = () => {
         stickyHeaderIndices={[0]}
         contentContainerStyle={{ marginTop: 110, paddingTop: 280, zIndex: 2 }}
         columnWrapperStyle={
-          activeTab === 0
+          activeTab === 0 || activeTab === 3
             ? {
                 alignSelf: 'flex-start',
                 paddingLeft: 16,
