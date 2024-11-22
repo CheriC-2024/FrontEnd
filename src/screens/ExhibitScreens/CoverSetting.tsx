@@ -71,7 +71,7 @@ const CoverSetting: React.FC = () => {
     data: extractedProperties,
     isLoading: isCloudVisionLoading,
     isError,
-  } = useCloudVision(artIds, 'COLOR', true);
+  } = useCloudVision(artIds, 'IMAGE_PROPERTIES', true);
 
   useEffect(() => {
     if (selectedArtworks.length > 0 && selectedArtworksChanged()) {
