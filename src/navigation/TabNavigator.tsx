@@ -106,7 +106,7 @@ const TabNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
-        name='MyCheriC'
+        name='MyCheric'
         component={MyCheriCScreen}
         options={{
           tabBarIcon: ({ color }) => (

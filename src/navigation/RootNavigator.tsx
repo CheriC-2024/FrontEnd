@@ -6,13 +6,14 @@ import { RootStackParamList } from './types';
 import CollectingStack from './CollectingStack';
 import ExhibitStack from './ExhibitStack';
 import HomeStack from './HomeStack';
+import MyCheriCStack from './MyCheriCStack';
 
 const Nav = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator: React.FC = () => {
   return (
     <Nav.Navigator
-      //initialRouteName='Stack'
+      initialRouteName='Stack'
       screenOptions={{ headerShown: false }}
     >
       <Nav.Screen name='Tabs' component={Tabs} />
@@ -20,6 +21,7 @@ const RootNavigator: React.FC = () => {
       <Nav.Screen name='CollectingStack' component={CollectingStack} />
       <Nav.Screen name='Exhibit' component={ExhibitStack} />
       <Nav.Screen name='HomeStack' component={HomeStack} />
+      <Nav.Screen name='MyCheric' component={MyCheriCStack} />
     </Nav.Navigator>
   );
 };
