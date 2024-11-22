@@ -10,6 +10,7 @@ const MyCheriCStack = () => {
     <Stack.Navigator
       screenOptions={{
         animationEnabled: false,
+        headerShown: false,
       }}
     >
       <Stack.Screen
