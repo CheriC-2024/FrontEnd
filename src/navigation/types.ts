@@ -7,7 +7,7 @@ export type RootStackParamList = {
   CollectingStack: undefined;
   Exhibit: undefined;
   HomeStack: undefined;
-  MyCheric: undefined;
+  MyChericStack: undefined;
 };
 
 // 네비게이션 바 타입 정의

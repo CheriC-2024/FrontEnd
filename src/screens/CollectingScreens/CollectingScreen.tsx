@@ -102,7 +102,7 @@ const CollectingScreen: React.FC = () => {
       <ArtistSectionWrapper>
         <H5>내가 팔로우한 작가 소식</H5>
         <FlatList
-          data={artistData}
+          data={[...artistData].reverse()}
           keyExtractor={(item) => item.id}
           horizontal
           initialNumToRender={2}
@@ -125,7 +125,7 @@ const CollectingScreen: React.FC = () => {
               <TouchableOpacity onPress={() => {}}>
                 <ArtworkImage
                   source={{
-                    uri: 'https://i.ibb.co/7vMp7Cd/unsplash-5-NE6m-X0-WVf-Q.png',
+                    uri: item.backgroundImage,
                   }}
                 />
               </TouchableOpacity>
@@ -152,9 +152,7 @@ const CollectingScreen: React.FC = () => {
               category={item.description}
               bio={item.bio}
               artistId={item.id}
-              backgroundImage={
-                'https://i.ibb.co/zbJrkTn/unsplash-2-Qg4y32pd-Cc.png'
-              }
+              backgroundImage={item.backgroundImage}
             />
           )}
           contentContainerStyle={{ paddingTop: 8, paddingBottom: 20 }}
@@ -308,9 +306,17 @@ const CollectingScreen: React.FC = () => {
                   </View>
                 ))}
               </Swiper>
-
               {/* Swiper 외부에 고정된 버튼 */}
-              <Button onPress={() => Alert.alert('Button Pressed')}>
+              <Button
+                onPress={() =>
+                  navigation.navigate('MyChericStack', {
+                    screen: 'PrivateArtRegisterStack',
+                    params: {
+                      screen: 'AddArtwork',
+                    },
+                  })
+                }
+              >
                 <ButtonContent>
                   <ButtonText>내가 소장한 작품 등록하러 가기</ButtonText>
                   <ButtonIcon

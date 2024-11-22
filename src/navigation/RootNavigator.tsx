@@ -21,7 +21,7 @@ const RootNavigator: React.FC = () => {
       <Nav.Screen name='CollectingStack' component={CollectingStack} />
       <Nav.Screen name='Exhibit' component={ExhibitStack} />
       <Nav.Screen name='HomeStack' component={HomeStack} />
-      <Nav.Screen name='MyCheric' component={MyCheriCStack} />
+      <Nav.Screen name='MyChericStack' component={MyCheriCStack} />
     </Nav.Navigator>
   );
 };
