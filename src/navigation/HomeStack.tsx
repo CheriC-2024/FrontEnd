@@ -18,7 +18,7 @@ import { HomeStackParamList } from './types';
 
 const Stack = createStackNavigator<HomeStackParamList>();
 
-const CollectingStack = () => {
+const HomeStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -50,4 +50,4 @@ const CollectingStack = () => {
   );
 };
 
-export default CollectingStack;
+export default HomeStack;
