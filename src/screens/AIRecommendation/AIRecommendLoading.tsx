@@ -11,11 +11,7 @@ import {
   setCloudVisionLabels,
   setPrevSelectedArt,
 } from 'src/slices/aiRecommendSlice';
-import {
-  useCloudVision,
-  useChatGptAIThemes,
-  useChatGptAITitles,
-} from '../../api/hooks/useAIQueries';
+import { useCloudVision, useChatGpt } from '../../api/hooks/useAIQueries';
 import { useImmersiveMode } from 'src/hooks/_index';
 import GradientBackground from 'src/styles/GradientBackground';
 import styled from 'styled-components/native';
@@ -59,9 +55,32 @@ const AIRecommendLoading: React.FC = () => {
       console.log('selectedArtIds 변경 감지:', selectedArtIds);
       dispatch(setPrevSelectedArt(selectedArtIds));
     }
-  }, [selectedArtIds, hasSelectedArtChanged, dispatch]);
+  }, [selectedArtIds, prevSelectedArt, dispatch]);
 
   // TODO: 로딩 상태 유지 후 페이지 이동 ----일단 이동----API 연결시에 고치도록...
+  // useEffect(() => {
+  //   if (source === 'ThemeSetting' && isThemeSuccess && aiThemesData) {
+  //     dispatch(setAIThemes(aiThemesData.result));
+  //     dispatch(setAIThemeReason(aiThemesData.reason));
+  //     navigation.navigate('AIRecommendTheme', { source });
+  //   } else if (
+  //     source === 'DescriptionSetting' &&
+  //     isTitleSuccess &&
+  //     aiTitlesData
+  //   ) {
+  //     dispatch(setAITitle(aiTitlesData.result));
+  //     dispatch(setAITitleReason(aiTitlesData.reason));
+  //     navigation.navigate('AIRecommendDescription', { source });
+  //   }
+  // }, [
+  //   source,
+  //   isThemeSuccess,
+  //   isTitleSuccess,
+  //   aiThemesData,
+  //   aiTitlesData,
+  //   dispatch,
+  //   navigation,
+  // ]);
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -70,32 +89,41 @@ const AIRecommendLoading: React.FC = () => {
       } else if (source === 'DescriptionSetting') {
         navigation.navigate('AIRecommendDescription', { source });
       }
-    }, 2000);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [navigation, source]);
+
   // Cloud Vision API 호출
   const { data: cloudVisionData } = useCloudVision(
     missingArtIds,
-    'LABEL',
+    'LABEL_DETECTION',
     true,
   );
 
   // Cloud Vision API 데이터를 Redux 상태에 저장 및 확인
   useEffect(() => {
-    if (cloudVisionData) {
-      console.log('Cloud Vision API 호출 성공:', cloudVisionData);
-      dispatch(
-        setCloudVisionLabels([...cloudVisionLabels, ...cloudVisionData]),
+    if (cloudVisionData && missingArtIds.length > 0) {
+      const newLabels = cloudVisionData.filter(
+        (newLabel) =>
+          !cloudVisionLabels.some((label) => label.artId === newLabel.artId),
       );
+
+      if (newLabels.length > 0) {
+        console.log('Cloud Vision API 호출 성공:', cloudVisionData);
+        dispatch(setCloudVisionLabels([...cloudVisionLabels, ...newLabels]));
+      }
     }
-  }, [cloudVisionData, cloudVisionLabels, dispatch, missingArtIds]);
+  }, [cloudVisionData, dispatch]);
 
   // ChatGPT API 호출 여부 제어 및 상태 확인
-  const shouldCallChatGptForThemes =
-    cloudVisionLabels.length > 0 &&
-    (aiThemes.length === 0 || hasSelectedArtChanged) &&
-    source === 'ThemeSetting';
+  const shouldCallChatGptForThemes = React.useMemo(
+    () =>
+      cloudVisionLabels.length > 0 &&
+      (aiThemes.length === 0 || hasSelectedArtChanged) &&
+      source === 'ThemeSetting',
+    [cloudVisionLabels, aiThemes.length, hasSelectedArtChanged, source],
+  );
 
   const shouldCallChatGptForTitles =
     cloudVisionLabels.length > 0 &&
@@ -110,38 +138,30 @@ const AIRecommendLoading: React.FC = () => {
     data: aiThemesData,
     isSuccess: isThemeSuccess,
     refetch: refetchThemes,
-  } = useChatGptAIThemes(cloudVisionLabels, shouldCallChatGptForThemes);
+  } = useChatGpt('THEME', cloudVisionLabels, shouldCallChatGptForThemes);
 
   // ChatGPT API 호출 훅 (TITLE)
   const {
     data: aiTitlesData,
     isSuccess: isTitleSuccess,
     refetch: refetchTitles,
-  } = useChatGptAITitles(cloudVisionLabels, shouldCallChatGptForTitles);
+  } = useChatGpt('TITLE', cloudVisionLabels, shouldCallChatGptForTitles);
 
   // 선택된 작품이 변경될 때 ChatGPT API 다시 호출
   useEffect(() => {
-    if (hasSelectedArtChanged) {
-      if (source === 'ThemeSetting' && shouldCallChatGptForThemes) {
-        console.log('ChatGPT API 테마 호출 재시작');
-        refetchThemes();
-      } else if (
-        source === 'DescriptionSetting' &&
-        shouldCallChatGptForTitles
-      ) {
-        console.log('ChatGPT API 제목 호출 재시작');
-        refetchTitles();
-      }
-      dispatch(setPrevSelectedArt(selectedArtIds)); // 상태 업데이트
+    if (hasSelectedArtChanged && shouldCallChatGptForThemes) {
+      console.log('ChatGPT API 테마 호출 재시작');
+      refetchThemes();
+    }
+    if (hasSelectedArtChanged && shouldCallChatGptForTitles) {
+      console.log('ChatGPT API 테마 호출 재시작');
+      refetchTitles();
     }
   }, [
-    hasSelectedArtChanged,
-    source,
     refetchThemes,
     refetchTitles,
     shouldCallChatGptForThemes,
     shouldCallChatGptForTitles,
-    dispatch,
   ]);
 
   // 테마 상태 업데이트 및 화면 전환
