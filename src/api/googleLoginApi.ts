@@ -11,7 +11,7 @@ export const signInWithGoogleToken = async (idToken) => {
     });
 
     const { accessToken, refreshToken, firstLogin } = response.data.data;
-
+    console.log(accessToken);
     return { accessToken, refreshToken, firstLogin };
   } catch (error) {
     console.error('Error during Google sign-in:', error);
