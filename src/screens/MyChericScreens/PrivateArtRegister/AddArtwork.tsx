@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, TouchableOpacity, Text } from 'react-native';
+import { useEffect } from 'react';
+import { ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -8,17 +8,23 @@ import { Container } from 'src/styles/layout';
 import { Subtitle2 } from 'src/styles/typography';
 import { PlusIcon, XIcon } from 'src/assets/icons/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from 'src/store';
+import {
+  setImgUrls,
+  updateArtBasicInfo,
+} from 'src/slices/registerPrivateArtworkSlice';
 
 const AddArtwork: React.FC = () => {
   const navigation = useNavigation();
-  const [images, setImages] = useState<string[]>([]);
-  const [selectedImage, setSelectedImage] = useState<number>(0);
-  const [privateArtName, setPrivateArtName] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  const dispatch = useDispatch<AppDispatch>();
+  const { artBasicInfo, imgUrls } = useSelector(
+    (state: RootState) => state.registerPrivateArtwork,
+  );
 
   // 헤더 설정
   useEffect(() => {
-    const isNextEnabled = privateArtName.trim().length > 0;
+    const isNextEnabled = artBasicInfo.name.trim().length > 0;
     navigation.setOptions(
       headerOptions(navigation, {
         headerRightText: '다음',
@@ -26,7 +32,16 @@ const AddArtwork: React.FC = () => {
         headerRightDisabled: !isNextEnabled,
       }),
     );
-  }, [navigation, privateArtName]);
+    console.log('현재 Redux 상태:', artBasicInfo, imgUrls);
+  }, [navigation, artBasicInfo, imgUrls]);
+
+  const handleNameChange = (name: string) => {
+    dispatch(updateArtBasicInfo({ name }));
+  };
+
+  const handleDescriptionChange = (description: string) => {
+    dispatch(updateArtBasicInfo({ description }));
+  };
 
   const handleAddImage = async (index: number) => {
     const permissionResult =
@@ -43,34 +58,54 @@ const AddArtwork: React.FC = () => {
     });
 
     if (!result.canceled && result.assets) {
-      const newImages = [...images];
-      newImages[index] = result.assets[0].uri; // 해당 인덱스에 이미지를 추가
-      setImages(newImages);
+      const newImageUri = result.assets[0].uri;
 
-      // 대표 이미지 설정
-      if (images.length === 0) {
-        setSelectedImage(index); // 첫 이미지가 대표 이미지로 자동 설정
+      if (index === 0 && !artBasicInfo.imgUrl) {
+        // 첫 번째 이미지 업로드 -> 대표 이미지 설정
+        dispatch(updateArtBasicInfo({ imgUrl: newImageUri }));
+      } else {
+        // 나머지 이미지 추가
+        const updatedImgUrls = [...imgUrls];
+        updatedImgUrls[index - 1] = newImageUri;
+        dispatch(setImgUrls(updatedImgUrls));
       }
     }
   };
 
-  // 이미지 삭제
   const handleRemoveImage = (index: number) => {
-    const newImages = [...images];
-    newImages.splice(index, 1); // 해당 이미지를 삭제
-    setImages(newImages);
-
-    if (selectedImage === index) {
-      // 대표 이미지가 삭제되었을 경우
-      setSelectedImage(newImages.length > 0 ? 0 : -1); // 남은 첫 이미지를 대표 이미지로 설정
-    } else if (selectedImage > index) {
-      setSelectedImage(selectedImage - 1); // 삭제 후 인덱스 조정
+    if (index === 0) {
+      // 대표 이미지 삭제
+      if (imgUrls.length > 0) {
+        // 나머지 이미지 중 첫 번째를 대표 이미지로 설정
+        const [nextMainImage, ...remainingImages] = imgUrls;
+        dispatch(updateArtBasicInfo({ imgUrl: nextMainImage }));
+        dispatch(setImgUrls(remainingImages));
+      } else {
+        // 모든 이미지가 삭제될 경우
+        dispatch(updateArtBasicInfo({ imgUrl: '' }));
+        dispatch(setImgUrls([]));
+      }
+    } else {
+      // 나머지 이미지 삭제
+      const updatedImages = imgUrls.filter((_, i) => i !== index - 1);
+      dispatch(setImgUrls(updatedImages));
     }
   };
 
-  // 대표 이미지 설정
   const handleSelectAsMain = (index: number) => {
-    setSelectedImage(index);
+    if (index === 0 || !imgUrls[index - 1]) return;
+
+    const selectedImage = imgUrls[index - 1];
+    const remainingImages = imgUrls.filter((_, i) => i !== index - 1);
+
+    // 대표 이미지 변경
+    const previousMainImage = artBasicInfo.imgUrl;
+    dispatch(updateArtBasicInfo({ imgUrl: selectedImage }));
+    if (previousMainImage) {
+      remainingImages.unshift(previousMainImage); // 이전 대표 이미지를 나머지 배열로 이동
+    }
+
+    dispatch(setImgUrls(remainingImages));
   };
 
   return (
@@ -88,14 +123,22 @@ const AddArtwork: React.FC = () => {
             <ImageContainer>
               {Array.from({ length: 3 }).map((_, index) => (
                 <ImageWrapper key={index}>
-                  {images[index] ? (
+                  {index === 0 && artBasicInfo.imgUrl ? (
                     <TouchableOpacity onPress={() => handleSelectAsMain(index)}>
                       <UploadedImageWrapper>
-                        <UploadedImage source={{ uri: images[index] }} />
+                        <UploadedImage source={{ uri: artBasicInfo.imgUrl }} />
                         <Overlay />
-                        {selectedImage === index && (
-                          <MainImageLabel>대표 사진</MainImageLabel>
-                        )}
+                        <MainImageLabel>대표 사진</MainImageLabel>
+                        <RemoveButton onPress={() => handleRemoveImage(index)}>
+                          <XIcon fill={'#fff'} width={14} height={14} />
+                        </RemoveButton>
+                      </UploadedImageWrapper>
+                    </TouchableOpacity>
+                  ) : imgUrls[index - 1] ? (
+                    <TouchableOpacity onPress={() => handleSelectAsMain(index)}>
+                      <UploadedImageWrapper>
+                        <UploadedImage source={{ uri: imgUrls[index - 1] }} />
+                        <Overlay />
                         <RemoveButton onPress={() => handleRemoveImage(index)}>
                           <XIcon fill={'#fff'} width={14} height={14} />
                         </RemoveButton>
@@ -115,8 +158,8 @@ const AddArtwork: React.FC = () => {
           label={'소장 작품의 이름'}
           placeholder={'소장하신 작품의 이름을 입력해주세요'}
           maxLength={50}
-          value={privateArtName}
-          onChangeText={setPrivateArtName}
+          value={artBasicInfo.name}
+          onChangeText={handleNameChange}
           required
           style={{ marginTop: 24, paddingHorizontal: 16 }}
         />
@@ -126,8 +169,8 @@ const AddArtwork: React.FC = () => {
             '컬렉터님만의 소장 작품 소개를 작성해주세요\nex) 이 작품은 작가님의 꿈을 펼친다는 의미가 담겨있는 스토리가 숨어있는 재밌는 작품이에요!'
           }
           maxLength={300}
-          value={description}
-          onChangeText={setDescription}
+          value={artBasicInfo.description}
+          onChangeText={handleDescriptionChange}
           style={{ marginTop: 24, paddingBottom: 20, paddingHorizontal: 16 }}
         />
       </ScrollView>
