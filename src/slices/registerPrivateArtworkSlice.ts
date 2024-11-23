@@ -38,7 +38,7 @@ const initialState: RegisterPrivateArtworkState = {
   artistName: '',
   price: 0,
   isPriceOpen: false,
-  fileUrl: [],
+  fileUrl: ['https://i.ibb.co/7XGGXPy/94-0-art-image.jpg'], // 임시
   imgUrls: [],
 };
 
