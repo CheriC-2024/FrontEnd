@@ -89,7 +89,7 @@ const BackgroundImageContainer = styled(Animated.View)`
   top: 0;
   left: 0;
   right: 0;
-  height: 170px;
+  height: 160px;
   z-index: 2;
 `;
 
