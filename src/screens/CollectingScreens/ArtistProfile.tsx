@@ -236,7 +236,7 @@ const ArtistProfile: React.FC = () => {
       <AnimatedHeaderOverlay
         artistName={artist.name}
         artworkCount={artworks.length}
-        backgroundImage='https://i.ibb.co/1vmZ82r/3.png'
+        backgroundImage='https://i.ibb.co/tYdwY2f/Frame-5211.png'
         scrollY={scrollY}
       />
       <ProfileImageContainer
