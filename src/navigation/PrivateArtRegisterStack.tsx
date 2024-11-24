@@ -10,7 +10,7 @@ import {
 
 const Stack = createStackNavigator<PrivateArtRegisterParamList>();
 
-const MyCheriCStack = () => {
+const PrivateArtRegisterStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -25,4 +25,4 @@ const MyCheriCStack = () => {
   );
 };
 
-export default MyCheriCStack;
+export default PrivateArtRegisterStack;

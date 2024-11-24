@@ -7,7 +7,7 @@ export type RootStackParamList = {
   CollectingStack: undefined;
   Exhibit: undefined;
   HomeStack: undefined;
-  MyChericStack: undefined;
+  MyChericStack: { screen: string };
 };
 
 // 네비게이션 바 타입 정의
@@ -77,6 +77,7 @@ export type HomeStackParamList = {
 export type MyChericStackParamList = {
   MyChericScreen: undefined;
   PrivateArtRegister: undefined;
+  ArtistRegister: undefined;
 };
 
 export type PrivateArtRegisterParamList = {
@@ -84,4 +85,11 @@ export type PrivateArtRegisterParamList = {
   AddArtworkInfo: undefined;
   AddDocs: undefined;
   RegisterCompletion: undefined;
+};
+
+export type ArtistRegisterParamList = {
+  AddResume: undefined;
+  AddInfo: undefined;
+  AddDocs: undefined;
+  Completion: undefined;
 };
