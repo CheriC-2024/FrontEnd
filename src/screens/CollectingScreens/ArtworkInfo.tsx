@@ -27,7 +27,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { artworkId = 101, newCollectionName } = route.params || {}; //101 임시 id
+  const { artworkId = 434, newCollectionName } = route.params || {}; //101 임시 id
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<Array<number>>(
@@ -159,15 +159,15 @@ const ArtworkInfo: React.FC = () => {
             size={28}
             style={{ marginRight: 4 }}
           />
-          <Subtitle2>김작가의 작품 설명</Subtitle2>
+          <Subtitle2>{artistData.artist.name}의 작품 설명</Subtitle2>
         </ArtistInfo>
         <ArtworkInfoCard>
           <ArtworkBio>
-            안녕하세요 저는 현재 10년 경력의 작가 네번째 작가라고 합니다. 이번
-            작품은 제 어릴적 좋아하던 동화책에서 영감을 받아 작업한 작품이에요.
-            여러분도 어릴적 좋아하던 동화의 주인공이 있지 않은가요? 제가
-            좋아하는 주인공인 피터팬을 모티브로 세상을 자유롭게 여행하는 한
-            아이의 이야기를 담았습니다.
+            Canyon Road는 제가 느낀 자연의 에너지를 담아낸 작품입니다. 이 길을
+            걸으며 보았던 색감, 곡선, 그리고 빛의 움직임이 마치 춤추는 것
+            같았고, 이를 화폭 위에 생생히 표현하고자 했습니다. 현실의 풍경이
+            주는 경이로움에 제 상상력을 더해 새로운 형태로 재구성한 이 작품은
+            자연이 가진 본질적인 아름다움을 탐구하는 과정이었습니다.
           </ArtworkBio>
         </ArtworkInfoCard>
         <SectionTitle>작품 기본 정보</SectionTitle>
@@ -277,12 +277,12 @@ const ArtworkInfo: React.FC = () => {
 };
 
 const tableItems = [
-  { label: '작가', content: '네번째작가' },
-  { label: '시리즈', content: '아몬드 나무' },
+  { label: '작가', content: '이강원' },
+  { label: '시리즈', content: 'Nichols Canyon' },
   { label: '작품 크기', content: '740mm * 920mm' },
   { label: '재질(사용재료)', content: '캔버스에 유화' },
-  { label: '제작시기', content: '1890년' },
-  { label: '작품 분야', content: '회화, 서양화' },
+  { label: '제작시기', content: '1990년' },
+  { label: '작품 분야', content: '유화, 회화' },
 ];
 
 const ArtworkImage = styled.Image`

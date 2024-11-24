@@ -1,10 +1,11 @@
 import axiosInstance from './axiosInstance';
+import axiosLocal from './axiosLocal';
 
 export const collectionApi = {
   // 사용자별 컬렉션 가져오기
   userCollections: async (userId: number) => {
     try {
-      const response = await axiosInstance.get('/collection', {
+      const response = await axiosLocal.get('/collection', {
         params: { userId },
       });
       // response.data에 collections 배열이 있는지 확인
@@ -21,7 +22,7 @@ export const collectionApi = {
   // 컬렉션 ID로 작품 목록 가져오기
   getArtworks: async (collectionIds: number[]) => {
     try {
-      const response = await axiosInstance.post('/collection/all', {
+      const response = await axiosLocal.post('/collection/all', {
         collectionIds,
       });
       if (response.data && response.data.collections) {

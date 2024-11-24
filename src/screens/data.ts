@@ -6,6 +6,7 @@ export const artistData = [
     description: '뉴미디어',
     followerCount: '조회 1회',
     bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
+    backgroundImage: 'https://i.ibb.co/zbJrkTn/unsplash-2-Qg4y32pd-Cc.png',
   },
   {
     id: 11,
@@ -14,6 +15,7 @@ export const artistData = [
     description: '회화',
     followerCount: '조회 3회',
     bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
+    backgroundImage: 'https://i.ibb.co/C1QyCkS/IMG-8457.png',
   },
   {
     id: 12,
@@ -22,6 +24,7 @@ export const artistData = [
     description: '뉴미디어 • 회화',
     followerCount: '조회 23회',
     bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
+    backgroundImage: 'https://i.ibb.co/93HJzxC/107-0-art-image.jpg',
   },
   {
     id: 13,
@@ -30,6 +33,7 @@ export const artistData = [
     description: '동양화',
     followerCount: '조회 17회',
     bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
+    backgroundImage: 'https://i.ibb.co/FWQfHVC/87-0-art-image.jpg',
   },
   {
     id: 14,
@@ -38,22 +42,7 @@ export const artistData = [
     description: '뉴미디어 • 회화',
     followerCount: '조회 5회',
     bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
-  },
-  {
-    id: 15,
-    name: '닉네임2',
-    image: 'https://i.ibb.co/dPbrz7F/Rectangle.png',
-    description: '뉴미디어 • 회화',
-    followerCount: '조회 5회',
-    bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
-  },
-  {
-    id: 16,
-    name: '닉네임3',
-    image: 'https://i.ibb.co/dPbrz7F/Rectangle.png',
-    description: '뉴미디어 • 회화',
-    followerCount: '조회 5회',
-    bio: '안녕하세요 저는 신진 작가 00입니다. 저는 주로 이러이러한 분야를 주로 하고 있고 저는 특히 이러한 이력이 있다.',
+    backgroundImage: 'https://i.ibb.co/NWVKgd6/10-0-art-image.jpg',
   },
 ];
 
@@ -63,7 +52,82 @@ export const artworkData = [
     categoryTitle: '컬렉터님을 위한 추천', // 큰 타이틀
     sections: [
       {
-        title: '회화', // 섹션 타이틀
+        title: '수채화',
+        data: [
+          { id: '36', image: 'https://i.ibb.co/Dr3Jp1p/136-0-art-image.jpg' },
+          { id: '37', image: 'https://i.ibb.co/S3m2hGn/128-0-art-image.jpg' },
+          { id: '38', image: 'https://i.ibb.co/M1nzfLr/119-0-art-image.jpg' },
+          { id: '39', image: 'https://i.ibb.co/cCprtP2/114-0-art-image.jpg' },
+          { id: '40', image: 'https://i.ibb.co/93HJzxC/107-0-art-image.jpg' },
+        ],
+      },
+      {
+        title: '유화', // 섹션 타이틀
+        data: [
+          { id: '6', image: 'https://i.ibb.co/ZJPgyBc/181-0-art-image.jpg' },
+          { id: '7', image: 'https://i.ibb.co/LYgRpTR/178-0-art-image.jpg' },
+          { id: '8', image: 'https://i.ibb.co/hyQ2M6X/166-0-art-image.jpg' },
+          { id: '9', image: 'https://i.ibb.co/6wC0Xfx/156-0-art-image.jpg' },
+          { id: '10', image: 'https://i.ibb.co/Dp05rfw/157-0-art-image.jpg' },
+        ],
+      },
+    ],
+  },
+  {
+    categoryTitle: '체리시의 미술 작품', // 큰 타이틀
+    sections: [
+      {
+        title: '뉴미디어', // 섹션 타이틀
+        data: [
+          { id: '11', image: 'https://i.ibb.co/YcR3t5x/2-0-art-image.jpg' },
+          { id: '12', image: 'https://i.ibb.co/NTttP54/3-0-art-image.jpg' },
+          { id: '13', image: 'https://i.ibb.co/2vfnXyB/21-0-art-image.jpg' },
+          { id: '14', image: 'https://i.ibb.co/NWVKgd6/10-0-art-image.jpg' },
+          { id: '15', image: 'https://i.ibb.co/myCmn6w/13-0-art-image.jpg' },
+        ],
+      },
+      {
+        title: '디자인', // 섹션 타이틀
+        data: [
+          { id: '16', image: 'https://i.ibb.co/7XGGXPy/94-0-art-image.jpg' },
+          { id: '20', image: 'https://i.ibb.co/Wn7QN8S/67-0-art-image.jpg' },
+          { id: '18', image: 'https://i.ibb.co/xg4Z38Q/89-0-art-image.jpg' },
+          { id: '17', image: 'https://i.ibb.co/FWQfHVC/87-0-art-image.jpg' },
+          { id: '19', image: 'https://i.ibb.co/7KtjZ65/83-0-art-image.jpg' },
+        ],
+      },
+      {
+        title: '드로잉',
+        data: [
+          { id: '21', image: 'https://i.ibb.co/1nmfc80/64-0-art-image.jpg' },
+          { id: '22', image: 'https://i.ibb.co/V9XSxbv/54-0-art-image.jpg' },
+          { id: '23', image: 'https://i.ibb.co/jT0znqJ/52-0-art-image.jpg' },
+          { id: '24', image: 'https://i.ibb.co/HNhhH4Q/47-0-art-image.png' },
+          { id: '25', image: 'https://i.ibb.co/mh0fjMC/49-0-art-image.jpg' },
+        ],
+      },
+      {
+        title: '판화',
+        data: [
+          { id: '26', image: 'https://i.ibb.co/28dJY7h/210-0-art-image.jpg' },
+          { id: '27', image: 'https://i.ibb.co/xLMSWjt/196-0-art-image.jpg' },
+          { id: '28', image: 'https://i.ibb.co/k42kHv8/192-0-art-image.jpg' },
+          { id: '29', image: 'https://i.ibb.co/jLbkVRc/204-0-art-image.jpg' },
+        ],
+      },
+      {
+        title: '동양화',
+        data: [
+          { id: '31', image: 'https://i.ibb.co/Tb4Pcsm/36-0-art-image.jpg' },
+          { id: '32', image: 'https://i.ibb.co/qx0DjG3/33-0-art-image.jpg' },
+          { id: '33', image: 'https://i.ibb.co/pfVnhNf/29-0-art-image.jpg' },
+          { id: '34', image: 'https://i.ibb.co/GsBYHt4/27-0-art-image.jpg' },
+          { id: '35', image: 'https://i.ibb.co/gt5RntJ/26-0-art-image.jpg' },
+        ],
+      },
+
+      {
+        title: '회화',
         data: [
           { id: 101, image: 'https://i.ibb.co/0DXj42m/2-image-1.png' },
           { id: 102, image: 'https://i.ibb.co/SrVkBNF/2-image-2.jpg' },
@@ -77,61 +141,6 @@ export const artworkData = [
           { id: 110, image: 'https://i.ibb.co/dQNkn71/IMG-8455.png' },
         ],
       },
-      {
-        title: '디자인', // 섹션 타이틀
-        data: [
-          { id: '6', image: 'https://i.ibb.co/yhqhcZ8/2-image-0.png' },
-          { id: '7', image: 'https://i.ibb.co/WBhPjkK/9-image-5.jpg' },
-          { id: '8', image: 'https://i.ibb.co/xf3YfMM/9-image-4.jpg' },
-          { id: '9', image: 'https://i.ibb.co/pKw9gZK/9-image-3.jpg' },
-          { id: '10', image: 'https://i.ibb.co/rxnXKF4/9-image-2.jpg' },
-        ],
-      },
-    ],
-  },
-  {
-    categoryTitle: '체리시의 미술 작품', // 큰 타이틀
-    sections: [
-      {
-        title: '뉴미디어', // 섹션 타이틀
-        data: [
-          { id: '11', image: 'https://via.placeholder.com/100' },
-          { id: '12', image: 'https://via.placeholder.com/100' },
-          { id: '13', image: 'https://via.placeholder.com/100' },
-          { id: '14', image: 'https://via.placeholder.com/100' },
-          { id: '15', image: 'https://via.placeholder.com/100' },
-        ],
-      },
-      {
-        title: '디자인', // 섹션 타이틀
-        data: [
-          { id: '16', image: 'https://via.placeholder.com/100' },
-          { id: '17', image: 'https://via.placeholder.com/100' },
-          { id: '18', image: 'https://via.placeholder.com/100' },
-          { id: '19', image: 'https://via.placeholder.com/100' },
-          { id: '20', image: 'https://via.placeholder.com/100' },
-        ],
-      },
-      {
-        title: '드로잉',
-        data: [
-          { id: '21', image: 'https://via.placeholder.com/100' },
-          { id: '22', image: 'https://via.placeholder.com/100' },
-          { id: '23', image: 'https://via.placeholder.com/100' },
-          { id: '24', image: 'https://via.placeholder.com/100' },
-          { id: '25', image: 'https://via.placeholder.com/100' },
-        ],
-      },
-      {
-        title: '판화',
-        data: [
-          { id: '26', image: 'https://via.placeholder.com/100' },
-          { id: '27', image: 'https://via.placeholder.com/100' },
-          { id: '28', image: 'https://via.placeholder.com/100' },
-          { id: '29', image: 'https://via.placeholder.com/100' },
-          { id: '30', image: 'https://via.placeholder.com/100' },
-        ],
-      },
     ],
   },
 ];
@@ -141,51 +150,58 @@ export const artistAndArtworkData = [
     artist: {
       id: 1,
       image: 'https://i.ibb.co/HtpR5VL/image.png',
-      name: '김작가',
-      category: '회화',
-      bio: '안녕하세요 저는 김작가 입니다. 자기소개는 뭐뭐 입니다. 저는 주로 회화를 그립니다.',
+      name: '이강원',
+      category: '유화, 수채화',
+      bio: '저는 색과 빛을 통해 세상을 새롭게 바라보는 화가입니다. 캘리포니아의 풍경과 요크셔의 땅에서 받은 영감을 작품에 담습니다. ',
       followers: 49,
     },
     artworks: [
       {
-        id: 101,
-        name: '아몬드 꽃',
-        fileName: 'https://i.ibb.co/bBm2V6M/IMG-8458-2.png',
+        id: 434,
+        name: 'Canyon Road',
+        fileName: 'https://i.ibb.co/F0m2hBv/160-0-art-image.jpg',
         cherryNum: 4,
         register: 'ARTIST',
       },
       {
+        id: 101,
+        name: '꽃',
+        fileName: 'https://i.ibb.co/YkGcr3f/111111.jpg',
+        cherryNum: 2,
+        register: 'ARTIST',
+      },
+      {
         id: 102,
-        name: '여름',
-        fileName: 'https://i.ibb.co/QNCnwJB/IMG-8456.png',
+        name: '여름언덕',
+        fileName: 'https://i.ibb.co/N3FyC8q/2024-11-21-123517.png',
         cherryNum: 1,
         register: 'ARTIST',
       },
       {
         id: 103,
         name: '봄의 정원',
-        fileName: 'https://i.ibb.co/C1QyCkS/IMG-8457.png',
+        fileName: 'https://i.ibb.co/0G4mxNy/2024-11-21-123532.png',
         cherryNum: 0,
         register: 'ARTIST',
       },
       {
         id: 1101,
         name: '공간',
-        fileName: 'https://i.ibb.co/rxnXKF4/9-image-2.jpg',
+        fileName: 'https://i.ibb.co/P9WMyJC/2024-11-21-123551.png',
         cherryNum: null,
         register: 'COLLECTOR',
       },
       {
         id: 1102,
         name: 'Light',
-        fileName: 'https://i.ibb.co/g9KxdQL/9-image-1.jpg',
+        fileName: 'https://i.ibb.co/p1d5849/2024-11-21-124150.png',
         cherryNum: 1,
         register: 'ARTIST',
       },
       {
         id: 1103,
         name: 'Blue World',
-        fileName: 'https://i.ibb.co/Jz5Y30P/2-image-5.jpg',
+        fileName: 'https://i.ibb.co/q0CxbKc/2024-11-21-124213.png',
         cherryNum: 0,
         register: 'ARTIST',
       },
@@ -199,21 +215,21 @@ export const artistAndArtworkData = [
       {
         id: 1021,
         name: 'Classified',
-        fileName: 'https://i.ibb.co/9y35bRf/4-image-5.jpg',
+        fileName: 'https://i.ibb.co/Hdk7HCd/2024-11-21-124221.png',
         cherryNum: 10,
         register: 'ARTIST',
       },
       {
         id: 1022,
         name: '현',
-        fileName: 'https://i.ibb.co/sQb0Zv0/8-image-4.jpg',
+        fileName: 'https://i.ibb.co/sHG45Nr/2024-11-21-124235.png',
         cherryNum: 1,
         register: 'ARTIST',
       },
       {
         id: 1023,
         name: '포레스트',
-        fileName: 'https://i.ibb.co/Y3mDZ9h/9-image-0.jpg',
+        fileName: 'https://i.ibb.co/Thv0VnJ/06-A33-hockney.jpg',
         cherryNum: 12,
         register: 'ARTIST',
       },
@@ -224,7 +240,7 @@ export const artistAndArtworkData = [
       id: 2,
       image: 'https://i.ibb.co/FDbBJWj/7.png',
       name: '박작가',
-      category: '회화 • 동양화',
+      category: '수채화',
       bio: '안녕하세요 저는 박작가 입니다. 주요 활동은 00있습니다. 자기소개 자기소개개개',
       followers: 266,
     },
@@ -264,7 +280,7 @@ export const artistAndArtworkData = [
       id: 3,
       image: 'https://i.ibb.co/V3K0kjM/3.png',
       name: '이작가',
-      category: '회화 • 뉴미디어',
+      category: '회화 • 수채화',
       bio: '자기소개 자기소개 구경하다가 가세요~',
       followers: 70,
     },
@@ -272,21 +288,21 @@ export const artistAndArtworkData = [
       {
         id: 301,
         name: '산속의 길',
-        fileName: 'https://via.placeholder.com/110',
+        fileName: 'https://i.ibb.co/7XGGXPy/94-0-art-image.jpg',
         cherryNum: 0,
         register: 'ARTIST',
       },
       {
         id: 302,
         name: '바다의 파도',
-        fileName: 'https://via.placeholder.com/136',
+        fileName: 'https://i.ibb.co/Wn7QN8S/67-0-art-image.jpg',
         cherryNum: 2,
         register: 'ARTIST',
       },
       {
         id: 303,
         name: '구름 사이',
-        fileName: 'https://via.placeholder.com/114',
+        fileName: 'https://i.ibb.co/7KtjZ65/83-0-art-image.jpg',
         cherryNum: 2,
         register: 'ARTIST',
       },
