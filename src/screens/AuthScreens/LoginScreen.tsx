@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import messaging from '@react-native-firebase/messaging';
+import DeviceInfo from 'react-native-device-info';
 import { WEB_CLIENT_ID } from '@env';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/StackNavigator';
@@ -23,10 +25,38 @@ const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const dispatch = useDispatch();
 
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
+  const [deviceToken, setDeviceToken] = useState<string | null>(null);
+
   useEffect(() => {
+    // Google Sign-in 초기화
     GoogleSignin.configure({
       webClientId: WEB_CLIENT_ID,
     });
+
+    // FCM 토큰 가져오기
+    const fetchFcmToken = async () => {
+      try {
+        const token = await messaging().getToken();
+        setFcmToken(token);
+        console.log('Login page FCM Token:', token);
+      } catch (error) {
+        console.error('Error fetching FCM token:', error);
+      }
+    };
+    //디바이스 토큰
+    const fetchDeviceToken = async () => {
+      try {
+        const token = await DeviceInfo.getUniqueId();
+        setDeviceToken(token);
+        console.log('Device Token:', token);
+      } catch (error) {
+        console.error('Error fetching Device Token:', error);
+      }
+    };
+
+    fetchFcmToken();
+    fetchDeviceToken();
   }, []);
 
   const signInWithGoogle = async () => {
@@ -35,9 +65,14 @@ const LoginScreen: React.FC = () => {
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.idToken;
 
+      if (!fcmToken) {
+        console.error('FCM token is not available.');
+        return;
+      }
+
       try {
         const { accessToken, refreshToken, firstLogin } =
-          await signInWithGoogleToken(idToken);
+          await signInWithGoogleToken(idToken, fcmToken, deviceToken);
         console.log('isFirstLogin', firstLogin);
 
         // Redux에 토큰값 저장

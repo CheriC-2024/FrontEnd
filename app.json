@@ -19,15 +19,13 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#E52C32"
       },
-      "package": "com.binaryswu.CheriC"
+      "package": "com.binaryswu.CheriC",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-router", "expo-font"],
     "extra": {
       "router": {
         "origin": false

@@ -4,6 +4,7 @@ import * as Font from 'expo-font';
 import { ActivityIndicator, View } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import messaging from '@react-native-firebase/messaging';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from 'styled-components/native';
 import { theme } from 'src/styles/theme';
@@ -16,6 +17,14 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    getFcmToken();
+    subscribe();
+    return () => {
+      subscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -40,10 +49,21 @@ const App = () => {
     loadFonts();
   }, []);
 
+  // FCM 토큰 받기
+  const getFcmToken = async () => {
+    const fcmToken = await messaging().getToken();
+    console.log('[+] FCM Token :: ', fcmToken);
+  };
+
+  // FCM 메시지를 앱이 foreground 상태일 경우 메시지를 수신
+  const subscribe = messaging().onMessage(async (remoteMessage) => {
+    console.log('[+] Remote Message ', JSON.stringify(remoteMessage));
+  });
+
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#E52C32" />
+        <ActivityIndicator size='large' color='#E52C32' />
       </View>
     );
   }

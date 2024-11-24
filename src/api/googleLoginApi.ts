@@ -1,12 +1,12 @@
 import axiosInstance from './axiosInstance';
 
-export const signInWithGoogleToken = async (idToken) => {
+export const signInWithGoogleToken = async (idToken, fcmToken, deviceToken) => {
   try {
     const response = await axiosInstance.get('/users/google-login', {
       headers: {
         'id-token': idToken,
-        'device-token': '1234', // Temporary device token
-        'fcm-token': '1234', // Temporary FCM token
+        'device-token': deviceToken,
+        'fcm-token': fcmToken,
       },
     });
 
