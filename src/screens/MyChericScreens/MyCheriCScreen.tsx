@@ -25,20 +25,20 @@ const MyCheriCScreen: React.FC = () => {
 
   const collectingSettings = [
     { title: '컬렉션 리스트', screen: 'CollectionListScreen' },
-    { title: '소장 작품 등록하기', screen: 'RegisterArtworkScreen' },
+    { title: '소장 작품 등록하기', screen: 'PrivateArtRegister' },
     { title: '등록한 소장 작품', screen: 'RegisteredArtworkScreen' },
     { title: '내가 좋아요한 작품', screen: 'LikedArtworkScreen' },
     { title: '내가 보낸 작품 요청', screen: 'SentRequestsScreen' },
   ];
 
   const extraSettings = [
-    { title: '작가로 인증하기', screen: 'CollectionListScreen' },
+    { title: '작가로 인증하기', screen: 'ArtistRegister' },
     { title: '공지사항 및 이벤트', screen: 'RegisterArtworkScreen' },
     { title: 'CheriC에 문의하기', screen: 'RegisteredArtworkScreen' },
   ];
 
   const handleNavigation = (screen: string) => {
-    navigation.navigate(screen as never);
+    navigation.navigate('MyChericStack', { screen });
   };
 
   return (
