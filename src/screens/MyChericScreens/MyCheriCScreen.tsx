@@ -19,7 +19,7 @@ const MyCheriCScreen: React.FC = () => {
   const exhibitSettings = [
     { title: '내가 게시한 컬렉션 전시', screen: 'PostedCollectionScreen' },
     { title: '내가 좋아요한 컬렉션 전시', screen: 'RequestedCollectionScreen' },
-    { title: '내가 작성한 관람 후기', screen: 'ReviewScreen' },
+    { title: '내가 작성한 방명록', screen: 'ReviewScreen' },
     { title: '작품 구매 내역', screen: 'PurchaseHistoryScreen' },
   ];
 
@@ -153,8 +153,9 @@ const CherryCountWrapper = styled.View`
 
 const ProfileSection = styled.View`
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   padding: 0 16px;
+  margin-top: 8px;
   margin-bottom: 24px;
 `;
 
@@ -162,11 +163,13 @@ const ProfileImage = styled.Image`
   width: 60px;
   height: 60px;
   border-radius: 30px;
-  margin-right: 4px;
+  margin-right: 8px;
+  elevation: 4;
 `;
 
 const ProfileInfo = styled.View`
   flex: 1;
+  margin-top: 4px;
 `;
 
 const Name = styled(H5)``;
@@ -185,6 +188,7 @@ const Tags = styled(TagTitle)`
 
 const ProfileButton = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.redBlack};
+  margin-top: 4px;
   padding: 10px 12px;
   border-radius: 20px;
   elevation: 4;
