@@ -8,6 +8,7 @@ interface ArtworkCategoryProps {
   maxSelection?: number;
   required: boolean;
   style?: ViewStyle;
+  label?: string;
 }
 
 const ArtworkCategory: React.FC<ArtworkCategoryProps> = ({
@@ -16,6 +17,7 @@ const ArtworkCategory: React.FC<ArtworkCategoryProps> = ({
   maxSelection = 2,
   required = false,
   style,
+  label = '작품의 미술 분야',
 }) => {
   // 고정된 카테고리 데이터
   const categories = [
@@ -76,7 +78,9 @@ const ArtworkCategory: React.FC<ArtworkCategoryProps> = ({
   return (
     <Container style={style}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Label>작품의 미술 분야 (최대 {maxSelection}개)</Label>
+        <Label>
+          {label} (최대 {maxSelection}개)
+        </Label>
         {required && <RequiredMark>*</RequiredMark>}
       </View>
       <Grid>
