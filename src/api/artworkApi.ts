@@ -36,6 +36,18 @@ export const fetchArtworkById = async (id: number) => {
   }
 };
 
+// POST 작품 좋아요
+export const addHeart = async (artworkId: number) => {
+  const response = await axiosInstance.post(`/arts/${artworkId}/heart`);
+  return response.data.data;
+};
+
+// DELETE 작품 좋아요
+export const removeHeart = async (artworkId: number) => {
+  const response = await axiosInstance.delete(`/arts/${artworkId}/heart`);
+  return response.data.data;
+};
+
 const artTypeMapping: Record<string, string> = {
   WATER_PAINTING: '수채화',
   OIL_PAINTING: '유화',

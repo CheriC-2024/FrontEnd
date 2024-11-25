@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, FlatList } from 'react-native';
 import styled from 'styled-components/native';
 import {
@@ -6,7 +6,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import { artistAndArtworkData } from '../data'; // 아티스트 및 작품 데이터 불러오기
+import { artistAndArtworkData } from '../data'; // 더미 데이터: 아티스트 및 작품 데이터 불러오기
 import { Container } from 'src/styles/layout';
 import { Caption, H4, H6, Subtitle2 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index.js';
@@ -19,17 +19,23 @@ import {
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Btn, BtnText } from 'src/components/Button';
 import { collections } from './data';
-import ToastMessage from 'src/components/ToastMessage'; // 토스트 메시지 컴포넌트
-import useToastMessage from 'src/hooks/useToastMessage'; // 토스트 훅
+import ToastMessage from 'src/components/ToastMessage';
+import useToastMessage from 'src/hooks/useToastMessage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useArtworkData } from 'src/api/hooks/useArtworkQueries';
+import { useAddHeart, useRemoveHeart } from 'src/api/hooks/useArtworkMutations';
 
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { artworkId, newCollectionName } = route.params || {};
   const { data: artworkData, isLoading, error } = useArtworkData(artworkId);
+  const { mutate: addHeartMutation, isLoading: isAddingHeart } = useAddHeart();
+  const { mutate: removeHeartMutation, isLoading: isRemovingHeart } =
+    useRemoveHeart();
+  const [liked, setLiked] = useState(false); // TODO: 좋아요 누른 작품 조회 API
+  const [heartCount, setHeartCount] = useState(artworkData?.heartCount || 0);
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<Array<number>>(
@@ -37,8 +43,6 @@ const ArtworkInfo: React.FC = () => {
   );
   const [previousSelectedCollections, setPreviousSelectedCollections] =
     useState<Array<number>>([]);
-
-  const [liked, setLiked] = useState(false);
 
   // 토스트 메시지 훅 사용
   const { toastVisible, toastMessage, showToast } = useToastMessage();
@@ -57,7 +61,31 @@ const ArtworkInfo: React.FC = () => {
   );
 
   const toggleLike = () => {
-    setLiked((prev) => !prev);
+    if (isAddingHeart || isRemovingHeart) return; // 중복 요청 방지
+
+    if (liked) {
+      // 좋아요 취소 (DELETE)
+      removeHeartMutation(artworkId, {
+        onSuccess: (newHeartCount) => {
+          setLiked(false); // 좋아요 상태 변경
+          setHeartCount(newHeartCount); // 좋아요 수 갱신
+        },
+        onError: (error) => {
+          console.error('Error removing heart:', error);
+        },
+      });
+    } else {
+      // 좋아요 추가 (POST)
+      addHeartMutation(artworkId, {
+        onSuccess: (newHeartCount) => {
+          setLiked(true); // 좋아요 상태 변경
+          setHeartCount(newHeartCount); // 좋아요 수 갱신
+        },
+        onError: (error) => {
+          console.error('Error adding heart:', error);
+        },
+      });
+    }
   };
 
   const handleOpenBottomSheet = () => {
@@ -138,7 +166,10 @@ const ArtworkInfo: React.FC = () => {
             ))}
           </TagsWrapper>
           <TagsWrapper>
-            <TouchableOpacity onPress={toggleLike}>
+            <TouchableOpacity
+              onPress={toggleLike}
+              disabled={isAddingHeart || isRemovingHeart}
+            >
               <HeartIcon
                 fill={liked ? '#E52C32' : 'none'}
                 stroke={liked ? null : '#120000'}
