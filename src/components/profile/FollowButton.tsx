@@ -11,7 +11,7 @@ interface FollowButtonProps {
   isFollowing: boolean;
   onFollowChange: (isFollowing: boolean) => void; // 상태 변경 콜백
 }
-
+// TODO: 팔로우 리스트 조회 api 갖고와서 현재 유저가 팔로우하는지
 const FollowButton: React.FC<FollowButtonProps> = ({
   userId,
   isFollowing,
