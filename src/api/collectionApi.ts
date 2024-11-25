@@ -51,3 +51,20 @@ export const createCollection = async (data: {
     throw error;
   }
 };
+
+// POST 기존 컬렉션에 작품 추가
+export const addArtworkToCollection = async (
+  collectionId: number,
+  artIds: number[],
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/collections/${collectionId}/art`,
+      { artIds },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error adding artwork to collection:', error);
+    throw error;
+  }
+};

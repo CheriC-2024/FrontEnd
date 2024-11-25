@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { collectionApi, createCollection } from 'src/api/collectionApi';
+import {
+  addArtworkToCollection,
+  collectionApi,
+  createCollection,
+} from 'src/api/collectionApi';
 
 // 유저 컬렉션을 가져오는 훅
 export const useUserCollection = (userId: number) => {
@@ -30,6 +34,25 @@ export const useCreateCollection = () => {
     },
     onError: (error) => {
       console.error('Error during collection creation:', error);
+    },
+  });
+};
+
+// 기존 컬렉션에 작품 추가 훅
+export const useAddArtworkToCollection = () => {
+  return useMutation({
+    mutationFn: ({
+      collectionId,
+      artIds,
+    }: {
+      collectionId: number;
+      artIds: number[];
+    }) => addArtworkToCollection(collectionId, artIds),
+    onSuccess: () => {
+      console.log('Artwork successfully added to collection!');
+    },
+    onError: (error) => {
+      console.error('Failed to add artwork to collection:', error);
     },
   });
 };
