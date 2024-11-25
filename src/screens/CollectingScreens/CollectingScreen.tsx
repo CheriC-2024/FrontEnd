@@ -3,7 +3,6 @@ import {
   View,
   Dimensions,
   Image,
-  Alert,
   FlatList,
   TouchableOpacity,
 } from 'react-native';
@@ -30,8 +29,6 @@ import {
 } from 'src/styles/typography';
 import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
 import LinearGradient from 'react-native-linear-gradient';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const CollectingScreen: React.FC = () => {
   const navigation = useNavigation();
