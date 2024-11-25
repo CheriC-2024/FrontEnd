@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, Animated, Text } from 'react-native';
+import {
+  View,
+  FlatList,
+  Animated,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
 import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -39,14 +45,9 @@ const ArtistProfile: React.FC = () => {
   const { artistId: routeArtistId } = route.params;
 
   const artistId = useSelector((state: RootState) => state.profile.artistId);
-  const followers = useSelector(
-    (state: RootState) => state.follow.followers[routeArtistId] || 0,
-  );
+  console.log('Route params:', routeArtistId);
 
-  console.log('Route params:', artistId);
-  const { artist, artworks, isLoading, error } = useArtistData(artistId!);
-  console.log('Fetched artworks:', artworks);
-  console.log('Fetched artist:', artist);
+  const { user, isLoading, error, isError } = useArtistData(routeArtistId);
 
   // 팔로우 상태 관리
   const [isFollowing, setIsFollowing] = useState(false);
@@ -69,29 +70,29 @@ const ArtistProfile: React.FC = () => {
     );
   }, [navigation]);
 
-  useEffect(() => {
-    // route의 artistId가 변경되면 Redux의 artistId를 업데이트
-    if (routeArtistId && routeArtistId !== artistId) {
-      dispatch(setArtistId(routeArtistId));
-    }
-    if (artist) {
-      dispatch(setInitialFollowers(artist.followers));
-    }
-  }, [routeArtistId, artistId, artist, dispatch]);
+  // useEffect(() => {
+  //   // route의 artistId가 변경되면 Redux의 artistId를 업데이트
+  //   if (routeArtistId && routeArtistId !== artistId) {
+  //     dispatch(setArtistId(routeArtistId));
+  //   }
+  //   if (artist) {
+  //     dispatch(setInitialFollowers(artist.followers));
+  //   }
+  // }, [routeArtistId, artistId, artist, dispatch]);
 
-  useEffect(() => {
-    if (routeArtistId !== null) {
-      dispatch(setCurrentProfileId(routeArtistId));
-    }
-    if (artist) {
-      dispatch(
-        setInitialFollowers({
-          userId: routeArtistId,
-          followers: artist.followers,
-        }),
-      );
-    }
-  }, [routeArtistId, artist, dispatch]);
+  // useEffect(() => {
+  //   if (routeArtistId !== null) {
+  //     dispatch(setCurrentProfileId(routeArtistId));
+  //   }
+  //   if (artist) {
+  //     dispatch(
+  //       setInitialFollowers({
+  //         userId: routeArtistId,
+  //         followers: artist.followers,
+  //       }),
+  //     );
+  //   }
+  // }, [routeArtistId, artist, dispatch]);
 
   useEffect(() => {
     if (route.params?.requestSuccess) {
@@ -126,7 +127,7 @@ const ArtistProfile: React.FC = () => {
 
   const renderTabContent = () => {
     if (activeTab === 0 || activeTab === 3) {
-      return artworks;
+      return; //TODO: 해당 작가 작품 리스트
     } else if (activeTab === 1) {
       return [{ key: 'artistRecord' }]; // placeholder 아이템
     } else if (activeTab === 2) {
@@ -136,7 +137,13 @@ const ArtistProfile: React.FC = () => {
   };
 
   if (isLoading) {
-    return <Container></Container>;
+    return (
+      <ActivityIndicator
+        size={'large'}
+        color={'#E52C32'}
+        style={{ justifyContent: 'center', alignItems: 'center' }}
+      />
+    );
   }
 
   if (error) {
@@ -234,9 +241,9 @@ const ArtistProfile: React.FC = () => {
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
-        artistName={artist.name}
-        artworkCount={artworks.length}
-        backgroundImage='https://i.ibb.co/tYdwY2f/Frame-5211.png'
+        artistName={user.name}
+        artworkCount={1} // TODO: 작품 리스트 API
+        backgroundImage={user.backgroundImgUrl}
         scrollY={scrollY}
       />
       <ProfileImageContainer
@@ -252,7 +259,7 @@ const ArtistProfile: React.FC = () => {
           zIndex: 3,
         }}
       >
-        <ArtistImage image={artist.image} size={88} />
+        <ArtistImage image={user.profileImgUrl} size={88} />
       </ProfileImageContainer>
       <Animated.View
         style={{
@@ -266,19 +273,19 @@ const ArtistProfile: React.FC = () => {
         }}
       >
         <ProfileWrapper>
-          <ArtistName>{artist.name}</ArtistName>
-          <ArtistInfo>{artist.category}</ArtistInfo>
-          <ArtistBio>{artist.bio}</ArtistBio>
+          <ArtistName>{user.name}</ArtistName>
+          <ArtistInfo>{user.artTypes.join(' • ')} 작가</ArtistInfo>
+          <ArtistBio>{user.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
             <FollowCountItem>
               <FollowLabel>팔로워</FollowLabel>
-              <FollowNumber>{followers}</FollowNumber>
+              <FollowNumber>{user.followerAmount}</FollowNumber>
             </FollowCountItem>
             <FollowCountItem>
               <FollowLabel>팔로잉</FollowLabel>
-              <FollowNumber>{artist.followers}</FollowNumber>
+              <FollowNumber>{user.followingAmount}</FollowNumber>
             </FollowCountItem>
           </View>
           <FollowButton userId={routeArtistId} />
@@ -307,12 +314,14 @@ const ArtistProfile: React.FC = () => {
             : null
         }
         ListFooterComponent={
-          <View
-            style={{
-              height:
-                artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
-            }}
-          />
+          <></>
+          // TODO: 작품 리스트 API
+          // <View
+          //   style={{
+          //     height:
+          //       artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
+          //   }}
+          // />
         }
         scrollEventThrottle={16}
       />

@@ -5,7 +5,7 @@ import {
   ArtCategoryHeader,
   ArtworkItem,
   ProfileRow,
-} from '../../components/_index'; // ProfileRow 컴포넌트 import 경로 확인
+} from '../../components/_index';
 import { artistAndArtworkData } from '../data';
 import { Container } from 'src/styles/layout';
 import { useNavigation, useRoute } from '@react-navigation/native';
