@@ -19,6 +19,15 @@ const MyCheriCScreen: React.FC = () => {
   console.log('[MyCheriC Screen Data]', userData);
 
   // TODO: 화면 이름 정리
+
+  const artistSettings = [
+    { title: '나의 작품 등록하기', screen: 'PostedCollectionScreen' },
+    { title: '등록된 나의 작품', screen: 'RequestedCollectionScreen' },
+    { title: '나의 작가 이력', screen: 'ReviewScreen' },
+    { title: '나의 정산 관리', screen: 'PurchaseHistoryScreen' },
+    { title: '내게 온 작품 요청', screen: 'PurchaseHistoryScreen' },
+  ];
+
   const exhibitSettings = [
     { title: '내가 게시한 컬렉션 전시', screen: 'PostedCollectionScreen' },
     { title: '내가 좋아요한 컬렉션 전시', screen: 'RequestedCollectionScreen' },
@@ -87,10 +96,11 @@ const MyCheriCScreen: React.FC = () => {
           <ProfileInfo>
             <Name>{userData.name}</Name>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TagTitle>선호 분야</TagTitle>
+              {!userData.validateArtist && <TagTitle>선호 분야</TagTitle>}
               {userData.artTypes.map((type, index) => (
                 <Tags key={index}>{type}</Tags>
               ))}
+              {userData.validateArtist && <TagTitle> 작가</TagTitle>}
             </View>
           </ProfileInfo>
           <ProfileButton>
@@ -98,7 +108,7 @@ const MyCheriCScreen: React.FC = () => {
           </ProfileButton>
         </ProfileSection>
         <SectionTitle>체리 관리하기</SectionTitle>
-        <CherryCard>
+        <CherryCard style={{ marginBottom: 12 }}>
           <CurrentCherryContainer>
             <CherryLabel>현재 보유중인 체리</CherryLabel>
             <CherryCountWrapper>
@@ -115,6 +125,42 @@ const MyCheriCScreen: React.FC = () => {
             </CherryButton>
           </CherryButtonsWrapper>
         </CherryCard>
+        {userData.validateArtist && (
+          <>
+            <SectionTitle>정산 관리하기</SectionTitle>
+            <CherryCard>
+              <CurrentCherryContainer>
+                <CherryLabel>현재 정산 예정 체리</CherryLabel>
+                <CherryCountWrapper>
+                  <CherryIcon fill={'#E52C32'} width={25} height={22} />
+                  <CherryCount>{userData.myCherryNum}</CherryCount>
+                </CherryCountWrapper>
+              </CurrentCherryContainer>
+              <CherryButtonsWrapper>
+                <CherryButton>
+                  <CherryButtonText>작품 관리하기</CherryButtonText>
+                </CherryButton>
+                <CherryButton>
+                  <CherryButtonText>정산 내역 보기</CherryButtonText>
+                </CherryButton>
+              </CherryButtonsWrapper>
+            </CherryCard>
+          </>
+        )}
+        {userData.validateArtist && (
+          <Section>
+            <SectionTitle>나의 작가 활동</SectionTitle>
+            {artistSettings.map((item, index) => (
+              <ListItem
+                key={index}
+                onPress={() => handleNavigation(item.screen)}
+              >
+                <ListItemText>{item.title}</ListItemText>
+                <ForwardIcon />
+              </ListItem>
+            ))}
+          </Section>
+        )}
         <Section>
           <SectionTitle>나의 컬렉션 전시 활동</SectionTitle>
           {exhibitSettings.map((item, index) => (
