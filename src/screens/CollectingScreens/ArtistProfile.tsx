@@ -323,7 +323,8 @@ const ArtistProfile: React.FC = () => {
       {isRequestSheetVisible && (
         <RequestArtworkSheet
           onClose={handleCloseRequestSheet}
-          artistId={artistId}
+          artistId={routeArtistId}
+          artistContact={artistResume.artistContactRes}
         />
       )}
       <CustomModal

@@ -4,7 +4,6 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Easing,
-  Image,
   Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -21,11 +20,18 @@ import {
 interface RequestArtworkSheetProps {
   onClose: () => void;
   artistId: number | null;
+  artistContact: {
+    email: string;
+    instagram: string;
+    naverBlog: string;
+    twitter: string;
+  };
 }
 
 const RequestArtworkSheet: React.FC<RequestArtworkSheetProps> = ({
   onClose,
   artistId,
+  artistContact,
 }) => {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(300)).current;
@@ -79,28 +85,32 @@ const RequestArtworkSheet: React.FC<RequestArtworkSheetProps> = ({
 
                 <LinksContainer>
                   <Subtitle2>링크</Subtitle2>
-                  <LinkButton
-                    onPress={() =>
-                      Linking.openURL('https://instagram.com/yourInstagram')
-                    }
-                  >
-                    <InstagramIcon />
-                    <LinkText>@hyekyeong</LinkText>
-                  </LinkButton>
-                  <LinkButton
-                    onPress={() =>
-                      Linking.openURL('https://blog.naver.com/yourBlog')
-                    }
-                  >
-                    <BlogIcon />
-                    <LinkText>혜경의 블로그</LinkText>
-                  </LinkButton>
-                  <LinkButton
-                    onPress={() => Linking.openURL('mailto:totom@naver.com')}
-                  >
-                    <EmailIcon />
-                    <LinkText>totom@naver.com</LinkText>
-                  </LinkButton>
+                  {artistContact.instagram && (
+                    <LinkButton
+                      onPress={() => Linking.openURL(artistContact.instagram)}
+                    >
+                      <InstagramIcon />
+                      <LinkText>{artistContact.instagram}</LinkText>
+                    </LinkButton>
+                  )}
+                  {artistContact.naverBlog && (
+                    <LinkButton
+                      onPress={() => Linking.openURL(artistContact.naverBlog)}
+                    >
+                      <BlogIcon />
+                      <LinkText>{artistContact.naverBlog}</LinkText>
+                    </LinkButton>
+                  )}
+                  {artistContact.email && (
+                    <LinkButton
+                      onPress={() =>
+                        Linking.openURL(`mailto:${artistContact.email}`)
+                      }
+                    >
+                      <EmailIcon />
+                      <LinkText>{artistContact.email}</LinkText>
+                    </LinkButton>
+                  )}
                 </LinksContainer>
               </SheetContent>
             </Animated.View>
