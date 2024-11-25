@@ -36,8 +36,6 @@ const ArtistProfile: React.FC = () => {
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
   const { artistId: routeArtistId } = route.params;
-
-  const artistId = useSelector((state: RootState) => state.profile.artistId);
   console.log('Route params:', routeArtistId);
 
   const { user, isLoading, error } = useArtistData(routeArtistId); // 작가 정보 가져오기

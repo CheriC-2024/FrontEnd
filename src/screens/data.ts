@@ -1,6 +1,6 @@
 export const artistData = [
   {
-    id: 10,
+    id: 1,
     name: '민지',
     image: 'https://i.ibb.co/vkK2qF1/Group-4864.png',
     description: '뉴미디어',
@@ -9,7 +9,7 @@ export const artistData = [
     backgroundImage: 'https://i.ibb.co/zbJrkTn/unsplash-2-Qg4y32pd-Cc.png',
   },
   {
-    id: 11,
+    id: 2,
     name: '예림',
     image: 'https://i.ibb.co/VN9334x/01.png',
     description: '회화',
@@ -18,7 +18,7 @@ export const artistData = [
     backgroundImage: 'https://i.ibb.co/C1QyCkS/IMG-8457.png',
   },
   {
-    id: 12,
+    id: 3,
     name: '혜경',
     image: 'https://i.ibb.co/7JZ8xKj/01.png',
     description: '뉴미디어 • 회화',
@@ -54,7 +54,7 @@ export const artworkData = [
       {
         title: '수채화',
         data: [
-          { id: '36', image: 'https://i.ibb.co/Dr3Jp1p/136-0-art-image.jpg' },
+          { id: 36, image: 'https://i.ibb.co/Dr3Jp1p/136-0-art-image.jpg' },
           { id: '37', image: 'https://i.ibb.co/S3m2hGn/128-0-art-image.jpg' },
           { id: '38', image: 'https://i.ibb.co/M1nzfLr/119-0-art-image.jpg' },
           { id: '39', image: 'https://i.ibb.co/cCprtP2/114-0-art-image.jpg' },
