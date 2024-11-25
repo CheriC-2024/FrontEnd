@@ -25,7 +25,10 @@ import CustomModal from 'src/components/Modal';
 import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
-import { useArtistData } from 'src/api/hooks/useArtistQueries';
+import {
+  useArtistData,
+  useArtistResumeData,
+} from 'src/api/hooks/useArtistQueries';
 import {
   setCurrentProfileId,
   setInitialFollowers,
@@ -47,7 +50,12 @@ const ArtistProfile: React.FC = () => {
   const artistId = useSelector((state: RootState) => state.profile.artistId);
   console.log('Route params:', routeArtistId);
 
-  const { user, isLoading, error, isError } = useArtistData(routeArtistId);
+  const { user, isLoading, error } = useArtistData(routeArtistId); // 작가 정보 가져오기
+  const {
+    data: artistResume,
+    isLoading: resumeLoading,
+    error: resumeError,
+  } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
 
   // 팔로우 상태 관리
   const [isFollowing, setIsFollowing] = useState(false);
@@ -136,17 +144,11 @@ const ArtistProfile: React.FC = () => {
     return [];
   };
 
-  if (isLoading) {
-    return (
-      <ActivityIndicator
-        size={'large'}
-        color={'#E52C32'}
-        style={{ justifyContent: 'center', alignItems: 'center' }}
-      />
-    );
+  if (isLoading && resumeLoading) {
+    return;
   }
 
-  if (error) {
+  if (error && resumeError) {
     return (
       <Container>
         <Text>데이터를 가져오는 중 오류가 발생했습니다.</Text>
@@ -202,7 +204,7 @@ const ArtistProfile: React.FC = () => {
       );
     }
     if (activeTab === 1) {
-      return <ArtistRecord artistHistory={artistHistory} />;
+      return <ArtistRecord artistResume={artistResume} />;
     }
     if (activeTab === 2) {
       return (
@@ -342,34 +344,6 @@ const ArtistProfile: React.FC = () => {
       />
     </View>
   );
-};
-
-// 작가 이력 로컬 데이터 TODO: API 연결
-const artistHistory = {
-  education: [
-    '서울여자대학교, 산업디자인전공 학사',
-    '서울여자대학교 대학원, 산업디자인전공 석사',
-  ],
-  soloExhibitions: [
-    { year: '2024', title: 'Art OOOO 2024', location: 'OOOO, 서울' },
-    { year: '2022', title: '다시보는 World, 2022', location: 'OOOO, 서울' },
-  ],
-  groupExhibitions: [
-    { year: '2024', title: 'Art OOOO 2024', location: 'OOOO, 서울' },
-    { year: '2023', title: 'OOOO 2023', location: 'OOOO, 서울' },
-    { year: '2023', title: 'OOOO OOOO 2023', location: 'OO, 광주' },
-  ],
-  collections: [
-    '서울여자대학교 미술관',
-    'OOOO OOO 미술관',
-    'OOOOOOO아트 전시관',
-  ],
-  awards: [
-    { year: '2024', title: '제24회 OOOO OO전 입선' },
-    { year: '2021', title: '제12회 OOOO전 대상' },
-    { year: '2020', title: '제20회 공모전 수상' },
-  ],
-  residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
 };
 
 const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`
