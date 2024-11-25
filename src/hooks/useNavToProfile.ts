@@ -16,7 +16,7 @@ const useNavToProfile = () => {
           params: { artistId: userId },
         });
       } else {
-        navigation.navigate('CollectingStack', {
+        navigation.navigate('HomeStack', {
           screen: 'CollectorProfile',
           params: { collectorId: userId },
         });
