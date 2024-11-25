@@ -15,6 +15,7 @@ import { Subtitle1 } from '../../styles/typography';
 import { signInWithGoogleToken } from 'src/api/googleLoginApi';
 import { setTokens } from 'src/slices/authSlice';
 import { useDispatch } from 'react-redux';
+import { fetchAndSetUserData } from 'src/api/userApi';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -81,6 +82,7 @@ const LoginScreen: React.FC = () => {
         if (firstLogin) {
           navigation.replace('Signup');
         } else {
+          await dispatch(fetchAndSetUserData()); // redux에 유저 정보 저장
           navigation.replace('Tabs');
         }
       } catch (apiError) {

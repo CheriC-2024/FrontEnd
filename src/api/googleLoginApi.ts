@@ -1,3 +1,4 @@
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import axiosInstance from './axiosInstance';
 
 export const signInWithGoogleToken = async (idToken, fcmToken, deviceToken) => {
@@ -42,6 +43,29 @@ export const signUp = async (signupData) => {
     return response.data;
   } catch (error) {
     console.error('Error during signup:', error);
+    throw error;
+  }
+};
+
+// Google 로그아웃
+export const googleSignOut = async () => {
+  try {
+    await GoogleSignin.signOut(); // Google 계정 로그아웃
+    console.log('Google account signed out.');
+  } catch (error) {
+    console.error('Error during Google sign-out:', error);
+    throw error;
+  }
+};
+
+// 서버 로그아웃
+export const logoutFromServer = async () => {
+  try {
+    const response = await axiosInstance.delete('/users/google-logout'); // 서버 로그아웃 API 호출
+    console.log('Logged out from server:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error during server logout:', error);
     throw error;
   }
 };

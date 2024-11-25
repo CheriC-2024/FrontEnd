@@ -15,6 +15,7 @@ import { ProgressBar } from 'src/components/_index';
 import { Container } from 'src/styles/layout';
 import { OIcon, XIcon } from 'src/assets/icons/_index';
 import { signUp } from 'src/api/googleLoginApi';
+import { fetchAndSetUserData } from 'src/api/userApi';
 
 const SignupScreen3: React.FC = () => {
   const theme = useTheme();
@@ -61,7 +62,7 @@ const SignupScreen3: React.FC = () => {
     try {
       const response = await signUp(signupData); // 회원가입 API 호출
       console.log('회원가입 성공:', response);
-
+      await dispatch(fetchAndSetUserData()); // redux에 유저 정보 저장
       // 회원가입 성공 후 다음 화면으로 이동
       navigation.navigate('Tabs');
     } catch (error) {

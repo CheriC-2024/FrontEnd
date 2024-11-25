@@ -1,19 +1,22 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { View, ScrollView } from 'react-native';
-import { useSelector } from 'react-redux';
-import { selectProfileImage } from 'src/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { ButtonText, Caption, H4, H5, Subtitle2 } from 'src/styles/typography';
-import { RootState } from 'src/store';
+import store, { RootState } from 'src/store';
 import { Container } from 'src/styles/layout';
 import { CherryIcon, ForwardIcon } from 'src/assets/icons/_index';
 import { useNavigation } from '@react-navigation/native';
+import { googleSignOut, logoutFromServer } from 'src/api/googleLoginApi';
+import { clearUserData } from 'src/slices/getUserSlice';
+import { clearTokens } from 'src/slices/authSlice';
 
 const MyCheriCScreen: React.FC = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
-  //TODO: 유저 정보 불러오는 API 연결
-  const { nickname, interests } = useSelector((state: RootState) => state.user);
-  const profileImage = useSelector(selectProfileImage);
+  const userData = useSelector((state: RootState) => state.getUser);
+
+  console.log('[MyCheriC Screen Data]', userData);
 
   // TODO: 화면 이름 정리
   const exhibitSettings = [
@@ -37,6 +40,37 @@ const MyCheriCScreen: React.FC = () => {
     { title: 'CheriC에 문의하기', screen: 'RegisteredArtworkScreen' },
   ];
 
+  const handleLogout = async () => {
+    try {
+      console.log('Starting logout process');
+
+      // Google 로그아웃
+      console.log('Attempting Google sign-out');
+      await googleSignOut();
+      console.log('Google sign-out successful');
+
+      // 서버 로그아웃
+      console.log('Attempting server logout');
+      await logoutFromServer();
+      console.log('Server logout successful');
+
+      // Redux 상태 초기화
+      console.log('Before clearing Redux state:', store.getState());
+      dispatch(clearUserData());
+      dispatch(clearTokens());
+      console.log('After clearing Redux state:', store.getState());
+
+      // 로그인 화면으로 이동
+      console.log('Navigating to Login screen');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Stack', params: { screen: 'Login' } }],
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   const handleNavigation = (screen: string) => {
     navigation.navigate('MyChericStack', { screen });
   };
@@ -45,13 +79,18 @@ const MyCheriCScreen: React.FC = () => {
     <Container removePadding>
       <ScrollView showsVerticalScrollIndicator={false}>
         <ProfileSection>
-          <ProfileImage source={{ uri: profileImage }} />
+          <ProfileImage
+            source={{
+              uri: userData.profileImgUrl || 'https://i.ibb.co/1RwzTLM/08.png',
+            }} // 경고문 방지용
+          />
           <ProfileInfo>
-            <Name>닉네임</Name>
+            <Name>{userData.name}</Name>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TagTitle>선호 분야</TagTitle>
-              <Tags>유화</Tags>
-              <Tags>회화</Tags>
+              {userData.artTypes.map((type, index) => (
+                <Tags key={index}>{type}</Tags>
+              ))}
             </View>
           </ProfileInfo>
           <ProfileButton>
@@ -64,7 +103,7 @@ const MyCheriCScreen: React.FC = () => {
             <CherryLabel>현재 보유중인 체리</CherryLabel>
             <CherryCountWrapper>
               <CherryIcon fill={'#E52C32'} width={25} height={22} />
-              <CherryCount>10</CherryCount>
+              <CherryCount>{userData.myCherryNum}</CherryCount>
             </CherryCountWrapper>
           </CurrentCherryContainer>
           <CherryButtonsWrapper>
@@ -102,6 +141,10 @@ const MyCheriCScreen: React.FC = () => {
               <ForwardIcon />
             </ListItem>
           ))}
+          <ListItem onPress={handleLogout}>
+            <ListItemText>로그아웃</ListItemText>
+            <ForwardIcon />
+          </ListItem>
         </Section>
       </ScrollView>
     </Container>
