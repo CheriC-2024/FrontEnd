@@ -45,7 +45,7 @@ const userSlice = createSlice({
 
 // 디폴트 이미지를 반환하는 Selector 추가
 export const selectProfileImage = (state: { user: UserState }) =>
-  state.user.profileImage || 'https://i.ibb.co/sQ0hGm7/08.png';
+  state.user.profileImage || 'https://i.ibb.co/1RwzTLM/08.png';
 
 export const {
   setNickname,
