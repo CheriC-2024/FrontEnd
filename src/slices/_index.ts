@@ -6,6 +6,7 @@ export { default as commentReducer } from './commentSlice';
 export { default as coverReducer } from './coverSlice';
 export { default as exhibitReducer } from './exhibitSlice';
 export { default as followReducer } from './followSlice';
+export { default as getUserReducer } from './getUserSlice';
 export { default as profileReducer } from './profileSlice';
 export { default as registerArtistReducer } from './registerArtistSlice';
 export { default as registerPrivateArtworkReducer } from './registerPrivateArtworkSlice';
