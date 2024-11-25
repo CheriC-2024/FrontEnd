@@ -4,12 +4,12 @@ import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { setArtistId, toggleFollow, unFollow } from 'src/slices/profileSlice';
 import {
   AnimatedHeaderOverlay,
   ArtistImage,
   ArtistRecord,
   ArtworkItem,
+  ExhibitListCard,
   FollowButton,
   RequestArtworkSheet,
   TabButtons,
@@ -18,11 +18,11 @@ import CustomModal from 'src/components/Modal';
 import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
-import { useArtistData } from 'src/api/hooks/useArtistQueries';
 import {
-  setCurrentProfileId,
-  setInitialFollowers,
-} from 'src/slices/followSlice';
+  useArtistData,
+  useArtistResumeData,
+} from 'src/api/hooks/useArtistQueries';
+import { homeExhibitData } from '../data';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -31,24 +31,27 @@ const ArtistProfile: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [isRequestSheetVisible, setRequestSheetVisible] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
   const { artistId: routeArtistId } = route.params;
+  console.log('Route params:', routeArtistId);
 
-  const artistId = useSelector((state: RootState) => state.profile.artistId);
-  const followers = useSelector(
-    (state: RootState) => state.follow.followers[routeArtistId] || 0,
-  );
+  const { user, isLoading, error } = useArtistData(routeArtistId); // 작가 정보 가져오기
+  const {
+    data: artistResume,
+    isLoading: resumeLoading,
+    error: resumeError,
+  } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
+  const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
 
-  console.log('Route params:', artistId);
-  const { artist, artworks, isLoading, error } = useArtistData(artistId!);
-  console.log('Fetched artworks:', artworks);
-  console.log('Fetched artist:', artist);
-
-  // 팔로우 상태 관리
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isModalVisible, setModalVisible] = useState(false);
+  useEffect(() => {
+    if (!isLoading && user) {
+      // 로딩이 끝난 후 데이터가 있을 때만 상태 설정
+      setIsFollowing(user.isFollowing || false);
+    }
+  }, [isLoading, user]);
 
   const handleCloseRequestSheet = () => {
     setRequestSheetVisible(false);
@@ -67,29 +70,29 @@ const ArtistProfile: React.FC = () => {
     );
   }, [navigation]);
 
-  useEffect(() => {
-    // route의 artistId가 변경되면 Redux의 artistId를 업데이트
-    if (routeArtistId && routeArtistId !== artistId) {
-      dispatch(setArtistId(routeArtistId));
-    }
-    if (artist) {
-      dispatch(setInitialFollowers(artist.followers));
-    }
-  }, [routeArtistId, artistId, artist, dispatch]);
+  // useEffect(() => {
+  //   // route의 artistId가 변경되면 Redux의 artistId를 업데이트
+  //   if (routeArtistId && routeArtistId !== artistId) {
+  //     dispatch(setArtistId(routeArtistId));
+  //   }
+  //   if (artist) {
+  //     dispatch(setInitialFollowers(artist.followers));
+  //   }
+  // }, [routeArtistId, artistId, artist, dispatch]);
 
-  useEffect(() => {
-    if (routeArtistId !== null) {
-      dispatch(setCurrentProfileId(routeArtistId));
-    }
-    if (artist) {
-      dispatch(
-        setInitialFollowers({
-          userId: routeArtistId,
-          followers: artist.followers,
-        }),
-      );
-    }
-  }, [routeArtistId, artist, dispatch]);
+  // useEffect(() => {
+  //   if (routeArtistId !== null) {
+  //     dispatch(setCurrentProfileId(routeArtistId));
+  //   }
+  //   if (artist) {
+  //     dispatch(
+  //       setInitialFollowers({
+  //         userId: routeArtistId,
+  //         followers: artist.followers,
+  //       }),
+  //     );
+  //   }
+  // }, [routeArtistId, artist, dispatch]);
 
   useEffect(() => {
     if (route.params?.requestSuccess) {
@@ -123,19 +126,21 @@ const ArtistProfile: React.FC = () => {
   );
 
   const renderTabContent = () => {
-    if (activeTab === 0) {
-      return artworks;
+    if (activeTab === 0 || activeTab === 3) {
+      return; //TODO: 해당 작가 작품 리스트
     } else if (activeTab === 1) {
       return [{ key: 'artistRecord' }]; // placeholder 아이템
+    } else if (activeTab === 2) {
+      return homeExhibitData;
     }
     return [];
   };
 
-  if (isLoading) {
-    return <Container></Container>;
+  if (isLoading && resumeLoading) {
+    return;
   }
 
-  if (error) {
+  if (error && resumeError) {
     return (
       <Container>
         <Text>데이터를 가져오는 중 오류가 발생했습니다.</Text>
@@ -155,15 +160,6 @@ const ArtistProfile: React.FC = () => {
     extrapolate: 'clamp',
   });
 
-  const handleFollowPress = () => {
-    setIsFollowing(!isFollowing);
-    if (isFollowing) {
-      dispatch(unFollow());
-    } else {
-      dispatch(toggleFollow());
-    }
-  };
-
   const handleConfirm = () => {
     setModalVisible(false);
     //navigation.navigate('SomeOtherScreen');
@@ -171,6 +167,10 @@ const ArtistProfile: React.FC = () => {
 
   const handleModalClose = () => {
     setModalVisible(false);
+  };
+
+  const handleFollowChange = (newFollowState: boolean) => {
+    setIsFollowing(newFollowState);
   };
 
   const renderItem = ({ item }) => {
@@ -191,7 +191,38 @@ const ArtistProfile: React.FC = () => {
       );
     }
     if (activeTab === 1) {
-      return <ArtistRecord artistHistory={artistHistory} />;
+      return <ArtistRecord artistResume={artistResume} />;
+    }
+    if (activeTab === 2) {
+      return (
+        <View style={{ marginVertical: 6, marginHorizontal: 16 }}>
+          <ExhibitListCard
+            imageSource={item.imageSource}
+            title={item.title}
+            collectorName={item.collectorName}
+            profileImage={item.profileImage}
+            likes={item.likes}
+            favorites={item.favorites}
+            tags={item.tags}
+          />
+        </View>
+      );
+    }
+    if (activeTab === 3) {
+      return (
+        <View style={{ marginTop: 16, marginRight: 10 }}>
+          <ArtworkItem
+            artwork={item}
+            selected={false} // 선택 상태 설정 필요 시
+            selectedIndex={0} // 선택 인덱스 설정 필요 시
+            onSelect={() =>
+              navigation.navigate('ArtworkInfo', {
+                artworkId: item.id,
+              })
+            }
+          />
+        </View>
+      );
     }
     return null;
   };
@@ -199,9 +230,9 @@ const ArtistProfile: React.FC = () => {
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
-        artistName={artist.name}
-        artworkCount={artworks.length}
-        backgroundImage='https://i.ibb.co/1vmZ82r/3.png'
+        artistName={user.name}
+        artworkCount={1} // TODO: 작품 리스트 API
+        backgroundImage={user.backgroundImgUrl}
         scrollY={scrollY}
       />
       <ProfileImageContainer
@@ -217,7 +248,7 @@ const ArtistProfile: React.FC = () => {
           zIndex: 3,
         }}
       >
-        <ArtistImage image={artist.image} size={88} />
+        <ArtistImage image={user.profileImgUrl} size={88} />
       </ProfileImageContainer>
       <Animated.View
         style={{
@@ -231,31 +262,35 @@ const ArtistProfile: React.FC = () => {
         }}
       >
         <ProfileWrapper>
-          <ArtistName>{artist.name}</ArtistName>
-          <ArtistInfo>{artist.category}</ArtistInfo>
-          <ArtistBio>{artist.bio}</ArtistBio>
+          <ArtistName>{user.name}</ArtistName>
+          <ArtistInfo>{user.artTypes.join(' • ')} 작가</ArtistInfo>
+          <ArtistBio>{user.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
             <FollowCountItem>
               <FollowLabel>팔로워</FollowLabel>
-              <FollowNumber>{followers}</FollowNumber>
+              <FollowNumber>{user.followerAmount}</FollowNumber>
             </FollowCountItem>
             <FollowCountItem>
               <FollowLabel>팔로잉</FollowLabel>
-              <FollowNumber>{artist.followers}</FollowNumber>
+              <FollowNumber>{user.followingAmount}</FollowNumber>
             </FollowCountItem>
           </View>
-          <FollowButton userId={routeArtistId} />
+          <FollowButton
+            userId={routeArtistId}
+            isFollowing={isFollowing}
+            onFollowChange={handleFollowChange}
+          />
         </FollowSection>
       </Animated.View>
       <FlatList
         data={renderTabContent()}
         extraData={activeTab}
-        key={activeTab === 0 ? '3-columns' : '1-column'}
+        key={activeTab === 0 || activeTab === 3 ? '3-columns' : '1-column'}
         keyExtractor={(_, index) => index.toString()}
         renderItem={renderItem}
-        numColumns={activeTab === 0 ? 3 : 1}
+        numColumns={activeTab === 0 || activeTab === 3 ? 3 : 1}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false },
@@ -264,7 +299,7 @@ const ArtistProfile: React.FC = () => {
         stickyHeaderIndices={[0]}
         contentContainerStyle={{ marginTop: 110, paddingTop: 280, zIndex: 2 }}
         columnWrapperStyle={
-          activeTab === 0
+          activeTab === 0 || activeTab === 3
             ? {
                 alignSelf: 'flex-start',
                 paddingLeft: 16,
@@ -272,19 +307,22 @@ const ArtistProfile: React.FC = () => {
             : null
         }
         ListFooterComponent={
-          <View
-            style={{
-              height:
-                artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
-            }}
-          />
+          <></>
+          // TODO: 작품 리스트 API
+          // <View
+          //   style={{
+          //     height:
+          //       artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
+          //   }}
+          // />
         }
         scrollEventThrottle={16}
       />
       {isRequestSheetVisible && (
         <RequestArtworkSheet
           onClose={handleCloseRequestSheet}
-          artistId={artistId}
+          artistId={routeArtistId}
+          artistContact={artistResume.artistContactRes}
         />
       )}
       <CustomModal
@@ -298,34 +336,6 @@ const ArtistProfile: React.FC = () => {
       />
     </View>
   );
-};
-
-// 작가 이력 로컬 데이터 TODO: API 연결
-const artistHistory = {
-  education: [
-    '서울여자대학교, 산업디자인전공 학사',
-    '서울여자대학교 대학원, 산업디자인전공 석사',
-  ],
-  soloExhibitions: [
-    { year: '2024', title: 'Art OOOO 2024', location: 'OOOO, 서울' },
-    { year: '2022', title: '다시보는 World, 2022', location: 'OOOO, 서울' },
-  ],
-  groupExhibitions: [
-    { year: '2024', title: 'Art OOOO 2024', location: 'OOOO, 서울' },
-    { year: '2023', title: 'OOOO 2023', location: 'OOOO, 서울' },
-    { year: '2023', title: 'OOOO OOOO 2023', location: 'OO, 광주' },
-  ],
-  collections: [
-    '서울여자대학교 미술관',
-    'OOOO OOO 미술관',
-    'OOOOOOO아트 전시관',
-  ],
-  awards: [
-    { year: '2024', title: '제24회 OOOO OO전 입선' },
-    { year: '2021', title: '제12회 OOOO전 대상' },
-    { year: '2020', title: '제20회 공모전 수상' },
-  ],
-  residency: [{ year: '2024', title: '인천아트플랫폼 레지던시' }],
 };
 
 const ProfileImageContainer = Animated.createAnimatedComponent(styled.View`

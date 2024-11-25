@@ -5,7 +5,7 @@ import {
   ArtCategoryHeader,
   ArtworkItem,
   ProfileRow,
-} from '../../components/_index'; // ProfileRow 컴포넌트 import 경로 확인
+} from '../../components/_index';
 import { artistAndArtworkData } from '../data';
 import { Container } from 'src/styles/layout';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -25,13 +25,21 @@ const ArtistCollecting: React.FC = () => {
     );
   }, [navigation]);
 
-  const handlePress = (artistId: number) => {
+  const handleArtistPress = (artistId: number) => {
     navigation.navigate('CollectingStack', {
       screen: 'ArtistProfile',
       params: { artistId },
     });
   };
 
+  // TODO:
+  // const handleArtworkPress = (artistId: number) => {
+  //   navigation.navigate('ArtworkInfo', {
+  //     artworkId: artwork.id.toString(),
+  //   });
+  // };
+
+  // TODO: 작가 정보 리스트 조회 API
   const renderArtistWithArtworks = ({ item }: { item: any }) => (
     <ArtistWithArtworksWrapper>
       <ProfileRow
@@ -40,7 +48,7 @@ const ArtistCollecting: React.FC = () => {
         category={item.artist.category}
         size={84}
         userId={item.artist.id}
-        onPress={() => handlePress(item.artist.id)}
+        onPress={() => handleArtistPress(item.artist.id)}
       />
       <View style={{ height: 16 }} />
       <FlatList
@@ -57,7 +65,7 @@ const ArtistCollecting: React.FC = () => {
               navigation.navigate('ArtworkInfo', {
                 artworkId: artwork.id.toString(),
               });
-              console.log(artwork.id);
+              console.log('[현재 작품 ID] : ', artwork.id);
             }}
           />
         )}

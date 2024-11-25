@@ -1,71 +1,92 @@
-// components/ArtistRecord.tsx
-
-import React from 'react';
 import styled from 'styled-components/native';
 import { Subtitle2, Caption } from 'src/styles/typography';
+import { View } from 'react-native';
 
-interface ArtistHistory {
-  education: string[];
-  soloExhibitions: { year: string; title: string; location: string }[];
-  groupExhibitions: { year: string; title: string; location: string }[];
-  collections: string[];
-  awards: { year: string; title: string }[];
-  residency: { year: string; title: string }[];
+interface ArtistResume {
+  artistDegreeRess: {
+    entranceAt: string;
+    graduateAt: string;
+    major: string;
+    schoolName: string;
+  }[];
+  artistExhibitionRess: {
+    exhibitionName: string;
+    exhibitionType: string;
+    location: string;
+    openedAt: string;
+  }[];
+  artistPrizeRess: {
+    level: string;
+    organization: string;
+    receivedAt: string;
+  }[];
+  artistResidenceRess: { residenceName: string }[];
+  artistArtStorageRess: { location: string }[];
 }
 
 interface ArtistRecordProps {
-  artistHistory: ArtistHistory;
+  artistResume: ArtistResume;
 }
 
-const ArtistRecord: React.FC<ArtistRecordProps> = ({ artistHistory }) => {
+const ArtistRecord: React.FC<ArtistRecordProps> = ({ artistResume }) => {
+  // 개인전 데이터 필터링
+  const individualExhibitions = artistResume.artistExhibitionRess.filter(
+    (item) => item.exhibitionType === 'INDIVIDUAL',
+  );
+  // 단체전 데이터 필터링
+  const groupExhibitions = artistResume.artistExhibitionRess.filter(
+    (item) => item.exhibitionType === 'GROUP',
+  );
   return (
     <Container>
       <Section>
         <SectionTitle>학력</SectionTitle>
-        {artistHistory.education.map((item, index) => (
-          <HistoryText key={index}>{item}</HistoryText>
+        {artistResume.artistDegreeRess.map((item, index) => (
+          <HistoryText key={index}>
+            {item.schoolName} ({item.entranceAt} ~ {item.graduateAt}),{' '}
+            {item.major}
+          </HistoryText>
         ))}
       </Section>
       <Section>
         <SectionTitle>개인전</SectionTitle>
-        {artistHistory.soloExhibitions.map((item, index) => (
+        {individualExhibitions.map((item, index) => (
           <HistoryText key={index}>
-            {item.year} 《{item.title}》, {item.location}
+            {item.openedAt} 《{item.exhibitionName}》, {item.location}
           </HistoryText>
         ))}
       </Section>
       <Section>
         <SectionTitle>단체전</SectionTitle>
-        {artistHistory.groupExhibitions.map((item, index) => (
+        {groupExhibitions.map((item, index) => (
           <HistoryText key={index}>
-            {item.year} 《{item.title}》, {item.location}
+            {item.openedAt} 《{item.exhibitionName}》, {item.location}
           </HistoryText>
         ))}
       </Section>
       <RowContainer>
         <HalfSection>
           <SectionTitle>작가의 작품 소장처</SectionTitle>
-          {artistHistory.collections.map((item, index) => (
-            <HistoryText key={index}>{item}</HistoryText>
+          {artistResume.artistArtStorageRess.map((item, index) => (
+            <HistoryText key={index}>{item.location}</HistoryText>
           ))}
         </HalfSection>
         <HalfSection>
           <SectionTitle>레지던시</SectionTitle>
-          {artistHistory.residency.map((item, index) => (
-            <HistoryText key={index}>
-              {item.year} {item.title}
-            </HistoryText>
+          {artistResume.artistResidenceRess.map((item, index) => (
+            <HistoryText key={index}>{item.residenceName}</HistoryText>
           ))}
         </HalfSection>
       </RowContainer>
       <Section>
         <SectionTitle>수상 및 선정</SectionTitle>
-        {artistHistory.awards.map((item, index) => (
+        {artistResume.artistPrizeRess.map((item, index) => (
           <HistoryText key={index}>
-            {item.year} {item.title}
+            {item.receivedAt} {item.level} - {item.organization}
           </HistoryText>
         ))}
       </Section>
+      <View style={{ height: 300 }} />
     </Container>
   );
 };

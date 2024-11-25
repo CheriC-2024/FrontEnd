@@ -124,7 +124,7 @@ const ArtCollecting: React.FC = () => {
                       <TouchableOpacity
                         onPress={() =>
                           handleNavigation('ArtworkInfo', {
-                            artworkId: item.id,
+                            artworkId: 434,
                           })
                         }
                       >

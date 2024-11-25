@@ -6,6 +6,7 @@ interface UserState {
   interests: string[];
   collectingExperience: boolean | null;
   isArtist: boolean | null;
+  profileImage: string;
 }
 
 const initialState: UserState = {
@@ -14,6 +15,7 @@ const initialState: UserState = {
   interests: [],
   collectingExperience: null,
   isArtist: null,
+  profileImage: '',
 };
 
 const userSlice = createSlice({
@@ -35,8 +37,15 @@ const userSlice = createSlice({
     setIsArtist: (state, action: PayloadAction<boolean | null>) => {
       state.isArtist = action.payload;
     },
+    setProfileImage: (state, action: PayloadAction<string>) => {
+      state.profileImage = action.payload;
+    },
   },
 });
+
+// 디폴트 이미지를 반환하는 Selector 추가
+export const selectProfileImage = (state: { user: UserState }) =>
+  state.user.profileImage || 'https://i.ibb.co/1RwzTLM/08.png';
 
 export const {
   setNickname,
@@ -44,5 +53,7 @@ export const {
   setInterests,
   setCollectingExperience,
   setIsArtist,
+  setProfileImage,
 } = userSlice.actions;
+
 export default userSlice.reducer;

@@ -2,9 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, FlatList, Animated, Text } from 'react-native';
 import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from 'src/store';
-import { setArtistId, toggleFollow, unFollow } from 'src/slices/profileSlice';
 import {
   AnimatedHeaderOverlay,
   ArtistImage,
@@ -17,32 +14,27 @@ import { Container } from 'src/styles/layout';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
 import { useArtistData } from 'src/api/hooks/useArtistQueries';
-import {
-  setCurrentProfileId,
-  setInitialFollowers,
-} from 'src/slices/followSlice';
 import { homeExhibitData } from '../data';
 
 const tabs = ['컬렉션 전시', '소장 작품'];
 
 const CollectorProfile: React.FC = () => {
-  const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
   const [activeTab, setActiveTab] = useState(0);
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const { artistId: routeArtistId } = route.params;
+  const { collectorId } = route.params;
+  console.log('Route params:', collectorId);
+  const { user, isLoading, error } = useArtistData(collectorId);
+  const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
 
-  const artistId = useSelector((state: RootState) => state.profile.artistId);
-  const followers = useSelector(
-    (state: RootState) => state.follow.followers[routeArtistId] || 0,
-  );
-
-  console.log('Route params:', artistId);
-  const { artist, artworks, isLoading, error } = useArtistData(artistId!);
-  console.log('Fetched artworks:', artworks);
-  console.log('Fetched artist:', artist);
+  useEffect(() => {
+    if (!isLoading && user) {
+      // 로딩이 끝난 후 데이터가 있을 때만 상태 설정
+      setIsFollowing(user.isFollowing || false);
+    }
+  }, [isLoading, user]);
 
   // 헤더 설정
   useEffect(() => {
@@ -55,29 +47,29 @@ const CollectorProfile: React.FC = () => {
     );
   }, [navigation]);
 
-  useEffect(() => {
-    // route의 artistId가 변경되면 Redux의 artistId를 업데이트
-    if (routeArtistId && routeArtistId !== artistId) {
-      dispatch(setArtistId(routeArtistId));
-    }
-    if (artist) {
-      dispatch(setInitialFollowers(artist.followers));
-    }
-  }, [routeArtistId, artistId, artist, dispatch]);
+  // useEffect(() => {
+  //   // route의 artistId가 변경되면 Redux의 artistId를 업데이트
+  //   if (routeArtistId && routeArtistId !== artistId) {
+  //     dispatch(setArtistId(routeArtistId));
+  //   }
+  //   if (artist) {
+  //     dispatch(setInitialFollowers(artist.followers));
+  //   }
+  // }, [routeArtistId, artistId, artist, dispatch]);
 
-  useEffect(() => {
-    if (routeArtistId !== null) {
-      dispatch(setCurrentProfileId(routeArtistId));
-    }
-    if (artist) {
-      dispatch(
-        setInitialFollowers({
-          userId: routeArtistId,
-          followers: artist.followers,
-        }),
-      );
-    }
-  }, [routeArtistId, artist, dispatch]);
+  // useEffect(() => {
+  //   if (routeArtistId !== null) {
+  //     dispatch(setCurrentProfileId(routeArtistId));
+  //   }
+  //   if (artist) {
+  //     dispatch(
+  //       setInitialFollowers({
+  //         userId: routeArtistId,
+  //         followers: artist.followers,
+  //       }),
+  //     );
+  //   }
+  // }, [routeArtistId, artist, dispatch]);
 
   // 상태 관리와 애니메이션 값을 연결하기 위해 useEffect 사용
   useEffect(() => {
@@ -93,6 +85,10 @@ const CollectorProfile: React.FC = () => {
     setActiveTab(index); // 상태 업데이트와 애니메이션 동시 실행을 위해 useEffect로 처리
   };
 
+  const handleFollowChange = (newFollowState: boolean) => {
+    setIsFollowing(newFollowState);
+  };
+
   const renderTabButtons = () => (
     <TabButtons
       tabs={tabs}
@@ -102,8 +98,8 @@ const CollectorProfile: React.FC = () => {
     />
   );
 
-  if (isLoading) {
-    return <Container></Container>;
+  if (isLoading || !user) {
+    return;
   }
 
   if (error) {
@@ -166,12 +162,13 @@ const CollectorProfile: React.FC = () => {
     activeTab === 0
       ? homeExhibitData
       : artworks.filter((artwork) => artwork.cherryNum === null);
+
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
-        artistName={artist.name}
-        artworkCount={artworks.length}
-        backgroundImage='https://i.ibb.co/1vmZ82r/3.png'
+        artistName={user.name}
+        artworkCount={1} // TODO: 작품 개수 리스트 조회 API 연결시
+        backgroundImage={user.backgroundImgUrl}
         scrollY={scrollY}
       />
       <ProfileImageContainer
@@ -187,7 +184,7 @@ const CollectorProfile: React.FC = () => {
           zIndex: 3,
         }}
       >
-        <ArtistImage image={artist.image} size={88} />
+        <ArtistImage image={user.profileImgUrl} size={88} />
       </ProfileImageContainer>
       <Animated.View
         style={{
@@ -201,22 +198,26 @@ const CollectorProfile: React.FC = () => {
         }}
       >
         <ProfileWrapper>
-          <ArtistName>{artist.name}</ArtistName>
-          <ArtistInfo>선호 분야 {artist.category}</ArtistInfo>
-          <ArtistBio>{artist.bio}</ArtistBio>
+          <ArtistName>{user.name}</ArtistName>
+          <ArtistInfo>선호 분야 {user.artTypes}</ArtistInfo>
+          <ArtistBio>{user.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
             <FollowCountItem>
               <FollowLabel>팔로워</FollowLabel>
-              <FollowNumber>{followers}</FollowNumber>
+              <FollowNumber>{user.followerAmount}</FollowNumber>
             </FollowCountItem>
             <FollowCountItem>
               <FollowLabel>팔로잉</FollowLabel>
-              <FollowNumber>{artist.followers}</FollowNumber>
+              <FollowNumber>{user.followingAmount}</FollowNumber>
             </FollowCountItem>
           </View>
-          <FollowButton userId={routeArtistId} />
+          <FollowButton
+            userId={collectorId}
+            isFollowing={isFollowing}
+            onFollowChange={handleFollowChange}
+          />
         </FollowSection>
       </Animated.View>
       <FlatList
@@ -242,12 +243,14 @@ const CollectorProfile: React.FC = () => {
             : null
         }
         ListFooterComponent={
-          <View
-            style={{
-              height:
-                artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
-            }}
-          />
+          <></>
+          // TODO: 작품 리스트 조회 API
+          // <View
+          //   style={{
+          //     height:
+          //       artworks.length <= 3 ? 620 : artworks.length <= 6 ? 400 : 200,
+          //   }}
+          // />
         }
         scrollEventThrottle={16}
       />

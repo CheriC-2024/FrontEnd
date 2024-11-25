@@ -3,5 +3,5 @@ export * from './AuthScreens/_index';
 export * from './CollectingScreens/_index';
 export * from './ExhibitScreens/_index';
 export * from './HomeScreens/_index';
-export { default as MyCheriCScreen } from './MyCheriCScreen';
+export * from './MyChericScreens/_index';
 export { default as SearchScreen } from './SearchScreen';

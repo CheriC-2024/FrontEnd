@@ -10,6 +10,7 @@ import CollectionItem from '../CollectionItem';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
 import { useNavigation } from '@react-navigation/native';
 import useSlideAnimation from 'src/hooks/useSlideAnimation';
+import { useAddArtworkToCollection } from 'src/api/hooks/useCollectionQueries';
 
 interface BottomSheetProps {
   onClose: () => void;
@@ -25,6 +26,7 @@ interface BottomSheetProps {
   onSelectCollection: (collectionIds: Array<number>) => void; // 다중 선택을 반영한 함수
 }
 
+//TODO: 컬렉션 조회해서 해당 작품 있으면 이미 선택표시 처리
 const AddCollectionBottomSheet: React.FC<BottomSheetProps> = ({
   onClose,
   collections,
@@ -36,19 +38,24 @@ const AddCollectionBottomSheet: React.FC<BottomSheetProps> = ({
   const navigation = useNavigation();
   const { slideAnim, slideOut } = useSlideAnimation(0.6, 500);
 
+  const { mutate: addArtwork } = useAddArtworkToCollection();
+
   const handleClose = () => slideOut(onClose);
 
   const toggleSelectCollection = (collectionId: number) => {
-    // 선택된 컬렉션을 토글하여 업데이트
-    let updatedCollections;
-    if (selectedCollections.includes(collectionId)) {
-      updatedCollections = selectedCollections.filter(
-        (id) => id !== collectionId,
-      );
-    } else {
-      updatedCollections = [...selectedCollections, collectionId];
-    }
-    onSelectCollection(updatedCollections); // 선택된 컬렉션 배열을 부모에 전달
+    // 선택 시 바로 API 호출
+    const isSelected = selectedCollections.includes(collectionId);
+    const updatedSelections = isSelected
+      ? selectedCollections.filter((id) => id !== collectionId)
+      : [...selectedCollections, collectionId];
+
+    onSelectCollection(updatedSelections);
+
+    // API 호출
+    addArtwork({
+      collectionId,
+      artIds: [artworkId],
+    });
   };
 
   const handleAddNewCollection = () => {
@@ -81,7 +88,7 @@ const AddCollectionBottomSheet: React.FC<BottomSheetProps> = ({
               renderItem={({ item }) => (
                 <CollectionItem
                   selected={selectedCollections.includes(item.id)} // 다중 선택 상태 반영
-                  onPress={() => toggleSelectCollection(item.id)} // 선택/해제 토글 함수 호출
+                  onPress={() => toggleSelectCollection(item.id)} // 선택/해제 및 API 호출
                   imageSource={{ uri: item.image }}
                   name={item.name}
                   description={item.description}

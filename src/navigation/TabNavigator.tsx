@@ -1,6 +1,5 @@
-import React from 'react';
 import { TouchableOpacity } from 'react-native';
-import { useTheme } from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -15,6 +14,7 @@ import {
   SearchIcon,
   CollectingIcon,
   MyChericIcon,
+  SettingIcon,
 } from '../assets/icons/_index';
 import ExhibitStack from './ExhibitStack';
 import { CenterNavButton } from './UI/CenterNavButton';
@@ -26,26 +26,32 @@ const TabNavigator: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation<TabParamList>();
 
-  const renderHeaderRight = () => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          // 알림 컴포넌트 자리
-        }}
-        style={{ marginRight: 16 }}
-      >
-        <NoticeIcon />
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <Tab.Navigator
-      screenOptions={() => ({
-        headerTitle: '', // headerTitle: 'CheriC',
+      screenOptions={({ route }) => ({
+        headerTitle: '',
         headerTitleAlign: 'left',
-        headerRight: () => renderHeaderRight(),
-        headerStyle: { backgroundColor: theme.colors.bg }, // 헤더 배경 설정
+        headerRight: () =>
+          route.name === 'MyCheric' ? (
+            <TouchableOpacity
+              onPress={() => {
+                // 설정 버튼
+              }}
+              style={{ marginRight: 16 }}
+            >
+              <SettingIcon fill={'#120000'} width={22} height={22} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => {
+                // 알림 버튼
+              }}
+              style={{ marginRight: 16 }}
+            >
+              <NoticeIcon />
+            </TouchableOpacity>
+          ),
+        headerStyle: { backgroundColor: theme.colors.bg },
         headerTitleStyle: {
           fontSize: 20,
           fontFamily: theme.fonts.bold,
@@ -54,9 +60,9 @@ const TabNavigator: React.FC = () => {
         tabBarInactiveTintColor: theme.colors.redBlack,
         tabBarLabelStyle: { fontSize: 10, fontFamily: theme.fonts.regular },
         tabBarStyle: {
-          height: 86, // 네비게이션 바의 높이
-          paddingBottom: 20, // 바텀 패딩
-          paddingTop: 16, // 탑 패딩
+          height: 86,
+          paddingBottom: 20,
+          paddingTop: 16,
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
         },
@@ -106,7 +112,7 @@ const TabNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
-        name='MyCheriC'
+        name='MyCheric'
         component={MyCheriCScreen}
         options={{
           tabBarIcon: ({ color }) => (
@@ -118,5 +124,10 @@ const TabNavigator: React.FC = () => {
     </Tab.Navigator>
   );
 };
+
+const HeaderButton = styled.TouchableOpacity`
+  padding: 8px;
+  margin-right: 16px;
+`;
 
 export default TabNavigator;

@@ -57,7 +57,7 @@ const HomeScreen: React.FC = () => {
           <CategoryTitle>내가 팔로우하는 컬렉터</CategoryTitle>
           <FlatList
             data={artistData}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => String(item.id)}
             horizontal
             initialNumToRender={2}
             showsHorizontalScrollIndicator={false}

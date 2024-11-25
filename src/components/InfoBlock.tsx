@@ -66,6 +66,7 @@ const Input = styled(TextInput)`
   height: 150px;
   background-color: ${({ theme }) => theme.colors.grey_4};
   padding: ${({ theme }) => theme.spacing.s4};
+  padding-bottom: ${({ theme }) => theme.spacing.s8};
   border-radius: ${({ theme }) => theme.radius.m};
   font-size: ${({ theme }) => theme.fontSizes.body2};
   line-height: ${({ theme }) => theme.lineHeights.body2};

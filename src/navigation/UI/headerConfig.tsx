@@ -49,7 +49,7 @@ const createHeaderLeft = (
       }}
     >
       {leftButtonType === 'icon' && (
-        <BackIcon width={22} height={22} fill={iconColor} />
+        <BackIcon width={18} height={18} fill={iconColor} />
       )}
       {leftButtonType === 'text' && (
         <Subtitle1 style={{ color: iconColor, marginLeft: 6 }}>
@@ -58,7 +58,7 @@ const createHeaderLeft = (
       )}
       {leftButtonType === 'both' && (
         <>
-          <BackIcon width={22} height={22} fill={iconColor} />
+          <BackIcon width={18} height={18} fill={iconColor} />
           <Subtitle1 style={{ color: iconColor, marginLeft: 8 }}>
             {leftButtonText}
           </Subtitle1>

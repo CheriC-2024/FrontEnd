@@ -11,6 +11,9 @@ import {
   themeReducer,
   userReducer,
   commentReducer,
+  registerPrivateArtworkReducer,
+  registerArtistReducer,
+  getUserReducer,
 } from '../slices/_index';
 
 const store = configureStore({
@@ -22,8 +25,11 @@ const store = configureStore({
     comment: commentReducer,
     cover: coverReducer,
     follow: followReducer,
+    getUser: getUserReducer,
     exhibit: exhibitReducer,
     profile: profileReducer,
+    registerArtist: registerArtistReducer,
+    registerPrivateArtwork: registerPrivateArtworkReducer,
     theme: themeReducer,
     user: userReducer,
   },

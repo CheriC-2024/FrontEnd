@@ -7,6 +7,7 @@ export type RootStackParamList = {
   CollectingStack: undefined;
   Exhibit: undefined;
   HomeStack: undefined;
+  MyChericStack: { screen: string };
 };
 
 // 네비게이션 바 타입 정의
@@ -15,7 +16,7 @@ export type TabParamList = {
   Search: undefined;
   Exhibit: { step: number; selectedThemes?: string[] };
   Collecting: undefined;
-  MyCheriC: undefined;
+  MyCheric: undefined;
 };
 
 // 스택 네비
@@ -71,5 +72,24 @@ export type HomeStackParamList = {
   ExhibitComments: undefined;
   ExhibitCommentsDetail: undefined;
   ExhibitCommentsWrite: undefined;
-  // 전시 부분 설계는 더 고민해보기
+};
+
+export type MyChericStackParamList = {
+  MyChericScreen: undefined;
+  PrivateArtRegister: undefined;
+  ArtistRegister: undefined;
+};
+
+export type PrivateArtRegisterParamList = {
+  AddArtwork: undefined;
+  AddArtworkInfo: undefined;
+  AddDocs: undefined;
+  RegisterCompletion: undefined;
+};
+
+export type ArtistRegisterParamList = {
+  AddResume: undefined;
+  AddInfo: undefined;
+  AddDocs: undefined;
+  Completion: undefined;
 };

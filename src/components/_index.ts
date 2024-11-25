@@ -17,3 +17,4 @@ export * from './exhibit/_index';
 export * from './gradients/_index';
 export * from './modals/_index';
 export * from './profile/_index';
+export * from './registrations/_index';

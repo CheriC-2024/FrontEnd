@@ -124,22 +124,22 @@ const interestOptions = [
   {
     label: '뉴미디어',
     image: require('src/assets/images/SignUpPage/interest1.png'),
-    value: 'MODIFY1',
+    value: 'NEW_MEDIA_ART',
   },
   {
     label: '동양화',
     image: require('src/assets/images/SignUpPage/interest2.png'),
-    value: 'MODIFY2',
+    value: 'ORIENTAL_PAINTING',
   },
   {
     label: '드로잉',
     image: require('src/assets/images/SignUpPage/interest3.png'),
-    value: 'MODIFY3',
+    value: 'DRAWING_ART',
   },
   {
     label: '디자인',
     image: require('src/assets/images/SignUpPage/interest4.png'),
-    value: 'MODIFY4',
+    value: 'DESIGN_ART',
   },
   {
     label: '수채화',
@@ -154,12 +154,12 @@ const interestOptions = [
   {
     label: '판화',
     image: require('src/assets/images/SignUpPage/interest7.png'),
-    value: 'MODIFY5',
+    value: 'PRINTMAKING_PAINTING',
   },
   {
     label: '회화',
     image: require('src/assets/images/SignUpPage/interest8.png'),
-    value: 'MODIFY6',
+    value: 'PAINTING',
   },
 ];
 

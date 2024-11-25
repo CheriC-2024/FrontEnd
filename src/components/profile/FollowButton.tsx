@@ -1,22 +1,36 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { ButtonText } from 'src/styles/typography';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from 'src/store';
-import { toggleFollow } from 'src/slices/followSlice';
+import {
+  useFollowUser,
+  useUnfollowUser,
+} from 'src/api/hooks/useFollowMutation';
 
 interface FollowButtonProps {
   userId: number;
+  isFollowing: boolean;
+  onFollowChange: (isFollowing: boolean) => void; // 상태 변경 콜백
 }
-
-const FollowButton: React.FC<FollowButtonProps> = ({ userId }) => {
-  const dispatch = useDispatch();
-  const isFollowing = useSelector(
-    (state: RootState) => state.follow.isFollowing[userId] || false,
-  );
+// TODO: 팔로우 리스트 조회 api 갖고와서 현재 유저가 팔로우하는지
+const FollowButton: React.FC<FollowButtonProps> = ({
+  userId,
+  isFollowing,
+  onFollowChange,
+}) => {
+  // React Query 훅
+  const { mutate: follow } = useFollowUser();
+  const { mutate: unfollow } = useUnfollowUser();
 
   const handleFollowPress = () => {
-    dispatch(toggleFollow(userId));
+    if (isFollowing) {
+      unfollow(userId, {
+        onSuccess: () => onFollowChange(false), // 언팔로우 성공 시 상태 변경
+      });
+    } else {
+      follow(userId, {
+        onSuccess: () => onFollowChange(true), // 팔로우 성공 시 상태 변경
+      });
+    }
   };
 
   return (

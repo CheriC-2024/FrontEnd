@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, FlatList } from 'react-native';
 import styled from 'styled-components/native';
 import {
@@ -6,7 +6,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import { artistAndArtworkData } from '../data'; // 아티스트 및 작품 데이터 불러오기
+import { artistAndArtworkData } from '../data'; // 더미 데이터: 아티스트 및 작품 데이터 불러오기
 import { Container } from 'src/styles/layout';
 import { Caption, H4, H6, Subtitle2 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index.js';
@@ -19,15 +19,23 @@ import {
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { Btn, BtnText } from 'src/components/Button';
 import { collections } from './data';
-import ToastMessage from 'src/components/ToastMessage'; // 토스트 메시지 컴포넌트
-import useToastMessage from 'src/hooks/useToastMessage'; // 토스트 훅
+import ToastMessage from 'src/components/ToastMessage';
+import useToastMessage from 'src/hooks/useToastMessage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useArtworkData } from 'src/api/hooks/useArtworkQueries';
+import { useAddHeart, useRemoveHeart } from 'src/api/hooks/useArtworkMutations';
 
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { artworkId = 101, newCollectionName } = route.params || {}; //101 임시 id
+  const { artworkId, newCollectionName } = route.params || {};
+  const { data: artworkData, isLoading, error } = useArtworkData(artworkId);
+  const { mutate: addHeartMutation, isLoading: isAddingHeart } = useAddHeart();
+  const { mutate: removeHeartMutation, isLoading: isRemovingHeart } =
+    useRemoveHeart();
+  const [liked, setLiked] = useState(false); // TODO: 좋아요 누른 작품 조회 API
+  const [heartCount, setHeartCount] = useState(artworkData?.heartCount || 0);
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<Array<number>>(
@@ -35,8 +43,6 @@ const ArtworkInfo: React.FC = () => {
   );
   const [previousSelectedCollections, setPreviousSelectedCollections] =
     useState<Array<number>>([]);
-
-  const [liked, setLiked] = useState(false);
 
   // 토스트 메시지 훅 사용
   const { toastVisible, toastMessage, showToast } = useToastMessage();
@@ -55,7 +61,31 @@ const ArtworkInfo: React.FC = () => {
   );
 
   const toggleLike = () => {
-    setLiked((prev) => !prev);
+    if (isAddingHeart || isRemovingHeart) return; // 중복 요청 방지
+
+    if (liked) {
+      // 좋아요 취소 (DELETE)
+      removeHeartMutation(artworkId, {
+        onSuccess: (newHeartCount) => {
+          setLiked(false); // 좋아요 상태 변경
+          setHeartCount(newHeartCount); // 좋아요 수 갱신
+        },
+        onError: (error) => {
+          console.error('Error removing heart:', error);
+        },
+      });
+    } else {
+      // 좋아요 추가 (POST)
+      addHeartMutation(artworkId, {
+        onSuccess: (newHeartCount) => {
+          setLiked(true); // 좋아요 상태 변경
+          setHeartCount(newHeartCount); // 좋아요 수 갱신
+        },
+        onError: (error) => {
+          console.error('Error adding heart:', error);
+        },
+      });
+    }
   };
 
   const handleOpenBottomSheet = () => {
@@ -94,21 +124,12 @@ const ArtworkInfo: React.FC = () => {
     );
   }, [navigation]);
 
-  // artworkId에 맞는 작품과 아티스트 데이터를 필터링
-  const artworkData = artistAndArtworkData
-    .flatMap((item) => item.artworks)
-    .find((artwork) => artwork.id === artworkId);
-
   const artistData = artistAndArtworkData.find((artist) =>
     artist.artworks.some((artwork) => artwork.id === artworkId),
   );
 
-  if (!artworkData) {
-    return (
-      <Container>
-        <ErrorMessage>해당 작품의 정보를 찾을 수 없습니다.</ErrorMessage>
-      </Container>
-    );
+  if (isLoading) {
+    return;
   }
 
   const handlePress = (artistId: number) => {
@@ -118,32 +139,51 @@ const ArtworkInfo: React.FC = () => {
     });
   };
 
+  const tableItems = [
+    { label: '작가', content: artworkData.artistName },
+    { label: '시리즈', content: artworkData.series || '정보 없음' },
+    {
+      label: '작품 크기',
+      content: `${artworkData.horizontalSize}mm x ${artworkData.verticalSize}mm`,
+    },
+    { label: '재질(사용재료)', content: artworkData.material || '정보 없음' },
+    { label: '제작시기', content: artworkData.madeAt || '정보 없음' },
+    {
+      label: '작품 분야',
+      content: artworkData.artTypes.join(', '),
+    },
+  ];
+
   return (
     <Container>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 작품 이미지 및 좋아요 수 */}
-        <ArtworkImage source={{ uri: artworkData.fileName }} />
+        <ArtworkImage source={{ uri: artworkData.imgUrl }} />
         <ArtworkCategoryWrapper>
           <TagsWrapper>
-            <CategoryTag>유화</CategoryTag>
-            <CategoryTag>회화</CategoryTag>
+            {artworkData.artTypes.map((type, index) => (
+              <CategoryTag key={index}>{type}</CategoryTag>
+            ))}
           </TagsWrapper>
           <TagsWrapper>
-            <TouchableOpacity onPress={toggleLike}>
+            <TouchableOpacity
+              onPress={toggleLike}
+              disabled={isAddingHeart || isRemovingHeart}
+            >
               <HeartIcon
                 fill={liked ? '#E52C32' : 'none'}
                 stroke={liked ? null : '#120000'}
               />
             </TouchableOpacity>
-            <LikeText>{artworkData.cherryNum + 100}</LikeText>
+            <LikeText>{artworkData.heartCount}</LikeText>
           </TagsWrapper>
         </ArtworkCategoryWrapper>
         <ArtworkTitle>{artworkData.name}</ArtworkTitle>
         <TouchableOpacity
-          onPress={() => handlePress(artistData.artist.id)}
+          onPress={() => handlePress(artworkData.userRes.id)}
           style={{ flexDirection: 'row', alignItems: 'center' }}
         >
-          <ArtistName>{artistData.artist.name}</ArtistName>
+          <ArtistName>{artworkData.userRes.name}</ArtistName>
           <Icon
             name='chevron-forward'
             size={22}
@@ -155,28 +195,25 @@ const ArtworkInfo: React.FC = () => {
         {/* 작가 정보 */}
         <ArtistInfo>
           <ArtistImage
-            image={artistData.artist.image}
+            image={artworkData.userRes.profileImgUrl}
             size={28}
             style={{ marginRight: 4 }}
           />
-          <Subtitle2>김작가의 작품 설명</Subtitle2>
+          <Subtitle2>{artworkData.userRes.name}의 작품 설명</Subtitle2>
         </ArtistInfo>
         <ArtworkInfoCard>
-          <ArtworkBio>
-            안녕하세요 저는 현재 10년 경력의 작가 네번째 작가라고 합니다. 이번
-            작품은 제 어릴적 좋아하던 동화책에서 영감을 받아 작업한 작품이에요.
-            여러분도 어릴적 좋아하던 동화의 주인공이 있지 않은가요? 제가
-            좋아하는 주인공인 피터팬을 모티브로 세상을 자유롭게 여행하는 한
-            아이의 이야기를 담았습니다.
-          </ArtworkBio>
+          <ArtworkBio>{artworkData.description}</ArtworkBio>
         </ArtworkInfoCard>
         <SectionTitle>작품 기본 정보</SectionTitle>
         <Table items={tableItems} />
         <SectionContainer>
           {/* 작품 이용 유의사항 섹션 */}
           <SectionTitle>작품 이용 유의사항</SectionTitle>
-          <InfoItem label='공개 여부' content='유료 (전시 1회당 2체리)' />
-          <InfoItem label='저작자' content='작가 네번째작가' />
+          <InfoItem
+            label='공개 여부'
+            content={`유료 (전시 1회당 ${artworkData.cherryPrice}체리)`}
+          />
+          <InfoItem label='저작자' content={artworkData.userRes.name} />
           <InfoItem
             label='유의사항'
             content='전시에 해당 작품을 유료로 활용할 수 있습니다. 저작권자인 작가가 설정한 금액(체리)은 전시 시 지급하시면, 전시회에 활용할 수 있습니다. 작품은 상업적 목적으로 금지하고 있으며, 캡처, 다운로드 등을 허용하지 않습니다. 위반 시 법적 문제가 될 수 있습니다.'
@@ -185,7 +222,7 @@ const ArtworkInfo: React.FC = () => {
         <View style={{ marginBottom: 28 }} />
         {/* 작가님의 다른 작품들 */}
         <TouchableOpacity
-          onPress={() => handlePress(artistData.artist.id)}
+          onPress={() => handlePress(artworkData.userRes.id)}
           style={{ flexDirection: 'row', alignItems: 'center' }}
         >
           <H6>이 작가님의 다른 작품들</H6>
@@ -196,9 +233,10 @@ const ArtworkInfo: React.FC = () => {
             style={{ paddingBottom: 2 }}
           />
         </TouchableOpacity>
+        {/* TODO: 작가별 작품 조회 API */}
         <OtherArtworksWrapper>
           <FlatList
-            data={artistData.artworks}
+            data={artistData?.artworks}
             keyExtractor={(artwork) => artwork.id.toString()}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -215,7 +253,7 @@ const ArtworkInfo: React.FC = () => {
           />
         </OtherArtworksWrapper>
         <TouchableOpacity
-          onPress={() => handlePress(artistData.artist.id)}
+          onPress={() => handlePress(artworkData.userRes.id)}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -268,22 +306,13 @@ const ArtworkInfo: React.FC = () => {
           selectedCollections={selectedCollections}
           onSelectCollection={handleSelectCollection}
           artworkId={artworkId}
-          artworkImage={artworkData.fileName}
+          artworkImage={artworkData.imgUrl}
         />
       )}
       <ToastMessage message={toastMessage} visible={toastVisible} />
     </Container>
   );
 };
-
-const tableItems = [
-  { label: '작가', content: '네번째작가' },
-  { label: '시리즈', content: '아몬드 나무' },
-  { label: '작품 크기', content: '740mm * 920mm' },
-  { label: '재질(사용재료)', content: '캔버스에 유화' },
-  { label: '제작시기', content: '1890년' },
-  { label: '작품 분야', content: '회화, 서양화' },
-];
 
 const ArtworkImage = styled.Image`
   width: 100%;

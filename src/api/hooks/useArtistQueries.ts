@@ -1,29 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
-import { artistAndArtworkData } from 'src/screens/data';
+import { fetchUserById } from '../userApi';
+import { fetchArtistResume } from '../artistApi';
 
-const fetchArtistData = async (artistId: number) => {
-  // 특정 artistId에 해당하는 데이터를 반환
-  const artistData = artistAndArtworkData.find(
-    (item) => item.artist.id === artistId,
-  );
-
-  if (artistData) {
-    const { artist, artworks } = artistData;
-    return { artist, artworks };
-  } else {
-    throw new Error('Artist not found');
-  }
-};
-
-export const useArtistData = (artistId: number) => {
-  const { data, ...queryInfo } = useQuery({
-    queryKey: ['artist', artistId],
-    queryFn: () => fetchArtistData(artistId),
+export const useArtistData = (id: number) => {
+  const { data, isLoading, error, isError } = useQuery({
+    queryKey: ['user', id], // 캐싱 키로 id를 포함
+    queryFn: () => fetchUserById(id), // API 호출
+    staleTime: 1000 * 60 * 5, // 5분 동안 데이터 유효
+    cacheTime: 1000 * 60 * 10, // 10분 동안 캐싱
+    enabled: !!id, // id가 있을 때만 요청
   });
 
-  return {
-    artist: data?.artist,
-    artworks: data?.artworks,
-    ...queryInfo,
-  };
+  return { user: data, isLoading, error, isError };
+};
+
+export const useArtistResumeData = (artistUserId: number) => {
+  return useQuery({
+    queryKey: ['artistResume', artistUserId], // 캐싱 키
+    queryFn: () => fetchArtistResume(artistUserId), // API 호출
+    staleTime: 1000 * 60 * 5, // 데이터 5분 동안 유효
+    enabled: !!artistUserId, // artistUserId가 있을 때만 실행
+  });
 };

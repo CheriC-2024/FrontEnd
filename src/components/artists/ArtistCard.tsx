@@ -3,7 +3,7 @@ import { Caption, Subtitle2 } from 'src/styles/typography';
 import styled from 'styled-components/native';
 import ArtistImage from './ArtistImage';
 import { TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import useNavToProfile from 'src/hooks/useNavToProfile';
 
 interface ArtistCardProps {
   image: string;
@@ -20,13 +20,10 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   artistId, // artistId를 prop으로 받아옴
   fontType = 'Caption',
 }) => {
-  const navigation = useNavigation();
+  const { navigateToProfile, loadingUserId } = useNavToProfile();
 
   const handlePress = () => {
-    navigation.navigate('HomeStack', {
-      screen: 'CollectorProfile', // TODO: 이거 작가인지, 컬렉터인지 판단하고 ArtistProfile 혹은 CollectorProfile로 가게 로직 수정해야 함
-      params: { artistId },
-    });
+    navigateToProfile(artistId); // navigateToProfile 함수 호출
   };
 
   return (
@@ -59,6 +56,11 @@ const ArtistName = styled.Text<{ fontType: string }>`
     font-size: 12px;
     font-family: PretendardRegular;
   `}
+`;
+
+const LoadingText = styled(Caption)`
+  color: ${({ theme }) => theme.colors.grey_8};
+  margin-top: ${({ theme }) => theme.margin.xs};
 `;
 
 export default ArtistCard;
