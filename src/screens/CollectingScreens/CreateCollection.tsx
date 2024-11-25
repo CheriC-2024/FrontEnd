@@ -8,6 +8,7 @@ import InfoBlock from 'src/components/InfoBlock';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { ScrollView } from 'react-native-gesture-handler';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import { useCreateCollection } from 'src/api/hooks/useCollectionQueries';
 
 const CreateCollection: React.FC = () => {
   const route = useRoute();
@@ -18,6 +19,7 @@ const CreateCollection: React.FC = () => {
 
   const [collectionName, setCollectionName] = useState('');
   const [collectionDescription, setCollectionDescription] = useState('');
+  const { mutate: createNewCollection, isLoading } = useCreateCollection();
 
   // 헤더 설정
   useEffect(() => {
@@ -34,9 +36,23 @@ const CreateCollection: React.FC = () => {
   }, [navigation, collectionName, collectionDescription]); // collectionName과 collectionDescription이 변경될 때마다 헤더 업데이트
 
   const handleComplete = () => {
-    navigation.navigate('ArtworkInfo', {
-      newCollectionName: collectionName,
-      artworkId: artworkId,
+    const requestData = {
+      name: collectionName.trim(),
+      description: collectionDescription.trim(),
+      artId: artworkId,
+    };
+
+    createNewCollection(requestData, {
+      onSuccess: () => {
+        navigation.navigate('ArtworkInfo', {
+          newCollectionName: collectionName,
+          artworkId: artworkId,
+        });
+      },
+      onError: (error) => {
+        alert('컬렉션 생성에 실패했습니다. 다시 시도해주세요.');
+        console.error(error);
+      },
     });
   };
 

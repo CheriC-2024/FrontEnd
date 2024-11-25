@@ -36,3 +36,18 @@ export const collectionApi = {
     }
   },
 };
+
+// POST 새로운 컬렉션 생성
+export const createCollection = async (data: {
+  name: string;
+  description: string;
+  artId: number;
+}) => {
+  try {
+    const response = await axiosInstance.post('/collections', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating collection:', error);
+    throw error;
+  }
+};
