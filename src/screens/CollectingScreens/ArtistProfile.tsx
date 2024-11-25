@@ -1,16 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  FlatList,
-  Animated,
-  Text,
-  ActivityIndicator,
-} from 'react-native';
+import { View, FlatList, Animated, Text } from 'react-native';
 import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { setArtistId, toggleFollow, unFollow } from 'src/slices/profileSlice';
 import {
   AnimatedHeaderOverlay,
   ArtistImage,
@@ -29,10 +22,6 @@ import {
   useArtistData,
   useArtistResumeData,
 } from 'src/api/hooks/useArtistQueries';
-import {
-  setCurrentProfileId,
-  setInitialFollowers,
-} from 'src/slices/followSlice';
 import { homeExhibitData } from '../data';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
@@ -42,6 +31,7 @@ const ArtistProfile: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [isRequestSheetVisible, setRequestSheetVisible] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -56,10 +46,7 @@ const ArtistProfile: React.FC = () => {
     isLoading: resumeLoading,
     error: resumeError,
   } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
-
-  // 팔로우 상태 관리
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(user.followerAmount || false);
 
   const handleCloseRequestSheet = () => {
     setRequestSheetVisible(false);
@@ -168,15 +155,6 @@ const ArtistProfile: React.FC = () => {
     extrapolate: 'clamp',
   });
 
-  const handleFollowPress = () => {
-    setIsFollowing(!isFollowing);
-    if (isFollowing) {
-      dispatch(unFollow());
-    } else {
-      dispatch(toggleFollow());
-    }
-  };
-
   const handleConfirm = () => {
     setModalVisible(false);
     //navigation.navigate('SomeOtherScreen');
@@ -184,6 +162,10 @@ const ArtistProfile: React.FC = () => {
 
   const handleModalClose = () => {
     setModalVisible(false);
+  };
+
+  const handleFollowChange = (newFollowState: boolean) => {
+    setIsFollowing(newFollowState);
   };
 
   const renderItem = ({ item }) => {
@@ -290,7 +272,11 @@ const ArtistProfile: React.FC = () => {
               <FollowNumber>{user.followingAmount}</FollowNumber>
             </FollowCountItem>
           </View>
-          <FollowButton userId={routeArtistId} />
+          <FollowButton
+            userId={routeArtistId}
+            isFollowing={isFollowing}
+            onFollowChange={handleFollowChange}
+          />
         </FollowSection>
       </Animated.View>
       <FlatList
