@@ -46,7 +46,14 @@ const ArtistProfile: React.FC = () => {
     isLoading: resumeLoading,
     error: resumeError,
   } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
-  const [isFollowing, setIsFollowing] = useState(user.followerAmount || false);
+  const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      // 로딩이 끝난 후 데이터가 있을 때만 상태 설정
+      setIsFollowing(user.isFollowing || false);
+    }
+  }, [isLoading, user]);
 
   const handleCloseRequestSheet = () => {
     setRequestSheetVisible(false);
