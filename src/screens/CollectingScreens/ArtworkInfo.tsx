@@ -23,11 +23,13 @@ import ToastMessage from 'src/components/ToastMessage'; // 토스트 메시지 �
 import useToastMessage from 'src/hooks/useToastMessage'; // 토스트 훅
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useArtworkData } from 'src/api/hooks/useArtworkQueries';
 
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { artworkId = 434, newCollectionName } = route.params || {}; //101 임시 id
+  const { artworkId, newCollectionName } = route.params || {};
+  const { data: artworkData, isLoading, error } = useArtworkData(artworkId);
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<Array<number>>(
@@ -94,21 +96,12 @@ const ArtworkInfo: React.FC = () => {
     );
   }, [navigation]);
 
-  // artworkId에 맞는 작품과 아티스트 데이터를 필터링
-  const artworkData = artistAndArtworkData
-    .flatMap((item) => item.artworks)
-    .find((artwork) => artwork.id === artworkId);
-
   const artistData = artistAndArtworkData.find((artist) =>
     artist.artworks.some((artwork) => artwork.id === artworkId),
   );
 
-  if (!artworkData) {
-    return (
-      <Container>
-        <ErrorMessage>해당 작품의 정보를 찾을 수 없습니다.</ErrorMessage>
-      </Container>
-    );
+  if (isLoading) {
+    return;
   }
 
   const handlePress = (artistId: number) => {
@@ -118,15 +111,31 @@ const ArtworkInfo: React.FC = () => {
     });
   };
 
+  const tableItems = [
+    { label: '작가', content: artworkData.artistName },
+    { label: '시리즈', content: artworkData.series || '정보 없음' },
+    {
+      label: '작품 크기',
+      content: `${artworkData.horizontalSize}mm x ${artworkData.verticalSize}mm`,
+    },
+    { label: '재질(사용재료)', content: artworkData.material || '정보 없음' },
+    { label: '제작시기', content: artworkData.madeAt || '정보 없음' },
+    {
+      label: '작품 분야',
+      content: artworkData.artTypes.join(', '),
+    },
+  ];
+
   return (
     <Container>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 작품 이미지 및 좋아요 수 */}
-        <ArtworkImage source={{ uri: artworkData.fileName }} />
+        <ArtworkImage source={{ uri: artworkData.imgUrl }} />
         <ArtworkCategoryWrapper>
           <TagsWrapper>
-            <CategoryTag>유화</CategoryTag>
-            <CategoryTag>회화</CategoryTag>
+            {artworkData.artTypes.map((type, index) => (
+              <CategoryTag key={index}>{type}</CategoryTag>
+            ))}
           </TagsWrapper>
           <TagsWrapper>
             <TouchableOpacity onPress={toggleLike}>
@@ -135,15 +144,15 @@ const ArtworkInfo: React.FC = () => {
                 stroke={liked ? null : '#120000'}
               />
             </TouchableOpacity>
-            <LikeText>{artworkData.cherryNum + 100}</LikeText>
+            <LikeText>{artworkData.heartCount}</LikeText>
           </TagsWrapper>
         </ArtworkCategoryWrapper>
         <ArtworkTitle>{artworkData.name}</ArtworkTitle>
         <TouchableOpacity
-          onPress={() => handlePress(artistData.artist.id)}
+          onPress={() => handlePress(artworkData.userRes.id)}
           style={{ flexDirection: 'row', alignItems: 'center' }}
         >
-          <ArtistName>{artistData.artist.name}</ArtistName>
+          <ArtistName>{artworkData.userRes.name}</ArtistName>
           <Icon
             name='chevron-forward'
             size={22}
@@ -155,28 +164,25 @@ const ArtworkInfo: React.FC = () => {
         {/* 작가 정보 */}
         <ArtistInfo>
           <ArtistImage
-            image={artistData.artist.image}
+            image={artworkData.userRes.profileImgUrl}
             size={28}
             style={{ marginRight: 4 }}
           />
-          <Subtitle2>{artistData.artist.name}의 작품 설명</Subtitle2>
+          <Subtitle2>{artworkData.userRes.name}의 작품 설명</Subtitle2>
         </ArtistInfo>
         <ArtworkInfoCard>
-          <ArtworkBio>
-            Canyon Road는 제가 느낀 자연의 에너지를 담아낸 작품입니다. 이 길을
-            걸으며 보았던 색감, 곡선, 그리고 빛의 움직임이 마치 춤추는 것
-            같았고, 이를 화폭 위에 생생히 표현하고자 했습니다. 현실의 풍경이
-            주는 경이로움에 제 상상력을 더해 새로운 형태로 재구성한 이 작품은
-            자연이 가진 본질적인 아름다움을 탐구하는 과정이었습니다.
-          </ArtworkBio>
+          <ArtworkBio>{artworkData.description}</ArtworkBio>
         </ArtworkInfoCard>
         <SectionTitle>작품 기본 정보</SectionTitle>
         <Table items={tableItems} />
         <SectionContainer>
           {/* 작품 이용 유의사항 섹션 */}
           <SectionTitle>작품 이용 유의사항</SectionTitle>
-          <InfoItem label='공개 여부' content='유료 (전시 1회당 2체리)' />
-          <InfoItem label='저작자' content='작가 네번째작가' />
+          <InfoItem
+            label='공개 여부'
+            content={`유료 (전시 1회당 ${artworkData.cherryPrice}체리)`}
+          />
+          <InfoItem label='저작자' content={artworkData.userRes.name} />
           <InfoItem
             label='유의사항'
             content='전시에 해당 작품을 유료로 활용할 수 있습니다. 저작권자인 작가가 설정한 금액(체리)은 전시 시 지급하시면, 전시회에 활용할 수 있습니다. 작품은 상업적 목적으로 금지하고 있으며, 캡처, 다운로드 등을 허용하지 않습니다. 위반 시 법적 문제가 될 수 있습니다.'
@@ -185,7 +191,7 @@ const ArtworkInfo: React.FC = () => {
         <View style={{ marginBottom: 28 }} />
         {/* 작가님의 다른 작품들 */}
         <TouchableOpacity
-          onPress={() => handlePress(artistData.artist.id)}
+          onPress={() => handlePress(artworkData.userRes.id)}
           style={{ flexDirection: 'row', alignItems: 'center' }}
         >
           <H6>이 작가님의 다른 작품들</H6>
@@ -196,9 +202,10 @@ const ArtworkInfo: React.FC = () => {
             style={{ paddingBottom: 2 }}
           />
         </TouchableOpacity>
+        {/* TODO: 작가별 작품 조회 API */}
         <OtherArtworksWrapper>
           <FlatList
-            data={artistData.artworks}
+            data={artistData?.artworks}
             keyExtractor={(artwork) => artwork.id.toString()}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -215,7 +222,7 @@ const ArtworkInfo: React.FC = () => {
           />
         </OtherArtworksWrapper>
         <TouchableOpacity
-          onPress={() => handlePress(artistData.artist.id)}
+          onPress={() => handlePress(artworkData.userRes.id)}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -268,22 +275,13 @@ const ArtworkInfo: React.FC = () => {
           selectedCollections={selectedCollections}
           onSelectCollection={handleSelectCollection}
           artworkId={artworkId}
-          artworkImage={artworkData.fileName}
+          artworkImage={artworkData.imgUrl}
         />
       )}
       <ToastMessage message={toastMessage} visible={toastVisible} />
     </Container>
   );
 };
-
-const tableItems = [
-  { label: '작가', content: '이강원' },
-  { label: '시리즈', content: 'Nichols Canyon' },
-  { label: '작품 크기', content: '740mm * 920mm' },
-  { label: '재질(사용재료)', content: '캔버스에 유화' },
-  { label: '제작시기', content: '1990년' },
-  { label: '작품 분야', content: '유화, 회화' },
-];
 
 const ArtworkImage = styled.Image`
   width: 100%;

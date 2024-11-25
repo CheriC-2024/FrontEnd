@@ -286,21 +286,21 @@ export const artistAndArtworkData = [
     },
     artworks: [
       {
-        id: 301,
+        id: 1,
         name: '산속의 길',
         fileName: 'https://i.ibb.co/7XGGXPy/94-0-art-image.jpg',
         cherryNum: 0,
         register: 'ARTIST',
       },
       {
-        id: 302,
+        id: 2,
         name: '바다의 파도',
         fileName: 'https://i.ibb.co/Wn7QN8S/67-0-art-image.jpg',
         cherryNum: 2,
         register: 'ARTIST',
       },
       {
-        id: 303,
+        id: 3,
         name: '구름 사이',
         fileName: 'https://i.ibb.co/7KtjZ65/83-0-art-image.jpg',
         cherryNum: 2,
