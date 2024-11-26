@@ -58,3 +58,9 @@ const artTypeMapping: Record<string, string> = {
   PRINTMAKING_PAINTING: '판화',
   PAINTING: '회화',
 };
+
+// GET 소장 작품 설명 조회
+export const getOwnArtworkDesc = async (artworkId: number) => {
+  const response = await axiosInstance.get(`/arts/${artworkId}`);
+  return response.data.data;
+};

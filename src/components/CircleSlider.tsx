@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled, { useTheme } from 'styled-components/native';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { Artwork } from 'src/interfaces/collection';
-import { imageAssets } from '../assets/DB/imageAssets';
 import { Subtitle2 } from 'src/styles/typography';
 
 interface CircleSliderProps {
@@ -42,11 +41,7 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
             onPress={() => onCirclePress(index)} // Regular circle press
           >
             <Circle isActive={currentIndex === index}>
-              {artwork.fileName && /^https?:\/\//.test(artwork.fileName) ? (
-                <CircleImage source={{ uri: artwork.fileName }} />
-              ) : (
-                <CircleImage source={imageAssets[artwork.fileName]} />
-              )}
+              <CircleImage source={{ uri: artwork.imgUrl }} />
               {isDescriptionFilled(index) && <Overlay />}
               {isDescriptionFilled(index) && (
                 <OverlayImage
