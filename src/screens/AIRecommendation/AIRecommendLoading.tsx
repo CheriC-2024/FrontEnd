@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Animated, Easing } from 'react-native';
+import { Animated, Dimensions, Easing } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from 'src/store';
 import {
@@ -15,7 +15,7 @@ import { useCloudVision, useChatGpt } from '../../api/hooks/useAIQueries';
 import { useImmersiveMode } from 'src/hooks/_index';
 import styled from 'styled-components/native';
 import { areArraysEqual } from 'src/utils/arrayUtils';
-import { Body1, Body2, H4, H5, Subtitle2 } from 'src/styles/typography';
+import { Subtitle2 } from 'src/styles/typography';
 
 const AIRecommendLoading: React.FC = () => {
   const navigation = useNavigation();
@@ -27,10 +27,25 @@ const AIRecommendLoading: React.FC = () => {
 
   // 로딩 화면 문구
   const [currentText, setCurrentText] = useState(loadingTexts[0]);
-  const [dots, setDots] = useState('');
   const [fadeAnim] = useState(new Animated.Value(1)); // 페이드 아웃용
   const [translateAnim] = useState(new Animated.Value(0)); // 텍스트 애니메이션용
   const [rotateAnim] = useState(new Animated.Value(0)); // 이미지 회전용
+  const screenWidth = Dimensions.get('window').width;
+
+  // 캐릭터의 위치 애니메이션 값
+  const [characterAnim] = useState(new Animated.Value(-screenWidth)); // 화면 왼쪽 밖에서 시작
+
+  useEffect(() => {
+    // 캐릭터 애니메이션: 좌에서 우로 반복 이동
+    Animated.loop(
+      Animated.timing(characterAnim, {
+        toValue: screenWidth, // 화면 오른쪽 밖으로 이동
+        duration: 8000, // 천천히 이동 (8초)
+        easing: Easing.linear, // 일정한 속도
+        useNativeDriver: true,
+      }),
+    ).start();
+  }, [characterAnim, screenWidth]);
 
   // const { selectedArtworks } = useSelector((state: RootState) => state.artwork);
   // const {
@@ -193,15 +208,6 @@ const AIRecommendLoading: React.FC = () => {
   }, [fadeAnim, translateAnim]);
 
   useEffect(() => {
-    // 점(`.`) 주기적으로 추가
-    const dotsInterval = setInterval(() => {
-      setDots((prevDots) => (prevDots.length < 3 ? prevDots + '.' : ''));
-    }, 500);
-
-    return () => clearInterval(dotsInterval);
-  }, []);
-
-  useEffect(() => {
     // 무한 회전 애니메이션
     Animated.loop(
       Animated.timing(rotateAnim, {
@@ -220,21 +226,36 @@ const AIRecommendLoading: React.FC = () => {
   });
   return (
     <Container>
-      <AnimatedImage
-        style={{ transform: [{ rotate }] }}
-        source={require('src/assets/loading.png')}
-      />
-      <AnimatedTextContainer>
-        <AnimatedText
-          style={{
-            opacity: fadeAnim,
-            transform: [{ translateY: translateAnim }],
-          }}
-        >
-          {currentText}
-          <Dots>{dots}</Dots>
-        </AnimatedText>
-      </AnimatedTextContainer>
+      {source === 'ThemeSetting' && (
+        <AnimatedCircle
+          style={{ transform: [{ rotate }] }}
+          source={require('src/assets/loading.png')}
+        />
+      )}
+      {source === 'DescriptionSetting' && (
+        <Mask>
+          <AnimatedCharacter
+            source={require('src/assets/temp_loading.png')}
+            style={{
+              transform: [{ translateX: characterAnim }],
+            }}
+          />
+        </Mask>
+      )}
+      <TipContainer>
+        <LightBulbImage source={require('src/assets/images/lightbulb.png')} />
+        <TipContent>
+          <TipText>전시 Tip이에요!</TipText>
+          <AnimatedText
+            style={{
+              opacity: fadeAnim,
+              transform: [{ translateY: translateAnim }],
+            }}
+          >
+            {currentText}
+          </AnimatedText>
+        </TipContent>
+      </TipContainer>
     </Container>
   );
 };
@@ -258,30 +279,60 @@ const Container = styled.View`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
-const AnimatedImage = styled(Animated.Image)`
-  width: 190px;
-  height: 190px;
-  margin-bottom: 20px;
+const AnimatedCircle = styled(Animated.Image)`
+  width: 150px;
+  height: 150px;
+  margin-bottom: 40px;
 `;
 
-const AnimatedTextContainer = styled.View`
+const Mask = styled.View`
+  width: 88%;
+  height: 107px;
   overflow: hidden;
-  height: 80px;
-  justify-content: center;
-  padding: 0 16px;
+  position: absolute;
+  top: 270px;
+`;
+
+const AnimatedCharacter = styled(Animated.Image)`
+  width: 302px;
+  height: 107px;
+`;
+
+const LightBulbImage = styled.Image`
+  width: 29px;
+  height: 37px;
+  margin-right: 8px;
+`;
+
+const TipContainer = styled.View`
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background-color: ${({ theme }) => theme.colors.cherryRed_10};
+  padding: 12px 16px;
+  border-radius: 20px;
+  max-width: 90%;
+  height: 100px;
+`;
+
+const TipContent = styled.View`
+  flex-direction: column;
+  flex: 1;
+`;
+
+const TipText = styled(Subtitle2)`
+  color: #fff;
+  margin-bottom: 4px;
 `;
 
 const AnimatedText = styled(Animated.Text)`
-  font-size: 16px;
-  color: ${({ theme }) => theme.colors.redBlack};
-  text-align: center;
-`;
-
-const Dots = styled(H5)`
-  color: ${({ theme }) => theme.colors.grey_8};
-  margin-left: 4px;
+  font-size: 14px;
+  font-family: ${({ theme }) => theme.fonts.regular};
+  color: #ffffffe2;
+  flex-wrap: wrap;
 `;
 
 export default AIRecommendLoading;
