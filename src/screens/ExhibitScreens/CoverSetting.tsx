@@ -192,6 +192,7 @@ const CoverSetting: React.FC = () => {
 
     const gradientConfigurations = [
       {
+        key: 'TOP_DOWN',
         colors:
           selectedCover.length >= 2
             ? selectedCover
@@ -200,6 +201,7 @@ const CoverSetting: React.FC = () => {
         end: { x: 0, y: 1 },
       },
       {
+        key: 'DOWN_TOP',
         colors: [
           ...(selectedCover.length >= 2
             ? selectedCover
@@ -209,6 +211,7 @@ const CoverSetting: React.FC = () => {
         end: { x: 0, y: 1 },
       },
       {
+        key: 'LEFT_CORNER_RIGHT_CORNER',
         colors:
           selectedCover.length >= 2
             ? selectedCover
@@ -217,6 +220,7 @@ const CoverSetting: React.FC = () => {
         end: { x: 1, y: 1 },
       },
       {
+        key: 'RIGHT_CORNER_LEFT_CORNER',
         colors: [
           ...(selectedCover.length >= 2
             ? selectedCover
@@ -228,7 +232,11 @@ const CoverSetting: React.FC = () => {
     ];
 
     const selectedConfig = gradientConfigurations[index];
-    dispatch(setSelectedGradientConfig(selectedConfig));
+    dispatch(
+      setSelectedGradientConfig({
+        ...selectedConfig,
+      }),
+    );
   };
 
   const handleImageUpload = async () => {

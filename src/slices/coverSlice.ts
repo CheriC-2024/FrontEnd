@@ -1,5 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+type GradientConfig = {
+  key: string; // TOP_DOWN, DOWN_TOP, LEFT_CORNER_RIGHT_CORNER, RIGHT_CORNER_LEFT_CORNER
+  colors: string[];
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+};
+
 interface CoverState {
   selectedCover: string[]; // 선택된 커버 상태
   selectedCoverImage: string | null; // 업로드된 이미지 상태
@@ -8,11 +15,7 @@ interface CoverState {
   coverType: 'gradient' | 'solid' | 'image';
   selectedPalette: string[]; // 선택된 팔레트 상태 추가
   coverColors: string[]; // 선택된 커버 색상 추가
-  selectedGradientConfig: {
-    colors: string[];
-    start: { x: number; y: number };
-    end: { x: number; y: number };
-  } | null;
+  selectedGradientConfig: GradientConfig | null;
 }
 
 const initialState: CoverState = {
@@ -23,7 +26,7 @@ const initialState: CoverState = {
   coverType: 'gradient',
   selectedPalette: [],
   coverColors: [],
-  selectedGradientConfig: null,
+  selectedGradientConfig: null as GradientConfig | null,
 };
 
 const coverSlice = createSlice({
