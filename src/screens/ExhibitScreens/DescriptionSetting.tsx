@@ -77,20 +77,18 @@ const DescriptionSetting: React.FC = () => {
               : require('src/assets/images/Character/character_happy.png')
           }
         />
-        <InputContainer>
-          <InfoBlock
-            label='전시 이름'
-            placeholder='ex) 항해 : 김아무개전'
-            maxLength={30}
-            required
-            value={exhibitTitle}
-            onChangeText={(text) => dispatch(setExhibitTitle(text))}
-            style={{ paddingBottom: parseInt(theme.padding.l) }}
-          />
-          <AIButtonContainer>
-            <AIRecommendBtn source='DescriptionSetting' />
-          </AIButtonContainer>
-        </InputContainer>
+        <AIButtonContainer>
+          <AIRecommendBtn source='DescriptionSetting' />
+        </AIButtonContainer>
+        <InfoBlock
+          label='전시 이름'
+          placeholder='ex) 항해 : 김아무개전'
+          maxLength={30}
+          required
+          value={exhibitTitle}
+          onChangeText={(text) => dispatch(setExhibitTitle(text))}
+          style={{ paddingBottom: parseInt(theme.padding.l) }}
+        />
         <DropdownContainer>
           <DropdownLabel>
             폰트 설정<Red>*</Red>
@@ -157,14 +155,9 @@ const DescriptionSetting: React.FC = () => {
 };
 
 const AIButtonContainer = styled.View`
-  position: absolute;
-  right: 0px;
-`;
-
-const InputContainer = styled.View`
-  margin-top: 30px;
-  position: relative;
-  z-index: 1;
+  flex-wrap: wrap-reverse;
+  margin-top: 20px;
+  margin-bottom: 8px;
 `;
 
 const Red = styled.Text`
@@ -184,6 +177,7 @@ const DropdownLabel = styled(Subtitle2)`
 
 const DropdownWrapper = styled.View`
   background-color: ${theme.colors.grey_4};
+  padding: 8px 0;
   border-radius: 20px;
   margin-bottom: ${theme.spacing.s6};
 `;
