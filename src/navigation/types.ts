@@ -32,9 +32,7 @@ export type StackParamList = {
   DescriptionSetting: undefined;
   ArtworkList: undefined;
   ArtworkDetail: {
-    isCollectorOnly: boolean;
-    imageUrl: any;
-    title: ReactNode;
+    artworkId: number;
   };
 };
 
