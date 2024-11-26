@@ -5,8 +5,8 @@ interface AIRecommendState {
   aiLabel: string[];
   aiThemes: string[];
   aiThemeReason: string[];
-  aiTitles: string;
-  aiTitleReason: string;
+  aiTitles: string[];
+  aiTitleReason: string[];
   cloudVisionLabels: CloudVisionLabel[];
   prevSelectedArt: number[];
 }
@@ -25,8 +25,17 @@ const initialState: AIRecommendState = {
     '설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다.',
     '설명 입니다adsadsaawd.wad awd설명 입efe니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다.',
   ],
-  aiTitles: '',
-  aiTitleReason: '',
+  aiTitles: [
+    '제목1',
+    '제목 이건 2번',
+    'Hello Hi',
+    '체리시',
+    '이건는 제목: 이거는 제목',
+  ],
+  aiTitleReason: [
+    '설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다.',
+    '설명 입니다adsadsaawd.wad awd설명 입efe니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다.',
+  ],
   cloudVisionLabels: [],
   prevSelectedArt: [],
 };
