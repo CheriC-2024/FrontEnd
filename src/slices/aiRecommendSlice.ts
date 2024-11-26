@@ -13,8 +13,18 @@ interface AIRecommendState {
 
 const initialState: AIRecommendState = {
   aiLabel: [],
-  aiThemes: [],
-  aiThemeReason: [],
+  // TODO: 시연용 데이터 추가하기
+  aiThemes: [
+    '추천 테마 1번',
+    '추천 테마 2번',
+    '추천 테마 3',
+    '추천 테마 4',
+    '추천 테마5입니다아',
+  ],
+  aiThemeReason: [
+    '설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다.',
+    '설명 입니다adsadsaawd.wad awd설명 입efe니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다. 설명 입니다.',
+  ],
   aiTitles: '',
   aiTitleReason: '',
   cloudVisionLabels: [],
