@@ -1,26 +1,24 @@
-import React from 'react';
 import styled from 'styled-components/native';
 import { CherryIcon } from '../assets/icons/_index.js';
 import { Caption } from 'src/styles/typography';
 import { Artwork } from 'src/interfaces/collection';
 
 // 필요한 속성만 사용하여 전달
-const ArtworkPriceInfo: React.FC<Pick<Artwork, 'cherryNum' | 'register'>> = ({
-  cherryNum,
-  register,
-}) => {
+const ArtworkPriceInfo: React.FC<
+  Pick<Artwork, 'cherryPrice' | 'collectorsArt'>
+> = ({ cherryPrice, collectorsArt }) => {
   return (
     <InfoContainer>
-      {cherryNum === null ? ( // TODO: api 구조 확정시 register 사용하여 수정 예정
+      {collectorsArt === true ? (
         <CollectorOnlyImage
           source={require('../assets/images/collectorOnlyText.png')}
         />
-      ) : register === 'ARTIST' && cherryNum > 0 ? (
+      ) : cherryPrice > 0 ? (
         <PriceRow>
           <Icon />
           <PriceText>
             {` `}
-            {cherryNum}
+            {cherryPrice}
           </PriceText>
         </PriceRow>
       ) : (

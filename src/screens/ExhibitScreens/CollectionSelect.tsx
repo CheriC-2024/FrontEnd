@@ -6,7 +6,6 @@ import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootState, AppDispatch } from '../../store';
 import { setFilterText, selectCollection } from '../../slices/collectionSlice';
-import { imageAssets } from 'src/assets/DB/imageAssets';
 import { useUserCollection } from 'src/api/hooks/useCollectionQueries';
 import { Container } from 'src/styles/layout';
 import GradientBackground from '../../styles/GradientBackground';
@@ -23,10 +22,11 @@ import {
 const CollectionSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: collectionsData, isLoading, error } = useUserCollection(1); // 임시 유저ID API 연결 예정
+  const { data: collectionsData, isLoading, error } = useUserCollection(); // 임시 유저ID API 연결 예정
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
+
   // 헤더 설정
   useEffect(() => {
     const isNextEnabled = activeCollections.length > 0;
@@ -86,7 +86,9 @@ const CollectionSelect: React.FC = () => {
         <LabelText>선택한 컬렉션</LabelText>
         <SelectedTagContainer>
           {activeCollections.map((id) => {
-            const collection = collectionsData.find((c) => c.id === id);
+            const collection = collectionsData.find(
+              (c) => c.collectionId === id,
+            );
             return (
               collection && (
                 <TagButton
@@ -103,16 +105,19 @@ const CollectionSelect: React.FC = () => {
           style={{ paddingTop: 8, paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
           data={filteredCollectionsData}
-          keyExtractor={(item) => item.id.toString()} // 각 아이템의 고유한 키 설정
+          keyExtractor={(item) => item.collectionId.toString()} // 각 아이템의 고유한 키 설정
           renderItem={({ item: collection }) => {
             // renderItem에서 컬렉션을 렌더링
-            const selected = activeCollections.includes(collection.id);
-            const firstArtworkImage = imageAssets[collection.fileName];
+            const selected = activeCollections.includes(
+              collection.collectionId,
+            );
             return (
               <CollectionItem
                 selected={selected}
-                onPress={() => dispatch(selectCollection(collection.id))}
-                imageSource={firstArtworkImage}
+                onPress={() =>
+                  dispatch(selectCollection(collection.collectionId))
+                }
+                imageSource={collection.latestArtImgUrl}
                 name={collection.name}
                 description={collection.description}
               />

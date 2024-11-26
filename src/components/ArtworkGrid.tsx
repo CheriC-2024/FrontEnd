@@ -1,9 +1,8 @@
-import React from 'react';
 import styled from 'styled-components/native';
 import ArtworkItem from './ArtworkItem';
 
 interface ArtworkGridProps {
-  artworks: any[];
+  artworks: any[]; //TODO: 구조
   selectedArtworks: any[];
   onSelect: (artwork: any) => void;
 }

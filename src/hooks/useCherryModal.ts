@@ -26,7 +26,7 @@ const useCherryModal = (
     } else {
       setModalProps({
         title: '앗 체리가 부족해요!',
-        message: `선택하신 작품 중 ${selectedArtworks}점은 전시를 위해 체리 5개가 필요해요\n체리를 더 구매하셔야 될 것 같아요!`,
+        message: `선택하신 작품 중 ${selectedArtworks}점은 전시를 위해 체리 ${selectedCherries}개가 필요해요\n체리를 더 구매하셔야 될 것 같아요!`,
         userCherries: userCherries,
         buttonText: '체리 구매하기',
         onAction: () => {

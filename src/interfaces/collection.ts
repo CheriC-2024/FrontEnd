@@ -1,13 +1,12 @@
-// TODO api 구조 픽스되면 변경 예정
-
 // Artwork 인터페이스 (추후 작품 데이터 반환 시 사용)
 export interface Artwork {
   artId: number;
+  imgUrl: string;
   name: string;
-  register: 'COLLECTOR' | 'ARTIST' | 'ADMIN';
-  cherryNum: number;
+  cherryPrice: number;
+  collectorsArt: boolean;
+  // TODO: 삭제 예정
   filePath?: string;
-  fileName: string;
 }
 
 // Collection 인터페이스
