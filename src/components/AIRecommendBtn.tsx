@@ -4,7 +4,8 @@ import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../navigation/types';
-import { Caption } from 'src/styles/typography';
+import { Body2, Caption } from 'src/styles/typography';
+import { SparkleIcon } from 'src/assets/icons/_index';
 
 interface AIRecommendBtnProps {
   source: string;
@@ -22,15 +23,23 @@ const AIRecommendBtn: React.FC<AIRecommendBtnProps> = ({ source }) => {
 
   return (
     <AIButton onPress={handleAIRecommendation}>
-      <AIButtonText>+ AI 추천을 받아보고 싶다면?</AIButtonText>
+      <SparkleIcon />
+      <AIButtonText>AI 추천 받아보기</AIButtonText>
     </AIButton>
   );
 };
 
-const AIButton = styled(TouchableOpacity)``;
+const AIButton = styled(TouchableOpacity)`
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 24px;
+  background-color: ${({ theme }) => theme.colors.cherryRed_10};
+  gap: 4px;
+`;
 
-const AIButtonText = styled(Caption)`
-  color: ${({ theme }) => theme.colors.grey_8};
+const AIButtonText = styled(Body2)`
+  color: #fff;
 `;
 
 export default AIRecommendBtn;
