@@ -37,8 +37,11 @@ const themeSlice = createSlice({
         (theme) => theme !== action.payload,
       ); // AI 테마 배열에서도 제거
     },
+    resetThemeState() {
+      return initialState;
+    },
   },
 });
 
-export const { addTheme, removeTheme } = themeSlice.actions;
+export const { addTheme, removeTheme, resetThemeState } = themeSlice.actions;
 export default themeSlice.reducer;

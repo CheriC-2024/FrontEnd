@@ -5,7 +5,11 @@ import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootState, AppDispatch } from '../../store';
-import { setFilterText, selectCollection } from '../../slices/collectionSlice';
+import {
+  setFilterText,
+  selectCollection,
+  clearSelectedCollections,
+} from '../../slices/collectionSlice';
 import { useUserCollection } from 'src/api/hooks/useCollectionQueries';
 import { Container } from 'src/styles/layout';
 import GradientBackground from '../../styles/GradientBackground';
@@ -42,6 +46,7 @@ const CollectionSelect: React.FC = () => {
   // 컴포넌트가 처음 마운트될 때 filterText 초기화
   useEffect(() => {
     dispatch(setFilterText('')); // filterText를 빈 문자열로 초기화
+    dispatch(clearSelectedCollections());
   }, [dispatch]);
 
   if (isLoading) {

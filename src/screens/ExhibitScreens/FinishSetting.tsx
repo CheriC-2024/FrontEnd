@@ -110,7 +110,7 @@ const FinishSetting: React.FC = () => {
 
   const handleConfirm = async () => {
     try {
-      setModalVisible(false);
+      // setModalVisible(false);
       navigation.navigate('ExhibitCompletion');
     } catch (error) {
       Alert.alert('에러', '전시 등록에 실패했습니다.');

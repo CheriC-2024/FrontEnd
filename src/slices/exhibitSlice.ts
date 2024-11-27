@@ -49,6 +49,9 @@ const exhibitSlice = createSlice({
     ) => {
       state.fontData = action.payload;
     },
+    resetExhibitState() {
+      return initialState;
+    },
   },
 });
 
@@ -57,6 +60,7 @@ export const {
   setExhibitDescription,
   setSelectedFont,
   setFontData,
+  resetExhibitState,
 } = exhibitSlice.actions;
 
 export default exhibitSlice.reducer;

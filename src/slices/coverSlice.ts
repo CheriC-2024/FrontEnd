@@ -66,6 +66,9 @@ const coverSlice = createSlice({
     ) => {
       state.selectedGradientConfig = action.payload;
     },
+    resetCoverState() {
+      return initialState;
+    },
   },
 });
 
@@ -78,6 +81,7 @@ export const {
   setSelectedPalette,
   setCoverColors,
   setSelectedGradientConfig,
+  resetCoverState,
 } = coverSlice.actions;
 
 export default coverSlice.reducer;

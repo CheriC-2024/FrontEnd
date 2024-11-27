@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert } from 'react-native';
 import styled from 'styled-components/native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { preparePostData } from 'src/utils/postExhibitUtils';
 import { postExhibition } from 'src/api/exhibitApi';
@@ -12,8 +12,14 @@ import { Caption, H4 } from 'src/styles/typography';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { OwnArtCheck } from 'src/assets/images/MyCheric/_index';
 import { RootState } from 'src/store';
+import { resetExhibitState } from 'src/slices/exhibitSlice';
+import { resetCoverState } from 'src/slices/coverSlice';
+import { resetThemeState } from 'src/slices/themeSlice';
+import { resetSelectedArtworks } from 'src/slices/artworkSlice';
+import { clearSelectedCollections } from 'src/slices/collectionSlice';
 
 const ExhibitCompletion: React.FC = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [postSuccess, setPostSuccess] = useState(false);
@@ -72,6 +78,12 @@ const ExhibitCompletion: React.FC = () => {
       console.log('POST 성공');
 
       setPostSuccess(true); // 성공 상태 업데이트
+      // Redux 상태 초기화 -> 에러
+      // dispatch(resetExhibitState());
+      // dispatch(resetCoverState());
+      // dispatch(resetThemeState());
+      // dispatch(resetSelectedArtworks());
+      // dispatch(clearSelectedCollections());
     } catch (error) {
       console.error('POST 실패:', error);
       Alert.alert('에러', '업로드 또는 등록 중 오류가 발생했습니다.');
