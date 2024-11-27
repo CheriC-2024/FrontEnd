@@ -44,6 +44,7 @@ export type ExhibitStackParamList = {
   DescriptionSetting: undefined;
   CoverSetting: undefined;
   FinishSetting: undefined;
+  ExhibitCompletion: undefined;
 };
 
 export type CollectingStackParamList = {

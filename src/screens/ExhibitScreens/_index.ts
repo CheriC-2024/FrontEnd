@@ -7,3 +7,4 @@ export { default as CoverSetting } from './CoverSetting';
 export { default as FinishSetting } from './FinishSetting';
 export { default as ArtworkDetail } from './ArtworkDetail';
 export { default as ArtworkList } from './ArtworkList';
+export { default as ExhibitCompletion } from './ExhibitCompletion';
