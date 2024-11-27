@@ -1,3 +1,4 @@
+import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
 type SortType = 'LATEST' | 'NAME';
@@ -20,7 +21,7 @@ export const collectionApi = {
   getArtworks: async (sort: SortType, collectionIds: number[]) => {
     try {
       const response = await axiosInstance.post(
-        `/collections/arts?sort=${sort}`,
+        `/collections/arts?sortType=${sort}`,
         {
           collectionIds,
         },
@@ -28,7 +29,15 @@ export const collectionApi = {
       console.dir('[선택된 컬렉션별 작품 조회] : ', response.data.data);
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching artworks:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Axios Error:', error.message);
+        console.error('Request URL:', error.config.url);
+        console.error('Request Data:', error.config.data);
+        console.error('Response Status:', error.response?.status);
+        console.error('Response Data:', error.response?.data);
+      } else {
+        console.error('Unexpected Error:', error);
+      }
       throw error;
     }
   },

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
 // POST 소장 작품 등록
@@ -31,8 +32,20 @@ export const fetchArtworkById = async (id: number) => {
     console.log('Fetched Artwork with Mapped Art Types:', data);
     return data;
   } catch (error) {
-    console.error('Error fetching artwork by ID:', error);
-    throw error;
+    if (axios.isAxiosError(error)) {
+      // AxiosError 상세 정보 출력
+      console.error('Axios Error Message:', error.message); // 에러 메시지
+      console.error('Axios Error Code:', error.code); // HTTP 상태 코드
+      console.error('Request URL:', error.config?.url); // 요청 URL
+      console.error('Request Params:', error.config?.params); // 쿼리 매개변수
+      console.error('Request Data:', error.config?.data); // 요청 데이터 (POST/PUT)
+      console.error('Response Status:', error.response?.status); // 응답 HTTP 상태 코드
+      console.error('Response Data:', error.response?.data); // 서버에서 반환된 데이터
+    } else {
+      // Axios가 아닌 다른 에러 처리
+      console.error('Unexpected Error:', error);
+    }
+    throw error; // 에러 다시 던지기
   }
 };
 
