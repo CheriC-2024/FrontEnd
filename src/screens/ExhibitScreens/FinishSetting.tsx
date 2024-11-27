@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  Alert,
+} from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CherryIcon, PencilIcon } from '../../assets/icons/_index.js';
@@ -27,7 +33,6 @@ import { Container } from 'src/styles/layout';
 import { Caption, H5, Subtitle2 } from 'src/styles/typography';
 import { Artwork } from 'src/interfaces/collection';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-import { useCherryFinishModal } from 'src/hooks/_index';
 import { useArtworkData } from 'src/api/hooks/useArtworkQueries';
 
 const FinishSetting: React.FC = () => {
@@ -75,6 +80,43 @@ const FinishSetting: React.FC = () => {
     );
   }, [navigation]);
 
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalProps, setModalProps] = useState({
+    title: '',
+    requiredCherries: 0,
+    userCherries: 0,
+  });
+
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const handleNext = () => {
+    const title =
+      totalCherries === 0 || myCherryNum >= totalCherries
+        ? '전시작품의 이용료를 결제할게요!'
+        : '체리가 부족해요!';
+    setModalProps({
+      title,
+      requiredCherries: totalCherries,
+      userCherries: myCherryNum,
+    });
+    setModalVisible(true);
+  };
+
+  const handleConfirm = async () => {
+    try {
+      setModalVisible(false);
+      navigation.navigate('ExhibitCompletion');
+    } catch (error) {
+      Alert.alert('에러', '전시 등록에 실패했습니다.');
+    }
+  };
+
   const userCherries = myCherryNum;
 
   // useArtworkData와 현재 선택된 작품 매핑
@@ -82,16 +124,6 @@ const FinishSetting: React.FC = () => {
     ...artwork,
     artistName: artworkData[index]?.artistName || '작가 정보 없음',
   }));
-
-  const { isModalVisible, modalProps, handleNext, setModalVisible } =
-    useCherryFinishModal(userCherries, totalCherries, () => {
-      // TODO: 확인했을 때 실행될 POST 요청, 체리 차감 API 등 추가 예정
-      navigation.reset({
-        index: 0, // 첫 번째 스크린으로 설정
-        routes: [{ name: 'Tabs' }], // Tabs 화면으로 이동
-      });
-      console.log('체리 사용 후 전시 완료');
-    });
 
   const renderItem = ({ item, drag, isActive }) => {
     const scale = useSharedValue(1);
@@ -264,11 +296,6 @@ const FinishSetting: React.FC = () => {
             )}
           </>
         )}
-        <CherryFinishModal
-          onClose={() => setModalVisible(false)}
-          visible={isModalVisible}
-          {...modalProps}
-        />
       </GradientContainer>
 
       <InnerContainer>
@@ -285,6 +312,12 @@ const FinishSetting: React.FC = () => {
         onClose={closeMusicSheet}
         initialSelectedMusic={selectedMusic}
         setSelectedMusic={setSelectedMusic}
+      />
+      <CherryFinishModal
+        visible={isModalVisible}
+        {...modalProps}
+        onConfirm={handleConfirm}
+        onClose={() => setModalVisible(false)}
       />
     </Container>
   );
