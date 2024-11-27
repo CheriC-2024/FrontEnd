@@ -8,7 +8,7 @@ export const collectionApi = {
     try {
       const response = await axiosInstance.get('/collections');
 
-      console.log('[현재 사용자 컬렉션 리스트 조회] : ', response.data.data);
+      console.dir('[현재 사용자 컬렉션 리스트 조회] : ', response.data.data);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching user collections:', error);
@@ -25,7 +25,7 @@ export const collectionApi = {
           collectionIds,
         },
       );
-      console.log('[선택된 컬렉션별 작품 조회] : ', response.data.data);
+      console.dir('[선택된 컬렉션별 작품 조회] : ', response.data.data);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching artworks:', error);
