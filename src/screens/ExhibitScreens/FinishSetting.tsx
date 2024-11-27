@@ -34,9 +34,8 @@ const FinishSetting: React.FC = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const { exhibitTitle, exhibitDescription, selectedFont } = useSelector(
-    (state: RootState) => state.exhibit,
-  );
+  const { exhibitTitle, exhibitDescription, selectedFont, fontData } =
+    useSelector((state: RootState) => state.exhibit);
   const {
     selectedCover,
     coverType,
@@ -48,6 +47,11 @@ const FinishSetting: React.FC = () => {
   const { selectedArtworks, totalCherries } = useSelector(
     (state: RootState) => state.artwork,
   );
+  // selectedFont 값에 해당하는 fontFamily 찾기
+  const selectedFontFamily =
+    fontData.find((font) => font.value === selectedFont)?.fontFamily ||
+    'PretendardRegular';
+
   // 각 artId에 대해 useArtworkData 호출
   const artworkQueries = selectedArtworks.map((artwork) =>
     useArtworkData(artwork.artId),
@@ -195,7 +199,7 @@ const FinishSetting: React.FC = () => {
         </TouchableOpacity>
       </MusicContainer>
       <SectionTitleContainer>
-        <H5 style={{ fontFamily: selectedFont }}>{exhibitTitle}</H5>
+        <H5 style={{ fontFamily: selectedFontFamily }}>{exhibitTitle}</H5>
         <TouchableOpacity
           onPress={() => handleEditPress('DescriptionSetting')}
           style={{ marginLeft: 4, paddingTop: 4 }}
