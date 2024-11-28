@@ -36,10 +36,10 @@ export const preparePostData = ({
       review: artworkInfoInput[index]?.artworkAppreciation || '',
       artId: artwork.artId,
     })),
-    coverImgUrl: selectedCoverImage || '',
-    colors: selectedCoverImage ? '' : selectedGradientConfig?.colors || '',
+    coverImgUrl: selectedCoverImage || null,
+    colors: selectedCoverImage ? null : selectedGradientConfig?.colors || null,
     exhibitionBackgroundType: selectedCoverImage
-      ? ''
+      ? null
       : selectedGradientConfig?.key || 'TOP_DOWN',
   };
 };
