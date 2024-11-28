@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { Dimensions, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
-import ExhibitCard, { ExhibitCardProps } from './ExhibitCard';
+import ExhibitCard from './ExhibitCard';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { Exhibition } from 'src/interfaces/collection';
 
 const { width } = Dimensions.get('window');
 
 interface ExhibitCarouselProps {
-  data: ExhibitCardProps[];
+  data: Exhibition[];
 }
 
 const ExhibitCarousel: React.FC<ExhibitCarouselProps> = ({ data }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const progress = useSharedValue<number>(0);
+  console.log(data);
 
   return (
     <Carousel

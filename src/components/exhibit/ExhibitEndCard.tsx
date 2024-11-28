@@ -1,52 +1,77 @@
-import React from 'react';
-import { Caption, H5 } from 'src/styles/typography';
+import React, { useState } from 'react';
 import styled from 'styled-components/native';
+import { Caption, H5, Body1, ButtonText } from 'src/styles/typography';
 import FollowButton from '../profile/FollowButton';
 import { ForwardIcon } from 'src/assets/icons/_index';
 
 interface ExhibitEndCardProps {
-  artistId: number;
+  artistId?: number;
   artistName: string;
   artistImage: string;
   infoText: string;
   category: string[];
-  comment: string;
+  comment?: string;
+  exhibitionStats: {
+    artworks: string; // Example: "유화 8작, 회화 3작"
+    exhibitions: number; // Total exhibitions by the collector
+    currentExhibition: number; // Current exhibition number
+  };
 }
-// TODO: props로 artistId만 받도록
+
 const ExhibitEndCard: React.FC<ExhibitEndCardProps> = ({
   artistId,
   artistName,
   artistImage,
   infoText,
   category,
-  comment,
+  comment = '',
+  exhibitionStats,
 }) => {
+  // Local state to track if the user is followed
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  // Toggle follow state on button press
+  const handleFollowPress = () => {
+    setIsFollowing((prev) => !prev);
+  };
+
   return (
     <CardContainer>
       <Header>
         <ArtistImage source={{ uri: artistImage }} />
         <ArtistInfo>
           <ArtistButton>
-            {/**profile로 이동 */}
             <ArtistName>{artistName}</ArtistName>
             <ForwardIcon />
           </ArtistButton>
           <Categories>
-            <Caption style={{ color: '#413333', marginRight: 4 }}>
-              선호 분야
-            </Caption>
-            {category.map((cat, index) => (
+            <Caption>선호 분야</Caption>
+            <Category>유화</Category>
+            <Category>수채화</Category>
+            {/* {category.map((cat, index) => (
               <Category key={index}>{cat}</Category>
-            ))}
+            ))} */}
           </Categories>
         </ArtistInfo>
-        <FollowButton userId={artistId} />
+        {/* <FollowButton userId={artistId} /> */}
+        <StyledButton isFollowing={isFollowing} onPress={handleFollowPress}>
+          <FollowButtonText isFollowing={isFollowing}>
+            {isFollowing ? '팔로우중' : '팔로우하기'}
+          </FollowButtonText>
+        </StyledButton>
       </Header>
-      <InfoText>{infoText}</InfoText>
-      <CommentContainer>
-        <Comment>{`"${comment}"`}</Comment>
-        <CommentAuthor>- {artistName} -</CommentAuthor>
-      </CommentContainer>
+      <InfoText>
+        컬렉터 {artistName}님께서 {exhibitionStats.artworks}을 보유중이며
+        지금까지 체리시에 총 {exhibitionStats.exhibitions}개의 컬렉션 전시를
+        선보였습니다. 컬렉터 {artistName}님의 이번 전시는 {artistName}{' '}
+        컬렉터님의 {exhibitionStats.currentExhibition}번째 컬렉션 전시입니다.
+      </InfoText>
+      {comment && (
+        <CommentContainer>
+          <Comment>{`“${comment}”`}</Comment>
+          <CommentAuthor>- 해랑 -</CommentAuthor>
+        </CommentContainer>
+      )}
     </CardContainer>
   );
 };
@@ -86,6 +111,7 @@ const ArtistName = styled(H5)``;
 const Categories = styled.View`
   flex-direction: row;
   align-items: center;
+  gap: 4px;
 `;
 
 const Category = styled(Caption)`
@@ -93,7 +119,6 @@ const Category = styled(Caption)`
   color: ${({ theme }) => theme.colors.grey_8};
   padding: 4px 8px;
   border-radius: 16px;
-  margin-right: 4px;
 `;
 
 const InfoText = styled(Caption)`
@@ -120,6 +145,22 @@ const CommentAuthor = styled(Caption)`
   margin-bottom: 10px;
   font-size: 10px;
   color: #fcf9f9;
+`;
+
+const StyledButton = styled.TouchableOpacity<{ isFollowing: boolean }>`
+  width: 104px;
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ isFollowing, theme }) =>
+    isFollowing ? theme.colors.cherryRed_10 : 'transparent'};
+  padding: 8px;
+  border-radius: ${({ theme }) => theme.radius.l};
+  border: 1.5px solid ${({ theme }) => theme.colors.cherryRed_10};
+`;
+
+const FollowButtonText = styled(ButtonText)<{ isFollowing: boolean }>`
+  color: ${({ isFollowing, theme }) =>
+    isFollowing ? theme.colors.white : theme.colors.cherryRed_10};
 `;
 
 export default ExhibitEndCard;
