@@ -95,7 +95,7 @@ const CoverSetting: React.FC = () => {
           dispatch(setSelectedCover(initialCover));
         }
       } else if (isError) {
-        console.error('데이터를 불러오는 데 실패했습니다.', isError);
+        console.error('', isError);
       }
     }
   }, [extractedProperties, isError, dispatch]);
@@ -148,7 +148,7 @@ const CoverSetting: React.FC = () => {
         dispatch(setSelectedCover(initialCover));
       }
     } else if (isError) {
-      console.error('데이터를 불러오는 데 실패했습니다.', isError);
+      console.error('', isError);
     }
   }, [extractedProperties, isError, dispatch]);
 
@@ -343,7 +343,7 @@ const CoverSetting: React.FC = () => {
               ),
             )
           ) : (
-            <LoadingText>팔레트를 불러올 수 없습니다.</LoadingText>
+            <LoadingText></LoadingText>
           )}
         </PaletteContainer>
         <CoverTypeButtonContainer>
