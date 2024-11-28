@@ -58,6 +58,7 @@ const ArtCategoryHeader: React.FC<{
 const HeaderWrapper = styled.View`
   flex-direction: row;
   align-items: flex-end;
+  background-color: #fff;
 `;
 
 const ImageWrapper = styled.View`
