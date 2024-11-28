@@ -1,5 +1,6 @@
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
+import { mapArtTypes } from 'src/utils/artTypeMapper';
 
 // POST 소장 작품 등록
 export const postPrivateArtwork = async (data: any) => {
@@ -76,4 +77,67 @@ const artTypeMapping: Record<string, string> = {
 export const getOwnArtworkDesc = async (artworkId: number) => {
   const response = await axiosInstance.get(`/arts/${artworkId}`);
   return response.data.data;
+};
+
+// GET 분야 별 작품 리스트
+export const fetchArtTypes = async (
+  order: string,
+  page: number,
+  size: number,
+  artType: string,
+) => {
+  try {
+    const response = await axiosInstance.get('/arts/art-type', {
+      params: {
+        order,
+        page,
+        size,
+        artType,
+      },
+    });
+    console.log(response.data.data);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching art types:', error);
+    throw error;
+  }
+};
+
+interface ArtResponse {
+  artId: number;
+  imgUrl: string;
+  name: string;
+  cherryNum: number | null;
+  createdAt: string;
+  userRes: {
+    id: number;
+    name: string;
+    profileImgUrl: string;
+  };
+}
+
+export const fetchArtTypesFilter = async ({
+  artType,
+  order = 'LATEST',
+  page = 0,
+  size = 10,
+  isCollectorsArt,
+  userId,
+}: {
+  artType?: string;
+  order?: string;
+  page?: number;
+  size?: number;
+  userId?: number;
+  isCollectorsArt?: string;
+}): Promise<ArtResponse[]> => {
+  try {
+    const response = await axiosInstance.get('/arts', {
+      params: { artType, order, page, size, userId, isCollectorsArt },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching art types filter:', error);
+    throw error;
+  }
 };
