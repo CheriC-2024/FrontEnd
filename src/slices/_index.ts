@@ -12,3 +12,4 @@ export { default as registerArtistReducer } from './registerArtistSlice';
 export { default as registerPrivateArtworkReducer } from './registerPrivateArtworkSlice';
 export { default as themeReducer } from './themeSlice';
 export { default as userReducer } from './userSlice';
+export { default as watchingExhibitReducer } from './watchingExhibitSlice';
