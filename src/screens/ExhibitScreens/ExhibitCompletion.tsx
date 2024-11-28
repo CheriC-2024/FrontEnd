@@ -10,7 +10,7 @@ import { Container } from 'src/styles/layout';
 import { Btn, BtnText } from 'src/components/Button';
 import { Caption, H4 } from 'src/styles/typography';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-import { OwnArtCheck } from 'src/assets/images/MyCheric/_index';
+import { CompleteDoor } from 'src/assets/images/MyCheric/_index';
 import { RootState } from 'src/store';
 import { resetExhibitState } from 'src/slices/exhibitSlice';
 import { resetCoverState } from 'src/slices/coverSlice';
@@ -115,7 +115,7 @@ const ExhibitCompletion: React.FC = () => {
           subtitle={'등록된 전시 정보를 확인해주세요.'}
         />
         <InfoContainer>
-          <OwnArtCheck />
+          <CompleteDoor />
           <H4>{exhibitTitle}</H4>
           <H4>전시 제작 완료!</H4>
           <Caption style={{ textAlign: 'center', marginTop: 8 }}>
