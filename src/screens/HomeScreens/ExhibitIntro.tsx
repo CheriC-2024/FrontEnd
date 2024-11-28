@@ -13,6 +13,9 @@ import { MusicOffIcon, MusicOnIcon } from 'src/assets/icons/_index.js';
 import { ButtonText } from 'src/styles/typography';
 import { DragGuideHorizontal } from 'src/components/_index';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { Audio } from 'expo-av';
 
 const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
@@ -29,6 +32,52 @@ const ExhibitIntro: React.FC = () => {
   const [isMusicOn, setIsMusicOn] = useState(true); // 초기값은 MusicOnIcon
   const [isDragGuideVisible, setIsDragGuideVisible] = useState(true); // DragGuideHorizontal의 가시성 상태
   const [showDragGuide, setShowDragGuide] = useState(false); // DragGuideHorizontal 표시 여부
+  const exhibitDetails = useSelector(
+    (state: RootState) => state.watchingExhibit.details,
+  );
+  const font = useSelector((state: RootState) => state.watchingExhibit.font);
+  if (!font) {
+    // Redux 상태가 아직 준비되지 않은 경우 로딩 화면을 보여줌
+    return;
+  }
+
+  const [sound, setSound] = useState<Audio.Sound | null>(null); // 오디오 객체
+
+  // 음악 재생 함수
+  const playSound = async () => {
+    try {
+      console.log('Loading Sound');
+      const { sound } = await Audio.Sound.createAsync(
+        require('src/assets/music.mp3'), // 로컬 MP3 파일 경로
+      );
+      setSound(sound);
+
+      console.log('Playing Sound');
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Error playing sound', error);
+    }
+  };
+
+  // 음악 정지 함수
+  const stopSound = async () => {
+    if (sound) {
+      console.log('Stopping Sound');
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+    }
+  };
+
+  // 음악 상태 토글
+  const toggleMusic = async () => {
+    if (isMusicOn) {
+      await stopSound();
+    } else {
+      await playSound();
+    }
+    setIsMusicOn((prev) => !prev);
+  };
 
   // 헤더 설정
   useEffect(() => {
@@ -107,19 +156,21 @@ const ExhibitIntro: React.FC = () => {
           colors={['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA']}
         >
           <OverlayBackground>
-            <TouchableOpacity onPress={() => setIsMusicOn((prev) => !prev)}>
+            <TouchableOpacity onPress={toggleMusic}>
               {isMusicOn ? <MusicOnIcon /> : <MusicOffIcon />}
             </TouchableOpacity>
 
             {/* 타이틀 애니메이션 적용 */}
-            <AnimatedTitle
+            <Animated.View
               style={{
                 opacity: fadeAnimTitle,
                 transform: [{ translateY: translateYTitle }],
               }}
             >
-              {exhibitData?.title}
-            </AnimatedTitle>
+              <StyledTitle fontFamily={font}>
+                {exhibitDetails?.title}
+              </StyledTitle>
+            </Animated.View>
 
             {/* 설명 애니메이션 적용 */}
             <AnimatedDescription
@@ -128,7 +179,7 @@ const ExhibitIntro: React.FC = () => {
                 transform: [{ translateY: translateYDescription }],
               }}
             >
-              {exhibitData?.description}
+              {exhibitDetails?.description}
             </AnimatedDescription>
 
             {showDragGuide && (
@@ -173,12 +224,12 @@ const OverlayBackground = styled.View`
   padding-top: 90px;
 `;
 
-const AnimatedTitle = styled(Animated.Text)`
+const StyledTitle = styled.Text<{ fontFamily: string }>`
   font-size: 44px;
-  font-family: 'Mapo';
   margin-top: 16px;
   margin-bottom: 24px;
   color: #fff;
+  font-family: 'Mapo';
 `;
 
 const AnimatedDescription = styled(

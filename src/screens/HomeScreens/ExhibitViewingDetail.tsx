@@ -22,23 +22,39 @@ import {
   CherryIcon,
   CollectorOnlyHeaderWhite,
 } from 'src/assets/icons/_index';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const ExhibitViewingDetail: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { artworkId } = route.params as { artworkId: number };
+  const exhibitDetails = useSelector(
+    (state: RootState) => state.watchingExhibit.details,
+  );
 
-  const artwork = dummyData.artworks.find((item) => item.id === artworkId);
-
-  if (!artwork) {
-    return (
-      <Container>
-        <H4>작품 정보를 찾을 수 없습니다.</H4>
-      </Container>
-    );
+  if (!exhibitDetails) {
+    // 데이터가 없으면 로딩 상태나 에러 처리
+    return null;
   }
+
+  const { artworkIndex, exhibitionArtRess } = route.params as {
+    artworkIndex: number;
+    exhibitionArtRess: typeof exhibitDetails.exhibitionArtRess;
+  };
+
+  const currentArtwork = exhibitionArtRess[artworkIndex];
+
+  // const artwork = dummyData.artworks.find((item) => item.id === artworkId);
+
+  // if (!artwork) {
+  //   return (
+  //     <Container>
+  //       <H4>작품 정보를 찾을 수 없습니다.</H4>
+  //     </Container>
+  //   );
+  // }
 
   // 헤더 설정
   React.useEffect(() => {
@@ -51,7 +67,7 @@ const ExhibitViewingDetail: React.FC = () => {
     );
   }, [navigation]);
 
-  const images = [artwork.fileName, ...(artwork.actualImages || [])];
+  const images = [currentArtwork.artExhibitionRes.imgUrl];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -135,22 +151,20 @@ const ExhibitViewingDetail: React.FC = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ImageBackground
-        source={{
-          uri: artwork.fileName,
-        }}
+        source={{ uri: currentArtwork.artExhibitionRes.imgUrl }}
         style={{ flex: 1 }}
         resizeMode='cover'
       >
         <Overlay />
         <TopRightText>
-          {artwork.cherryNum === null ? (
+          {currentArtwork.artExhibitionRes.collectorsArt ? (
             <CollectorOnlyHeaderWhite />
-          ) : artwork.cherryNum === 0 ? (
+          ) : currentArtwork.artExhibitionRes.cherryPrice === 0 ? (
             '무료'
           ) : (
             <>
               <CherryIcon fill='white' width={18} height={16} />{' '}
-              {artwork.cherryNum}
+              {currentArtwork.artExhibitionRes.cherryPrice}
             </>
           )}
         </TopRightText>
@@ -159,10 +173,7 @@ const ExhibitViewingDetail: React.FC = () => {
           <AnimatedRope style={animatedRopeStyle(false)} />
           <GestureDetector gesture={composedGesture}>
             <Animated.View style={[animatedImageStyle]}>
-              <StyledImage
-                source={{ uri: images[currentImageIndex] }}
-                resizeMode='contain'
-              />
+              <StyledImage source={{ uri: images[0] }} resizeMode='contain' />
             </Animated.View>
           </GestureDetector>
           {images.length > 1 && (
@@ -195,9 +206,11 @@ const ExhibitViewingDetail: React.FC = () => {
             </NavigationContainer>
           )}
           <DescriptionContainer>
-            <Title>전시이름</Title>
-            <Subtitle>시리즈명</Subtitle>
-            <ArtistName>작가 이름</ArtistName>
+            <Title>{currentArtwork.artExhibitionRes.name}</Title>
+            <Subtitle>{currentArtwork.artExhibitionRes.series}</Subtitle>
+            <ArtistName>
+              {currentArtwork.artExhibitionRes.artistName}
+            </ArtistName>
           </DescriptionContainer>
         </Content>
       </ImageBackground>

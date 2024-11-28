@@ -23,13 +23,27 @@ import {
 } from 'src/components/_index';
 import { artistData, homeExhibitData, privateArtworkData } from '../data';
 import { Caption, H4, H6 } from 'src/styles/typography';
+import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const {
+    data: carouselData = [],
+    isLoading: isCarouselLoading,
+    isError: isCarouselError,
+  } = useExhibitions({
+    userId: undefined,
+    order: 'LATEST',
+    page: 0,
+    size: 3,
+  });
 
   const openBottomSheet = () => setBottomSheetVisible(true);
   const closeBottomSheet = () => setBottomSheetVisible(false);
+
+  if (isCarouselLoading) return;
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <Background source={require('src/assets/home_bg.png')}>
@@ -49,7 +63,7 @@ const HomeScreen: React.FC = () => {
           source={require('src/assets/images/Character/right.png')}
         />
         <View style={{ marginTop: 32 }}>
-          <ExhibitCarousel data={homeExhibitData} />
+          <ExhibitCarousel data={carouselData} />
         </View>
       </Background>
       <Container style={{ flex: 1 }} removePadding>

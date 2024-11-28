@@ -29,50 +29,24 @@ import {
   Subtitle2,
 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import TableWhite from 'src/components/TableWhite';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
-
-// 더미 데이터
-export const dummyData = {
-  artist: {
-    id: 1,
-    image: 'https://i.ibb.co/HtpR5VL/image.png',
-    name: '김작가',
-    category: '회화',
-    bio: '안녕하세요 저는 김작가 입니다. 자기소개는 뭐뭐 입니다. 저는 주로 회화를 그립니다.',
-    followers: 49,
-  },
-  artworks: [
-    {
-      id: 101,
-      name: '아몬드 꽃',
-      fileName: 'https://i.ibb.co/bBm2V6M/IMG-8458-2.png',
-      description:
-        '이 작품은 아주 저명한 작품입니다! 작품 설명이 여기에 들어갑니다.',
-      value:
-        '수집계기입니다. 이 작품은 아주 저명한 작품입니다! 작품 설명이 여기에 들어갑니다.',
-      appreciation:
-        'dadadadassd sasfsda asdasdsfdsf sdfsfddsfdfss asasdasds  f fd sdfsdfdsf s asfasraw r fasdaw as rf zsf  f',
-    },
-    {
-      id: 102,
-      name: '여름',
-      fileName: 'https://i.ibb.co/QNCnwJB/IMG-8456.png',
-      description: '여름 작품에 대한 설명입니다.',
-    },
-    {
-      id: 103,
-      name: '봄의 정원',
-      fileName: 'https://i.ibb.co/C1QyCkS/IMG-8457.png',
-      description: '봄의 정원 작품에 대한 설명입니다.',
-    },
-  ],
-};
 
 const ExhibitViewing: React.FC = () => {
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null); // CircleSlider의 ScrollView Ref
   const carouselRef = useRef<any>(null); // Carousel Ref
+  const exhibitDetails = useSelector(
+    (state: RootState) => state.watchingExhibit.details,
+  );
+
+  if (!exhibitDetails) {
+    // 데이터가 없으면 로딩 상태나 에러 처리
+    return null;
+  }
 
   // 애니메이션 값
   const fadeAnimOverlay = useRef(new Animated.Value(1)).current;
@@ -83,11 +57,32 @@ const ExhibitViewing: React.FC = () => {
   const [currentVerticalIndex, setCurrentVerticalIndex] = useState(0); // 세로 스크롤 인덱스
   const [currentHorizontalIndex, setCurrentHorizontalIndex] = useState(0); // 가로 캐러셀 인덱스
 
-  const selectedArtworks = dummyData.artworks; // 더미 데이터에서 artworks 가져오기
+  const selectedArtworks = exhibitDetails.exhibitionArtRess.map((art) => ({
+    id: art.artExhibitionRes.imgUrl, // 작품 이미지 URL을 ID로 사용
+    name: art.artExhibitionRes.name, // 작품 이름
+    description: art.description, // 작품 설명
+    reasonForPurchase: art.reasonForPurchase, // 수집 계기
+    appreciation: art.review, // 감상평
+    imageUrl: art.artExhibitionRes.imgUrl, // 작품 이미지 URL
+  })); // 더미 데이터에서 artworks 가져오기
+
   const images = [
-    ...dummyData.artworks.map((artwork) => artwork.fileName),
-    ...['endSlide'], // endSlide 추가
+    ...selectedArtworks.map((artwork) => artwork.imageUrl),
+    'endSlide', // 마지막 슬라이드용
   ];
+
+  // 하트 로컬 관리
+  const [isLiked, setIsLiked] = useState(false);
+  const [heartCount, setHeartCount] = useState(exhibitDetails.heartCount);
+
+  const toggleLike = () => {
+    if (isLiked) {
+      setHeartCount((prev) => prev - 1); // Decrement if already liked
+    } else {
+      setHeartCount((prev) => prev + 1); // Increment if not liked
+    }
+    setIsLiked((prev) => !prev);
+  };
 
   const handleEndButtonClick = () => {
     if (!showEndSlide) {
@@ -177,9 +172,11 @@ const ExhibitViewing: React.FC = () => {
     }
   };
 
-  const handleImagePress = (artworkId: number) => {
-    // 페이지로 이동, artworkId 전달
-    navigation.navigate('ExhibitViewingDetail', { artworkId });
+  const handleImagePress = (index: number) => {
+    navigation.navigate('ExhibitViewingDetail', {
+      artworkIndex: index,
+      exhibitionArtRess: exhibitDetails.exhibitionArtRess,
+    });
   };
 
   const handleScroll = (event: any) => {
@@ -254,7 +251,7 @@ const ExhibitViewing: React.FC = () => {
         source={
           currentHorizontalIndex === images.length - 1 //endSlide인 경우
             ? { uri: 'https://i.ibb.co/7YvsNd7/2.jpg' }
-            : { uri: selectedArtworks[currentHorizontalIndex]?.fileName }
+            : { uri: selectedArtworks[currentHorizontalIndex]?.imageUrl }
         }
         style={{ flex: 1 }}
         resizeMode='cover'
@@ -283,12 +280,6 @@ const ExhibitViewing: React.FC = () => {
                   renderItem={({ item, index }) =>
                     item === 'endSlide' ? (
                       <EndSlide>
-                        <EndSlideBackground
-                          source={{
-                            uri: 'https://i.ibb.co/yhqhcZ8/2-image-0.png',
-                          }}
-                          resizeMode='cover'
-                        />
                         <Overlay />
                         <EndSlide style={{ zIndex: 10 }}>
                           <ThanksText>
@@ -301,23 +292,30 @@ const ExhibitViewing: React.FC = () => {
                               marginBottom: 12,
                             }}
                           >
-                            <HeartIcon stroke={'#fff'} />
-                            <HeartNum>101</HeartNum>
+                            <TouchableOpacity onPress={toggleLike}>
+                              <HeartIcon
+                                fill={isLiked ? '#E32C32' : 'none'}
+                                stroke={isLiked ? 'none' : '#fff'}
+                              />
+                            </TouchableOpacity>
+                            <HeartNum>{heartCount}</HeartNum>
                           </View>
                           <EndSlideText>이 전시를 만든 컬렉터는</EndSlideText>
                           <ExhibitEndCard
-                            artistName='닉네임'
-                            artistImage='https://i.ibb.co/dPbrz7F/Rectangle.png'
-                            infoText='컬렉터 닉네임님께서 유화 8작, 회화 3작을 보유중이며 지금까지 체리시에 총 5개의 컬렉션 전시를 선보였습니다. 컬렉터 닉네임님의 이번 전시는 닉네임 컬렉터님의 5번째 컬렉션 전시입니다'
-                            category={['유화', '회화']}
-                            comment='매번 전시 테마부터 작품까지 센스가 좋으십니다 항상 잘보고 있어요'
-                            artistId={0}
+                            artistName={exhibitDetails.userRes.name}
+                            artistImage={exhibitDetails.userRes.profileImgUrl}
+                            infoText={exhibitDetails.userRes.description}
+                            category={exhibitDetails.userRes.artTypes}
+                            comment='매번 전시 테마부터 작품까지 센스가 좋으십니다. 항상 잘보고 있어요.'
+                            exhibitionStats={{
+                              artworks: '유화 8작, 회화 3작',
+                              exhibitions: 5,
+                              currentExhibition: 5,
+                            }}
                           />
                           <CommentButton
                             onPress={() =>
-                              navigation.navigate('ExhibitComments', {
-                                exhibitId: 1,
-                              })
+                              navigation.navigate('ExhibitComments')
                             }
                           >
                             <Body1>방명록 남기러 가기</Body1>
@@ -331,9 +329,7 @@ const ExhibitViewing: React.FC = () => {
                       </EndSlide>
                     ) : (
                       <TouchableWithoutFeedback
-                        onPress={() =>
-                          handleImagePress(selectedArtworks[index].id)
-                        }
+                        onPress={() => handleImagePress(index)}
                       >
                         <BackgroundImage
                           source={{ uri: item }}
@@ -350,7 +346,9 @@ const ExhibitViewing: React.FC = () => {
               <Page>
                 <ScrollTextWrapper>
                   <ScrollTextTitle>
-                    <H6 style={{ color: 'white' }}>{dummyData.artist.name} </H6>
+                    <H6 style={{ color: 'white' }}>
+                      {exhibitDetails.userRes.name}
+                    </H6>
                     님의 <Red>작품 소개</Red>
                   </ScrollTextTitle>
                   <ScrollText>
@@ -362,11 +360,16 @@ const ExhibitViewing: React.FC = () => {
               <Page>
                 <ScrollTextWrapper>
                   <ScrollTextTitle>
-                    <H6 style={{ color: 'white' }}>{dummyData.artist.name} </H6>
+                    <H6 style={{ color: 'white' }}>
+                      {exhibitDetails.userRes.name}{' '}
+                    </H6>
                     님의 <Red>수집 계기</Red>
                   </ScrollTextTitle>
                   <ScrollText>
-                    {selectedArtworks[currentHorizontalIndex]?.value}
+                    {
+                      selectedArtworks[currentHorizontalIndex]
+                        ?.reasonForPurchase
+                    }
                   </ScrollText>
                 </ScrollTextWrapper>
               </Page>
@@ -374,7 +377,10 @@ const ExhibitViewing: React.FC = () => {
               <Page>
                 <ScrollTextWrapper>
                   <ScrollTextTitle>
-                    <H6 style={{ color: 'white' }}>{dummyData.artist.name} </H6>
+                    <H6 style={{ color: 'white' }}>
+                      {' '}
+                      {exhibitDetails.userRes.name}
+                    </H6>
                     님의 <Red>작품 감상평</Red>
                   </ScrollTextTitle>
                   <ScrollText>
@@ -386,11 +392,72 @@ const ExhibitViewing: React.FC = () => {
               <Page>
                 <ScrollTextWrapper>
                   <ScrollTextTitle>작품의 기본 정보</ScrollTextTitle>
-                  <ScrollText>정보 테이블 들어갈 예정</ScrollText>
+                  <TableWhite
+                    items={[
+                      {
+                        label: '작가',
+                        content:
+                          exhibitDetails.exhibitionArtRess[
+                            currentHorizontalIndex
+                          ]?.artExhibitionRes.artistName || '정보 없음',
+                      },
+                      {
+                        label: '시리즈',
+                        content:
+                          exhibitDetails.exhibitionArtRess[
+                            currentHorizontalIndex
+                          ]?.artExhibitionRes.series || '-',
+                      },
+                      {
+                        label: '작품 크기',
+                        content: `${exhibitDetails.exhibitionArtRess[currentHorizontalIndex]?.artExhibitionRes.horizontalSize || 'N/A'}mm × ${exhibitDetails.exhibitionArtRess[currentHorizontalIndex]?.artExhibitionRes.verticalSize || 'N/A'}mm`,
+                      },
+                      {
+                        label: '재질(사용재료)',
+                        content:
+                          exhibitDetails.exhibitionArtRess[
+                            currentHorizontalIndex
+                          ]?.artExhibitionRes.material || '정보 없음',
+                      },
+                      {
+                        label: '제작 시기',
+                        content:
+                          exhibitDetails.exhibitionArtRess[
+                            currentHorizontalIndex
+                          ]?.artExhibitionRes.madeAt || '정보 없음',
+                      },
+                      {
+                        label: '작품 분야',
+                        content: '유화 , 수채화',
+                        // exhibitDetails.exhibitionArtRess[
+                        //   currentHorizontalIndex
+                        // ]?.artExhibitionRes.artTypes.join(', ') ||
+                        // '정보 없음',
+                      },
+                    ]}
+                  />
+                  <SectionDivider />
+                  <ScrollTextTitle>작품 이용 유의사항</ScrollTextTitle>
+                  <TableWhite
+                    items={[
+                      { label: '공개여부', content: '유료 (전시 1회당 2체리)' },
+                      {
+                        label: '저작권자',
+                        content:
+                          exhibitDetails.exhibitionArtRess[
+                            currentHorizontalIndex
+                          ]?.artExhibitionRes.artistName || '정보 없음',
+                      },
+                      {
+                        label: '유의사항',
+                        content:
+                          '전시에 해당 작품을 유료로 활용할 수 있습니다. 저작권자인 작가가 설정한 공개(체리)를 전시료로 지불하시면, 전시에 활용하실 수 있습니다. 단, 일부화면의 유출을 금지하고 있으며, 캡처, 다운로드 등을 막아야 합니다. 이를 유의하시기 바랍니다.',
+                      },
+                    ]}
+                  />
                 </ScrollTextWrapper>
               </Page>
             </Animated.ScrollView>
-
             {/* CircleSlider 상단 오버레이 */}
             <CircleSliderWrapper>
               <CircleSlider
@@ -488,7 +555,7 @@ const Overlay = styled.View`
 const ScrollTextTitle = styled(Subtitle2)`
   color: white;
   text-align: center;
-  margin-top: 10px;
+  margin-bottom: 8px;
 `;
 
 const ScrollText = styled(Caption)`
@@ -630,4 +697,10 @@ const CommentButton = styled.TouchableOpacity`
 
 const ExitButton = styled.TouchableOpacity`
   margin-top: 8px;
+`;
+
+const SectionDivider = styled.View`
+  height: 1px;
+  margin: 4px 0;
+  background-color: ${({ theme }) => theme.colors.grey_4};
 `;

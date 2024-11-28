@@ -39,7 +39,11 @@ const ExhibitComments: React.FC = () => {
         iconColor: '#120000',
         rightButtonType: 'text',
         headerRightText: '전시 나가기',
-        onHeaderRightPress: () => void '',
+        onHeaderRightPress: () => {
+          navigation.navigate('Tabs', {
+            screen: 'Home',
+          });
+        },
         headerTransparent: true,
       }),
     );
@@ -136,13 +140,13 @@ const ExhibitComments: React.FC = () => {
                 <CommentIconsContainer>
                   <IconWrapper>
                     <CommentIcon />
-                    <IconText>2</IconText>
+                    <IconText>0</IconText>
                   </IconWrapper>
                   <IconWrapper>
                     <View style={{ paddingBottom: 4 }}>
-                      <ThumbsUpIconFilled />
+                      <ThumbsUpIcon />
                     </View>
-                    <IconText>2</IconText>
+                    <IconText>0</IconText>
                   </IconWrapper>
                   <IconWrapper style={{ marginLeft: 0 }}>
                     <MenuIcon fill={'#B0ABAB'} />
@@ -167,13 +171,13 @@ const ExhibitComments: React.FC = () => {
                 <CommentIconsContainer>
                   <IconWrapper>
                     <CommentIcon />
-                    <IconText>2</IconText>
+                    <IconText>1</IconText>
                   </IconWrapper>
                   <IconWrapper>
                     <View style={{ paddingBottom: 4 }}>
-                      <ThumbsUpIconFilled />
+                      <ThumbsUpIcon />
                     </View>
-                    <IconText>2</IconText>
+                    <IconText>0</IconText>
                   </IconWrapper>
                   <IconWrapper style={{ marginLeft: 0 }}>
                     <MenuIcon fill={'#B0ABAB'} />

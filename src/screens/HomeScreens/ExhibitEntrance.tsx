@@ -1,5 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {
   Animated,
   PanResponder,
@@ -13,6 +17,10 @@ import { ArtistImage, DragGuideHorizontal } from 'src/components/_index';
 import { Body1, Caption, H6, Subtitle1 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index';
 import LinearGradient from 'react-native-linear-gradient';
+import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { setExhibitTitle, setFont } from 'src/slices/watchingExhibitSlice';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,7 +39,63 @@ const DRAG_THRESHOLD = -230;
 
 const ExhibitEntrance: React.FC = () => {
   const navigation = useNavigation();
-  const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
+  const route = useRoute();
+  const dispatch = useDispatch();
+  const { exhibitId } = route.params || {}; // 전시 ID 가져오기
+  const {
+    data: exhibits = [],
+    isLoading,
+    isError,
+  } = useExhibitions({
+    order: 'LATEST',
+    page: 0,
+    size: 10,
+  });
+
+  // 해당 exhibitId에 맞는 데이터를 찾기
+  const exhibitData = exhibits.find(
+    (exhibit) => exhibit.exhibitionId === exhibitId,
+  );
+
+  if (isLoading) {
+    return;
+  }
+  const { fontData } = useSelector((state: RootState) => state.exhibit);
+
+  // exhibitData.font에 매칭되는 fontFamily 찾기
+  const fontFamily =
+    fontData.find((font) => font.value === exhibitData?.font)?.fontFamily ||
+    'PretendardRegular';
+
+  useEffect(() => {
+    if (!isLoading && exhibitData?.name && fontFamily) {
+      dispatch(setExhibitTitle(exhibitData.name));
+      dispatch(setFont(fontFamily));
+    }
+  }, [fontFamily, exhibitData, isLoading, dispatch]);
+
+  // Gradient 설정
+  const gradientConfigurations = [
+    { key: 'TOP_DOWN', start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
+    { key: 'DOWN_TOP', start: { x: 0, y: 1 }, end: { x: 0, y: 0 } },
+    {
+      key: 'LEFT_CORNER_RIGHT_CORNER',
+      start: { x: 0, y: 0 },
+      end: { x: 1, y: 1 },
+    },
+    {
+      key: 'RIGHT_CORNER_LEFT_CORNER',
+      start: { x: 1, y: 1 },
+      end: { x: 0, y: 0 },
+    },
+  ];
+
+  const gradientConfig = gradientConfigurations.find(
+    (config) => config.key === exhibitData?.exhibitionBackgroundType,
+  ) || {
+    start: { x: 0.5, y: 0 },
+    end: { x: 0.5, y: 0.8 },
+  };
 
   const [showGuide, setShowGuide] = useState(true);
   const guideOpacity = useRef(new Animated.Value(1)).current; // 서서히 사라지는 효과를 위한 투명도 설정
@@ -143,7 +207,9 @@ const ExhibitEntrance: React.FC = () => {
               duration: ANIMATION_DURATION,
               useNativeDriver: false,
             }).start(() => {
-              navigation.navigate('ExhibitLoading'); // ExhibitLoading 화면으로 이동
+              navigation.navigate('ExhibitLoading', {
+                exhibitId: exhibitData.exhibitionId,
+              }); // ExhibitLoading 화면으로 이동
             });
           }, 1000); // 확장 및 화면 밖으로 이동하기 전에 1초 지연
         } else {
@@ -194,26 +260,44 @@ const ExhibitEntrance: React.FC = () => {
   }, [navigation]);
 
   return (
-    <GradientBackground colors={['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA']}>
+    <GradientBackground
+      colors={
+        exhibitData.colors.length === 4
+          ? exhibitData.colors
+          : [...exhibitData.colors, ...exhibitData.colors]
+      }
+      start={gradientConfig.start}
+      end={gradientConfig.end}
+    >
       <ContentContainer>
         <HeaderContainer>
           <NameWrapper>
-            <ArtistImage image={exhibitData.profileImage} size={42} />
+            <ArtistImage
+              // exhibitData?.userRes.profileImgUrl
+              image={exhibitData?.userRes.profileImgUrl}
+              size={42}
+            />
             <Subtitle1 style={{ color: 'white', marginLeft: 6 }}>
-              {exhibitData?.collectorName}
+              {exhibitData?.userRes.name || '닉네임'}
             </Subtitle1>
             <Body1 style={{ color: 'white' }}>님의 컬렉션 전시</Body1>
           </NameWrapper>
           <LikeWrapper>
             <HeartIcon fill={'white'} stroke={''} />
-            <H6 style={{ color: 'white' }}>123</H6>
+            <H6 style={{ color: 'white' }}>23</H6>
           </LikeWrapper>
         </HeaderContainer>
         <TitleContainer>
-          <ExhibitTitle>{exhibitData?.title}</ExhibitTitle>
-          <ExhibitDate>전시일자 2024.05.13</ExhibitDate>
+          <ExhibitTitle style={{ fontFamily }}>
+            {exhibitData?.name}
+          </ExhibitTitle>
+          <ExhibitDate>
+            전시 등록일 {exhibitData?.date || '2024.11.28'}
+          </ExhibitDate>
           <TagsContainer>
-            {exhibitData?.tags.map((tag, idx) => <Tag key={idx}># {tag}</Tag>)}
+            {exhibitData?.themes.map((theme, idx) => (
+              <Tag key={idx}># {theme}</Tag>
+            ))}
           </TagsContainer>
         </TitleContainer>
       </ContentContainer>
@@ -250,11 +334,7 @@ const ExhibitEntrance: React.FC = () => {
 
 export default ExhibitEntrance;
 
-const GradientBackground = styled(LinearGradient).attrs({
-  colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 0.8 },
-})`
+const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;
@@ -293,7 +373,6 @@ const TitleContainer = styled.View`
 
 const ExhibitTitle = styled.Text`
   font-size: 44px;
-  font-family: 'Mapo';
   margin-bottom: 16px;
   color: #fff;
 `;

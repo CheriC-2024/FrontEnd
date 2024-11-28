@@ -7,6 +7,7 @@ import { RootState } from 'src/store';
 import {
   MenuIcon,
   SendIcon,
+  ThumbsUpIcon,
   ThumbsUpIconFilled,
 } from 'src/assets/icons/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
@@ -18,6 +19,8 @@ const ExhibitCommentsDetail = ({ route }) => {
   const [replyText, setReplyText] = useState('');
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const userData = useSelector((state: RootState) => state.getUser);
+  const [likes, setLikes] = useState({});
 
   const updatedComment = useSelector((state: RootState) =>
     state.comment.comments.find((c) => c.id === comment.id),
@@ -47,15 +50,38 @@ const ExhibitCommentsDetail = ({ route }) => {
       setReplyText('');
     }
   };
+  // Initialize like state for the main comment and replies
+  useEffect(() => {
+    const initialLikes = {};
+    initialLikes[comment.id] = { liked: false, count: 1 }; // Main comment
+    updatedComment?.replies.forEach((reply) => {
+      initialLikes[reply.id] = { liked: false, count: 0 };
+    });
+    setLikes(initialLikes);
+  }, [comment, updatedComment]);
+
+  const toggleLike = (id) => {
+    setLikes((prevLikes) => ({
+      ...prevLikes,
+      [id]: {
+        liked: !prevLikes[id].liked,
+        count: prevLikes[id].liked
+          ? prevLikes[id].count - 1
+          : prevLikes[id].count + 1,
+      },
+    }));
+  };
 
   return (
     <Container>
       <CommentContainer>
-        <ProfileImage source={{ uri: 'https://via.placeholder.com/50' }} />
+        <ProfileImage
+          source={{ uri: 'https://i.ibb.co/PrqQ6hG/Group-4625.png' }}
+        />
         <CommentContent>
-          <UserName>닉네임</UserName>
+          <UserName>채리시</UserName>
           <CommentText>{updatedComment?.text || comment.text}</CommentText>
-          <CommentMeta>2024.05.14</CommentMeta>
+          <CommentMeta>2024.11.27</CommentMeta>
         </CommentContent>
         <View
           style={{
@@ -64,9 +90,13 @@ const ExhibitCommentsDetail = ({ route }) => {
             marginTop: 20,
           }}
         >
-          <LikeContainer>
-            <ThumbsUpIconFilled />
-            <LikeCount>2</LikeCount>
+          <LikeContainer onPress={() => toggleLike(comment.id)}>
+            {likes[comment.id]?.liked ? (
+              <ThumbsUpIconFilled />
+            ) : (
+              <ThumbsUpIcon />
+            )}
+            <LikeCount>{likes[comment.id]?.count}</LikeCount>
           </LikeContainer>
           <MenuIcon />
         </View>
@@ -77,11 +107,11 @@ const ExhibitCommentsDetail = ({ route }) => {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <ReplyContainer>
-            <ProfileImage source={{ uri: 'https://via.placeholder.com/50' }} />
+            <ProfileImage source={{ uri: userData.profileImgUrl }} />
             <ReplyContent>
-              <UserName>닉네임</UserName>
+              <UserName>{userData.name}</UserName>
               <ReplyText>{item.text}</ReplyText>
-              <ReplyMeta>2024.05.14</ReplyMeta>
+              <ReplyMeta>2024.11.28</ReplyMeta>
             </ReplyContent>
             <View
               style={{
@@ -91,8 +121,8 @@ const ExhibitCommentsDetail = ({ route }) => {
               }}
             >
               <LikeContainer>
-                <ThumbsUpIconFilled />
-                <LikeCount>2</LikeCount>
+                <ThumbsUpIcon />
+                <LikeCount>0</LikeCount>
               </LikeContainer>
               <MenuIcon />
             </View>
@@ -156,7 +186,7 @@ const CommentMeta = styled(Caption)`
   margin-top: 4px;
 `;
 
-const LikeContainer = styled.View`
+const LikeContainer = styled.TouchableOpacity`
   align-items: center;
   justify-content: center;
 `;
