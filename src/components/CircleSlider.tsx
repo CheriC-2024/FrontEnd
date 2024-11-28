@@ -26,6 +26,7 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
   showEndButton = false,
 }) => {
   const theme = useTheme();
+  console.log(selectedArtworks);
 
   return (
     <View
@@ -41,7 +42,9 @@ const CircleSlider: React.FC<CircleSliderProps> = ({
             onPress={() => onCirclePress(index)} // Regular circle press
           >
             <Circle isActive={currentIndex === index}>
-              <CircleImage source={{ uri: artwork.imgUrl }} />
+              <CircleImage
+                source={{ uri: artwork.imgUrl || artwork.imageUrl }} // 전시만들기 || 전시보기 이거 나중에 통합
+              />
               {isDescriptionFilled(index) && <Overlay />}
               {isDescriptionFilled(index) && (
                 <OverlayImage

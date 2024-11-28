@@ -19,7 +19,10 @@ const ArtworkItem: React.FC<ArtworkItemProps> = ({
   return (
     <ArtworkItemWrapper selected={selected} onPress={onSelect}>
       <ArtworkImageWrapper selected={selected}>
-        <ArtworkImage source={{ uri: artwork.imgUrl }} selected={selected} />
+        <ArtworkImage
+          source={{ uri: artwork.imgUrl || artwork.fileName }}
+          selected={selected}
+        />
         {selected && (
           <SelectedIndexWrapper>
             <SelectedIndex>{selectedIndex + 1}</SelectedIndex>
@@ -29,7 +32,7 @@ const ArtworkItem: React.FC<ArtworkItemProps> = ({
       <ArtworkInfoContainer>
         <ArtworkName>{artwork.name}</ArtworkName>
         <ArtworkPriceInfo
-          cherryPrice={artwork.cherryPrice}
+          cherryPrice={artwork.cherryPrice || artwork.cherryNum}
           collectorsArt={artwork.collectorsArt}
         />
       </ArtworkInfoContainer>

@@ -5,11 +5,11 @@ import { Artwork } from 'src/interfaces/collection';
 
 // 필요한 속성만 사용하여 전달
 const ArtworkPriceInfo: React.FC<
-  Pick<Artwork, 'cherryPrice' | 'collectorsArt'>
-> = ({ cherryPrice, collectorsArt }) => {
+  Pick<Artwork, 'cherryPrice' | 'collectorsArt' | 'cherryNum'>
+> = ({ cherryPrice, collectorsArt, cherryNum }) => {
   return (
     <InfoContainer>
-      {collectorsArt === true ? (
+      {collectorsArt === true || (cherryNum == null && cherryNum > 0) ? (
         <CollectorOnlyImage
           source={require('../assets/images/collectorOnlyText.png')}
         />
