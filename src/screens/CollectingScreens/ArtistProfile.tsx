@@ -23,6 +23,7 @@ import {
   useArtistResumeData,
 } from 'src/api/hooks/useArtistQueries';
 import { homeExhibitData } from '../data';
+import { useFetchArtTypesFilter } from 'src/api/hooks/useArtworkQueries';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -44,7 +45,26 @@ const ArtistProfile: React.FC = () => {
     isLoading: resumeLoading,
     error: resumeError,
   } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
+  const {
+    data: ownArtData,
+    isLoading: ownArtLoading,
+    error: ownArtError,
+  } = useFetchArtTypesFilter({ userId: 30, isCollectorsArt: 'true' });
+  const {
+    data: artData,
+    isLoading: artLoading,
+    error: artError,
+  } = useFetchArtTypesFilter({ userId: 30, isCollectorsArt: 'false' });
   const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
+  console.dir(artData);
+
+  const [selectedIndex, setSelectedIndex] = useState(null); // 선택된 인덱스
+  const [selectedArtworkId, setSelectedArtworkId] = useState(null); // 선택된 작품 ID
+
+  const handleSelect = (index, artworkId) => {
+    setSelectedIndex(index);
+    setSelectedArtworkId(artworkId);
+  };
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -126,8 +146,10 @@ const ArtistProfile: React.FC = () => {
   );
 
   const renderTabContent = () => {
-    if (activeTab === 0 || activeTab === 3) {
-      return; //TODO: 해당 작가 작품 리스트
+    if (activeTab === 0) {
+      return artData || []; // artData 활용
+    } else if (activeTab === 3) {
+      return ownArtData || []; // ownArtData 활용
     } else if (activeTab === 1) {
       return [{ key: 'artistRecord' }]; // placeholder 아이템
     } else if (activeTab === 2) {
@@ -136,8 +158,8 @@ const ArtistProfile: React.FC = () => {
     return [];
   };
 
-  if (isLoading && resumeLoading) {
-    return;
+  if (isLoading && resumeLoading && artLoading && ownArtLoading) {
+    return <View></View>;
   }
 
   if (error && resumeError) {
@@ -183,7 +205,7 @@ const ArtistProfile: React.FC = () => {
             selectedIndex={0} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
-                artworkId: item.id,
+                artworkId: 51,
               })
             }
           />
@@ -204,6 +226,7 @@ const ArtistProfile: React.FC = () => {
             likes={item.likes}
             favorites={item.favorites}
             tags={item.tags}
+            font={item.font}
           />
         </View>
       );
@@ -213,11 +236,11 @@ const ArtistProfile: React.FC = () => {
         <View style={{ marginTop: 16, marginRight: 10 }}>
           <ArtworkItem
             artwork={item}
-            selected={false} // 선택 상태 설정 필요 시
-            selectedIndex={0} // 선택 인덱스 설정 필요 시
+            selected={selectedIndex} // 선택 상태 설정 필요 시
+            selectedIndex={selectedIndex} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
-                artworkId: item.id,
+                artworkId: item.artId,
               })
             }
           />
@@ -230,9 +253,9 @@ const ArtistProfile: React.FC = () => {
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
-        artistName={user.name}
-        artworkCount={1} // TODO: 작품 리스트 API
-        backgroundImage={user.backgroundImgUrl}
+        artistName={'주유진'}
+        artworkCount={10} // TODO: 작품 리스트 API
+        backgroundImage={user?.backgroundImgUrl}
         scrollY={scrollY}
       />
       <ProfileImageContainer
@@ -262,7 +285,7 @@ const ArtistProfile: React.FC = () => {
         }}
       >
         <ProfileWrapper>
-          <ArtistName>{user.name}</ArtistName>
+          <ArtistName>{'주유진(Ju Yu Jin)'}</ArtistName>
           <ArtistInfo>{user.artTypes.join(' • ')} 작가</ArtistInfo>
           <ArtistBio>{user.description}</ArtistBio>
         </ProfileWrapper>
@@ -279,7 +302,7 @@ const ArtistProfile: React.FC = () => {
           </View>
           <FollowButton
             userId={routeArtistId}
-            isFollowing={isFollowing}
+            isFollowing={user.following}
             onFollowChange={handleFollowChange}
           />
         </FollowSection>

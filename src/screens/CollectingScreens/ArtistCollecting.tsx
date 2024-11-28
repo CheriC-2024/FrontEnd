@@ -28,7 +28,7 @@ const ArtistCollecting: React.FC = () => {
   const handleArtistPress = (artistId: number) => {
     navigation.navigate('CollectingStack', {
       screen: 'ArtistProfile',
-      params: { artistId },
+      params: { artistId: 30 },
     });
   };
 

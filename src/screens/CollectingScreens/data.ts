@@ -37,7 +37,7 @@ export const images: ImageItem[] = [
     artist: '레미',
   },
   {
-    id: 434,
+    id: 4,
     uri: 'https://i.ibb.co/F0m2hBv/160-0-art-image.jpg',
     width: 300,
     height: 450,

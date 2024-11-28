@@ -29,18 +29,21 @@ import {
 } from 'src/styles/typography';
 import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
 import LinearGradient from 'react-native-linear-gradient';
+import { useFetchArtTypes } from 'src/api/hooks/useArtworkQueries';
+import { ForwardIcon } from 'src/assets/icons/_index';
 
 const CollectingScreen: React.FC = () => {
   const navigation = useNavigation();
   const images = [
-    require('src/assets/images/CollectingPage/swipe_test1.png'),
-    require('src/assets/images/CollectingPage/swipe_test2.png'),
-    require('src/assets/images/CollectingPage/swipe_test3.png'),
+    require('src/assets/images/CollectingPage/swipe1.png'),
+    // require('src/assets/images/CollectingPage/swipe_test2.png'),
+    // require('src/assets/images/CollectingPage/swipe_test3.png'),
   ];
 
   const [selectedCoverType, setSelectedCoverType] = useState<'작품' | '작가'>(
     '작품',
   );
+  const { data: apiData, isLoading, isError } = useFetchArtTypes();
 
   const handleCoverTypeChange = (type: '작품' | '작가') => {
     setSelectedCoverType(type);
@@ -50,6 +53,36 @@ const CollectingScreen: React.FC = () => {
       screen: screen,
       params: { categoryTitle },
     });
+  };
+
+  const transformArtworkData = (artworkResponse: any) => {
+    const recommended = {
+      categoryTitle: '컬렉터님을 위한 추천',
+      sections: [],
+    };
+
+    const otherCategories = {
+      categoryTitle: '체리시의 미술 작품',
+      sections: [],
+    };
+
+    artworkResponse.forEach((item: any) => {
+      const section = {
+        title: item.artType,
+        data: item.artMostBriefListRess.map((art: any) => ({
+          id: art.artId,
+          image: art.imgUrl,
+        })),
+      };
+
+      if (item.userPreference) {
+        recommended.sections.push(section);
+      } else {
+        otherCategories.sections.push(section);
+      }
+    });
+
+    return [recommended, otherCategories];
   };
 
   const renderCategoryButtons = () => (
@@ -164,9 +197,10 @@ const CollectingScreen: React.FC = () => {
         renderItem={({ item }) => (
           <CategoryWrapper
             is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
+            style={{ paddingLeft: 16 }}
           >
             <ArtistCategoryTitle>{item.categoryTitle}</ArtistCategoryTitle>
-            {item.sections?.map((section) => (
+            {item.sections?.map((section, index) => (
               <SectionWrapper key={section.title}>
                 <TouchableOpacity
                   style={{ flexDirection: 'row', alignItems: 'center' }}
@@ -184,7 +218,7 @@ const CollectingScreen: React.FC = () => {
                 </TouchableOpacity>
                 {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
                 <FlatList
-                  data={artistAndArtworkData}
+                  data={artistAndArtworkData.slice(index ** 2)}
                   keyExtractor={(subItem) => subItem.artist.id.toString()}
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -206,62 +240,83 @@ const CollectingScreen: React.FC = () => {
     </View>
   );
 
-  const renderArtworkSection = () => (
-    <FlatList
-      data={artworkData.slice(1)} // 첫 번째 항목 (key) 제외, 이건 API 연결시 변경 예정
-      keyExtractor={(item, index) => index.toString()}
-      initialNumToRender={5}
-      showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <CategoryWrapper
-          is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
-        >
-          <CategoryTitle>{item.categoryTitle}</CategoryTitle>
-          {item.sections?.map((section) => (
-            <SectionWrapper key={section.title}>
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-                // section.title을 ArtCollecting으로 전달
-                onPress={() => handleNavigation('ArtCollecting', section.title)}
-              >
-                <SectionTitle>{section.title}</SectionTitle>
-                <Icon
-                  name='chevron-forward'
-                  size={20}
-                  color='#120000'
-                  style={{ paddingBottom: 7 }}
-                />
-              </TouchableOpacity>
+  const renderArtworkSection = () => {
+    if (isLoading) {
+      // Return a placeholder JSX instead of nothing
+      return <View style={{ padding: 20 }}></View>;
+    }
 
-              {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
-              <FlatList
-                data={section.data}
-                keyExtractor={(subItem) => subItem.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item: subItem }) => (
-                  <TouchableOpacity
-                    // section.title을 ArtCollecting으로 전달
-                    onPress={() =>
-                      handleNavigation('ArtworkInfo', { artworkId: subItem.id })
-                    }
-                  >
-                    <ImageWrapper>
-                      <StyledImage source={{ uri: subItem.image }} />
-                    </ImageWrapper>
-                  </TouchableOpacity>
-                )}
-              />
-            </SectionWrapper>
-          ))}
-        </CategoryWrapper>
-      )}
-      ListFooterComponent={<View style={{ height: 60 }} />} // 리스트 하단 여백 값
-    />
-  );
+    if (isError || !apiData) {
+      // Return an error placeholder JSX instead of nothing
+      return (
+        <View style={{ padding: 20 }}>
+          <Caption>Error loading artwork data.</Caption>
+        </View>
+      );
+    }
+
+    // Transform the API response into the required structure
+    const transformedData = transformArtworkData(apiData);
+
+    return (
+      <Container>
+        <FlatList
+          data={transformedData}
+          keyExtractor={(item) => item.categoryTitle || item.key}
+          renderItem={({ item }) => {
+            return (
+              <CategoryWrapper is2ndSection>
+                <CategoryTitle>{item.categoryTitle}</CategoryTitle>
+                {item.sections.map((section) => (
+                  <SectionWrapper key={section.title}>
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                      onPress={() =>
+                        navigation.navigate('CollectingStack', {
+                          screen: 'ArtCollecting',
+                          params: { categoryTitle: section.title }, // Pass artType as a param
+                        })
+                      }
+                    >
+                      <SectionTitle>{section.title}</SectionTitle>
+                      <View style={{ marginBottom: 8 }}>
+                        <ForwardIcon width={22} height={22} />
+                      </View>
+                    </TouchableOpacity>
+                    <FlatList
+                      data={section.data}
+                      keyExtractor={(subItem) => subItem.id.toString()}
+                      horizontal
+                      renderItem={({ item: art }) => (
+                        <TouchableOpacity
+                          onPress={() =>
+                            navigation.navigate('CollectingStack', {
+                              screen: 'ArtworkInfo', // Specify the screen within the stack
+                              params: { artworkId: art.id }, // Pass artId as a parameter
+                            })
+                          }
+                        >
+                          <ImageWrapper>
+                            <StyledImage source={{ uri: art.image }} />
+                          </ImageWrapper>
+                        </TouchableOpacity>
+                      )}
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ overflow: 'visible', zIndex: 3 }}
+                    />
+                  </SectionWrapper>
+                ))}
+              </CategoryWrapper>
+            );
+          }}
+          ListFooterComponent={<View style={{ height: 60 }} />}
+        />
+      </Container>
+    );
+  };
 
   return (
     <Container removePadding>
@@ -269,24 +324,15 @@ const CollectingScreen: React.FC = () => {
         data={artworkData}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[1]} // CategoryButtons가 고정되도록 설정
+        stickyHeaderIndices={[1]} // Sticky header
         ListHeaderComponent={
           <>
-            <View
-              style={{
-                position: 'relative',
-                marginBottom: 18,
-              }}
-            >
-              {/* Swiper 컴포넌트는 배경 이미지만 스와이프 */}
+            <View style={{ position: 'relative', marginBottom: 18 }}>
               <Swiper
                 loop
                 timeout={2}
                 controlsEnabled={false}
-                containerStyle={{
-                  width: '100%',
-                  height: 320,
-                }}
+                containerStyle={{ width: '100%', height: 320 }}
               >
                 {images.map((image, index) => (
                   <View key={index} style={{ position: 'relative' }}>
@@ -298,19 +344,15 @@ const CollectingScreen: React.FC = () => {
                         resizeMode: 'cover',
                       }}
                     />
-                    {/* 그라데이션 추가 */}
                     <GradientOverlay />
                   </View>
                 ))}
               </Swiper>
-              {/* Swiper 외부에 고정된 버튼 */}
               <Button
                 onPress={() =>
                   navigation.navigate('MyChericStack', {
                     screen: 'PrivateArtRegisterStack',
-                    params: {
-                      screen: 'AddArtwork',
-                    },
+                    params: { screen: 'AddArtwork' },
                   })
                 }
               >
@@ -335,11 +377,13 @@ const CollectingScreen: React.FC = () => {
           if (item.key === 'CATEGORY_BUTTONS') {
             return renderCategoryButtons();
           }
+          return null; // Avoid early returns causing hook mismatch
         }}
         ListFooterComponent={
-          selectedCoverType === '작품'
-            ? renderArtworkSection()
-            : renderArtistSection()
+          <View>
+            {selectedCoverType === '작품' && renderArtworkSection()}
+            {selectedCoverType === '작가' && renderArtistSection()}
+          </View>
         }
       />
     </Container>
@@ -409,7 +453,6 @@ const CategoryTypeButtonText = styled(Body2)<{ selected?: boolean }>`
 const CategoryWrapper = styled.View<{ is2ndSection?: boolean }>`
   padding-top: ${({ is2ndSection, theme }) =>
     is2ndSection ? theme.padding.xs : theme.padding.m};
-  padding-left: ${({ theme }) => theme.padding.m};
   padding-bottom: ${({ theme }) => theme.padding.m};
   margin-bottom: 20px;
   background-color: ${({ is2ndSection, theme }) =>
@@ -439,7 +482,7 @@ const SectionTitle = styled(Subtitle1)`
 const ImageWrapper = styled.View`
   width: 115px;
   height: 142px;
-  margin-right: ${({ theme }) => theme.spacing.s3};
+  margin-right: 8px;
 `;
 
 const StyledImage = styled.Image`
