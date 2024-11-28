@@ -235,7 +235,7 @@ const AIRecommendLoading: React.FC = () => {
       {source === 'DescriptionSetting' && (
         <Mask>
           <AnimatedCharacter
-            source={require('src/assets/temp_loading.png')}
+            source={require('src/assets/loading_line.png')}
             style={{
               transform: [{ translateX: characterAnim }],
             }}
@@ -297,7 +297,7 @@ const Mask = styled.View`
 `;
 
 const AnimatedCharacter = styled(Animated.Image)`
-  width: 302px;
+  width: 402px;
   height: 107px;
 `;
 
