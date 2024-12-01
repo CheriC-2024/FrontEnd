@@ -48,4 +48,5 @@ src/assets/DB/
 
 /%ProgramData%/
 android/app/google-services.json
+android\app\google-services.json
 google-services.json
