@@ -24,8 +24,7 @@
       },
       "package": "com.binaryswu.CheriC",
       "googleServicesFile": "./google-services.json",
-      "runtimeVersion": "1.0.0",
-      "usesCleartextTraffic": true
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
