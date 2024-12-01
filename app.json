@@ -24,15 +24,13 @@
       },
       "package": "com.binaryswu.CheriC",
       "googleServicesFile": "./google-services.json",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "usesCleartextTraffic": true
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-router", "expo-font", "expo-build-properties"],
     "extra": {
       "router": {
         "origin": false

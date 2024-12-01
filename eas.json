@@ -11,7 +11,8 @@
       "distribution": "internal",
       "channel": "preview",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease" //통합 apk 빌드용인데 안돼..
       }
     },
     "production": {
