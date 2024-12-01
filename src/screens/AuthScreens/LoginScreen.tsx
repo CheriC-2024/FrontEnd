@@ -7,11 +7,11 @@ import {
 } from '@react-native-google-signin/google-signin';
 import messaging from '@react-native-firebase/messaging';
 import DeviceInfo from 'react-native-device-info';
-import { WEB_CLIENT_ID } from '@env';
+import { API_BASE_URL, WEB_CLIENT_ID } from '@env';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/StackNavigator';
 import { GoogleIcon, SplashIcon } from 'src/assets/icons/_index';
-import { Subtitle1 } from '../../styles/typography';
+import { H5, Subtitle1 } from '../../styles/typography';
 import { signInWithGoogleToken } from 'src/api/googleLoginApi';
 import { setTokens } from 'src/slices/authSlice';
 import { useDispatch } from 'react-redux';
@@ -28,6 +28,8 @@ const LoginScreen: React.FC = () => {
 
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [deviceToken, setDeviceToken] = useState<string | null>(null);
+
+  const [debugMessage, setDebugMessage] = useState<string>(''); // Debug 메시지 상태 추가
 
   useEffect(() => {
     // Google Sign-in 초기화
@@ -85,19 +87,14 @@ const LoginScreen: React.FC = () => {
           await dispatch(fetchAndSetUserData()); // redux에 유저 정보 저장
           navigation.replace('Tabs');
         }
+        setDebugMessage(`Sign-in successful. First login: ${firstLogin}`);
       } catch (apiError) {
+        setDebugMessage(`API error during sign-in: ${apiError.message}`);
         console.error('API error during sign-in:', apiError);
       }
     } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('Google sign-in was cancelled');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('Google sign-in is in progress');
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log('Google Play services not available or outdated');
-      } else {
-        console.error('Error signing in with Google:', error);
-      }
+      setDebugMessage(`Google sign-in error: ${error.message}`);
+      console.error('Error signing in with Google:', error);
     }
   };
 
@@ -108,6 +105,7 @@ const LoginScreen: React.FC = () => {
         <GoogleIcon />
         <ButtonText>{`   `}Sign up with Google</ButtonText>
       </Button>
+      <H5>{debugMessage}</H5>
     </Container>
   );
 };
