@@ -47,5 +47,3 @@ src/api/api.ts
 src/assets/DB/
 
 /%ProgramData%/
-
-google-services.json
