@@ -13,7 +13,6 @@ import store from './src/store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NavigationContainer } from '@react-navigation/native';
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
 import {
   APP_ID,
   AUTH_DOMAIN,
@@ -37,7 +36,6 @@ const queryClient = new QueryClient();
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
