@@ -26,24 +26,10 @@ import {
 const CollectionSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: collectionsData, isLoading, error } = useUserCollection(); // 임시 유저ID API 연결 예정
+  const { data: collectionsData, isLoading, error } = useUserCollection();
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // 에러 발생 시 상태 업데이트
-  useEffect(() => {
-    if (error) {
-      console.log('Error:', error);
-      const errorText =
-        typeof error === 'string'
-          ? error
-          : error.message || 'Unknown error occurred';
-      setErrorMessage(errorText);
-    }
-  }, [error]);
 
   // 헤더 설정
   useEffect(() => {
@@ -71,21 +57,20 @@ const CollectionSelect: React.FC = () => {
     );
   }
 
-  // 에러가 발생한 경우 에러 메시지 출력
-  if (errorMessage) {
+  // 에러가 발생했을 경우 상태로 설정
+  if (error) {
+    console.log('Error:', error);
     return (
       <View
         style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ color: 'red', fontSize: 16 }}>
-          에러 발생: {errorMessage}
-        </Text>
+        <Text style={{ color: 'red', fontSize: 16 }}>에러 발생</Text>
       </View>
     );
   }
 
   // 컬렉션이 없는 경우
-  if (collectionsData.length === 0) {
+  if (!collectionsData || collectionsData.length === 0) {
     return <EmptyState />;
   }
 
