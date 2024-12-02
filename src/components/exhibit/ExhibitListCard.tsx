@@ -1,15 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ButtonText, Caption, H4 } from 'src/styles/typography';
+import { ButtonText, Caption } from 'src/styles/typography';
 import { HeartIcon, ViewsIcon } from 'src/assets/icons/_index';
 import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
 export interface ExhibitCardProps {
   imageSource: string | null;
-  colors?: string[]; // New optional colors prop for gradient
+  colors?: string[];
   title: string;
   collectorName: string;
   profileImage: string;
@@ -17,11 +18,12 @@ export interface ExhibitCardProps {
   favorites: number;
   tags: string[];
   font: string;
+  bgType: string;
 }
 
 const ExhibitListCard: React.FC<ExhibitCardProps> = ({
   imageSource,
-  colors = ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'], // Default gradient colors
+  colors,
   title,
   collectorName,
   profileImage,
@@ -29,6 +31,7 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
   favorites,
   tags,
   font,
+  bgType,
 }) => {
   const { fontData } = useSelector((state: RootState) => state.exhibit);
   console.log('ExhibitListCard', imageSource);
@@ -38,15 +41,17 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
     fontData.find((fontItem) => fontItem.value === font)?.fontFamily ||
     'PretendardRegular';
   const useGradientBackground = !imageSource || imageSource.trim() === ''; // Check for null or empty string
-  const gradientColors =
-    colors.length >= 2
-      ? colors
-      : [...colors, ...Array(2 - colors.length).fill(colors[0] || '#000')];
+  const gradientConfig = getGradientConfig(bgType);
+
   return (
     <CardWrapper>
       <CardContainer>
         {useGradientBackground ? (
-          <GradientBackground colors={gradientColors}>
+          <GradientBackground
+            colors={colors}
+            start={gradientConfig.start}
+            end={gradientConfig.end}
+          >
             <OverlayContent>
               <TitleContainer>
                 <Title style={{ fontFamily }} numberOfLines={2}>
