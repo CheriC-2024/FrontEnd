@@ -26,7 +26,12 @@ import {
 const CollectionSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: collectionsData, isLoading, isError } = useUserCollection();
+  const {
+    data: collectionsData,
+    isLoading,
+    isError,
+    error,
+  } = useUserCollection();
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
@@ -63,13 +68,15 @@ const CollectionSelect: React.FC = () => {
       <View
         style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ color: 'red', fontSize: 16 }}>에러 발생</Text>
+        <Text style={{ color: 'red', fontSize: 16 }}>{error?.message}</Text>
       </View>
     );
   }
 
+  console.log('collectionsData:', collectionsData);
+
   // 컬렉션이 없는 경우
-  if (!collectionsData || collectionsData.length === 0) {
+  if (!collectionsData) {
     return <EmptyState />;
   }
 
