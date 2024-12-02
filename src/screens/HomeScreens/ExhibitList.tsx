@@ -51,7 +51,7 @@ const ExhibitList: React.FC = () => {
     userId: selectedTab === '팔로우' ? followedUserIds[0] : undefined,
     order: 'LATEST',
     page: 0,
-    size: 10,
+    size: 20,
   });
 
   const selectedFollowers = followedUserIds.map((userId) => ({
@@ -163,9 +163,15 @@ const ExhibitList: React.FC = () => {
             return (
               <TouchableOpacity
                 onPress={() => {
+                  // 전시 아이디를 params로 넘겨서 ExhibitEntrance 화면으로 이동
                   navigation.navigate('HomeStack', {
                     screen: 'ExhibitEntrance',
-                    params: { exhibitId: item.exhibitionId },
+                    params: {
+                      exhibitId: item.exhibitionId,
+                      exhibitColors: item.colors,
+                      exhibitThemes: item.themes,
+                      bgType: item.exhibitionBackgroundType,
+                    },
                   });
                 }}
               >
@@ -179,6 +185,7 @@ const ExhibitList: React.FC = () => {
                   favorites={item.hits}
                   tags={item.themes}
                   font={item.font}
+                  bgType={item.exhibitionBackgroundType}
                 />
               </TouchableOpacity>
             );

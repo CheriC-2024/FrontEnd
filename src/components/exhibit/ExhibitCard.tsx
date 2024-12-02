@@ -12,6 +12,7 @@ import { Exhibition } from 'src/interfaces/collection';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { LinearGradient } from 'expo-linear-gradient';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
 interface ExhibitCardProps extends Exhibition {
   isCurrent: boolean; // To highlight the currently focused card
@@ -42,6 +43,7 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
 
   const useGradientBackground = !coverImgUrl || coverImgUrl.trim() === '';
   const gradientColors = colors.length >= 2 ? colors : [...colors, colors[0]];
+  const gradientConfig = getGradientConfig(exhibitionBackgroundType);
 
   // 텍스트 애니메이션 스타일
   const textStyle = useAnimatedStyle(() => {
@@ -50,15 +52,28 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
   });
 
   return (
-    <TouchableWithoutFeedback // TODO: 전시 아이디 params로 넘기기
+    <TouchableWithoutFeedback
       onPress={() => {
-        navigation.navigate('HomeStack', { screen: 'ExhibitEntrance' });
+        // 전시 아이디를 params로 넘겨서 ExhibitEntrance 화면으로 이동
+        navigation.navigate('HomeStack', {
+          screen: 'ExhibitEntrance',
+          params: {
+            exhibitId: exhibitionId,
+            exhibitColors: gradientColors,
+            exhibitThemes: themes,
+            bgType: exhibitionBackgroundType,
+          },
+        });
       }}
     >
       <CardWrapper>
         <CardContainer>
           {useGradientBackground ? (
-            <GradientBackground colors={gradientColors}>
+            <GradientBackground
+              colors={gradientColors}
+              start={gradientConfig.start}
+              end={gradientConfig.end}
+            >
               <Animated.View style={textStyle}>
                 <TitleContainer>
                   <Title style={{ fontFamily }}>{name}</Title>
