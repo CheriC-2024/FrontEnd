@@ -31,6 +31,20 @@ const CollectionSelect: React.FC = () => {
     (state: RootState) => state.collection,
   );
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // 에러 발생 시 상태 업데이트
+  useEffect(() => {
+    if (error) {
+      console.log('Error:', error);
+      const errorText =
+        typeof error === 'string'
+          ? error
+          : error.message || 'Unknown error occurred';
+      setErrorMessage(errorText);
+    }
+  }, [error]);
+
   // 헤더 설정
   useEffect(() => {
     const isNextEnabled = activeCollections.length > 0;
@@ -57,16 +71,8 @@ const CollectionSelect: React.FC = () => {
     );
   }
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // 에러가 발생했을 경우 상태로 설정
-  if (error) {
-    console.log('Error:', error);
-    const errorText =
-      typeof error === 'string'
-        ? error
-        : error.message || 'Unknown error occurred';
-    setErrorMessage(errorText);
+  // 에러가 발생한 경우 에러 메시지 출력
+  if (errorMessage) {
     return (
       <View
         style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
