@@ -9,7 +9,7 @@ export const collectionApi = {
     try {
       const response = await axiosInstance.get('/collections');
 
-      console.dir('[현재 사용자 컬렉션 리스트 조회] : ', response.data.data);
+      console.log('[현재 사용자 컬렉션 리스트 조회] : ', response.data.data);
       return response.data.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -34,7 +34,7 @@ export const collectionApi = {
           collectionIds,
         },
       );
-      console.dir('[선택된 컬렉션별 작품 조회] : ', response.data.data);
+      console.log('[선택된 컬렉션별 작품 조회] : ', response.data.data);
       return response.data.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
