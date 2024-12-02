@@ -17,10 +17,14 @@ import { ArtistImage, DragGuideHorizontal } from 'src/components/_index';
 import { Body1, Caption, H6, Subtitle1 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index';
 import LinearGradient from 'react-native-linear-gradient';
-import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
+import {
+  useExhibitionDetails,
+  useExhibitions,
+} from 'src/api/hooks/useExhibitQueries';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { setExhibitTitle, setFont } from 'src/slices/watchingExhibitSlice';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -41,25 +45,19 @@ const ExhibitEntrance: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useDispatch();
-  const { exhibitId } = route.params || {}; // 전시 ID 가져오기
+  const { exhibitId, exhibitColors, exhibitThemes, bgType } =
+    route.params || {}; // 전시 ID 가져오기
   const {
-    data: exhibits = [],
+    data: exhibitData,
     isLoading,
     isError,
-  } = useExhibitions({
-    order: 'LATEST',
-    page: 0,
-    size: 10,
-  });
+  } = useExhibitionDetails(exhibitId);
 
-  // 해당 exhibitId에 맞는 데이터를 찾기
-  const exhibitData = exhibits.find(
-    (exhibit) => exhibit.exhibitionId === exhibitId,
-  );
+  // // 해당 exhibitId에 맞는 데이터를 찾기
+  // const exhibitData = exhibits.find(
+  //   (exhibit) => exhibit.exhibitionId === exhibitId,
+  // );
 
-  if (isLoading) {
-    return;
-  }
   const { fontData } = useSelector((state: RootState) => state.exhibit);
 
   // exhibitData.font에 매칭되는 fontFamily 찾기
@@ -74,28 +72,16 @@ const ExhibitEntrance: React.FC = () => {
     }
   }, [fontFamily, exhibitData, isLoading, dispatch]);
 
-  // Gradient 설정
-  const gradientConfigurations = [
-    { key: 'TOP_DOWN', start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
-    { key: 'DOWN_TOP', start: { x: 0, y: 1 }, end: { x: 0, y: 0 } },
-    {
-      key: 'LEFT_CORNER_RIGHT_CORNER',
-      start: { x: 0, y: 0 },
-      end: { x: 1, y: 1 },
-    },
-    {
-      key: 'RIGHT_CORNER_LEFT_CORNER',
-      start: { x: 1, y: 1 },
-      end: { x: 0, y: 0 },
-    },
-  ];
-
-  const gradientConfig = gradientConfigurations.find(
-    (config) => config.key === exhibitData?.exhibitionBackgroundType,
-  ) || {
-    start: { x: 0.5, y: 0 },
-    end: { x: 0.5, y: 0.8 },
-  };
+  // 헤더 설정
+  useEffect(() => {
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'icon',
+        iconColor: '#fff',
+        headerTransparent: true,
+      }),
+    );
+  }, [navigation]);
 
   const [showGuide, setShowGuide] = useState(true);
   const guideOpacity = useRef(new Animated.Value(1)).current; // 서서히 사라지는 효과를 위한 투명도 설정
@@ -248,24 +234,16 @@ const ExhibitEntrance: React.FC = () => {
     }),
   ).current;
 
-  // 헤더 설정
-  useEffect(() => {
-    navigation.setOptions(
-      headerOptions(navigation, {
-        leftButtonType: 'icon',
-        iconColor: '#fff',
-        headerTransparent: true,
-      }),
-    );
-  }, [navigation]);
+  // Gradient 설정
+  const gradientConfig = getGradientConfig(bgType);
+
+  if (isLoading) {
+    return;
+  }
 
   return (
     <GradientBackground
-      colors={
-        exhibitData.colors.length === 4
-          ? exhibitData.colors
-          : [...exhibitData.colors, ...exhibitData.colors]
-      }
+      colors={exhibitColors}
       start={gradientConfig.start}
       end={gradientConfig.end}
     >
@@ -295,7 +273,7 @@ const ExhibitEntrance: React.FC = () => {
             전시 등록일 {exhibitData?.date || '2024.11.28'}
           </ExhibitDate>
           <TagsContainer>
-            {exhibitData?.themes.map((theme, idx) => (
+            {exhibitThemes.map((theme, idx) => (
               <Tag key={idx}># {theme}</Tag>
             ))}
           </TagsContainer>
