@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dimensions, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import ExhibitCard from './ExhibitCard';
@@ -18,7 +18,15 @@ interface ExhibitCarouselProps {
 const ExhibitCarousel: React.FC<ExhibitCarouselProps> = ({ data }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const progress = useSharedValue<number>(0);
-  console.log(data);
+
+  const animatedStyles = data.map((item, index) => {
+    return useAnimatedStyle(() => {
+      const scale = withSpring(progress.value === index ? 1 : 0.7);
+      return {
+        transform: [{ scale }],
+      };
+    });
+  });
 
   return (
     <Carousel
@@ -31,25 +39,11 @@ const ExhibitCarousel: React.FC<ExhibitCarouselProps> = ({ data }) => {
         (progress.value = absoluteProgress)
       }
       renderItem={({ item, index }) => {
-        // 각 카드에 애니메이션 효과 적용
-        const animatedStyle = useAnimatedStyle(() => {
-          // 중앙 카드는 scale 1, 양옆 카드는 0.85
-          const scale = withSpring(progress.value === index ? 1 : 0.7);
-          return {
-            transform: [{ scale }],
-          };
-        });
-
         const isCurrent = index === currentIndex;
 
         return (
-          <View
-            style={{
-              width: width,
-              alignItems: 'center',
-            }}
-          >
-            <Animated.View style={animatedStyle}>
+          <View style={{ width: width, alignItems: 'center' }}>
+            <Animated.View style={animatedStyles[index]}>
               <ExhibitCard {...item} index={index} isCurrent={isCurrent} />
             </Animated.View>
           </View>
