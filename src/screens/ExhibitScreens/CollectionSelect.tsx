@@ -64,6 +64,7 @@ const CollectionSelect: React.FC = () => {
 
   // 에러가 발생했을 경우 상태로 설정
   if (isError) {
+    console.log('collectionsData:', collectionsData);
     return (
       <View
         style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
@@ -72,8 +73,6 @@ const CollectionSelect: React.FC = () => {
       </View>
     );
   }
-
-  console.log('collectionsData:', collectionsData);
 
   // 컬렉션이 없는 경우
   if (!collectionsData) {
