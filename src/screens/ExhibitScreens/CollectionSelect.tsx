@@ -26,7 +26,7 @@ import {
 const CollectionSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: collectionsData, isLoading, error } = useUserCollection();
+  const { data: collectionsData, isLoading, isError } = useUserCollection();
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
@@ -58,8 +58,7 @@ const CollectionSelect: React.FC = () => {
   }
 
   // 에러가 발생했을 경우 상태로 설정
-  if (error) {
-    console.log('Error:', error);
+  if (isError) {
     return (
       <View
         style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
