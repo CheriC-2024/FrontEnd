@@ -4,7 +4,7 @@ import store from 'src/store';
 import { clearTokens, setTokens } from 'src/slices/authSlice';
 
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL || 'http://localhost:8080/api/v1',
+  baseURL: API_BASE_URL,
   timeout: 0,
   proxy: false,
 });

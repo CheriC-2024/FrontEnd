@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, ActivityIndicator, FlatList, View } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -57,9 +57,25 @@ const CollectionSelect: React.FC = () => {
     );
   }
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // 에러가 발생했을 경우 상태로 설정
   if (error) {
-    console.log(error);
-    return <Text>로드 발생</Text>;
+    console.log('Error:', error);
+    const errorText =
+      typeof error === 'string'
+        ? error
+        : error.message || 'Unknown error occurred';
+    setErrorMessage(errorText);
+    return (
+      <View
+        style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Text style={{ color: 'red', fontSize: 16 }}>
+          에러 발생: {errorMessage}
+        </Text>
+      </View>
+    );
   }
 
   // 컬렉션이 없는 경우
