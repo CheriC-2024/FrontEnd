@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Modal,
   FlatList,
@@ -7,13 +6,12 @@ import {
   View,
 } from 'react-native';
 import styled from 'styled-components/native';
-
 import { useNavigation } from '@react-navigation/native';
 import useSlideAnimation from 'src/hooks/useSlideAnimation';
-import { artistData } from 'src/screens/data';
 import ProfileRow from '../profile/ProfileRow';
 import { ButtonText, H4 } from 'src/styles/typography';
 import SeparatorLine from '../SeparatorLine';
+import { useUsersBriefList } from 'src/api/hooks/useUserQueries';
 
 interface CollectorBottomSheetProps {
   onClose: () => void;
@@ -26,6 +24,14 @@ const CollectorSuggestSheet: React.FC<CollectorBottomSheetProps> = ({
   const { slideAnim, slideOut } = useSlideAnimation(0.6, 500);
 
   const handleClose = () => slideOut(onClose);
+
+  const { data, isLoading, error } = useUsersBriefList({
+    isFollowing: false,
+    artTypes: 'PAINTING',
+    order: 'FOLLOWER',
+    page: 0,
+    size: 5,
+  });
 
   return (
     <Modal transparent={true} animationType='none'>
@@ -46,14 +52,14 @@ const CollectorSuggestSheet: React.FC<CollectorBottomSheetProps> = ({
             </Subtitle>
 
             <FlatList
-              data={artistData}
+              data={data}
               keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
                 <ProfileRow
-                  image={item.image}
+                  image={item.profileImgUrl}
                   name={item.name}
-                  category={item.description}
+                  category={item.artTypes}
                   size={60}
                   userId={item.id}
                   onPress={() =>
