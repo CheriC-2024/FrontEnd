@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
-import { fetchUserInfo } from '../userApi';
+import { fetchUserInfo, fetchUsersBriefList } from '../userApi';
 import { setUserData } from 'src/slices/getUserSlice';
 import store, { AppDispatch } from 'src/store';
 
@@ -16,5 +16,21 @@ export const useFetchUserInfo = () => {
       console.log('Redux State after setUserData:', store.getState());
     },
     staleTime: 1000 * 60 * 5, // 데이터 5분간 유효
+  });
+};
+
+type UseUsersBriefParams = {
+  isFollowing: boolean;
+  artTypes: string;
+  order: 'FOLLOWER' | 'NAME' | 'LATEST';
+  page: number;
+  size: number;
+};
+
+export const useUsersBriefList = (params: UseUsersBriefParams) => {
+  return useQuery({
+    queryKey: ['usersBrief', params], // 쿼리 키
+    queryFn: () => fetchUsersBriefList(params), // fetch 함수
+    staleTime: 1000 * 60 * 5, // 5분 동안 신선함 유지
   });
 };
