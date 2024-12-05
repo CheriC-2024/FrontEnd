@@ -50,7 +50,6 @@ const CollectorSuggestSheet: React.FC<CollectorBottomSheetProps> = ({
             <Subtitle>
               컬렉터님의 관심분야를 기반으로 추천된 컬렉터에요
             </Subtitle>
-
             <FlatList
               data={data}
               keyExtractor={(item) => item.id.toString()}

@@ -33,7 +33,7 @@ const ProfileRow: React.FC<ProfileRowProps> = ({
           </InfoWrapper>
         </ArtistInfo>
       </TouchableOpacity>
-      <View style={{ marginRight: 16 }}>
+      <View style={{ marginRight: 0 }}>
         <FollowButton userId={userId} />
       </View>
     </RowContainer>
