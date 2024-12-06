@@ -46,16 +46,6 @@ const ExhibitViewingDetail: React.FC = () => {
 
   const currentArtwork = exhibitionArtRess[artworkIndex];
 
-  // const artwork = dummyData.artworks.find((item) => item.id === artworkId);
-
-  // if (!artwork) {
-  //   return (
-  //     <Container>
-  //       <H4>작품 정보를 찾을 수 없습니다.</H4>
-  //     </Container>
-  //   );
-  // }
-
   // 헤더 설정
   React.useEffect(() => {
     navigation.setOptions(
@@ -132,7 +122,7 @@ const ExhibitViewingDetail: React.FC = () => {
 
       // 줄 높이 조절
       const height = Math.max(
-        dropY.value + translateY.value + screenHeight * 0.3,
+        dropY.value + translateY.value + screenHeight * 0.5,
         0,
       );
 
@@ -220,37 +210,6 @@ const ExhibitViewingDetail: React.FC = () => {
 
 export default ExhibitViewingDetail;
 
-// Dummy data for artwork
-const dummyData = {
-  artworks: [
-    {
-      id: 101,
-      fileName: 'https://i.ibb.co/bBm2V6M/IMG-8458-2.png',
-      actualImages: [
-        'https://i.ibb.co/bBm2V6M/IMG-8458-2.png',
-        'https://i.ibb.co/QNCnwJB/IMG-8456.png',
-      ],
-      cherryNum: 0,
-    },
-    {
-      id: 102,
-      fileName: 'https://i.ibb.co/QNCnwJB/IMG-8456.png',
-      actualImages: [],
-      cherryNum: null,
-    },
-    {
-      id: 103,
-      fileName: 'https://i.ibb.co/C1QyCkS/IMG-8457.png',
-      actualImages: ['https://i.ibb.co/C1QyCkS/IMG-8457.png'],
-      cherryNum: 3,
-    },
-  ],
-};
-
-const Container = styled.View`
-  flex: 1;
-`;
-
 const Content = styled.View`
   flex: 1;
   justify-content: flex-end;
@@ -273,7 +232,7 @@ const Overlay = styled.View`
 
 const AnimatedRope = styled(Animated.View)`
   position: absolute;
-  top: 0;
+  top: 0px;
   width: 2px;
   background-color: #ffffff6e;
 `;
