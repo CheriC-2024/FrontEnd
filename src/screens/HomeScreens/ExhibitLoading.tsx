@@ -7,12 +7,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useExhibitionDetails } from 'src/api/hooks/useExhibitQueries';
 import { setExhibitDetails } from 'src/slices/watchingExhibitSlice';
 import { useDispatch } from 'react-redux';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
 const ExhibitLoading: React.FC = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { exhibitId } = route.params || {}; // 전시 ID 가져오기
+  const { exhibitId, exhibitColors, bgType } = route.params || {}; // 전시 ID 가져오기
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // TanStack Query로 데이터 가져오기
@@ -59,15 +60,27 @@ const ExhibitLoading: React.FC = () => {
 
       // 3초 후 ExhibitIntro로 이동
       const timer = setTimeout(() => {
-        navigation.replace('ExhibitIntro', { exhibitionDetails });
+        navigation.replace('ExhibitIntro', {
+          exhibitionDetails,
+          exhibitId: exhibitId,
+          bgType: bgType,
+          exhibitColors: exhibitColors,
+        });
       }, 3000);
 
       return () => clearTimeout(timer);
     }
   }, [exhibitionDetails, isError, navigation]);
 
+  // Gradient 설정
+  const gradientConfig = getGradientConfig(bgType);
+
   return (
-    <GradientBackground>
+    <GradientBackground
+      colors={exhibitColors}
+      start={gradientConfig.start}
+      end={gradientConfig.end}
+    >
       <OverlayBackground>
         <AnimatedTicketIcon
           source={require('src/assets/ticket_lottie.png')}
@@ -80,11 +93,7 @@ const ExhibitLoading: React.FC = () => {
 
 export default ExhibitLoading;
 
-const GradientBackground = styled(LinearGradient).attrs({
-  colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 0.8 },
-})`
+const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;

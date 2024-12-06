@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   Animated,
   TouchableOpacity,
@@ -8,7 +8,6 @@ import {
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { homeExhibitData } from '../data';
 import { MusicOffIcon, MusicOnIcon } from 'src/assets/icons/_index.js';
 import { ButtonText } from 'src/styles/typography';
 import { DragGuideHorizontal } from 'src/components/_index';
@@ -16,10 +15,12 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { Audio } from 'expo-av';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
 const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
-  const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
+  const route = useRoute();
+  const { exhibitId, bgType, exhibitColors } = route.params || {}; // 전시 ID 가져오기
 
   // 애니메이션 값
   const fadeAnimTitle = useRef(new Animated.Value(0)).current; // 타이틀 페이드 인 초기값
@@ -138,6 +139,9 @@ const ExhibitIntro: React.FC = () => {
     });
   };
 
+  // Gradient 설정
+  const gradientConfig = getGradientConfig(bgType);
+
   return (
     <TouchableWithoutFeedback onPress={handleScreenPress}>
       <PanGestureHandler
@@ -153,7 +157,9 @@ const ExhibitIntro: React.FC = () => {
         }}
       >
         <GradientBackground
-          colors={['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA']}
+          colors={exhibitColors}
+          start={gradientConfig.start}
+          end={gradientConfig.end}
         >
           <OverlayBackground>
             <TouchableOpacity onPress={toggleMusic}>
@@ -204,11 +210,7 @@ const ExhibitIntro: React.FC = () => {
 
 export default ExhibitIntro;
 
-const GradientBackground = styled(LinearGradient).attrs({
-  colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 0.8 },
-})`
+const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;
@@ -229,7 +231,7 @@ const StyledTitle = styled.Text<{ fontFamily: string }>`
   margin-top: 16px;
   margin-bottom: 24px;
   color: #fff;
-  font-family: 'Mapo';
+  font-family: ${({ fontFamily }) => fontFamily};
 `;
 
 const AnimatedDescription = styled(
