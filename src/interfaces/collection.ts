@@ -33,6 +33,7 @@ export interface Exhibition {
   heartCount: number; // 좋아요 수
   hits: number; // 조회수
   userRes: UserRes;
+  createAt: string;
 }
 
 export interface UserRes {
