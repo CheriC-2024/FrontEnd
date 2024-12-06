@@ -79,3 +79,17 @@ export const getExhibitionDetails = async (id: number) => {
     }
   }
 };
+
+// POST 작품 좋아요
+export const addExhibitHeart = async (exhibitId: number) => {
+  const response = await axiosInstance.post(`/exhibitions/${exhibitId}/heart`);
+  return response.data.data;
+};
+
+// DELETE 작품 좋아요
+export const removeExhibitHeart = async (exhibitId: number) => {
+  const response = await axiosInstance.delete(
+    `/exhibitions/${exhibitId}/heart`,
+  );
+  return response.data.data;
+};
