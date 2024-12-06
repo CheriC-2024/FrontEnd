@@ -618,6 +618,7 @@ const BannerBackground = styled.View`
 
 const Button = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.redBlack};
+  align-self: flex-start;
   margin-top: 12px;
   padding: 10px;
   border-radius: 20px;
