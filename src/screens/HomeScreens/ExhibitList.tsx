@@ -171,6 +171,8 @@ const ExhibitList: React.FC = () => {
                       exhibitColors: item.colors,
                       exhibitThemes: item.themes,
                       bgType: item.exhibitionBackgroundType,
+                      heartCount: item.heartCount,
+                      name: item.name,
                     },
                   });
                 }}

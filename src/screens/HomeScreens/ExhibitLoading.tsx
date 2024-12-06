@@ -8,12 +8,13 @@ import { useExhibitionDetails } from 'src/api/hooks/useExhibitQueries';
 import { setExhibitDetails } from 'src/slices/watchingExhibitSlice';
 import { useDispatch } from 'react-redux';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 const ExhibitLoading: React.FC = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { exhibitId, exhibitColors, bgType } = route.params || {}; // 전시 ID 가져오기
+  const { exhibitId, exhibitColors, bgType, name } = route.params || {}; // 전시 ID 가져오기
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // TanStack Query로 데이터 가져오기
@@ -57,6 +58,8 @@ const ExhibitLoading: React.FC = () => {
 
     if (exhibitionDetails) {
       console.log('Exhibition Details:', exhibitionDetails);
+      const exhibitFont = getFontFamilyByValue(exhibitionDetails.font);
+      console.log(name);
 
       // 3초 후 ExhibitIntro로 이동
       const timer = setTimeout(() => {
@@ -65,8 +68,10 @@ const ExhibitLoading: React.FC = () => {
           exhibitId: exhibitId,
           bgType: bgType,
           exhibitColors: exhibitColors,
+          exhibitFont: exhibitFont,
+          name: name,
         });
-      }, 3000);
+      }, 5000);
 
       return () => clearTimeout(timer);
     }

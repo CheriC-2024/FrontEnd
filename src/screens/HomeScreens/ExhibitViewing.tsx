@@ -9,7 +9,7 @@ import {
   View,
   ImageBackground,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import Carousel from 'react-native-reanimated-carousel';
 import {
@@ -32,10 +32,16 @@ import { HeartIcon } from 'src/assets/icons/_index';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import TableWhite from 'src/components/TableWhite';
+import {
+  useAddExhibitHeart,
+  useRemoveExhibitHeart,
+} from 'src/api/hooks/useExhibitMutations';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
 const ExhibitViewing: React.FC = () => {
+  const route = useRoute();
+  const { exhibitId } = route.params || {}; // 전시 ID 가져오기
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null); // CircleSlider의 ScrollView Ref
   const carouselRef = useRef<any>(null); // Carousel Ref
@@ -56,6 +62,7 @@ const ExhibitViewing: React.FC = () => {
   const [isOverlayVisible, setIsOverlayVisible] = useState(true);
   const [currentVerticalIndex, setCurrentVerticalIndex] = useState(0); // 세로 스크롤 인덱스
   const [currentHorizontalIndex, setCurrentHorizontalIndex] = useState(0); // 가로 캐러셀 인덱스
+  const totalPages = 5; // 세로 스크롤
 
   const selectedArtworks = exhibitDetails.exhibitionArtRess.map((art) => ({
     id: art.artExhibitionRes.imgUrl, // 작품 이미지 URL을 ID로 사용
@@ -75,13 +82,25 @@ const ExhibitViewing: React.FC = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [heartCount, setHeartCount] = useState(exhibitDetails.heartCount);
 
-  const toggleLike = () => {
+  const { mutate: addHeart } = useAddExhibitHeart();
+  const { mutate: removeHeart } = useRemoveExhibitHeart();
+
+  const handleLikePress = () => {
     if (isLiked) {
-      setHeartCount((prev) => prev - 1); // Decrement if already liked
+      removeHeart(exhibitId, {
+        onSuccess: (newHeartCount: number) => {
+          setIsLiked(false);
+          setHeartCount(newHeartCount);
+        },
+      });
     } else {
-      setHeartCount((prev) => prev + 1); // Increment if not liked
+      addHeart(exhibitId, {
+        onSuccess: (newHeartCount: number) => {
+          setIsLiked(true);
+          setHeartCount(newHeartCount);
+        },
+      });
     }
-    setIsLiked((prev) => !prev);
   };
 
   const handleEndButtonClick = () => {
@@ -156,9 +175,6 @@ const ExhibitViewing: React.FC = () => {
   const handleButtonPress = () => {
     if (!scrollViewRef.current) return;
 
-    // 총 페이지 수 계산
-    const totalPages = 5; // 현재 페이지 수 (필요 시 변경 가능)
-
     // 다음 페이지로 이동하거나 맨 위로 스크롤
     if (currentVerticalIndex < totalPages - 1) {
       // 다음 페이지로 이동
@@ -169,6 +185,14 @@ const ExhibitViewing: React.FC = () => {
       // 마지막 페이지라면 맨 위로 이동
       scrollViewRef.current.scrollTo({ y: 0, animated: true });
       setCurrentVerticalIndex(0); // 인덱스 초기화
+    }
+  };
+
+  const getButtonText = () => {
+    if (currentVerticalIndex === 0) {
+      return '컬렉터의 작품설명 보기'; // 처음 텍스트
+    } else {
+      return `${currentVerticalIndex}/${totalPages - 1}`; // 이후 텍스트
     }
   };
 
@@ -292,9 +316,9 @@ const ExhibitViewing: React.FC = () => {
                               marginBottom: 12,
                             }}
                           >
-                            <TouchableOpacity onPress={toggleLike}>
+                            <TouchableOpacity onPress={handleLikePress}>
                               <HeartIcon
-                                fill={isLiked ? '#E32C32' : 'none'}
+                                fill={isLiked ? '#fff' : 'none'}
                                 stroke={isLiked ? 'none' : '#fff'}
                               />
                             </TouchableOpacity>
@@ -312,6 +336,7 @@ const ExhibitViewing: React.FC = () => {
                               exhibitions: 5,
                               currentExhibition: 5,
                             }}
+                            artistId={exhibitDetails.userRes.id}
                           />
                           <CommentButton
                             onPress={() =>
@@ -479,13 +504,11 @@ const ExhibitViewing: React.FC = () => {
                     </Subtitle1>
                   </BannerBackground>
                 </BannerContainer>
-                <TouchableOpacity onPress={handleButtonPress}>
-                  <Button>
-                    <ButtonText style={{ color: '#fff' }}>
-                      컬렉터의 작품설명 보기
-                    </ButtonText>
-                  </Button>
-                </TouchableOpacity>
+                <Button onPress={handleButtonPress}>
+                  <ButtonText style={{ color: '#fff' }}>
+                    {getButtonText()}
+                  </ButtonText>
+                </Button>
               </TitleWrapper>
             )}
             {isOverlayVisible && (
@@ -593,10 +616,10 @@ const BannerBackground = styled.View`
   justify-content: center;
 `;
 
-const Button = styled.View`
+const Button = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.redBlack};
   margin-top: 12px;
-  padding: 10px 20px;
+  padding: 10px;
   border-radius: 20px;
   align-items: center;
 `;
@@ -623,13 +646,6 @@ const GuideContainer = styled.View`
   position: absolute;
   bottom: 40px;
   right: 16px;
-`;
-
-const GuideWrapperRow = styled(Animated.View)`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 0 8px;
 `;
 
 const GuideWrapperColumn = styled(Animated.View)`
@@ -663,15 +679,6 @@ const EndSlide = styled.View`
   align-items: center;
   text-align: center;
   position: relative;
-`;
-
-const EndSlideBackground = styled(ImageBackground)`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  width: 100%;
-  height: 100%;
 `;
 
 const ThanksText = styled(H5)`

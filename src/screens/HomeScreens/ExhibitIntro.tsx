@@ -21,7 +21,8 @@ import { useIncrementHits } from 'src/api/hooks/useExhibitMutations';
 const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { exhibitId, bgType, exhibitColors } = route.params || {}; // 전시 ID 가져오기
+  const { exhibitId, bgType, exhibitColors, exhibitFont, name } =
+    route.params || {}; // 전시 ID 가져오기
   const { mutate: incrementHits } = useIncrementHits();
 
   // 애니메이션 값
@@ -38,13 +39,9 @@ const ExhibitIntro: React.FC = () => {
   const exhibitDetails = useSelector(
     (state: RootState) => state.watchingExhibit.details,
   );
-  const font = useSelector((state: RootState) => state.watchingExhibit.font);
-  if (!font) {
-    // Redux 상태가 아직 준비되지 않은 경우 로딩 화면을 보여줌
-    return;
-  }
-
   const [sound, setSound] = useState<Audio.Sound | null>(null); // 오디오 객체
+
+  console.log(exhibitFont);
 
   // 음악 재생 함수
   const playSound = async () => {
@@ -157,6 +154,7 @@ const ExhibitIntro: React.FC = () => {
   // Gradient 설정
   const gradientConfig = getGradientConfig(bgType);
 
+  console.log(name);
   return (
     <TouchableWithoutFeedback onPress={handleScreenPress}>
       <PanGestureHandler
@@ -166,7 +164,7 @@ const ExhibitIntro: React.FC = () => {
 
             // 오른쪽에서 왼쪽으로 스와이프 감지
             if (translationX < -100) {
-              navigation.navigate('ExhibitViewing');
+              navigation.navigate('ExhibitViewing', { exhibitId: exhibitId });
             }
           }
         }}
@@ -188,9 +186,7 @@ const ExhibitIntro: React.FC = () => {
                 transform: [{ translateY: translateYTitle }],
               }}
             >
-              <StyledTitle fontFamily={font}>
-                {exhibitDetails?.title}
-              </StyledTitle>
+              <StyledTitle fontFamily={exhibitFont}>{name}</StyledTitle>
             </Animated.View>
 
             {/* 설명 애니메이션 적용 */}

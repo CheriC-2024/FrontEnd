@@ -54,6 +54,7 @@ const ExhibitEntrance: React.FC = () => {
     hits,
     createAt,
     name,
+    heartCount,
   } = route.params || {}; // 전시 ID 가져오기
   const {
     data: exhibitData,
@@ -242,9 +243,10 @@ const ExhibitEntrance: React.FC = () => {
 
   // Gradient 설정
   const gradientConfig = getGradientConfig(bgType);
+  console.log(name);
 
   const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
-  const [heartCount, setHeartCount] = useState(hits); // 초기 좋아요 수를 hits로 설정
+  const [newHeartCount, setHeartCount] = useState(heartCount); // 초기 좋아요 수를 hits로 설정
 
   const { mutate: addHeart } = useAddExhibitHeart();
   const { mutate: removeHeart } = useRemoveExhibitHeart();
@@ -289,17 +291,15 @@ const ExhibitEntrance: React.FC = () => {
           <TouchableOpacity onPress={handleLikePress}>
             <LikeWrapper>
               <HeartIcon
-                fill={isLiked ? '#E52C32' : 'white'}
-                stroke={isLiked ? undefined : '#120000'}
+                fill={isLiked ? '#E52C32' : 'none'}
+                stroke={isLiked ? 'none' : '#fff'}
               />
-              <H6 style={{ color: 'white' }}>{heartCount}</H6>
+              <H6 style={{ color: 'white' }}>{newHeartCount}</H6>
             </LikeWrapper>
           </TouchableOpacity>
         </HeaderContainer>
         <TitleContainer>
-          <ExhibitTitle style={{ fontFamily }}>
-            {exhibitData?.name}
-          </ExhibitTitle>
+          <ExhibitTitle style={{ fontFamily }}>{name}</ExhibitTitle>
           <ExhibitDate>전시 등록일 {createAt}</ExhibitDate>
           <TagsContainer>
             {exhibitThemes.map((theme, idx) => (
