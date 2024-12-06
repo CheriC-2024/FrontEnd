@@ -14,8 +14,8 @@ export interface ExhibitCardProps {
   title: string;
   collectorName: string;
   profileImage: string;
-  likes: number;
-  favorites: number;
+  hits: number;
+  heartCount: number;
   tags: string[];
   font: string;
   bgType: string;
@@ -27,8 +27,8 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
   title,
   collectorName,
   profileImage,
-  likes,
-  favorites,
+  hits,
+  heartCount,
   tags,
   font,
   bgType,
@@ -87,10 +87,10 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
         </ProfileSection>
         <StatsContainer>
           <ViewsIcon />
-          <StatText>{likes}</StatText>
+          <StatText>{hits}</StatText>
           <View style={{ width: 4 }} />
           <HeartIcon fill={'#413333'} stroke={''} width={16} height={16} />
-          <StatText>{favorites}</StatText>
+          <StatText>{heartCount}</StatText>
         </StatsContainer>
       </InfoContainer>
     </CardWrapper>

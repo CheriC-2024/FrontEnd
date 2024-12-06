@@ -181,8 +181,8 @@ const ExhibitList: React.FC = () => {
                   title={item.name}
                   collectorName={item.userRes.name}
                   profileImage={item.userRes.profileImgUrl}
-                  likes={item.heartCount}
-                  favorites={item.hits}
+                  heartCount={item.heartCount}
+                  hits={item.hits}
                   tags={item.themes}
                   font={item.font}
                   bgType={item.exhibitionBackgroundType}
