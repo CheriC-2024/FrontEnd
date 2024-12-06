@@ -41,6 +41,7 @@ interface ExhibitionDetails {
   exhibitionArtRess: ExhibitionArtRes[];
   userRes: UserRes;
   exhibitionReviewRes: any; // Define specific type if applicable
+  createAt: string;
 }
 
 interface WatchingExhibitState {
