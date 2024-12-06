@@ -5,7 +5,7 @@ import FollowButton from '../profile/FollowButton';
 import { ForwardIcon } from 'src/assets/icons/_index';
 
 interface ExhibitEndCardProps {
-  artistId?: number;
+  artistId: number;
   artistName: string;
   artistImage: string;
   infoText: string;
@@ -53,12 +53,12 @@ const ExhibitEndCard: React.FC<ExhibitEndCardProps> = ({
             ))} */}
           </Categories>
         </ArtistInfo>
-        {/* <FollowButton userId={artistId} /> */}
-        <StyledButton isFollowing={isFollowing} onPress={handleFollowPress}>
+        <FollowButton userId={artistId} />
+        {/* <StyledButton isFollowing={isFollowing} onPress={handleFollowPress}>
           <FollowButtonText isFollowing={isFollowing}>
             {isFollowing ? '팔로우중' : '팔로우하기'}
           </FollowButtonText>
-        </StyledButton>
+        </StyledButton> */}
       </Header>
       <InfoText>
         컬렉터 {artistName}님께서 {exhibitionStats.artworks}을 보유중이며
