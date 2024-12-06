@@ -16,11 +16,13 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { Audio } from 'expo-av';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import { useIncrementHits } from 'src/api/hooks/useExhibitMutations';
 
 const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { exhibitId, bgType, exhibitColors } = route.params || {}; // 전시 ID 가져오기
+  const { mutate: incrementHits } = useIncrementHits();
 
   // 애니메이션 값
   const fadeAnimTitle = useRef(new Animated.Value(0)).current; // 타이틀 페이드 인 초기값
@@ -128,6 +130,19 @@ const ExhibitIntro: React.FC = () => {
     translateYTitle,
     translateYDescription,
   ]);
+
+  useEffect(() => {
+    if (exhibitId) {
+      incrementHits(exhibitId, {
+        onSuccess: () => {
+          console.log(`Exhibit ID ${exhibitId} hits incremented.`);
+        },
+        onError: (error) => {
+          console.error('Error incrementing exhibit hits:', error);
+        },
+      });
+    }
+  }, [exhibitId, incrementHits]);
 
   const handleScreenPress = () => {
     Animated.timing(fadeAnimGuide, {
