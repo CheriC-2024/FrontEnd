@@ -9,22 +9,23 @@ import {
   PanResponder,
   Dimensions,
   ImageBackground,
+  TouchableOpacity,
 } from 'react-native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import styled from 'styled-components/native';
-import { homeExhibitData } from '../data';
 import { ArtistImage, DragGuideHorizontal } from 'src/components/_index';
 import { Body1, Caption, H6, Subtitle1 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index';
 import LinearGradient from 'react-native-linear-gradient';
-import {
-  useExhibitionDetails,
-  useExhibitions,
-} from 'src/api/hooks/useExhibitQueries';
+import { useExhibitionDetails } from 'src/api/hooks/useExhibitQueries';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { setExhibitTitle, setFont } from 'src/slices/watchingExhibitSlice';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import {
+  useAddExhibitHeart,
+  useRemoveExhibitHeart,
+} from 'src/api/hooks/useExhibitMutations';
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,18 +46,20 @@ const ExhibitEntrance: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useDispatch();
-  const { exhibitId, exhibitColors, exhibitThemes, bgType } =
-    route.params || {}; // 전시 ID 가져오기
+  const {
+    exhibitId,
+    exhibitColors,
+    exhibitThemes,
+    bgType,
+    hits,
+    createAt,
+    name,
+  } = route.params || {}; // 전시 ID 가져오기
   const {
     data: exhibitData,
     isLoading,
     isError,
   } = useExhibitionDetails(exhibitId);
-
-  // // 해당 exhibitId에 맞는 데이터를 찾기
-  // const exhibitData = exhibits.find(
-  //   (exhibit) => exhibit.exhibitionId === exhibitId,
-  // );
 
   const { fontData } = useSelector((state: RootState) => state.exhibit);
 
@@ -194,7 +197,10 @@ const ExhibitEntrance: React.FC = () => {
               useNativeDriver: false,
             }).start(() => {
               navigation.navigate('ExhibitLoading', {
-                exhibitId: exhibitData.exhibitionId,
+                exhibitId: exhibitId,
+                exhibitColors: exhibitColors,
+                bgType: bgType,
+                name: name,
               }); // ExhibitLoading 화면으로 이동
             });
           }, 1000); // 확장 및 화면 밖으로 이동하기 전에 1초 지연
@@ -237,6 +243,30 @@ const ExhibitEntrance: React.FC = () => {
   // Gradient 설정
   const gradientConfig = getGradientConfig(bgType);
 
+  const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
+  const [heartCount, setHeartCount] = useState(hits); // 초기 좋아요 수를 hits로 설정
+
+  const { mutate: addHeart } = useAddExhibitHeart();
+  const { mutate: removeHeart } = useRemoveExhibitHeart();
+
+  const handleLikePress = () => {
+    if (isLiked) {
+      removeHeart(exhibitId, {
+        onSuccess: (newHeartCount: number) => {
+          setIsLiked(false);
+          setHeartCount(newHeartCount);
+        },
+      });
+    } else {
+      addHeart(exhibitId, {
+        onSuccess: (newHeartCount: number) => {
+          setIsLiked(true);
+          setHeartCount(newHeartCount);
+        },
+      });
+    }
+  };
+
   if (isLoading) {
     return;
   }
@@ -250,28 +280,27 @@ const ExhibitEntrance: React.FC = () => {
       <ContentContainer>
         <HeaderContainer>
           <NameWrapper>
-            <ArtistImage
-              // exhibitData?.userRes.profileImgUrl
-              image={exhibitData?.userRes.profileImgUrl}
-              size={42}
-            />
+            <ArtistImage image={exhibitData?.userRes.profileImgUrl} size={42} />
             <Subtitle1 style={{ color: 'white', marginLeft: 6 }}>
               {exhibitData?.userRes.name || '닉네임'}
             </Subtitle1>
             <Body1 style={{ color: 'white' }}>님의 컬렉션 전시</Body1>
           </NameWrapper>
-          <LikeWrapper>
-            <HeartIcon fill={'white'} stroke={''} />
-            <H6 style={{ color: 'white' }}>23</H6>
-          </LikeWrapper>
+          <TouchableOpacity onPress={handleLikePress}>
+            <LikeWrapper>
+              <HeartIcon
+                fill={isLiked ? '#E52C32' : 'white'}
+                stroke={isLiked ? undefined : '#120000'}
+              />
+              <H6 style={{ color: 'white' }}>{heartCount}</H6>
+            </LikeWrapper>
+          </TouchableOpacity>
         </HeaderContainer>
         <TitleContainer>
           <ExhibitTitle style={{ fontFamily }}>
             {exhibitData?.name}
           </ExhibitTitle>
-          <ExhibitDate>
-            전시 등록일 {exhibitData?.date || '2024.11.28'}
-          </ExhibitDate>
+          <ExhibitDate>전시 등록일 {createAt}</ExhibitDate>
           <TagsContainer>
             {exhibitThemes.map((theme, idx) => (
               <Tag key={idx}># {theme}</Tag>
