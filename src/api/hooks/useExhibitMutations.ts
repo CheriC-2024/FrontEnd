@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addExhibitHeart, removeExhibitHeart } from '../exhibitApi';
+import {
+  addExhibitHeart,
+  incrementExhibitHits,
+  removeExhibitHeart,
+} from '../exhibitApi';
 
 // 좋아요 추가 Mutation
 export const useAddExhibitHeart = () => {
@@ -28,5 +32,12 @@ export const useRemoveExhibitHeart = () => {
         heartCount: newHeartCount,
       }));
     },
+  });
+};
+
+// 조회수 증가
+export const useIncrementHits = () => {
+  return useMutation({
+    mutationFn: (exhibitId: number) => incrementExhibitHits(exhibitId),
   });
 };

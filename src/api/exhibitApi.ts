@@ -93,3 +93,9 @@ export const removeExhibitHeart = async (exhibitId: number) => {
   );
   return response.data.data;
 };
+
+// POST 조회수 증가
+export const incrementExhibitHits = async (exhibitId: number) => {
+  const response = await axiosInstance.post(`/exhibitions/${exhibitId}/hits`);
+  return response.data;
+};
