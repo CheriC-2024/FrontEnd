@@ -62,6 +62,8 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
             exhibitColors: gradientColors,
             exhibitThemes: themes,
             bgType: exhibitionBackgroundType,
+            hits: hits,
+            name: name,
           },
         });
       }}
