@@ -347,7 +347,13 @@ const ExhibitViewing: React.FC = () => {
                           >
                             <Body1>방명록 남기러 가기</Body1>
                           </CommentButton>
-                          <ExitButton>
+                          <ExitButton
+                            onPress={() =>
+                              navigation.replace('Tabs', {
+                                screen: 'Home',
+                              })
+                            }
+                          >
                             <Body1 style={{ color: '#B0ABAB' }}>
                               컬렉션 전시 나가기
                             </Body1>

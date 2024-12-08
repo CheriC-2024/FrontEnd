@@ -55,7 +55,7 @@ const ExhibitComments: React.FC = () => {
         rightButtonType: 'text',
         headerRightText: '전시 나가기',
         onHeaderRightPress: () => {
-          navigation.navigate('Tabs', {
+          navigation.replace('Tabs', {
             screen: 'Home',
           });
         },
