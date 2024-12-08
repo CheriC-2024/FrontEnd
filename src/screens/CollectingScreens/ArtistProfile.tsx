@@ -36,15 +36,15 @@ const ArtistProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const { artistId: routeArtistId } = route.params;
-  console.log('Route params:', routeArtistId);
+  const { artistId } = route.params;
+  console.log('Route params:', artistId);
 
-  const { user, isLoading, error } = useArtistData(routeArtistId); // 작가 정보 가져오기
+  const { user, isLoading, error } = useArtistData(artistId); // 작가 정보 가져오기
   const {
     data: artistResume,
     isLoading: resumeLoading,
     error: resumeError,
-  } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
+  } = useArtistResumeData(artistId); // 작가 이력 가져오기
   const {
     data: ownArtData,
     isLoading: ownArtLoading,
@@ -205,7 +205,7 @@ const ArtistProfile: React.FC = () => {
             selectedIndex={0} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
-                artworkId: 51,
+                artworkId: item.artId,
               })
             }
           />
@@ -253,7 +253,7 @@ const ArtistProfile: React.FC = () => {
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
-        artistName={'주유진'}
+        artistName={user?.name}
         artworkCount={10} // TODO: 작품 리스트 API
         backgroundImage={user?.backgroundImgUrl}
         scrollY={scrollY}
@@ -271,38 +271,38 @@ const ArtistProfile: React.FC = () => {
           zIndex: 3,
         }}
       >
-        <ArtistImage image={user.profileImgUrl} size={88} />
+        <ArtistImage image={user?.profileImgUrl} size={88} />
       </ProfileImageContainer>
       <Animated.View
         style={{
           position: 'absolute',
           top: scrollY.interpolate({
             inputRange: [0, 230], // 스크롤 범위
-            outputRange: [150, -120], // 스크롤에 따라 위로 이동
+            outputRange: [150, -140], // 스크롤에 따라 위로 이동
             extrapolate: 'clamp',
           }),
           zIndex: 1,
         }}
       >
         <ProfileWrapper>
-          <ArtistName>{'주유진(Ju Yu Jin)'}</ArtistName>
-          <ArtistInfo>{user.artTypes.join(' • ')} 작가</ArtistInfo>
-          <ArtistBio>{user.description}</ArtistBio>
+          <ArtistName>{user?.name}</ArtistName>
+          <ArtistInfo>{user?.artTypes.join(' • ')} 작가</ArtistInfo>
+          <ArtistBio>{user?.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
             <FollowCountItem>
               <FollowLabel>팔로워</FollowLabel>
-              <FollowNumber>{user.followerAmount}</FollowNumber>
+              <FollowNumber>{user?.followerAmount}</FollowNumber>
             </FollowCountItem>
             <FollowCountItem>
               <FollowLabel>팔로잉</FollowLabel>
-              <FollowNumber>{user.followingAmount}</FollowNumber>
+              <FollowNumber>{user?.followingAmount}</FollowNumber>
             </FollowCountItem>
           </View>
           <FollowButton
-            userId={routeArtistId}
-            isFollowing={user.following}
+            userId={artistId}
+            isFollowing={user?.following}
             onFollowChange={handleFollowChange}
           />
         </FollowSection>
@@ -330,7 +330,9 @@ const ArtistProfile: React.FC = () => {
             : null
         }
         ListFooterComponent={
-          <></>
+          <>
+            <View style={{ height: 160 }} />
+          </>
           // TODO: 작품 리스트 API
           // <View
           //   style={{
@@ -344,7 +346,7 @@ const ArtistProfile: React.FC = () => {
       {isRequestSheetVisible && (
         <RequestArtworkSheet
           onClose={handleCloseRequestSheet}
-          artistId={routeArtistId}
+          artistId={artistId}
           artistContact={artistResume.artistContactRes}
         />
       )}
