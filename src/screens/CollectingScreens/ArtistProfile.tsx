@@ -23,6 +23,7 @@ import {
   useArtistResumeData,
 } from 'src/api/hooks/useArtistQueries';
 import { homeExhibitData } from '../data';
+import { useFetchArtTypesFilter } from 'src/api/hooks/useArtworkQueries';
 
 const tabs = ['미술 작품', '작가 이력', '컬렉션 전시', '소장 작품'];
 
@@ -35,16 +36,35 @@ const ArtistProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const animationValue = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const { artistId: routeArtistId } = route.params;
-  console.log('Route params:', routeArtistId);
+  const { artistId } = route.params;
+  console.log('Route params:', artistId);
 
-  const { user, isLoading, error } = useArtistData(routeArtistId); // 작가 정보 가져오기
+  const { user, isLoading, error } = useArtistData(artistId); // 작가 정보 가져오기
   const {
     data: artistResume,
     isLoading: resumeLoading,
     error: resumeError,
-  } = useArtistResumeData(routeArtistId); // 작가 이력 가져오기
+  } = useArtistResumeData(artistId); // 작가 이력 가져오기
+  const {
+    data: ownArtData,
+    isLoading: ownArtLoading,
+    error: ownArtError,
+  } = useFetchArtTypesFilter({ userId: 30, isCollectorsArt: 'true' });
+  const {
+    data: artData,
+    isLoading: artLoading,
+    error: artError,
+  } = useFetchArtTypesFilter({ userId: 30, isCollectorsArt: 'false' });
   const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
+  console.dir(artData);
+
+  const [selectedIndex, setSelectedIndex] = useState(null); // 선택된 인덱스
+  const [selectedArtworkId, setSelectedArtworkId] = useState(null); // 선택된 작품 ID
+
+  const handleSelect = (index, artworkId) => {
+    setSelectedIndex(index);
+    setSelectedArtworkId(artworkId);
+  };
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -126,8 +146,10 @@ const ArtistProfile: React.FC = () => {
   );
 
   const renderTabContent = () => {
-    if (activeTab === 0 || activeTab === 3) {
-      return; //TODO: 해당 작가 작품 리스트
+    if (activeTab === 0) {
+      return artData || []; // artData 활용
+    } else if (activeTab === 3) {
+      return ownArtData || []; // ownArtData 활용
     } else if (activeTab === 1) {
       return [{ key: 'artistRecord' }]; // placeholder 아이템
     } else if (activeTab === 2) {
@@ -136,8 +158,8 @@ const ArtistProfile: React.FC = () => {
     return [];
   };
 
-  if (isLoading && resumeLoading) {
-    return;
+  if (isLoading && resumeLoading && artLoading && ownArtLoading) {
+    return <View></View>;
   }
 
   if (error && resumeError) {
@@ -183,7 +205,7 @@ const ArtistProfile: React.FC = () => {
             selectedIndex={0} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
-                artworkId: item.id,
+                artworkId: item.artId,
               })
             }
           />
@@ -204,6 +226,7 @@ const ArtistProfile: React.FC = () => {
             likes={item.likes}
             favorites={item.favorites}
             tags={item.tags}
+            font={item.font}
           />
         </View>
       );
@@ -213,11 +236,11 @@ const ArtistProfile: React.FC = () => {
         <View style={{ marginTop: 16, marginRight: 10 }}>
           <ArtworkItem
             artwork={item}
-            selected={false} // 선택 상태 설정 필요 시
-            selectedIndex={0} // 선택 인덱스 설정 필요 시
+            selected={selectedIndex} // 선택 상태 설정 필요 시
+            selectedIndex={selectedIndex} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
-                artworkId: item.id,
+                artworkId: item.artId,
               })
             }
           />
@@ -230,9 +253,9 @@ const ArtistProfile: React.FC = () => {
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
-        artistName={user.name}
-        artworkCount={1} // TODO: 작품 리스트 API
-        backgroundImage={user.backgroundImgUrl}
+        artistName={user?.name}
+        artworkCount={10} // TODO: 작품 리스트 API
+        backgroundImage={user?.backgroundImgUrl}
         scrollY={scrollY}
       />
       <ProfileImageContainer
@@ -248,38 +271,38 @@ const ArtistProfile: React.FC = () => {
           zIndex: 3,
         }}
       >
-        <ArtistImage image={user.profileImgUrl} size={88} />
+        <ArtistImage image={user?.profileImgUrl} size={88} />
       </ProfileImageContainer>
       <Animated.View
         style={{
           position: 'absolute',
           top: scrollY.interpolate({
             inputRange: [0, 230], // 스크롤 범위
-            outputRange: [150, -120], // 스크롤에 따라 위로 이동
+            outputRange: [150, -140], // 스크롤에 따라 위로 이동
             extrapolate: 'clamp',
           }),
           zIndex: 1,
         }}
       >
         <ProfileWrapper>
-          <ArtistName>{user.name}</ArtistName>
-          <ArtistInfo>{user.artTypes.join(' • ')} 작가</ArtistInfo>
-          <ArtistBio>{user.description}</ArtistBio>
+          <ArtistName>{user?.name}</ArtistName>
+          <ArtistInfo>{user?.artTypes.join(' • ')} 작가</ArtistInfo>
+          <ArtistBio>{user?.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
             <FollowCountItem>
               <FollowLabel>팔로워</FollowLabel>
-              <FollowNumber>{user.followerAmount}</FollowNumber>
+              <FollowNumber>{user?.followerAmount}</FollowNumber>
             </FollowCountItem>
             <FollowCountItem>
               <FollowLabel>팔로잉</FollowLabel>
-              <FollowNumber>{user.followingAmount}</FollowNumber>
+              <FollowNumber>{user?.followingAmount}</FollowNumber>
             </FollowCountItem>
           </View>
           <FollowButton
-            userId={routeArtistId}
-            isFollowing={isFollowing}
+            userId={artistId}
+            isFollowing={user?.following}
             onFollowChange={handleFollowChange}
           />
         </FollowSection>
@@ -307,7 +330,9 @@ const ArtistProfile: React.FC = () => {
             : null
         }
         ListFooterComponent={
-          <></>
+          <>
+            <View style={{ height: 160 }} />
+          </>
           // TODO: 작품 리스트 API
           // <View
           //   style={{
@@ -321,7 +346,7 @@ const ArtistProfile: React.FC = () => {
       {isRequestSheetVisible && (
         <RequestArtworkSheet
           onClose={handleCloseRequestSheet}
-          artistId={routeArtistId}
+          artistId={artistId}
           artistContact={artistResume.artistContactRes}
         />
       )}

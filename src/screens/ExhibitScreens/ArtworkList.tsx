@@ -30,9 +30,7 @@ const ArtworkList: React.FC = () => {
     const artwork = selectedArtworks.find((art) => art.artId === artId);
     if (artwork) {
       navigation.navigate('ArtworkDetail', {
-        isCollectorOnly: artwork.cherryNum === null,
-        imageUrl: artwork.fileName,
-        title: artwork.name,
+        artworkId: artId,
       });
     }
   };
@@ -59,15 +57,15 @@ const ArtworkList: React.FC = () => {
               onPress={() => handleArtworkPress(artwork.artId)}
             >
               <ArtworkItem>
-                <ArtworkImage source={imageAssets[artwork.fileName]} />
+                <ArtworkImage source={{ uri: artwork.imgUrl }} />
                 <Subtitle2>{artwork.name}</Subtitle2>
-                {artwork.cherryNum === null ? (
+                {artwork.collectorsArt ? (
                   <CollectorOnlyImage
                     source={require('../../assets/images/collectorOnlyText.png')}
                   />
                 ) : (
                   <ArtworkDescription>
-                    {artwork.cherryNum === 0 ? (
+                    {artwork.cherryPrice === 0 ? (
                       '무료'
                     ) : (
                       <View
@@ -78,7 +76,7 @@ const ArtworkList: React.FC = () => {
                       >
                         <CherryIcon fill='#B0ABAB' />
                         <Text style={{ color: '#B0ABAB' }}>
-                          {artwork.cherryNum}
+                          {artwork.cherryPrice}
                         </Text>
                       </View>
                     )}

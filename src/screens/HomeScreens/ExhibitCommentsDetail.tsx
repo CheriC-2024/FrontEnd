@@ -1,27 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components/native';
 import { FlatList, View } from 'react-native';
-import { addReply } from 'src/slices/commentSlice';
 import { RootState } from 'src/store';
 import {
   MenuIcon,
   SendIcon,
+  ThumbsUpIcon,
   ThumbsUpIconFilled,
 } from 'src/assets/icons/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { useNavigation } from '@react-navigation/native';
 import { Caption } from 'src/styles/typography';
+import { usePostCommentReply } from 'src/api/hooks/useExhibitMutations';
+import { useCommentReplies } from 'src/api/hooks/useExhibitQueries';
 
 const ExhibitCommentsDetail = ({ route }) => {
-  const { comment } = route.params;
+  const { commentId, exhibitId } = route.params;
   const [replyText, setReplyText] = useState('');
-  const dispatch = useDispatch();
   const navigation = useNavigation();
-
-  const updatedComment = useSelector((state: RootState) =>
-    state.comment.comments.find((c) => c.id === comment.id),
-  );
+  const userData = useSelector((state: RootState) => state.getUser);
+  const [likes, setLikes] = useState({});
+  const {
+    data: comment = [],
+    isLoading,
+    error,
+  } = useCommentReplies({
+    exhibitId,
+    commentId,
+  });
+  const { mutate: postReply, isPending } = usePostCommentReply(
+    exhibitId,
+    commentId,
+  ); // API 훅 사용
 
   // 헤더 설정
   useEffect(() => {
@@ -36,26 +47,54 @@ const ExhibitCommentsDetail = ({ route }) => {
     );
   }, [navigation]);
 
+  // 좋아요 상태 초기화
+  // useEffect(() => {
+  //   const initialLikes = {};
+  //   if (comment) {
+  //     initialLikes[comment.id] = { liked: false, count: comment.heartCount }; // 메인 댓글
+  //     comment.replies.forEach((reply) => {
+  //       initialLikes[reply.id] = { liked: false, count: reply.heartCount };
+  //     });
+  //   }
+  //   setLikes(initialLikes);
+  // }, [comment]);
+
+  // 좋아요 토글 처리
+  const toggleLike = (id) => {
+    setLikes((prevLikes) => ({
+      ...prevLikes,
+      [id]: {
+        liked: !prevLikes[id].liked,
+        count: prevLikes[id].liked
+          ? prevLikes[id].count - 1
+          : prevLikes[id].count + 1,
+      },
+    }));
+  };
+
+  // 대댓글 추가
   const handleAddReply = () => {
     if (replyText.trim()) {
-      dispatch(
-        addReply({
-          commentId: comment.id,
-          replyText: replyText.trim(),
-        }),
-      );
+      postReply(replyText.trim());
       setReplyText('');
     }
   };
 
+  if (isLoading || isPending) {
+    return;
+  }
+  console.log(comment);
+
   return (
     <Container>
       <CommentContainer>
-        <ProfileImage source={{ uri: 'https://via.placeholder.com/50' }} />
+        <ProfileImage
+          source={{ uri: 'https://i.ibb.co/PrqQ6hG/Group-4625.png' }}
+        />
         <CommentContent>
-          <UserName>닉네임</UserName>
-          <CommentText>{updatedComment?.text || comment.text}</CommentText>
-          <CommentMeta>2024.05.14</CommentMeta>
+          <UserName>{comment.name}</UserName>
+          <CommentText>{comment.review}</CommentText>
+          <CommentMeta>{comment.createAt}</CommentMeta>
         </CommentContent>
         <View
           style={{
@@ -64,24 +103,28 @@ const ExhibitCommentsDetail = ({ route }) => {
             marginTop: 20,
           }}
         >
-          <LikeContainer>
-            <ThumbsUpIconFilled />
-            <LikeCount>2</LikeCount>
+          <LikeContainer onPress={() => toggleLike(comment.id)}>
+            {likes[comment.id]?.liked ? (
+              <ThumbsUpIconFilled />
+            ) : (
+              <ThumbsUpIcon />
+            )}
+            <LikeCount>{likes[comment.id]?.count}</LikeCount>
           </LikeContainer>
           <MenuIcon />
         </View>
       </CommentContainer>
       <RepliesList
-        data={updatedComment?.replies || []}
-        keyExtractor={(item) => item.id}
+        data={comment.replies || []}
+        keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <ReplyContainer>
-            <ProfileImage source={{ uri: 'https://via.placeholder.com/50' }} />
+            <ProfileImage source={{ uri: userData.profileImgUrl }} />
             <ReplyContent>
-              <UserName>닉네임</UserName>
-              <ReplyText>{item.text}</ReplyText>
-              <ReplyMeta>2024.05.14</ReplyMeta>
+              <UserName>{item.name}</UserName>
+              <ReplyText>{item.review}</ReplyText>
+              <ReplyMeta>{item.createAt}</ReplyMeta>
             </ReplyContent>
             <View
               style={{
@@ -91,16 +134,14 @@ const ExhibitCommentsDetail = ({ route }) => {
               }}
             >
               <LikeContainer>
-                <ThumbsUpIconFilled />
-                <LikeCount>2</LikeCount>
+                <ThumbsUpIcon />
+                <LikeCount>0</LikeCount>
               </LikeContainer>
               <MenuIcon />
             </View>
           </ReplyContainer>
         )}
       />
-
-      {/* Input for adding a reply */}
       <ReplyInputContainer>
         <InputWrapper>
           <ReplyInput
@@ -156,7 +197,7 @@ const CommentMeta = styled(Caption)`
   margin-top: 4px;
 `;
 
-const LikeContainer = styled.View`
+const LikeContainer = styled.TouchableOpacity`
   align-items: center;
   justify-content: center;
 `;

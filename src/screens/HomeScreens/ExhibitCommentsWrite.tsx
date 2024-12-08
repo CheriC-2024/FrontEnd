@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
-import { ImageBackground } from 'react-native';
+import { ImageBackground, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import { useNavigation } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-import { useDispatch } from 'react-redux';
-import { addComment } from 'src/slices/commentSlice';
+import { usePostComment } from 'src/api/hooks/useExhibitMutations';
 
 const BACKGROUND_IMAGE = { uri: 'https://i.ibb.co/yhqhcZ8/2-image-0.png' };
 
-const ExhibitCommentsWrite: React.FC = () => {
+const ExhibitCommentsWrite: React.FC<{ route: any }> = ({ route }) => {
+  const { exhibitId } = route.params || {}; // 전시 ID 가져오기
   const [comment, setComment] = useState('');
   const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const { mutate: postReview, isPending } = usePostComment(exhibitId); // API 훅 사용
 
   // 헤더 설정
   useEffect(() => {
@@ -20,20 +20,29 @@ const ExhibitCommentsWrite: React.FC = () => {
         leftButtonType: undefined,
         iconColor: '#120000',
         rightButtonType: 'text',
-        headerRightText: '완료하기',
+        headerRightText: isPending ? '등록 중...' : '완료하기',
         onHeaderRightPress: handleComplete,
         headerTransparent: true,
       }),
     );
-  }, [navigation, comment]);
+  }, [navigation, comment, isPending]);
 
   const handleComplete = () => {
-    if (comment) {
-      dispatch(addComment(comment.trim()));
-      navigation.goBack();
-    } else {
-      console.log('Empty comment, no action taken.');
+    if (!comment.trim()) {
+      Alert.alert('오류', '댓글을 작성해주세요.');
+      return;
     }
+
+    postReview(comment.trim(), {
+      onSuccess: () => {
+        setComment(''); // 입력 필드 초기화
+        navigation.goBack(); // 이전 화면으로 이동
+      },
+      onError: (error) => {
+        Alert.alert('오류', '댓글 등록 중 오류가 발생했습니다.');
+        console.error('Post Review Error:', error);
+      },
+    });
   };
 
   return (
@@ -52,6 +61,7 @@ const ExhibitCommentsWrite: React.FC = () => {
               setComment(text);
             }}
             maxLength={150}
+            editable={!isPending} // 로딩 중엔 입력 비활성화
           />
         </CommentInputContainer>
       </Content>

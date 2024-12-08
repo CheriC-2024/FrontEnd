@@ -197,7 +197,7 @@ const Subtitle = styled(Body2)`
 
 const AnimatedButtonWrapper = styled(Animated.View)`
   position: absolute;
-  bottom: 120px;
+  bottom: 90px;
   right: 115px;
   align-items: center;
   padding: 12px 20px;

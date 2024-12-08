@@ -16,7 +16,6 @@ import {
   Subtitle1,
   Subtitle2,
 } from 'src/styles/typography';
-import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { RefreshIcon } from 'src/assets/icons/_index';
 import { View } from 'react-native';
 

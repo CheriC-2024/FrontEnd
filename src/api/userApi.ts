@@ -3,7 +3,7 @@ import axiosInstance from './axiosInstance';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // 사용자 정보 가져오기
-const fetchUserInfo = async () => {
+export const fetchUserInfo = async () => {
   const response = await axiosInstance.get('/users');
   console.log('유저정보 조회', response.data.data);
   return response.data.data;
@@ -39,6 +39,27 @@ export const fetchAndSetUserData = createAsyncThunk(
     return userData;
   },
 );
+
+type FetchUsersParams = {
+  isFollowing: boolean;
+  artTypes: string; // "PAINTING", "DIGITAL_ART" 등
+  order: 'FOLLOWER' | 'NAME' | 'LATEST';
+  page: number;
+  size: number;
+};
+
+export const fetchUsersBriefList = async ({
+  isFollowing,
+  artTypes,
+  order,
+  page,
+  size,
+}: FetchUsersParams) => {
+  const response = await axiosInstance.get('/users/all-brief', {
+    params: { isFollowing, artTypes, order, page, size },
+  });
+  return response.data.data; // API 응답 데이터 반환
+};
 
 const artTypeMapping: { [key: string]: string } = {
   NEW_MEDIA_ART: '뉴미디어',

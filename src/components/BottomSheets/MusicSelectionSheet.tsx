@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   ScrollView,
@@ -8,32 +8,28 @@ import {
 } from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useSelector } from 'react-redux';
-import { RootState } from 'src/store';
 import useSlideAnimation from 'src/hooks/useSlideAnimation';
 import { Body2, ButtonText, H4 } from 'src/styles/typography';
 
 const MusicSelectionSheet = ({
   isVisible,
   onClose,
-  selectedMusic,
+  initialSelectedMusic = null, // 초기 선택값을 받을 수 있도록 설정
   setSelectedMusic,
 }) => {
-  const { slideAnim, slideIn, slideOut } = useSlideAnimation();
-  const selectedThemes = useSelector(
-    (state: RootState) => state.theme.selectedThemes,
-  );
+  const { slideAnim, slideIn, slideOut, resetAnimation } = useSlideAnimation();
+  const [localSelectedMusic, setLocalSelectedMusic] =
+    useState(initialSelectedMusic);
 
   const handleMusicSelect = (music: string) => {
-    if (selectedMusic === music) {
-      setSelectedMusic(null);
-    } else {
-      setSelectedMusic(music);
-    }
+    const updatedMusic = localSelectedMusic === music ? null : music;
+    setLocalSelectedMusic(updatedMusic); // 로컬 상태 업데이트
+    setSelectedMusic(updatedMusic); // 부모 상태 업데이트
   };
 
   useEffect(() => {
     if (isVisible) {
+      resetAnimation();
       slideIn();
     }
   }, [isVisible]);
@@ -62,28 +58,19 @@ const MusicSelectionSheet = ({
                 <Subtitle>
                   컬렉터님의 전시 테마를 기반으로 추천된 배경음이에요
                 </Subtitle>
-                <TagsContainer>
-                  {selectedThemes.map((theme, index) => (
-                    <Tag key={index}>#{theme}</Tag>
-                  ))}
-                </TagsContainer>
                 <ScrollView style={{ flexGrow: 1 }}>
-                  {['Brightness', 'Colorful', 'Upbeat Melody'].map(
-                    (music, index) => (
-                      <MusicItem
-                        key={index}
-                        selected={selectedMusic === music}
-                        onPress={() => handleMusicSelect(music)}
-                      >
-                        <Icon
-                          name='musical-note-outline'
-                          size={20}
-                          color='#120000'
-                        />
-                        <MusicText>{music}</MusicText>
-                      </MusicItem>
-                    ),
-                  )}
+                  {['Brightness', 'Colorful'].map((music, index) => (
+                    <MusicItem
+                      key={index}
+                      selected={localSelectedMusic === music}
+                      onPress={() => handleMusicSelect(music)}
+                    >
+                      <MusicImage
+                        source={{ uri: 'https://i.ibb.co/FD83JjT/suno1.jpg' }}
+                      />
+                      <MusicText>{music}</MusicText>
+                    </MusicItem>
+                  ))}
                 </ScrollView>
               </SheetContainer>
             </Animated.View>
@@ -93,6 +80,8 @@ const MusicSelectionSheet = ({
     </Modal>
   );
 };
+
+export default MusicSelectionSheet;
 
 const ModalContainer = styled.View`
   flex: 1;
@@ -148,8 +137,12 @@ const MusicItem = styled(TouchableOpacity)<{ selected: boolean }>`
   overflow: visible;
 `;
 
+const MusicImage = styled.Image`
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+`;
+
 const MusicText = styled(ButtonText)`
   margin-left: 10px;
 `;
-
-export default MusicSelectionSheet;

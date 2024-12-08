@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   Animated,
   TouchableOpacity,
@@ -8,15 +8,22 @@ import {
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { homeExhibitData } from '../data';
 import { MusicOffIcon, MusicOnIcon } from 'src/assets/icons/_index.js';
 import { ButtonText } from 'src/styles/typography';
 import { DragGuideHorizontal } from 'src/components/_index';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { Audio } from 'expo-av';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import { useIncrementHits } from 'src/api/hooks/useExhibitMutations';
 
 const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
-  const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
+  const route = useRoute();
+  const { exhibitId, bgType, exhibitColors, exhibitFont, name } =
+    route.params || {}; // 전시 ID 가져오기
+  const { mutate: incrementHits } = useIncrementHits();
 
   // 애니메이션 값
   const fadeAnimTitle = useRef(new Animated.Value(0)).current; // 타이틀 페이드 인 초기값
@@ -29,6 +36,48 @@ const ExhibitIntro: React.FC = () => {
   const [isMusicOn, setIsMusicOn] = useState(true); // 초기값은 MusicOnIcon
   const [isDragGuideVisible, setIsDragGuideVisible] = useState(true); // DragGuideHorizontal의 가시성 상태
   const [showDragGuide, setShowDragGuide] = useState(false); // DragGuideHorizontal 표시 여부
+  const exhibitDetails = useSelector(
+    (state: RootState) => state.watchingExhibit.details,
+  );
+  const [sound, setSound] = useState<Audio.Sound | null>(null); // 오디오 객체
+
+  console.log(exhibitFont);
+
+  // 음악 재생 함수
+  const playSound = async () => {
+    try {
+      console.log('Loading Sound');
+      const { sound } = await Audio.Sound.createAsync(
+        require('src/assets/music.mp3'), // 로컬 MP3 파일 경로
+      );
+      setSound(sound);
+
+      console.log('Playing Sound');
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Error playing sound', error);
+    }
+  };
+
+  // 음악 정지 함수
+  const stopSound = async () => {
+    if (sound) {
+      console.log('Stopping Sound');
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+    }
+  };
+
+  // 음악 상태 토글
+  const toggleMusic = async () => {
+    if (isMusicOn) {
+      await stopSound();
+    } else {
+      await playSound();
+    }
+    setIsMusicOn((prev) => !prev);
+  };
 
   // 헤더 설정
   useEffect(() => {
@@ -79,6 +128,19 @@ const ExhibitIntro: React.FC = () => {
     translateYDescription,
   ]);
 
+  useEffect(() => {
+    if (exhibitId) {
+      incrementHits(exhibitId, {
+        onSuccess: () => {
+          console.log(`Exhibit ID ${exhibitId} hits incremented.`);
+        },
+        onError: (error) => {
+          console.error('Error incrementing exhibit hits:', error);
+        },
+      });
+    }
+  }, [exhibitId, incrementHits]);
+
   const handleScreenPress = () => {
     Animated.timing(fadeAnimGuide, {
       toValue: 0,
@@ -89,6 +151,10 @@ const ExhibitIntro: React.FC = () => {
     });
   };
 
+  // Gradient 설정
+  const gradientConfig = getGradientConfig(bgType);
+
+  console.log(name);
   return (
     <TouchableWithoutFeedback onPress={handleScreenPress}>
       <PanGestureHandler
@@ -98,28 +164,30 @@ const ExhibitIntro: React.FC = () => {
 
             // 오른쪽에서 왼쪽으로 스와이프 감지
             if (translationX < -100) {
-              navigation.navigate('ExhibitViewing');
+              navigation.navigate('ExhibitViewing', { exhibitId: exhibitId });
             }
           }
         }}
       >
         <GradientBackground
-          colors={['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA']}
+          colors={exhibitColors}
+          start={gradientConfig.start}
+          end={gradientConfig.end}
         >
           <OverlayBackground>
-            <TouchableOpacity onPress={() => setIsMusicOn((prev) => !prev)}>
+            <TouchableOpacity onPress={toggleMusic}>
               {isMusicOn ? <MusicOnIcon /> : <MusicOffIcon />}
             </TouchableOpacity>
 
             {/* 타이틀 애니메이션 적용 */}
-            <AnimatedTitle
+            <Animated.View
               style={{
                 opacity: fadeAnimTitle,
                 transform: [{ translateY: translateYTitle }],
               }}
             >
-              {exhibitData?.title}
-            </AnimatedTitle>
+              <StyledTitle fontFamily={exhibitFont}>{name}</StyledTitle>
+            </Animated.View>
 
             {/* 설명 애니메이션 적용 */}
             <AnimatedDescription
@@ -128,7 +196,7 @@ const ExhibitIntro: React.FC = () => {
                 transform: [{ translateY: translateYDescription }],
               }}
             >
-              {exhibitData?.description}
+              {exhibitDetails?.description}
             </AnimatedDescription>
 
             {showDragGuide && (
@@ -153,11 +221,7 @@ const ExhibitIntro: React.FC = () => {
 
 export default ExhibitIntro;
 
-const GradientBackground = styled(LinearGradient).attrs({
-  colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 0.8 },
-})`
+const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;
@@ -173,12 +237,12 @@ const OverlayBackground = styled.View`
   padding-top: 90px;
 `;
 
-const AnimatedTitle = styled(Animated.Text)`
+const StyledTitle = styled.Text<{ fontFamily: string }>`
   font-size: 44px;
-  font-family: 'Mapo';
   margin-top: 16px;
   margin-bottom: 24px;
   color: #fff;
+  font-family: ${({ fontFamily }) => fontFamily};
 `;
 
 const AnimatedDescription = styled(

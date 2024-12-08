@@ -8,6 +8,7 @@ import {
   DescriptionSetting,
   CoverSetting,
   FinishSetting,
+  ExhibitCompletion,
 } from 'src/screens/ExhibitScreens/_index';
 import { ExhibitStackParamList } from './types';
 
@@ -27,6 +28,7 @@ const ExhibitStack = () => {
       <Stack.Screen name='DescriptionSetting' component={DescriptionSetting} />
       <Stack.Screen name='CoverSetting' component={CoverSetting} />
       <Stack.Screen name='FinishSetting' component={FinishSetting} />
+      <Stack.Screen name='ExhibitCompletion' component={ExhibitCompletion} />
     </Stack.Navigator>
   );
 };

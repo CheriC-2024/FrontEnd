@@ -7,18 +7,21 @@ import {
 } from 'src/api/collectionApi';
 
 // 유저 컬렉션을 가져오는 훅
-export const useUserCollection = (userId: number) => {
+export const useUserCollection = () => {
   return useQuery({
-    queryKey: ['collections', userId],
-    queryFn: () => collectionApi.userCollections(userId),
+    queryKey: ['collections'],
+    queryFn: () => collectionApi.userCollections(),
   });
 };
 
 // 특정 컬렉션에 속한 작품 목록을 가져오는 훅
-export const useArtworkList = (collectionIds: number[]) => {
+export const useArtworkList = (
+  sort: 'LATEST' | 'NAME',
+  collectionIds: number[],
+) => {
   return useQuery({
-    queryKey: ['artworks', collectionIds],
-    queryFn: () => collectionApi.getArtworks(collectionIds),
+    queryKey: ['artworks', sort, collectionIds],
+    queryFn: () => collectionApi.getArtworks(sort, collectionIds),
     enabled: collectionIds.length > 0, // collectionIds가 있을 때만 쿼리 실행
   });
 };

@@ -30,7 +30,9 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
     <ArtistCardButton onPress={handlePress}>
       <ArtistImageWrapper>
         <ArtistImage image={image} size={size} />
-        <ArtistName fontType={fontType}>{name}</ArtistName>
+        <ArtistName fontType={fontType} numberOfLines={2} ellipsizeMode='tail'>
+          {name}
+        </ArtistName>
       </ArtistImageWrapper>
     </ArtistCardButton>
   );
@@ -56,6 +58,8 @@ const ArtistName = styled.Text<{ fontType: string }>`
     font-size: 12px;
     font-family: PretendardRegular;
   `}
+  max-width:90px;
+  text-align: center;
 `;
 
 const LoadingText = styled(Caption)`

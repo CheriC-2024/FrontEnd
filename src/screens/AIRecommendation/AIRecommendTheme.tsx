@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { Text, Animated } from 'react-native';
+import { useState } from 'react';
+import {
+  Text,
+  Animated,
+  LayoutRectangle,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { StackParamList } from 'src/navigation/types';
@@ -8,12 +14,11 @@ import { RootState } from 'src/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTheme, removeTheme } from '../../slices/themeSlice';
 import { useToastMessage } from 'src/hooks/_index';
-import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { TitleSubtitle, TagButton, ToastMessage } from 'src/components/_index';
 import { Btn, BtnText } from 'src/components/Button';
 import { Container } from 'src/styles/layout';
 import { RefreshIcon } from '../../assets/icons/_index.js';
-import { Caption, Subtitle1, Subtitle2 } from 'src/styles/typography';
+import { Body2, Caption, Subtitle1, Subtitle2 } from 'src/styles/typography';
 
 const AIRecommendTheme: React.FC = () => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
@@ -28,15 +33,10 @@ const AIRecommendTheme: React.FC = () => {
   );
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const { toastVisible, toastMessage, showToast } = useToastMessage();
-
-  // navigation.setOptions(
-  //   headerOptions(navigation, {
-  //     leftButtonType: null,
-  //     headerTitle: '전시 테마 AI 추천',
-  //     headerTitleAlign: 'left',
-  //   }),
-  // );
-
+  const [buttonPosition, setButtonPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [animations, setAnimations] = useState<{
     [key: string]: Animated.Value;
   }>(
@@ -60,13 +60,20 @@ const AIRecommendTheme: React.FC = () => {
     ),
   );
 
-  const handleThemeSelect = (theme: string) => {
+  const handleThemeSelect = (theme: string, layout: LayoutRectangle | null) => {
     if (selectedTheme !== theme) {
       if (selectedTheme) {
         animateCircle(selectedTheme, 100, 12); // reset to original size
       }
       setSelectedTheme(theme);
       animateCircle(theme, 140, 16); // enlarge circle and text
+    }
+    if (layout) {
+      // Calculate button position based on circle position
+      setButtonPosition({
+        x: layout.x + layout.width / 2, // Center horizontally
+        y: layout.y + layout.height, // Position below the circle
+      });
     }
   };
 
@@ -97,80 +104,96 @@ const AIRecommendTheme: React.FC = () => {
     }).start();
   };
 
+  // 추천 이유 텍스트
+  const reasonText = selectedTheme
+    ? aiThemeReason[aiThemes.indexOf(selectedTheme)] ||
+      '테마 추천 이유가 없습니다.'
+    : '컬렉터님이 선택한 작품들로 테마를 만들었어요!';
+
+  const reasonTitleText = selectedTheme
+    ? '추천 이유'
+    : '테마를 클릭하고 추천 이유 보기';
+
   return (
     <>
-      <Container>
+      <Container removePadding>
         <HeaderText>전시 테마 AI 추천</HeaderText>
         <TitleSubtitle
           titleLarge='AI가 만든 전시 테마'
           subtitle='원하는 전시 테마를 선택해 주세요'
-          style={{ marginBottom: 12 }}
+          style={{ marginBottom: 12, paddingHorizontal: 16 }}
         />
-        <RefreshIcon size={30} />
+        <View style={{ paddingHorizontal: 16 }}>
+          <RefreshIcon size={30} />
+        </View>
         <ThemeScrollViewContainer>
           <ThemeScrollView horizontal showsHorizontalScrollIndicator={false}>
             {aiThemes.map((theme, index) => (
-              <AnimatedThemeCircle
-                key={index}
-                onPress={() => handleThemeSelect(theme)}
-                selected={
-                  selectedThemes.includes(theme) || selectedTheme === theme
-                }
-                style={{
-                  width: animations[theme],
-                  height: animations[theme],
-                  alignSelf: 'center', // 여기서 중앙 정렬 유지
-                }}
-              >
-                {selectedTheme === theme ? (
-                  <GradientCircle colors={['#fff', '#FDEDED']}>
-                    <AnimatedThemeText
-                      style={{ fontSize: 16, fontFamily: 'PretendardBold' }}
-                    >
-                      {`#${theme}`}
-                    </AnimatedThemeText>
-                  </GradientCircle>
-                ) : (
-                  <AnimatedThemeText
-                    style={{ fontSize: textAnimations[theme] }}
+              <AnimatedThemeContainer key={index}>
+                <AnimatedThemeCircle
+                  selected={selectedTheme === theme} // 현재 선택된 테마
+                  added={selectedThemes.includes(theme)} // 추가된 테마인지 확인
+                  style={{
+                    width: animations[theme], // 애니메이션된 원 크기
+                    height: animations[theme],
+                  }}
+                  onLayout={(event) => {
+                    if (selectedTheme === theme) {
+                      const layout = event.nativeEvent.layout;
+                      setButtonPosition({
+                        x: layout.x + layout.width / 2, // Center horizontally
+                        y: layout.y + layout.height, // Position below the circle
+                      });
+                    }
+                  }}
+                  onPress={(event) =>
+                    handleThemeSelect(theme, event.nativeEvent.layout)
+                  }
+                >
+                  {selectedTheme === theme ? (
+                    <GradientCircle colors={['#fff', '#FDEEEF']}>
+                      <AnimatedThemeText
+                        style={{
+                          fontSize: textAnimations[theme], // 애니메이션된 폰트 크기
+                        }}
+                      >
+                        {`#${theme}`}
+                      </AnimatedThemeText>
+                    </GradientCircle>
+                  ) : (
+                    <ThemeText>{`#${theme}`}</ThemeText>
+                  )}
+                </AnimatedThemeCircle>
+                {/* 원 바로 아래 버튼 */}
+                {selectedTheme === theme && (
+                  <AnimatedButton
+                    style={{
+                      marginTop: 8, // 원 바로 아래에 위치
+                    }}
+                    onPress={handleAddTheme}
                   >
-                    {`#${theme}`}
-                  </AnimatedThemeText>
+                    <ReasonButtonText>추가하기</ReasonButtonText>
+                  </AnimatedButton>
                 )}
-              </AnimatedThemeCircle>
+              </AnimatedThemeContainer>
             ))}
           </ThemeScrollView>
         </ThemeScrollViewContainer>
-
         <ReasonContainer>
           <ReasonIcon
             source={require('src/assets/images/Character/character_ai.png')}
           />
-          {selectedTheme ? (
-            <ReasonTextContainer>
-              <ReasonTitle>추천 이유</ReasonTitle>
-              <ReasonText>
-                {aiThemeReason[aiThemes.indexOf(selectedTheme)]}
-              </ReasonText>
-              <ReasonButton onPress={handleAddTheme}>
-                <ReasonButtonText>추가하기</ReasonButtonText>
-              </ReasonButton>
-            </ReasonTextContainer>
-          ) : (
-            <ReasonTextContainer>
-              <ReasonTitle>테마를 클릭하고 추천 이유 보기</ReasonTitle>
-              <ReasonText>
-                컬렉터님이 선택한 작품들로 테마를 만들었어요!
-              </ReasonText>
-            </ReasonTextContainer>
-          )}
+          <ReasonTextContainer>
+            <ReasonTitle>{reasonTitleText}</ReasonTitle>
+            <ReasonText>{reasonText}</ReasonText>
+          </ReasonTextContainer>
         </ReasonContainer>
         <SelectedThemesHeader>
           <Subtitle2>설정한 테마</Subtitle2>
-          <Subtitle2>
+          <Body2>
             {selectedThemes.length}{' '}
-            <Text style={{ color: theme.colors.grey_6 }}>/ 3</Text>
-          </Subtitle2>
+            <Body2 style={{ color: theme.colors.grey_6 }}>/ 3</Body2>
+          </Body2>
         </SelectedThemesHeader>
         <SelectedThemes>
           {selectedThemes.map((theme, index) => (
@@ -197,6 +220,14 @@ const AIRecommendTheme: React.FC = () => {
 
 const HeaderText = styled(Subtitle1)`
   margin: 16px 0;
+  padding: 0 16px;
+`;
+
+const AnimatedThemeContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+  margin: 8px; /* 원 사이 간격 */
+  padding-bottom: 20px;
 `;
 
 const ThemeScrollViewContainer = styled.View`
@@ -204,20 +235,23 @@ const ThemeScrollViewContainer = styled.View`
   justify-content: center;
   align-items: center;
   margin-top: 30px;
-  height: 150px;
+  height: 200px;
 `;
 
 const ThemeScrollView = styled.ScrollView`
   flex-grow: 0;
 `;
 
-const ThemeCircle = styled.TouchableOpacity<{ selected: boolean }>`
+const ThemeCircle = styled.TouchableOpacity<{
+  selected: boolean;
+  added: boolean;
+}>`
   border-radius: 70px;
-  background-color: ${({ selected }) => (selected ? '#F7F5F5' : '#fff')};
+  background-color: ${({ selected, added }) =>
+    selected ? '#fff' : added ? '#dfdfdf' : '#fff'};
   justify-content: center;
   align-items: center;
   align-self: center;
-  margin: 5px 10px 5px 5px; /*그림자 잘리는 것 방지 */
   elevation: 5;
   overflow: visible;
 `;
@@ -244,9 +278,9 @@ const ReasonContainer = styled.View`
   background-color: #fcfbfb;
   flex-direction: row;
   align-items: flex-end;
+  padding: 0 16px;
   padding-top: ${({ theme }) => theme.padding.l};
   padding-bottom: ${({ theme }) => theme.padding.l};
-  margin-top: ${({ theme }) => theme.spacing.s11};
   margin-bottom: ${({ theme }) => theme.spacing.s9};
 `;
 
@@ -273,18 +307,19 @@ const ReasonText = styled(Caption)`
   margin-bottom: ${({ theme }) => theme.spacing.s1};
 `;
 
-const ReasonButton = styled.TouchableOpacity`
-  flex: 1;
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
+
+const AnimatedButton = styled(AnimatedTouchableOpacity)`
+  background-color: #fff;
+  border-radius: 32px;
   justify-content: center;
-  align-self: flex-end;
-  margin-top: ${({ theme }) => theme.margin.xl};
-  border-radius: ${({ theme }) => theme.radius.l};
-  background-color: #f7f5f5;
+  align-items: center;
+  elevation: 5;
 `;
 
-const ReasonButtonText = styled(Caption)`
-  padding: 4px 16px;
-  font-family: ${({ theme }) => theme.fonts.bold};
+const ReasonButtonText = styled(Body2)`
+  padding: 4px 10px;
   color: ${({ theme }) => theme.colors.grey_8};
 `;
 
@@ -292,12 +327,14 @@ const SelectedThemesHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: 0 16px;
   padding-bottom: ${({ theme }) => theme.spacing.s3};
 `;
 
 const SelectedThemes = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  padding: 0 16px;
 `;
 
 export default AIRecommendTheme;

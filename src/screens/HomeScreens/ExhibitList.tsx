@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { FlatList, TouchableOpacity, View, Text } from 'react-native';
+import {
+  FlatList,
+  TouchableOpacity,
+  View,
+  Text,
+  RefreshControl,
+} from 'react-native';
 import styled from 'styled-components/native';
 import {
   ArtCategoryHeader,
@@ -15,6 +21,7 @@ import { Container } from 'src/styles/layout';
 import { homeExhibitData } from '../data';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
+import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
 
 const ExhibitList: React.FC = () => {
   const navigation = useNavigation();
@@ -25,34 +32,38 @@ const ExhibitList: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showCollectorSuggestSheet, setShowCollectorSuggestSheet] =
     useState(false);
-  // Redux 상태에서 현재 프로필 ID와 팔로우 정보 가져오기
+  const [refreshing, setRefreshing] = useState(false); // 새로고침 상태 관리
+
   const { currentProfileId, isFollowing } = useSelector(
     (state: RootState) => state.follow,
   );
 
-  // Redux의 팔로우 상태를 기반으로 팔로우된 사용자 ID 리스트 생성
   const followedUserIds = Object.keys(isFollowing)
     .filter((userId) => isFollowing[Number(userId)] === true)
     .map(Number);
-  console.log(followedUserIds);
 
-  // TODO: 팔로우된 사용자들의 프로필 이미지를 반환하는 함수 -API 연결시 수정
+  const {
+    data: exhibits = [],
+    isLoading,
+    isError,
+    refetch, // refetch 메서드 추가
+  } = useExhibitions({
+    userId: selectedTab === '팔로우' ? followedUserIds[0] : undefined,
+    order: 'LATEST',
+    page: 0,
+    size: 20,
+  });
+
   const selectedFollowers = followedUserIds.map((userId) => ({
     profileImage: homeExhibitData.find((exhibit) => exhibit.userId === userId)
       ?.profileImage,
   }));
 
-  // "팔로우" 탭에서 팔로우된 사용자가 없을 때 빈 메시지 표시 조건
   const isFollowTabEmpty =
     selectedTab === '팔로우' && followedUserIds.length === 0;
 
-  // "팔로우" 탭이 선택된 경우에는 팔로우된 사용자 전시만, "모두보기"일 경우 전체 전시를 표시
   const exhibitsToDisplay =
-    selectedTab === '팔로우' && followedUserIds.length > 0
-      ? homeExhibitData.filter((exhibit) =>
-          followedUserIds.includes(exhibit.id),
-        )
-      : homeExhibitData;
+    selectedTab === '팔로우' && followedUserIds.length === 0 ? [] : exhibits;
 
   useEffect(() => {
     navigation.setOptions(
@@ -72,11 +83,6 @@ const ExhibitList: React.FC = () => {
     setShowCircleSlider(tab === '팔로우');
   };
 
-  // const handleCirclePress = (index: number) => {
-  //   setCurrentIndex(index);
-  //   dispatch(setCurrentProfileId(followedUserIds[index])); // 선택된 프로필 ID 업데이트
-  // };
-
   const handleShowCollectorSuggestSheet = () => {
     setShowCollectorSuggestSheet(true);
   };
@@ -85,18 +91,31 @@ const ExhibitList: React.FC = () => {
     setShowCollectorSuggestSheet(false);
   };
 
-  // sticky 구현하기 위해서 'header' 항목 추가
-  // "팔로우" 탭에서 팔로우된 사용자가 없을 때 데이터를 빈 배열로 설정
+  const handleRefresh = async () => {
+    setRefreshing(true); // 새로고침 상태 시작
+    await refetch(); // API 재요청
+    setRefreshing(false); // 새로고침 상태 종료
+  };
+
   const data =
-    selectedTab === '팔로우' && followedUserIds.length === 0
-      ? []
-      : [{ key: 'header' }, ...exhibitsToDisplay];
+    exhibitsToDisplay.length === 0
+      ? [{ key: 'header' }]
+      : [
+          { key: 'header' },
+          ...exhibitsToDisplay.map((exhibit) => ({ ...exhibit })),
+        ];
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <Container>
       <FlatList
-        data={[{ key: 'header' }, ...exhibitsToDisplay]}
-        keyExtractor={(item, index) => item.key || index.toString()}
+        data={data}
+        keyExtractor={(item, index) =>
+          item.key || item.exhibitionId?.toString() || index.toString()
+        }
         renderItem={({ item }) => {
           if (item.key === 'header') {
             return (
@@ -129,7 +148,7 @@ const ExhibitList: React.FC = () => {
                   followedUserIds.length > 0 &&
                   showCircleSlider && (
                     <CircleSlider
-                      selectedFollowers={selectedFollowers} // 필요한 데이터로 전달
+                      selectedFollowers={selectedFollowers}
                       currentIndex={currentIndex}
                       onCirclePress={setCurrentIndex}
                       scrollViewRef={React.createRef()}
@@ -141,17 +160,36 @@ const ExhibitList: React.FC = () => {
               </>
             );
           } else if (!isFollowTabEmpty) {
-            // 팔로우된 사용자가 있는 경우에만 ExhibitListCard 렌더링
             return (
-              <ExhibitListCard
-                imageSource={item.imageSource}
-                title={item.title}
-                collectorName={item.collectorName}
-                profileImage={item.profileImage}
-                likes={item.likes}
-                favorites={item.favorites}
-                tags={item.tags}
-              />
+              <TouchableOpacity
+                onPress={() => {
+                  // 전시 아이디를 params로 넘겨서 ExhibitEntrance 화면으로 이동
+                  navigation.navigate('HomeStack', {
+                    screen: 'ExhibitEntrance',
+                    params: {
+                      exhibitId: item.exhibitionId,
+                      exhibitColors: item.colors,
+                      exhibitThemes: item.themes,
+                      bgType: item.exhibitionBackgroundType,
+                      heartCount: item.heartCount,
+                      name: item.name,
+                    },
+                  });
+                }}
+              >
+                <ExhibitListCard
+                  imageSource={item.coverImgUrl}
+                  colors={item.colors}
+                  title={item.name}
+                  collectorName={item.userRes.name}
+                  profileImage={item.userRes.profileImgUrl}
+                  heartCount={item.heartCount}
+                  hits={item.hits}
+                  tags={item.themes}
+                  font={item.font}
+                  bgType={item.exhibitionBackgroundType}
+                />
+              </TouchableOpacity>
             );
           }
           return null;
@@ -163,8 +201,11 @@ const ExhibitList: React.FC = () => {
           />
         }
         ListFooterComponent={<View style={{ height: 60 }} />}
-        stickyHeaderIndices={[1]} // HeaderContainer만 스티키로 설정
+        stickyHeaderIndices={[1]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       />
       {showCollectorSuggestSheet && (
         <CollectorSuggestSheet onClose={handleCloseCollectorSuggestSheet} />

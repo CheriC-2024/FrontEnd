@@ -14,13 +14,17 @@ const initialState: ExhibitState = {
   fontData: [
     {
       label: '기본 시스템 폰트',
-      value: 'default',
+      value: 'BASIC',
       fontFamily: 'PretendardRegular',
     },
-    { label: '검은고딕', value: 'BlackHanSans', fontFamily: 'BlackHanSans' },
-    { label: '마포다카포', value: 'Mapo', fontFamily: 'Mapo' },
-    { label: '산토끼', value: 'SanTokki', fontFamily: 'SanTokki' },
-    { label: '롯데리아 찹땅겨', value: 'Lotteria', fontFamily: 'Lotteria' },
+    { label: '검은고딕', value: 'BLACK_HAN_SANS', fontFamily: 'BlackHanSans' },
+    { label: '마포다카포', value: 'MAPODACAPO', fontFamily: 'Mapo' },
+    { label: '산토끼', value: 'HS_SANTOKKI', fontFamily: 'SanTokki' },
+    {
+      label: '롯데리아 찹땅겨',
+      value: 'LOTTERIA_CHAB',
+      fontFamily: 'Lotteria',
+    },
   ],
 };
 
@@ -45,6 +49,9 @@ const exhibitSlice = createSlice({
     ) => {
       state.fontData = action.payload;
     },
+    resetExhibitState() {
+      return initialState;
+    },
   },
 });
 
@@ -53,6 +60,7 @@ export const {
   setExhibitDescription,
   setSelectedFont,
   setFontData,
+  resetExhibitState,
 } = exhibitSlice.actions;
 
 export default exhibitSlice.reducer;

@@ -1,51 +1,84 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ButtonText, Caption, H4 } from 'src/styles/typography';
+import { ButtonText, Caption } from 'src/styles/typography';
 import { HeartIcon, ViewsIcon } from 'src/assets/icons/_index';
 import styled from 'styled-components/native';
+import LinearGradient from 'react-native-linear-gradient';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
 export interface ExhibitCardProps {
-  imageSource: string;
+  imageSource: string | null;
+  colors?: string[];
   title: string;
   collectorName: string;
   profileImage: string;
-  likes: number;
-  favorites: number;
+  hits: number;
+  heartCount: number;
   tags: string[];
+  font: string;
+  bgType: string;
 }
 
 const ExhibitListCard: React.FC<ExhibitCardProps> = ({
   imageSource,
+  colors,
   title,
   collectorName,
   profileImage,
-  likes,
-  favorites,
+  hits,
+  heartCount,
   tags,
+  font,
+  bgType,
 }) => {
+  const { fontData } = useSelector((state: RootState) => state.exhibit);
+  console.log('ExhibitListCard', imageSource);
+
+  // Redux에서 fontFamily 찾기
+  const fontFamily =
+    fontData.find((fontItem) => fontItem.value === font)?.fontFamily ||
+    'PretendardRegular';
+  const useGradientBackground = !imageSource || imageSource.trim() === ''; // Check for null or empty string
+  const gradientConfig = getGradientConfig(bgType);
+
   return (
     <CardWrapper>
       <CardContainer>
-        <BackgroundContainer source={{ uri: imageSource }} resizeMode='cover'>
-          <View
-            style={{
-              height: '100%',
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-              paddingVertical: 20,
-              paddingHorizontal: 24,
-            }}
+        {useGradientBackground ? (
+          <GradientBackground
+            colors={colors}
+            start={gradientConfig.start}
+            end={gradientConfig.end}
           >
-            <TitleContainer>
-              <Title numberOfLines={2}>{title}</Title>
-            </TitleContainer>
-            <TagsContainer>
-              {tags.map((tag, idx) => (
-                <Tag key={idx}># {tag}</Tag>
-              ))}
-            </TagsContainer>
-          </View>
-        </BackgroundContainer>
+            <OverlayContent>
+              <TitleContainer>
+                <Title style={{ fontFamily }} numberOfLines={2}>
+                  {title}
+                </Title>
+              </TitleContainer>
+              <TagsContainer>
+                {tags.map((tag, idx) => (
+                  <Tag key={idx}># {tag}</Tag>
+                ))}
+              </TagsContainer>
+            </OverlayContent>
+          </GradientBackground>
+        ) : (
+          <BackgroundContainer source={{ uri: imageSource }} resizeMode='cover'>
+            <OverlayContent>
+              <TitleContainer>
+                <Title numberOfLines={2}>{title}</Title>
+              </TitleContainer>
+              <TagsContainer>
+                {tags.map((tag, idx) => (
+                  <Tag key={idx}># {tag}</Tag>
+                ))}
+              </TagsContainer>
+            </OverlayContent>
+          </BackgroundContainer>
+        )}
       </CardContainer>
       <InfoContainer>
         <ProfileSection>
@@ -54,10 +87,10 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
         </ProfileSection>
         <StatsContainer>
           <ViewsIcon />
-          <StatText>{likes}</StatText>
+          <StatText>{hits}</StatText>
           <View style={{ width: 4 }} />
           <HeartIcon fill={'#413333'} stroke={''} width={16} height={16} />
-          <StatText>{favorites}</StatText>
+          <StatText>{heartCount}</StatText>
         </StatsContainer>
       </InfoContainer>
     </CardWrapper>
@@ -84,14 +117,26 @@ const BackgroundContainer = styled.ImageBackground`
   height: 100%;
 `;
 
+const GradientBackground = styled(LinearGradient)`
+  width: 100%;
+  height: 100%;
+`;
+
+const OverlayContent = styled.View`
+  height: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+`;
+
 const TitleContainer = styled.View`
   align-items: center;
   justify-content: center;
 `;
 
-const Title = styled(H4)`
+const Title = styled.Text`
   color: #fff;
-  font-size: 16px;
+  font-size: 24px;
   text-align: center;
 `;
 

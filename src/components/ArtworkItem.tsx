@@ -1,7 +1,5 @@
-import React from 'react';
 import styled from 'styled-components/native';
 import ArtworkPriceInfo from './ArtworkPriceInfo';
-import { imageAssets } from 'src/assets/DB/imageAssets';
 import { Subtitle2 } from 'src/styles/typography';
 import { Artwork } from 'src/interfaces/collection';
 
@@ -12,27 +10,19 @@ interface ArtworkItemProps {
   onSelect: () => void;
 }
 
-// fileName이 URI인지 로컬 이미지인지 판단하는 임시 함수
-// TODO api 연결시 다시 맞춰서 수정
-const isUri = (fileName: string) => {
-  return fileName.startsWith('http://') || fileName.startsWith('https://');
-};
-
 const ArtworkItem: React.FC<ArtworkItemProps> = ({
   artwork,
   selected,
   selectedIndex,
   onSelect,
 }) => {
-  // fileName이 URI인지 아닌지를 판단
-  const artworkImage = isUri(artwork.fileName)
-    ? { uri: artwork.fileName } // URI일 경우
-    : imageAssets[artwork.fileName];
-
   return (
     <ArtworkItemWrapper selected={selected} onPress={onSelect}>
       <ArtworkImageWrapper selected={selected}>
-        <ArtworkImage source={artworkImage} selected={selected} />
+        <ArtworkImage
+          source={{ uri: artwork.imgUrl || artwork.fileName }}
+          selected={selected}
+        />
         {selected && (
           <SelectedIndexWrapper>
             <SelectedIndex>{selectedIndex + 1}</SelectedIndex>
@@ -42,8 +32,8 @@ const ArtworkItem: React.FC<ArtworkItemProps> = ({
       <ArtworkInfoContainer>
         <ArtworkName>{artwork.name}</ArtworkName>
         <ArtworkPriceInfo
-          cherryNum={artwork.cherryNum}
-          register={artwork.register}
+          cherryPrice={artwork.cherryPrice || artwork.cherryNum}
+          collectorsArt={artwork.collectorsArt}
         />
       </ArtworkInfoContainer>
     </ArtworkItemWrapper>

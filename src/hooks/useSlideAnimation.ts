@@ -27,11 +27,15 @@ const useSlideAnimation = (initialHeightOffset = 0.5, duration = 500) => {
     });
   };
 
+  const resetAnimation = () => {
+    slideAnim.setValue(screenHeight * initialHeightOffset);
+  };
+
   useEffect(() => {
     slideIn();
   }, []);
 
-  return { slideAnim, slideOut, slideIn };
+  return { slideAnim, slideOut, slideIn, resetAnimation };
 };
 
 export default useSlideAnimation;

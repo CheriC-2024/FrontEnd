@@ -7,28 +7,43 @@ import {
   View,
 } from 'react-native';
 import styled from 'styled-components/native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import TitleSubtitle from 'src/components/TitleSubtitle';
-import { Body1, ButtonText, Caption } from 'src/styles/typography';
+import { Body1, ButtonText, Caption, Subtitle1 } from 'src/styles/typography';
 import {
   CommentIcon,
   MenuIcon,
   ThumbsUpIcon,
   ThumbsUpIconFilled,
 } from 'src/assets/icons/_index';
-import { useSelector } from 'react-redux';
-import { RootState } from 'src/store';
+import { useCommentsList } from 'src/api/hooks/useExhibitQueries';
 
 const ExhibitComments: React.FC = () => {
+  const route = useRoute();
+  const { exhibitId } = route.params || {}; // 전시 ID 가져오기
   const navigation = useNavigation();
-  const comments = useSelector((state: RootState) => state.comment.comments);
+  const {
+    data: comments = [],
+    isLoading,
+    error,
+  } = useCommentsList({
+    exhibitId,
+    page: 0,
+    size: 10,
+  });
+
+  // 댓글 배열을 절반으로 나누기
+  const middleIndex = Math.ceil(comments.length / 2); // 중간 인덱스 계산
+  const firstRowComments = comments.slice(0, middleIndex); // 첫 절반
+  const secondRowComments = comments.slice(middleIndex); // 나머지 절반
 
   const sensitivity = 0.1; // 민감도
-  const movementLimit = 180 * comments.length; // 드래그 범위
+  const movementLimit =
+    180 * Math.max(firstRowComments.length, secondRowComments.length);
   const animationDuration = 10000; // 애니메이션 재생시간
 
-  const row1Anim = useRef(new Animated.Value(0)).current;
+  const row1Anim = useRef(new Animated.Value(10)).current;
   const row2Anim = useRef(new Animated.Value(-movementLimit + 200)).current; // 두번째 줄
 
   // 헤더 설정
@@ -39,7 +54,11 @@ const ExhibitComments: React.FC = () => {
         iconColor: '#120000',
         rightButtonType: 'text',
         headerRightText: '전시 나가기',
-        onHeaderRightPress: () => void '',
+        onHeaderRightPress: () => {
+          navigation.replace('Tabs', {
+            screen: 'Home',
+          });
+        },
         headerTransparent: true,
       }),
     );
@@ -97,15 +116,17 @@ const ExhibitComments: React.FC = () => {
 
   const handleCardPress = (commentId: string) => {
     const selectedComment = comments.find((c) => c.id === commentId);
+    console.log(selectedComment.id);
     if (selectedComment) {
       navigation.navigate('ExhibitCommentsDetail', {
-        comment: selectedComment,
+        exhibitId: exhibitId,
+        commentId: selectedComment.id,
       });
     }
   };
 
   const handleAddCommentPress = () => {
-    navigation.navigate('ExhibitCommentsWrite');
+    navigation.navigate('ExhibitCommentsWrite', { exhibitId: exhibitId });
   };
 
   return (
@@ -122,68 +143,81 @@ const ExhibitComments: React.FC = () => {
         subtitle='관람하신 컬렉션 전시에 대한 후기를 남겨주세요!'
         style={{ marginTop: 90, marginLeft: 16 }}
       />
-      <RowContainer {...panResponderRow1.panHandlers}>
-        <AnimatedRow style={{ transform: [{ translateX: row1Anim }] }}>
-          {comments.map((comment, index) => (
-            <TouchableOpacity
-              key={comment.id}
-              onPress={() => handleCardPress(comment.id)}
-            >
-              <CommentCard>
-                <TruncatedText numberOfLines={5} ellipsizeMode='tail'>
-                  {comment.text}
-                </TruncatedText>
-                <CommentIconsContainer>
-                  <IconWrapper>
-                    <CommentIcon />
-                    <IconText>2</IconText>
-                  </IconWrapper>
-                  <IconWrapper>
-                    <View style={{ paddingBottom: 4 }}>
-                      <ThumbsUpIconFilled />
-                    </View>
-                    <IconText>2</IconText>
-                  </IconWrapper>
-                  <IconWrapper style={{ marginLeft: 0 }}>
-                    <MenuIcon fill={'#B0ABAB'} />
-                  </IconWrapper>
-                </CommentIconsContainer>
-              </CommentCard>
-            </TouchableOpacity>
-          ))}
-        </AnimatedRow>
-      </RowContainer>
-      <RowContainer {...panResponderRow2.panHandlers}>
-        <AnimatedRow style={{ transform: [{ translateX: row2Anim }] }}>
-          {comments.map((comment, index) => (
-            <TouchableOpacity
-              key={comment.id}
-              onPress={() => handleCardPress(comment.id)}
-            >
-              <CommentCard>
-                <TruncatedText numberOfLines={5} ellipsizeMode='tail'>
-                  {comment.text}
-                </TruncatedText>
-                <CommentIconsContainer>
-                  <IconWrapper>
-                    <CommentIcon />
-                    <IconText>2</IconText>
-                  </IconWrapper>
-                  <IconWrapper>
-                    <View style={{ paddingBottom: 4 }}>
-                      <ThumbsUpIconFilled />
-                    </View>
-                    <IconText>2</IconText>
-                  </IconWrapper>
-                  <IconWrapper style={{ marginLeft: 0 }}>
-                    <MenuIcon fill={'#B0ABAB'} />
-                  </IconWrapper>
-                </CommentIconsContainer>
-              </CommentCard>
-            </TouchableOpacity>
-          ))}
-        </AnimatedRow>
-      </RowContainer>
+      {isLoading && (
+        <LoadingMessage>댓글을 불러오는 중입니다...</LoadingMessage>
+      )}
+      {error && <ErrorMessage>댓글을 불러오는 데 실패했습니다.</ErrorMessage>}
+      {!isLoading && !error && (!comments || comments.length === 0) && (
+        <EmptyMessage>
+          아직 방명록이 없습니다.{`\n`}가장 첫번째로 남겨보세요!
+        </EmptyMessage>
+      )}
+      {!isLoading && comments && comments.length > 0 && (
+        <>
+          <RowContainer {...panResponderRow1.panHandlers}>
+            <AnimatedRow style={{ transform: [{ translateX: row1Anim }] }}>
+              {firstRowComments.map((comment) => (
+                <TouchableOpacity
+                  key={comment.id}
+                  onPress={() => handleCardPress(comment.id)}
+                >
+                  <CommentCard>
+                    <TruncatedText numberOfLines={5} ellipsizeMode='tail'>
+                      {comment.review}
+                    </TruncatedText>
+                    <CommentIconsContainer>
+                      <IconWrapper>
+                        <CommentIcon />
+                        <IconText>{comment.replyCount}</IconText>
+                      </IconWrapper>
+                      <IconWrapper>
+                        <View style={{ paddingBottom: 4 }}>
+                          <ThumbsUpIcon />
+                        </View>
+                        <IconText>{comment.heartCount}</IconText>
+                      </IconWrapper>
+                      <IconWrapper style={{ marginLeft: 0 }}>
+                        <MenuIcon fill={'#B0ABAB'} />
+                      </IconWrapper>
+                    </CommentIconsContainer>
+                  </CommentCard>
+                </TouchableOpacity>
+              ))}
+            </AnimatedRow>
+          </RowContainer>
+          <RowContainer {...panResponderRow2.panHandlers}>
+            <AnimatedRow style={{ transform: [{ translateX: row2Anim }] }}>
+              {secondRowComments.map((comment) => (
+                <TouchableOpacity
+                  key={comment.id}
+                  onPress={() => handleCardPress(comment.id)}
+                >
+                  <CommentCard>
+                    <TruncatedText numberOfLines={5} ellipsizeMode='tail'>
+                      {comment.review}
+                    </TruncatedText>
+                    <CommentIconsContainer>
+                      <IconWrapper>
+                        <CommentIcon />
+                        <IconText>{comment.replyCount}</IconText>
+                      </IconWrapper>
+                      <IconWrapper>
+                        <View style={{ paddingBottom: 4 }}>
+                          <ThumbsUpIcon />
+                        </View>
+                        <IconText>{comment.heartCount}</IconText>
+                      </IconWrapper>
+                      <IconWrapper style={{ marginLeft: 0 }}>
+                        <MenuIcon fill={'#B0ABAB'} />
+                      </IconWrapper>
+                    </CommentIconsContainer>
+                  </CommentCard>
+                </TouchableOpacity>
+              ))}
+            </AnimatedRow>
+          </RowContainer>
+        </>
+      )}
       <CharacterImage
         source={require('src/assets/images/Character/back.png')}
       />
@@ -288,6 +322,26 @@ const CharacterImage = styled.Image`
   right: 33%;
   width: 118px;
   height: 146px;
+`;
+
+const EmptyMessage = styled(Subtitle1)`
+  color: ${({ theme }) => theme.colors.redBlack};
+  text-align: center;
+  margin-top: 260px;
+`;
+
+const LoadingMessage = styled.Text`
+  color: ${({ theme }) => theme.colors.grey_6};
+  text-align: center;
+  margin-top: 50px;
+  font-size: 16px;
+`;
+
+const ErrorMessage = styled.Text`
+  color: ${({ theme }) => theme.colors.redBlack};
+  text-align: center;
+  margin-top: 50px;
+  font-size: 16px;
 `;
 
 export default ExhibitComments;

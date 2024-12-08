@@ -14,6 +14,7 @@ import {
   registerPrivateArtworkReducer,
   registerArtistReducer,
   getUserReducer,
+  watchingExhibitReducer,
 } from '../slices/_index';
 
 const store = configureStore({
@@ -32,6 +33,7 @@ const store = configureStore({
     registerPrivateArtwork: registerPrivateArtworkReducer,
     theme: themeReducer,
     user: userReducer,
+    watchingExhibit: watchingExhibitReducer,
   },
 });
 

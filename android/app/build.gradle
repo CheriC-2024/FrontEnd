@@ -85,6 +85,7 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace 'com.binaryswu.CheriC'
+
     defaultConfig {
         applicationId 'com.binaryswu.CheriC'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -96,6 +97,7 @@ android {
         //     abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         // }
     }
+
     splits {
         abi {
             enable true
@@ -104,6 +106,7 @@ android {
             universalApk false
         }
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -112,6 +115,7 @@ android {
             keyPassword 'android'
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -125,17 +129,27 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
     packagingOptions {
         jniLibs {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
     }
+
     sourceSets {
         main {
             java.srcDirs = ['src/main/java', 'src/main/kotlin']
         }
     }
+
+    // Decode and write the google-services.json file if the environment variable is set
+    if (System.getenv("GOOGLE_SERVICES_JSON")) {
+        def googleServicesBase64 = System.getenv("GOOGLE_SERVICES_JSON")
+        def googleServicesFile = file("google-services.json")
+        googleServicesFile.text = new String(googleServicesBase64.decodeBase64())
+    }
 }
+
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:
@@ -165,8 +179,9 @@ dependencies {
     implementation project(':react-native-reanimated')
     implementation("com.facebook.soloader:soloader:0.10.4")
     implementation project(':react-native-immersive-mode')
-    implementation platform('com.google.firebase:firebase-bom:32.3.1')
+    implementation platform('com.google.firebase:firebase-bom:33.6.0')
 	implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-analytics'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

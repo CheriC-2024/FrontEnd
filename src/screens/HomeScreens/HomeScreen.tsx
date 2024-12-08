@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  Text,
   ScrollView,
   ImageBackground,
   Image,
@@ -11,25 +10,65 @@ import {
 import styled from 'styled-components/native';
 import { useNavigation } from '@react-navigation/native';
 import { Container } from 'src/styles/layout';
-import TitleSubtitle from 'src/components/TitleSubtitle';
 import { ForwardIcon, PlusIcon } from 'src/assets/icons/_index';
 import {
   ArtistCard,
   CollectorSuggestSheet,
-  ExhibitCard,
   ExhibitCarousel,
   PrivateArtworkCard,
   SeparatorLine,
 } from 'src/components/_index';
-import { artistData, homeExhibitData, privateArtworkData } from '../data';
 import { Caption, H4, H6 } from 'src/styles/typography';
+import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
+import { useFollowList } from 'src/api/hooks/useFollowMutation';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { useFetchArtTypesFilter } from 'src/api/hooks/useArtworkQueries';
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
+  const userData = useSelector((state: RootState) => state.getUser);
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const {
+    data: carouselData = [],
+    isLoading: isCarouselLoading,
+    isError: isCarouselError,
+  } = useExhibitions({
+    userId: undefined,
+    order: 'LATEST',
+    page: 0,
+    size: 3,
+  });
+
+  const {
+    data: followersData,
+    isLoading: isFollowersLoading,
+    error: isFollowersError,
+  } = useFollowList({
+    userId: userData.id,
+    sort: 'FOLLOWING',
+    order: 'LATEST',
+    page: 0,
+    size: 20,
+  });
+
+  const {
+    data: ownArtData,
+    isLoading: isOwnArtLoading,
+    error,
+  } = useFetchArtTypesFilter({
+    userId: userData.id,
+    isCollectorsArt: 'true',
+    order: 'LATEST',
+    page: 0,
+    size: 3,
+  });
 
   const openBottomSheet = () => setBottomSheetVisible(true);
   const closeBottomSheet = () => setBottomSheetVisible(false);
+
+  if (isCarouselLoading || isFollowersLoading || isOwnArtLoading) return;
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <Background source={require('src/assets/home_bg.png')}>
@@ -49,14 +88,14 @@ const HomeScreen: React.FC = () => {
           source={require('src/assets/images/Character/right.png')}
         />
         <View style={{ marginTop: 32 }}>
-          <ExhibitCarousel data={homeExhibitData} />
+          <ExhibitCarousel data={carouselData} />
         </View>
       </Background>
       <Container style={{ flex: 1 }} removePadding>
         <SectionWrapper>
           <CategoryTitle>내가 팔로우하는 컬렉터</CategoryTitle>
           <FlatList
-            data={artistData}
+            data={followersData}
             keyExtractor={(item) => String(item.id)}
             horizontal
             initialNumToRender={2}
@@ -65,7 +104,7 @@ const HomeScreen: React.FC = () => {
             contentContainerStyle={{ paddingHorizontal: 2 }}
             renderItem={({ item }) => (
               <ArtistCard
-                image={item.image}
+                image={item.profileImgUrl}
                 name={item.name}
                 artistId={item.id}
                 size={74}
@@ -95,12 +134,12 @@ const HomeScreen: React.FC = () => {
             </View>
           </TouchableOpacity>
         </SectionWrapper>
-        {privateArtworkData.map((item) => (
-          <CardWrapper key={item.id}>
+        {ownArtData.map((item) => (
+          <CardWrapper key={item.artId}>
             <PrivateArtworkCard
-              image={item.image}
-              collectorName={item.collectorName}
-              collectorImage={item.collectorImage}
+              image={item.imgUrl}
+              collectorName={item.userRes.name}
+              collectorImage={item.userRes.profileImgUrl}
             />
           </CardWrapper>
         ))}

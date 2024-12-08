@@ -68,6 +68,7 @@ const TabWrapper = styled.View`
   flex-direction: row;
   position: relative;
   background-color: #fcfcfc;
+  z-index: 1000;
 `;
 
 const TabButton = styled(TouchableOpacity)<{ active: boolean }>`

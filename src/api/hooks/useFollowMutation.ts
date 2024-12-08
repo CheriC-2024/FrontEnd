@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { followUser, unfollowUser } from '../followApi';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { followUser, getFollowList, unfollowUser } from '../followApi';
 
 // 팔로우 Mutation
 export const useFollowUser = () => {
@@ -23,5 +23,27 @@ export const useUnfollowUser = () => {
     onSuccess: (_, followedId) => {
       queryClient.invalidateQueries(['user', followedId]);
     },
+  });
+};
+
+type UseFollowListParams = {
+  userId: number;
+  sort: 'FOLLOWING' | 'FOLLOWER';
+  order: 'LATEST' | 'NAME' | 'FOLLOWER';
+  page: number;
+  size: number;
+};
+
+export const useFollowList = ({
+  userId,
+  sort,
+  order,
+  page,
+  size,
+}: UseFollowListParams) => {
+  return useQuery({
+    queryKey: ['followList', userId, sort, order, page, size],
+    queryFn: () => getFollowList(userId, sort, order, page, size),
+    staleTime: 1000 * 60 * 5,
   });
 };

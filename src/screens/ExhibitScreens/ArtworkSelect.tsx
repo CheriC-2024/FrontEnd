@@ -38,6 +38,7 @@ import { useCherryModal } from 'src/hooks/_index';
 const ArtworkSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
+  const { myCherryNum } = useSelector((state: RootState) => state.getUser);
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
@@ -48,14 +49,14 @@ const ArtworkSelect: React.FC = () => {
     data: artworkListData,
     isLoading,
     error,
-  } = useArtworkList(activeCollections);
+  } = useArtworkList('LATEST', activeCollections); //TODO: 드랍다운 나열 기능 구현
 
-  // 임시 유저 보유 체리 => userApi 사용 예정
-  const userCherries = 5;
+  //유저 체리
+  const userCherries = myCherryNum;
 
   // 체리가 포함된 작품 개수 계산
   const cherryArtworksCount = selectedArtworks.filter(
-    (artwork) => artwork.cherryNum > 0,
+    (artwork) => artwork.cherryPrice > 0,
   ).length;
 
   const handleNextScreen = () => {
@@ -127,7 +128,7 @@ const ArtworkSelect: React.FC = () => {
   // 작품 검색 필터링
   const filteredArtworkListData = artworkListData.map((collection) => ({
     ...collection,
-    artList: filterData(collection.artList, filterText, 'name'),
+    artBriefRess: filterData(collection.artBriefRess, filterText, 'name'),
   }));
 
   // 모든 컬렉션 접기/펼치기
@@ -149,7 +150,7 @@ const ArtworkSelect: React.FC = () => {
   const renderCollection = ({ item: collection }) => (
     <View key={collection.collectionId}>
       <CollectionTitle
-        collectionName={collection.collectionName}
+        collectionName={collection.name}
         isExpanded={expandedCollections[collection.collectionId]}
         onToggle={() =>
           dispatch(toggleCollectionExpansion(collection.collectionId))
@@ -158,7 +159,7 @@ const ArtworkSelect: React.FC = () => {
       {/* 컬렉션이 확장되어 있는 경우에만 작품 목록을 렌더링 */}
       {expandedCollections[collection.collectionId] && (
         <ArtworkGrid
-          artworks={collection.artList}
+          artworks={collection.artBriefRess}
           selectedArtworks={selectedArtworks}
           onSelect={(artwork) => dispatch(toggleArtworkSelection(artwork))}
         />

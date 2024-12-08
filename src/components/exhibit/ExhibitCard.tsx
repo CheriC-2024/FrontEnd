@@ -8,30 +8,43 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import { Exhibition } from 'src/interfaces/collection';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
 
-export interface ExhibitCardProps {
-  imageSource: string;
-  title: string;
-  collectorName: string;
-  profileImage: string;
-  likes: number;
-  favorites: number;
-  tags: string[];
-  index: number;
-  isCurrent: boolean; // 현재 카드 여부
+interface ExhibitCardProps extends Exhibition {
+  isCurrent: boolean; // To highlight the currently focused card
 }
 
 const ExhibitCard: React.FC<ExhibitCardProps> = ({
-  imageSource,
-  title,
-  collectorName,
-  profileImage,
-  likes,
-  favorites,
-  tags,
+  exhibitionId,
+  name,
+  coverImgUrl,
+  themes,
+  heartCount,
+  hits,
+  font,
+  colors,
+  exhibitionBackgroundType,
+  userRes,
   isCurrent,
 }) => {
   const navigation = useNavigation();
+  const { profileImgUrl } = userRes;
+
+  const { fontData } = useSelector((state: RootState) => state.exhibit);
+
+  // Find the matching fontFamily for the provided font identifier
+  const fontFamily =
+    fontData.find((fontItem) => fontItem.value === font)?.fontFamily ||
+    'PretendardRegular';
+
+  const useGradientBackground = !coverImgUrl || coverImgUrl.trim() === '';
+  const gradientColors = colors.length >= 2 ? colors : [...colors, colors[0]];
+  const gradientConfig = getGradientConfig(exhibitionBackgroundType);
+
   // 텍스트 애니메이션 스타일
   const textStyle = useAnimatedStyle(() => {
     const opacity = withTiming(isCurrent ? 1 : 0, { duration: 400 });
@@ -39,38 +52,68 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
   });
 
   return (
-    <TouchableWithoutFeedback // TODO: 전시 아이디 params로 넘기기
+    <TouchableWithoutFeedback
       onPress={() => {
-        navigation.navigate('HomeStack', { screen: 'ExhibitEntrance' });
+        // 전시 아이디를 params로 넘겨서 ExhibitEntrance 화면으로 이동
+        navigation.navigate('HomeStack', {
+          screen: 'ExhibitEntrance',
+          params: {
+            exhibitId: exhibitionId,
+            exhibitColors: gradientColors,
+            exhibitThemes: themes,
+            bgType: exhibitionBackgroundType,
+            heartCount: heartCount,
+            name: name,
+          },
+        });
       }}
     >
       <CardWrapper>
         <CardContainer>
-          <BackgroundContainer source={{ uri: imageSource }}>
-            <Animated.View style={textStyle}>
-              <TitleContainer>
-                <Title>{title}</Title>
-              </TitleContainer>
-              <TagsContainer>
-                {tags.map((tag, idx) => (
-                  <Tag key={idx}># {tag}</Tag>
-                ))}
-              </TagsContainer>
-            </Animated.View>
-          </BackgroundContainer>
+          {useGradientBackground ? (
+            <GradientBackground
+              colors={gradientColors}
+              start={gradientConfig.start}
+              end={gradientConfig.end}
+            >
+              <Animated.View style={textStyle}>
+                <TitleContainer>
+                  <Title style={{ fontFamily }}>{name}</Title>
+                </TitleContainer>
+                <TagsContainer>
+                  {themes.map((theme, idx) => (
+                    <Tag key={idx}># {theme}</Tag>
+                  ))}
+                </TagsContainer>
+              </Animated.View>
+            </GradientBackground>
+          ) : (
+            <BackgroundContainer source={{ uri: coverImgUrl }}>
+              <Animated.View style={textStyle}>
+                <TitleContainer>
+                  <Title style={{ fontFamily }}>{name}</Title>
+                </TitleContainer>
+                <TagsContainer>
+                  {themes.map((theme, idx) => (
+                    <Tag key={idx}># {theme}</Tag>
+                  ))}
+                </TagsContainer>
+              </Animated.View>
+            </BackgroundContainer>
+          )}
         </CardContainer>
         <Animated.View style={textStyle}>
           <InfoContainer>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <ProfileImage source={{ uri: profileImage }} />
-              <CollectorName>{collectorName}</CollectorName>
+              <ProfileImage source={{ uri: userRes.profileImgUrl }} />
+              <CollectorName>{userRes.name}</CollectorName>
             </View>
             <StatsContainer>
               <ViewsIcon />
-              <StatText>{likes}</StatText>
+              <StatText>{hits}</StatText>
               <View style={{ width: 4 }} />
               <HeartIcon fill={'#413333'} stroke={''} width={16} height={16} />
-              <StatText>{favorites}</StatText>
+              <StatText>{heartCount}</StatText>
             </StatsContainer>
           </InfoContainer>
         </Animated.View>
@@ -103,20 +146,29 @@ const BackgroundContainer = styled.ImageBackground`
   height: 100%;
 `;
 
+const GradientBackground = styled(LinearGradient)`
+  width: 100%;
+  height: 100%;
+`;
+
 const TitleContainer = styled.View`
   align-items: center;
   justify-content: center;
   padding: 80px 16px 32px 16px;
 `;
 
-const Title = styled(H4)`
+const Title = styled.Text`
   height: 96px;
+  font-size: 24px;
   color: #fff;
+  text-align: center;
 `;
 
 const TagsContainer = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   margin: 0 12px;
 `;
 
@@ -145,7 +197,9 @@ const ProfileImage = styled.Image`
   margin-right: 4px;
 `;
 
-const CollectorName = styled(ButtonText)``;
+const CollectorName = styled(ButtonText)`
+  color: #120000;
+`;
 
 const StatsContainer = styled.View`
   flex-direction: row;

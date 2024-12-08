@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components/native';
-import { ScrollView, TouchableOpacity, View, Image } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ProgressBarComponent from '../../components/ProgressBar';
 import {
@@ -9,7 +9,6 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import { ExhibitStackParamList } from 'src/navigation/types';
-import { imageAssets } from '../../assets/DB/imageAssets';
 import TitleSubtitle from 'src/components/TitleSubtitle';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
@@ -19,9 +18,9 @@ import InfoBlock from 'src/components/InfoBlock';
 import { theme } from 'src/styles/theme';
 import { Btn, BtnText } from 'src/components/Button';
 import { updateArtworkInfoInput } from 'src/slices/artworkSlice';
-import { Artwork } from 'src/interfaces/collection';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { CircleSlider } from 'src/components/_index';
+import { getOwnArtworkDesc } from 'src/api/artworkApi';
 
 const ArtworkInfoSetting: React.FC = () => {
   const route = useRoute();
@@ -31,7 +30,6 @@ const ArtworkInfoSetting: React.FC = () => {
   const contentScrollViewRef = useRef<ScrollView>(null);
   const navigation = useNavigation<NavigationProp<ExhibitStackParamList>>();
   const dispatch = useDispatch();
-
   const { artworkInfoInput, selectedArtworks } = useSelector(
     (state: RootState) => state.artwork,
   );
@@ -54,6 +52,12 @@ const ArtworkInfoSetting: React.FC = () => {
       }),
     );
   }, [navigation, artworkInfoInput]);
+
+  const currentArtworkInfo = artworkInfoInput[currentIndex] || {
+    artworkDescription: '',
+    artworkValue: '',
+    artworkAppreciation: '',
+  };
 
   const handleNext = () => {
     const nextIndex = (currentIndex + 1) % selectedArtworks.length;
@@ -79,24 +83,28 @@ const ArtworkInfoSetting: React.FC = () => {
     );
   };
 
-  const handleDetailPress = () => {
-    const artwork = selectedArtworks[currentIndex];
-    if (artwork) {
-      navigation.navigate('Stack', {
-        screen: 'ArtworkDetail',
-        params: {
-          isCollectorOnly: artwork.cherryNum === null,
-          imageUrl: artwork.fileName,
-          title: artwork.name,
-        },
-      });
+  const handleOwnArt = async (artworkId: number, index: number) => {
+    try {
+      const data = await getOwnArtworkDesc(artworkId);
+      dispatch(
+        updateArtworkInfoInput({
+          index,
+          field: 'artworkDescription',
+          value: data.description,
+        }),
+      );
+    } catch (error) {
+      console.error('Error fetching artwork description:', error);
     }
   };
 
-  const currentArtworkInfo = artworkInfoInput[currentIndex] || {
-    artworkDescription: '',
-    artworkValue: '',
-    artworkAppreciation: '',
+  const handleDetailPress = () => {
+    navigation.navigate('Stack', {
+      screen: 'ArtworkDetail',
+      params: {
+        artworkId: selectedArtworks[currentIndex].artId,
+      },
+    });
   };
 
   const placeholderText = `컬렉터님만의 작품을 소개해주세요\n
@@ -136,13 +144,13 @@ ex) 그림 속 꽃의 모습이 봄의 활기를 생생히 표현되어
       >
         {selectedArtworks.length > 0 && (
           <ImagePreview
-            source={imageAssets[selectedArtworks[currentIndex]?.fileName]}
+            source={{ uri: selectedArtworks[currentIndex]?.imgUrl }}
           />
         )}
         <ArtworkTitleContainer>
           <ArtworkTitleWrapper>
             <H6>{selectedArtworks[currentIndex]?.name}</H6>
-            {selectedArtworks[currentIndex]?.cherryNum === null && ( // 컬렉터 소장 작품인 경우
+            {selectedArtworks[currentIndex]?.collectorsArt && ( // 컬렉터 소장 작품인 경우
               <CollectorsOnlyIcon
                 source={require('../../assets/images/ExhibitPage/collectors_only.png')}
               />
@@ -153,17 +161,28 @@ ex) 그림 속 꽃의 모습이 봄의 활기를 생생히 표현되어
             <Icon name='chevron-forward-outline' size={14} color='#120000' />
           </ArtworkDetailButton>
         </ArtworkTitleContainer>
-        <InfoBlock
-          label='나만의 작품 소개글'
-          placeholder={placeholderText}
-          maxLength={500}
-          required
-          value={currentArtworkInfo.artworkDescription}
-          onChangeText={(text: string) =>
-            handleInputChange('artworkDescription', text)
-          }
-          style={{ paddingBottom: parseInt(theme.padding.l) }}
-        />
+        <OwnArtDescriptionBtnContainer>
+          {selectedArtworks[currentIndex]?.collectorsArt && (
+            <OwnArtDescriptionBtn
+              onPress={() =>
+                handleOwnArt(selectedArtworks[currentIndex].artId, currentIndex)
+              }
+            >
+              <Caption>소장작품 소개 불러오기</Caption>
+            </OwnArtDescriptionBtn>
+          )}
+          <InfoBlock
+            label='나만의 작품 소개글'
+            placeholder={placeholderText}
+            maxLength={500}
+            required
+            value={currentArtworkInfo.artworkDescription}
+            onChangeText={(text: string) =>
+              handleInputChange('artworkDescription', text)
+            }
+            style={{ paddingBottom: parseInt(theme.padding.l) }}
+          />
+        </OwnArtDescriptionBtnContainer>
         <InfoBlock
           label='나만의 작품 수집 계기'
           placeholder='작품을 수집하게 된 계기를 알려주세요'
@@ -242,6 +261,21 @@ const ArtworkDetailButton = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
   padding: 2px 0;
+`;
+
+const OwnArtDescriptionBtnContainer = styled.View`
+  position: relative;
+`;
+
+const OwnArtDescriptionBtn = styled.TouchableOpacity`
+  position: absolute;
+  top: 0;
+  right: 2px;
+  padding: 4px 8px;
+  border-radius: 32px;
+  background-color: #fff;
+  z-index: 2;
+  elevation: 2;
 `;
 
 export default ArtworkInfoSetting;

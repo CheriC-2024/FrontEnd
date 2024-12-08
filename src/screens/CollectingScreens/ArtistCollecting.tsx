@@ -28,7 +28,7 @@ const ArtistCollecting: React.FC = () => {
   const handleArtistPress = (artistId: number) => {
     navigation.navigate('CollectingStack', {
       screen: 'ArtistProfile',
-      params: { artistId },
+      params: { artistId: 30 },
     });
   };
 
@@ -42,14 +42,16 @@ const ArtistCollecting: React.FC = () => {
   // TODO: 작가 정보 리스트 조회 API
   const renderArtistWithArtworks = ({ item }: { item: any }) => (
     <ArtistWithArtworksWrapper>
-      <ProfileRow
-        image={item.artist.image}
-        name={item.artist.name}
-        category={item.artist.category}
-        size={84}
-        userId={item.artist.id}
-        onPress={() => handleArtistPress(item.artist.id)}
-      />
+      <View style={{ paddingRight: 16 }}>
+        <ProfileRow
+          image={item.artist.image}
+          name={item.artist.name}
+          category={item.artist.category}
+          size={84}
+          userId={item.artist.id}
+          onPress={() => handleArtistPress(item.artist.id)}
+        />
+      </View>
       <View style={{ height: 16 }} />
       <FlatList
         data={item.artworks}

@@ -18,7 +18,7 @@ const ArtistImage: React.FC<ArtistImageProps> = ({
       <StyledArtistImage
         source={{ uri: image }}
         size={size}
-        resizeMode='contain'
+        resizeMode='cover'
       />
     </ImageWrapper>
   );

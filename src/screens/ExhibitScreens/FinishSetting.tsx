@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  Alert,
+} from 'react-native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CherryIcon, PencilIcon } from '../../assets/icons/_index.js';
@@ -18,7 +24,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedArtworks } from 'src/slices/artworkSlice';
 import { RootState } from 'src/store';
 import MusicSelectionSheet from '../../components/bottomSheets/MusicSelectionSheet';
-import { imageAssets } from '../../assets/DB/imageAssets';
 import {
   TitleSubtitle,
   ProgressBar,
@@ -28,26 +33,36 @@ import { Container } from 'src/styles/layout';
 import { Caption, H5, Subtitle2 } from 'src/styles/typography';
 import { Artwork } from 'src/interfaces/collection';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
-import { useCherryFinishModal } from 'src/hooks/_index';
+import { useArtworkData } from 'src/api/hooks/useArtworkQueries';
 
 const FinishSetting: React.FC = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const { exhibitTitle, exhibitDescription, selectedFont } = useSelector(
-    (state: RootState) => state.exhibit,
-  );
+  const { exhibitTitle, exhibitDescription, selectedFont, fontData } =
+    useSelector((state: RootState) => state.exhibit);
   const {
     selectedCover,
     coverType,
     selectedCoverImage,
     selectedGradientConfig,
   } = useSelector((state: RootState) => state.cover);
-
+  const { myCherryNum } = useSelector((state: RootState) => state.getUser);
   const { selectedThemes } = useSelector((state: RootState) => state.theme);
   const { selectedArtworks, totalCherries } = useSelector(
     (state: RootState) => state.artwork,
   );
+  // selectedFont 값에 해당하는 fontFamily 찾기
+  const selectedFontFamily =
+    fontData.find((font) => font.value === selectedFont)?.fontFamily ||
+    'PretendardRegular';
+
+  // 각 artId에 대해 useArtworkData 호출
+  const artworkQueries = selectedArtworks.map((artwork) =>
+    useArtworkData(artwork.artId),
+  );
+  const isLoading = artworkQueries.some((query) => query.isLoading);
+  const artworkData = artworkQueries.map((query) => query.data);
   const [selectedMusic, setSelectedMusic] = useState<string[]>([
     '아직 음악이 없습니다',
   ]);
@@ -65,19 +80,52 @@ const FinishSetting: React.FC = () => {
     );
   }, [navigation]);
 
-  const userCherries = 5; // 실제 사용자의 체리 정보 (임시)
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalProps, setModalProps] = useState({
+    title: '',
+    requiredCherries: 0,
+    userCherries: 0,
+  });
 
-  const { isModalVisible, modalProps, handleNext, setModalVisible } =
-    useCherryFinishModal(userCherries, totalCherries, () => {
-      // TODO: 확인했을 때 실행될 POST 요청, 체리 차감 API 등 추가 예정
-      navigation.reset({
-        index: 0, // 첫 번째 스크린으로 설정
-        routes: [{ name: 'Tabs' }], // Tabs 화면으로 이동
-      });
-      console.log('체리 사용 후 전시 완료');
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const handleNext = () => {
+    const title =
+      totalCherries === 0 || myCherryNum >= totalCherries
+        ? '전시작품의 이용료를 결제할게요!'
+        : '체리가 부족해요!';
+    setModalProps({
+      title,
+      requiredCherries: totalCherries,
+      userCherries: myCherryNum,
     });
+    setModalVisible(true);
+  };
 
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<Artwork>) => {
+  const handleConfirm = async () => {
+    try {
+      // setModalVisible(false);
+      navigation.navigate('ExhibitCompletion');
+    } catch (error) {
+      Alert.alert('에러', '전시 등록에 실패했습니다.');
+    }
+  };
+
+  const userCherries = myCherryNum;
+
+  // useArtworkData와 현재 선택된 작품 매핑
+  const enrichedArtworks = selectedArtworks.map((artwork, index) => ({
+    ...artwork,
+    artistName: artworkData[index]?.artistName || '작가 정보 없음',
+  }));
+
+  const renderItem = ({ item, drag, isActive }) => {
     const scale = useSharedValue(1);
     const opacity = useSharedValue(1);
 
@@ -98,12 +146,12 @@ const FinishSetting: React.FC = () => {
       }
     }, [isActive]);
 
-    const artworkImage = imageAssets[item.fileName];
+    if (isLoading) return;
 
     return (
       <ArtworkContainer style={animatedStyle}>
         <ArtworkTouchable disabled={isActive}>
-          <ArtworkImage source={artworkImage} />
+          <ArtworkImage source={{ uri: item.imgUrl }} />
         </ArtworkTouchable>
         <ArtworkInfo>
           <TouchableOpacity
@@ -113,11 +161,10 @@ const FinishSetting: React.FC = () => {
             <PencilIcon width={14} height={14} />
           </TouchableOpacity>
           <Subtitle2>{item.name}</Subtitle2>
-          {/*TODO: API 연결시 */}
-          <ArtworkSubtitle>작가 이름</ArtworkSubtitle>
-          {item.cherryNum !== null && (
+          <ArtworkSubtitle>{item.artistName}</ArtworkSubtitle>
+          {item.cherryPrice !== null && (
             <ArtworkCherry>
-              {item.cherryNum === 0 ? (
+              {item.cherryPrice === 0 ? (
                 '무료'
               ) : (
                 <View
@@ -127,12 +174,12 @@ const FinishSetting: React.FC = () => {
                   }}
                 >
                   <CherryIcon fill='#B0ABAB' />
-                  <Text style={{ color: '#B0ABAB' }}>{item.cherryNum}</Text>
+                  <Text style={{ color: '#B0ABAB' }}>{item.cherryPrice}</Text>
                 </View>
               )}
             </ArtworkCherry>
           )}
-          {item.cherryNum === null && (
+          {item.cherryPrice === null && (
             <CollectorOnlyImage
               source={require('../../assets/images/collectorOnlyText.png')}
             />
@@ -184,7 +231,7 @@ const FinishSetting: React.FC = () => {
         </TouchableOpacity>
       </MusicContainer>
       <SectionTitleContainer>
-        <H5 style={{ fontFamily: selectedFont }}>{exhibitTitle}</H5>
+        <H5 style={{ fontFamily: selectedFontFamily }}>{exhibitTitle}</H5>
         <TouchableOpacity
           onPress={() => handleEditPress('DescriptionSetting')}
           style={{ marginLeft: 4, paddingTop: 4 }}
@@ -249,16 +296,11 @@ const FinishSetting: React.FC = () => {
             )}
           </>
         )}
-        <CherryFinishModal
-          onClose={() => setModalVisible(false)}
-          visible={isModalVisible}
-          {...modalProps}
-        />
       </GradientContainer>
 
       <InnerContainer>
         <DraggableFlatList
-          data={selectedArtworks}
+          data={enrichedArtworks}
           renderItem={renderItem}
           keyExtractor={(item) => item.artId.toString()}
           onDragEnd={handleDragEnd}
@@ -268,8 +310,14 @@ const FinishSetting: React.FC = () => {
       <MusicSelectionSheet
         isVisible={isMusicSheetVisible}
         onClose={closeMusicSheet}
-        selectedMusic={selectedMusic}
-        setSelectedMusic={(music) => dispatch(setSelectedMusic(music))}
+        initialSelectedMusic={selectedMusic}
+        setSelectedMusic={setSelectedMusic}
+      />
+      <CherryFinishModal
+        visible={isModalVisible}
+        {...modalProps}
+        onConfirm={handleConfirm}
+        onClose={() => setModalVisible(false)}
       />
     </Container>
   );

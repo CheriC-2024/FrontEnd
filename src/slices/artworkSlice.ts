@@ -65,7 +65,7 @@ const artworkSlice = createSlice({
 
       // 총 체리 갯수 업데이트
       state.totalCherries = state.selectedArtworks.reduce(
-        (sum, item) => sum + (item.cherryNum !== null ? item.cherryNum : 0),
+        (sum, item) => sum + (item.cherryPrice !== null ? item.cherryPrice : 0),
         0,
       );
 

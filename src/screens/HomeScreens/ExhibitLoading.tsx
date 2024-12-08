@@ -1,16 +1,38 @@
 import { useEffect, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { Animated } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Animated, Alert } from 'react-native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useExhibitionDetails } from 'src/api/hooks/useExhibitQueries';
+import { setExhibitDetails } from 'src/slices/watchingExhibitSlice';
+import { useDispatch } from 'react-redux';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 const ExhibitLoading: React.FC = () => {
-  // TODO: 여기서 전시 관련 정보 모두 GET하기 -> 리덕스 (watchExhibitSlice) 넣어서 전역 상태 관리
+  const dispatch = useDispatch();
   const navigation = useNavigation();
-  const fadeAnim = useRef(new Animated.Value(0)).current; // 초기 투명도 값 0
+  const route = useRoute();
+  const { exhibitId, exhibitColors, bgType, name } = route.params || {}; // 전시 ID 가져오기
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // 헤더 설정
+  // TanStack Query로 데이터 가져오기
+  const {
+    data: exhibitionDetails,
+    isLoading,
+    isError,
+  } = useExhibitionDetails(exhibitId);
+
+  useEffect(() => {
+    if (exhibitionDetails) {
+      dispatch(setExhibitDetails(exhibitionDetails));
+    }
+    if (isError) {
+      Alert.alert('Error', 'Failed to load exhibition details.');
+    }
+  }, [exhibitionDetails, isError, dispatch]);
+
   useEffect(() => {
     navigation.setOptions(
       headerOptions(navigation, {
@@ -22,25 +44,52 @@ const ExhibitLoading: React.FC = () => {
 
     // 이미지 페이드 인 애니메이션
     Animated.timing(fadeAnim, {
-      toValue: 1, // 최종 투명도 값 1
-      duration: 1000, // 1초 동안 애니메이션 실행
+      toValue: 1,
+      duration: 1000,
       useNativeDriver: true,
     }).start();
-
-    const timer = setTimeout(() => {
-      navigation.replace('ExhibitIntro');
-    }, 3000);
-
-    // 컴포넌트 언마운트 시 타이머 정리
-    return () => clearTimeout(timer);
   }, [navigation, fadeAnim]);
 
+  useEffect(() => {
+    if (isError) {
+      Alert.alert('Error', 'Failed to load exhibition details.');
+      navigation.goBack();
+    }
+
+    if (exhibitionDetails) {
+      console.log('Exhibition Details:', exhibitionDetails);
+      const exhibitFont = getFontFamilyByValue(exhibitionDetails.font);
+      console.log(name);
+
+      // 3초 후 ExhibitIntro로 이동
+      const timer = setTimeout(() => {
+        navigation.replace('ExhibitIntro', {
+          exhibitionDetails,
+          exhibitId: exhibitId,
+          bgType: bgType,
+          exhibitColors: exhibitColors,
+          exhibitFont: exhibitFont,
+          name: name,
+        });
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [exhibitionDetails, isError, navigation]);
+
+  // Gradient 설정
+  const gradientConfig = getGradientConfig(bgType);
+
   return (
-    <GradientBackground colors={['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA']}>
+    <GradientBackground
+      colors={exhibitColors}
+      start={gradientConfig.start}
+      end={gradientConfig.end}
+    >
       <OverlayBackground>
         <AnimatedTicketIcon
           source={require('src/assets/ticket_lottie.png')}
-          style={{ opacity: fadeAnim }} // 애니메이션된 투명도 값 적용
+          style={{ opacity: fadeAnim }}
         />
       </OverlayBackground>
     </GradientBackground>
@@ -49,11 +98,7 @@ const ExhibitLoading: React.FC = () => {
 
 export default ExhibitLoading;
 
-const GradientBackground = styled(LinearGradient).attrs({
-  colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 0.8 },
-})`
+const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;

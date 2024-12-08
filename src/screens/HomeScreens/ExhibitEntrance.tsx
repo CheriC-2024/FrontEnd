@@ -1,18 +1,31 @@
 import { useRef, useEffect, useState } from 'react';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {
   Animated,
   PanResponder,
   Dimensions,
   ImageBackground,
+  TouchableOpacity,
 } from 'react-native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import styled from 'styled-components/native';
-import { homeExhibitData } from '../data';
 import { ArtistImage, DragGuideHorizontal } from 'src/components/_index';
 import { Body1, Caption, H6, Subtitle1 } from 'src/styles/typography';
 import { HeartIcon } from 'src/assets/icons/_index';
 import LinearGradient from 'react-native-linear-gradient';
+import { useExhibitionDetails } from 'src/api/hooks/useExhibitQueries';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import { setExhibitTitle, setFont } from 'src/slices/watchingExhibitSlice';
+import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import {
+  useAddExhibitHeart,
+  useRemoveExhibitHeart,
+} from 'src/api/hooks/useExhibitMutations';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,7 +44,48 @@ const DRAG_THRESHOLD = -230;
 
 const ExhibitEntrance: React.FC = () => {
   const navigation = useNavigation();
-  const exhibitData = homeExhibitData.find((exhibit) => exhibit.id === '1');
+  const route = useRoute();
+  const dispatch = useDispatch();
+  const {
+    exhibitId,
+    exhibitColors,
+    exhibitThemes,
+    bgType,
+    hits,
+    createAt,
+    name,
+    heartCount,
+  } = route.params || {}; // 전시 ID 가져오기
+  const {
+    data: exhibitData,
+    isLoading,
+    isError,
+  } = useExhibitionDetails(exhibitId);
+
+  const { fontData } = useSelector((state: RootState) => state.exhibit);
+
+  // exhibitData.font에 매칭되는 fontFamily 찾기
+  const fontFamily =
+    fontData.find((font) => font.value === exhibitData?.font)?.fontFamily ||
+    'PretendardRegular';
+
+  useEffect(() => {
+    if (!isLoading && exhibitData?.name && fontFamily) {
+      dispatch(setExhibitTitle(exhibitData.name));
+      dispatch(setFont(fontFamily));
+    }
+  }, [fontFamily, exhibitData, isLoading, dispatch]);
+
+  // 헤더 설정
+  useEffect(() => {
+    navigation.setOptions(
+      headerOptions(navigation, {
+        leftButtonType: 'icon',
+        iconColor: '#fff',
+        headerTransparent: true,
+      }),
+    );
+  }, [navigation]);
 
   const [showGuide, setShowGuide] = useState(true);
   const guideOpacity = useRef(new Animated.Value(1)).current; // 서서히 사라지는 효과를 위한 투명도 설정
@@ -143,7 +197,12 @@ const ExhibitEntrance: React.FC = () => {
               duration: ANIMATION_DURATION,
               useNativeDriver: false,
             }).start(() => {
-              navigation.navigate('ExhibitLoading'); // ExhibitLoading 화면으로 이동
+              navigation.navigate('ExhibitLoading', {
+                exhibitId: exhibitId,
+                exhibitColors: exhibitColors,
+                bgType: bgType,
+                name: name,
+              }); // ExhibitLoading 화면으로 이동
             });
           }, 1000); // 확장 및 화면 밖으로 이동하기 전에 1초 지연
         } else {
@@ -182,38 +241,70 @@ const ExhibitEntrance: React.FC = () => {
     }),
   ).current;
 
-  // 헤더 설정
-  useEffect(() => {
-    navigation.setOptions(
-      headerOptions(navigation, {
-        leftButtonType: 'icon',
-        iconColor: '#fff',
-        headerTransparent: true,
-      }),
-    );
-  }, [navigation]);
+  // Gradient 설정
+  const gradientConfig = getGradientConfig(bgType);
+  console.log(name);
+
+  const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
+  const [newHeartCount, setHeartCount] = useState(heartCount); // 초기 좋아요 수를 hits로 설정
+
+  const { mutate: addHeart } = useAddExhibitHeart();
+  const { mutate: removeHeart } = useRemoveExhibitHeart();
+
+  const handleLikePress = () => {
+    if (isLiked) {
+      removeHeart(exhibitId, {
+        onSuccess: (newHeartCount: number) => {
+          setIsLiked(false);
+          setHeartCount(newHeartCount);
+        },
+      });
+    } else {
+      addHeart(exhibitId, {
+        onSuccess: (newHeartCount: number) => {
+          setIsLiked(true);
+          setHeartCount(newHeartCount);
+        },
+      });
+    }
+  };
+
+  if (isLoading) {
+    return;
+  }
 
   return (
-    <GradientBackground colors={['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA']}>
+    <GradientBackground
+      colors={exhibitColors}
+      start={gradientConfig.start}
+      end={gradientConfig.end}
+    >
       <ContentContainer>
         <HeaderContainer>
           <NameWrapper>
-            <ArtistImage image={exhibitData.profileImage} size={42} />
+            <ArtistImage image={exhibitData?.userRes.profileImgUrl} size={42} />
             <Subtitle1 style={{ color: 'white', marginLeft: 6 }}>
-              {exhibitData?.collectorName}
+              {exhibitData?.userRes.name || '닉네임'}
             </Subtitle1>
             <Body1 style={{ color: 'white' }}>님의 컬렉션 전시</Body1>
           </NameWrapper>
-          <LikeWrapper>
-            <HeartIcon fill={'white'} stroke={''} />
-            <H6 style={{ color: 'white' }}>123</H6>
-          </LikeWrapper>
+          <TouchableOpacity onPress={handleLikePress}>
+            <LikeWrapper>
+              <HeartIcon
+                fill={isLiked ? '#E52C32' : 'none'}
+                stroke={isLiked ? 'none' : '#fff'}
+              />
+              <H6 style={{ color: 'white' }}>{newHeartCount}</H6>
+            </LikeWrapper>
+          </TouchableOpacity>
         </HeaderContainer>
         <TitleContainer>
-          <ExhibitTitle>{exhibitData?.title}</ExhibitTitle>
-          <ExhibitDate>전시일자 2024.05.13</ExhibitDate>
+          <ExhibitTitle style={{ fontFamily }}>{name}</ExhibitTitle>
+          <ExhibitDate>전시 등록일 {createAt}</ExhibitDate>
           <TagsContainer>
-            {exhibitData?.tags.map((tag, idx) => <Tag key={idx}># {tag}</Tag>)}
+            {exhibitThemes.map((theme, idx) => (
+              <Tag key={idx}># {theme}</Tag>
+            ))}
           </TagsContainer>
         </TitleContainer>
       </ContentContainer>
@@ -250,11 +341,7 @@ const ExhibitEntrance: React.FC = () => {
 
 export default ExhibitEntrance;
 
-const GradientBackground = styled(LinearGradient).attrs({
-  colors: ['#1F2C35', '#49A0BE', '#95BFC4', '#E2DFCA'],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 0.8 },
-})`
+const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;
@@ -293,7 +380,6 @@ const TitleContainer = styled.View`
 
 const ExhibitTitle = styled.Text`
   font-size: 44px;
-  font-family: 'Mapo';
   margin-bottom: 16px;
   color: #fff;
 `;

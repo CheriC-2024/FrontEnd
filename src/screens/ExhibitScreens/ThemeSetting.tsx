@@ -127,8 +127,8 @@ const ThemeSetting: React.FC<{}> = ({}) => {
 const AIButtonContainer = styled.View`
   flex-direction: row;
   justify-content: flex-end;
-  margin-top: ${({ theme }) => theme.spacing.s9};
-  margin-bottom: ${({ theme }) => theme.margin.xs};
+  margin-top: 20px;
+  margin-bottom: 8px;
 `;
 
 const Hash = styled(Subtitle1)`

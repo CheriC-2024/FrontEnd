@@ -1,12 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, ActivityIndicator, FlatList, View } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootState, AppDispatch } from '../../store';
-import { setFilterText, selectCollection } from '../../slices/collectionSlice';
-import { imageAssets } from 'src/assets/DB/imageAssets';
+import {
+  setFilterText,
+  selectCollection,
+  clearSelectedCollections,
+} from '../../slices/collectionSlice';
 import { useUserCollection } from 'src/api/hooks/useCollectionQueries';
 import { Container } from 'src/styles/layout';
 import GradientBackground from '../../styles/GradientBackground';
@@ -23,10 +26,16 @@ import {
 const CollectionSelect: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: collectionsData, isLoading, error } = useUserCollection(1); // 임시 유저ID API 연결 예정
+  const {
+    data: collectionsData,
+    isLoading,
+    isError,
+    error,
+  } = useUserCollection();
   const { activeCollections, filterText } = useSelector(
     (state: RootState) => state.collection,
   );
+
   // 헤더 설정
   useEffect(() => {
     const isNextEnabled = activeCollections.length > 0;
@@ -42,6 +51,7 @@ const CollectionSelect: React.FC = () => {
   // 컴포넌트가 처음 마운트될 때 filterText 초기화
   useEffect(() => {
     dispatch(setFilterText('')); // filterText를 빈 문자열로 초기화
+    dispatch(clearSelectedCollections());
   }, [dispatch]);
 
   if (isLoading) {
@@ -52,13 +62,20 @@ const CollectionSelect: React.FC = () => {
     );
   }
 
-  if (error) {
-    console.log(error);
-    return <Text>로드 발생</Text>;
+  // 에러가 발생했을 경우 상태로 설정
+  if (isError) {
+    console.log('collectionsData:', collectionsData);
+    return (
+      <View
+        style={{ padding: 16, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Text style={{ color: 'red', fontSize: 16 }}>{error?.message}</Text>
+      </View>
+    );
   }
 
   // 컬렉션이 없는 경우
-  if (collectionsData.length === 0) {
+  if (!collectionsData) {
     return <EmptyState />;
   }
 
@@ -86,7 +103,9 @@ const CollectionSelect: React.FC = () => {
         <LabelText>선택한 컬렉션</LabelText>
         <SelectedTagContainer>
           {activeCollections.map((id) => {
-            const collection = collectionsData.find((c) => c.id === id);
+            const collection = collectionsData.find(
+              (c) => c.collectionId === id,
+            );
             return (
               collection && (
                 <TagButton
@@ -103,16 +122,19 @@ const CollectionSelect: React.FC = () => {
           style={{ paddingTop: 8, paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
           data={filteredCollectionsData}
-          keyExtractor={(item) => item.id.toString()} // 각 아이템의 고유한 키 설정
+          keyExtractor={(item) => item.collectionId.toString()} // 각 아이템의 고유한 키 설정
           renderItem={({ item: collection }) => {
             // renderItem에서 컬렉션을 렌더링
-            const selected = activeCollections.includes(collection.id);
-            const firstArtworkImage = imageAssets[collection.fileName];
+            const selected = activeCollections.includes(
+              collection.collectionId,
+            );
             return (
               <CollectionItem
                 selected={selected}
-                onPress={() => dispatch(selectCollection(collection.id))}
-                imageSource={firstArtworkImage}
+                onPress={() =>
+                  dispatch(selectCollection(collection.collectionId))
+                }
+                imageSource={collection.latestArtImgUrl}
                 name={collection.name}
                 description={collection.description}
               />

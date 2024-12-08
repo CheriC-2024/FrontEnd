@@ -1,25 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { ButtonText } from 'src/styles/typography';
 import {
   useFollowUser,
   useUnfollowUser,
 } from 'src/api/hooks/useFollowMutation';
+import { useUserInfoById } from 'src/api/hooks/useUserQueries';
 
 interface FollowButtonProps {
   userId: number;
-  isFollowing: boolean;
   onFollowChange: (isFollowing: boolean) => void; // 상태 변경 콜백
 }
-// TODO: 팔로우 리스트 조회 api 갖고와서 현재 유저가 팔로우하는지
 const FollowButton: React.FC<FollowButtonProps> = ({
   userId,
-  isFollowing,
   onFollowChange,
 }) => {
   // React Query 훅
   const { mutate: follow } = useFollowUser();
   const { mutate: unfollow } = useUnfollowUser();
+  const { data, isLoading } = useUserInfoById(userId);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    if (data) {
+      setIsFollowing(data.following);
+    }
+  }, [data]);
 
   const handleFollowPress = () => {
     if (isFollowing) {
@@ -32,6 +38,10 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       });
     }
   };
+
+  if (isLoading) {
+    return;
+  }
 
   return (
     <StyledButton isFollowing={isFollowing} onPress={handleFollowPress}>
