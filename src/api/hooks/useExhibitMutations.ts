@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   addExhibitHeart,
   incrementExhibitHits,
+  postExhibitionComment,
+  postExhibitionCommentReply,
   removeExhibitHeart,
 } from '../exhibitApi';
 
@@ -39,5 +41,42 @@ export const useRemoveExhibitHeart = () => {
 export const useIncrementHits = () => {
   return useMutation({
     mutationFn: (exhibitId: number) => incrementExhibitHits(exhibitId),
+  });
+};
+
+// 댓글 추가
+export const usePostComment = (exhibitId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (message: string) =>
+      postExhibitionComment({ exhibitId, message }),
+
+    onSuccess: () => {
+      // 방명록 데이터 업데이트
+      queryClient.invalidateQueries(['exhibitionComments', exhibitId]);
+    },
+  });
+};
+
+// 대댓글 추가
+export const usePostCommentReply = (exhibitId: number, commentId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (message: string) =>
+      postExhibitionCommentReply({ exhibitId, commentId, message }),
+
+    onSuccess: (data) => {
+      console.log('Reply posted successfully:', data);
+      queryClient.invalidateQueries([
+        'exhibitionCommentReplies',
+        exhibitId,
+        commentId,
+      ]);
+    },
+    onError: (error) => {
+      console.error('Failed to post reply:', error);
+    },
   });
 };

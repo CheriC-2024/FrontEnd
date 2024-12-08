@@ -340,7 +340,9 @@ const ExhibitViewing: React.FC = () => {
                           />
                           <CommentButton
                             onPress={() =>
-                              navigation.navigate('ExhibitComments')
+                              navigation.navigate('ExhibitComments', {
+                                exhibitId: exhibitId,
+                              })
                             }
                           >
                             <Body1>방명록 남기러 가기</Body1>
