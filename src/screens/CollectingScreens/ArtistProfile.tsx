@@ -49,12 +49,12 @@ const ArtistProfile: React.FC = () => {
     data: ownArtData,
     isLoading: ownArtLoading,
     error: ownArtError,
-  } = useFetchArtTypesFilter({ userId: 30, isCollectorsArt: 'true' });
+  } = useFetchArtTypesFilter({ userId: artistId, isCollectorsArt: 'true' });
   const {
     data: artData,
     isLoading: artLoading,
     error: artError,
-  } = useFetchArtTypesFilter({ userId: 30, isCollectorsArt: 'false' });
+  } = useFetchArtTypesFilter({ userId: artistId, isCollectorsArt: 'false' });
   const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
   console.dir(artData);
 
