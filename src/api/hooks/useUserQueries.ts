@@ -1,8 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
-import { fetchUserById, fetchUserInfo, fetchUsersBriefList } from '../userApi';
+import {
+  fetchRecommendUsers,
+  fetchUserById,
+  fetchUserInfo,
+  fetchUsersBriefList,
+  RecommendUsersParams,
+} from '../userApi';
 import { setUserData } from 'src/slices/getUserSlice';
 import store, { AppDispatch } from 'src/store';
+import { artTypeMapping } from 'src/utils/artTypeMapper';
 
 export const useFetchUserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -42,5 +49,21 @@ export const useUserInfoById = (id: number) => {
     staleTime: 1000 * 60 * 5, // 5분 동안 캐싱 유지
     cacheTime: 1000 * 60 * 10, // 10분 동안 데이터 캐싱
     refetchOnWindowFocus: false, // 화면에 다시 포커스될 때 재요청 비활성화
+  });
+};
+
+export const useRecommendUsers = (
+  params: Omit<RecommendUsersParams, 'page'>,
+) => {
+  return useQuery({
+    queryKey: ['recommendUsers', params],
+    queryFn: () =>
+      fetchRecommendUsers({
+        ...params,
+        page: 0, // 페이지를 고정하여 무한 스크롤 대신 단일 호출로 동작
+      }),
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
+    retry: 2,
   });
 };
