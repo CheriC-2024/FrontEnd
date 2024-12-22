@@ -327,6 +327,7 @@ const InnerContainer = styled.View`
   flex: 1;
   margin: -16px;
   padding-top: 15px;
+  padding-bottom: 24px;
 `;
 
 const GradientContainer = styled.View`

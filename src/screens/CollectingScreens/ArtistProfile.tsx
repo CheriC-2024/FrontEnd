@@ -50,16 +50,16 @@ const ArtistProfile: React.FC = () => {
     isLoading: ownArtLoading,
     error: ownArtError,
   } = useFetchArtTypesFilter({ userId: artistId, isCollectorsArt: 'true' });
+  console.log(ownArtData);
   const {
     data: artData,
     isLoading: artLoading,
     error: artError,
   } = useFetchArtTypesFilter({ userId: artistId, isCollectorsArt: 'false' });
   const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
-  console.dir(artData);
 
-  const [selectedIndex, setSelectedIndex] = useState(null); // 선택된 인덱스
-  const [selectedArtworkId, setSelectedArtworkId] = useState(null); // 선택된 작품 ID
+  const [selectedIndex, setSelectedIndex] = useState([]); // 선택된 인덱스
+  const [selectedArtworkId, setSelectedArtworkId] = useState(); // 선택된 작품 ID
 
   const handleSelect = (index, artworkId) => {
     setSelectedIndex(index);
@@ -162,7 +162,7 @@ const ArtistProfile: React.FC = () => {
     return <View></View>;
   }
 
-  if (error && resumeError) {
+  if (error && resumeError && ownArtData && artError) {
     return (
       <Container>
         <Text>데이터를 가져오는 중 오류가 발생했습니다.</Text>
@@ -236,8 +236,8 @@ const ArtistProfile: React.FC = () => {
         <View style={{ marginTop: 16, marginRight: 10 }}>
           <ArtworkItem
             artwork={item}
-            selected={selectedIndex} // 선택 상태 설정 필요 시
-            selectedIndex={selectedIndex} // 선택 인덱스 설정 필요 시
+            selected={false} // 선택 상태 설정 필요 시
+            selectedIndex={0} // 선택 인덱스 설정 필요 시
             onSelect={() =>
               navigation.navigate('ArtworkInfo', {
                 artworkId: item.artId,
@@ -254,7 +254,7 @@ const ArtistProfile: React.FC = () => {
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
         artistName={user?.name}
-        artworkCount={10} // TODO: 작품 리스트 API
+        artworkCount={artData?.length || 0} // TODO: 작품 리스트 API
         backgroundImage={user?.backgroundImgUrl}
         scrollY={scrollY}
       />
@@ -287,7 +287,7 @@ const ArtistProfile: React.FC = () => {
         <ProfileWrapper>
           <ArtistName>{user?.name}</ArtistName>
           <ArtistInfo>{user?.artTypes.join(' • ')} 작가</ArtistInfo>
-          <ArtistBio>{user?.description}</ArtistBio>
+          <ArtistBio numberOfLines={3}>{user?.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
@@ -331,7 +331,7 @@ const ArtistProfile: React.FC = () => {
         }
         ListFooterComponent={
           <>
-            <View style={{ height: 160 }} />
+            <View style={{ height: 260 }} />
           </>
           // TODO: 작품 리스트 API
           // <View

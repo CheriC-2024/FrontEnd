@@ -31,6 +31,7 @@ interface UserRes {
   description: string;
   artTypes: string[];
   profileImgUrl: string;
+  isFollow: boolean;
 }
 
 interface ExhibitionDetails {
@@ -41,6 +42,7 @@ interface ExhibitionDetails {
   exhibitionArtRess: ExhibitionArtRes[];
   userRes: UserRes;
   exhibitionReviewRes: any; // Define specific type if applicable
+  isHeart: false;
   createAt: string;
 }
 

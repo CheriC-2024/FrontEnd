@@ -14,7 +14,8 @@ export const extractProperties = async (
     const { data: responseData, code, message } = response.data;
 
     if (code === 201) {
-      console.log('API Call Success:', message);
+      console.log('CLOUD VISION API Call Success:', message);
+      console.log(responseData);
 
       // 필요한 데이터만 반환
       return responseData.map((item: { artId: number; properties: any[] }) => ({

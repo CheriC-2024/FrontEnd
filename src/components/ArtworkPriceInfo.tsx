@@ -9,10 +9,8 @@ const ArtworkPriceInfo: React.FC<
 > = ({ cherryPrice, collectorsArt, cherryNum }) => {
   return (
     <InfoContainer>
-      {collectorsArt === true || (cherryNum == null && cherryNum > 0) ? (
-        <CollectorOnlyImage
-          source={require('../assets/images/collectorOnlyText.png')}
-        />
+      {cherryPrice == 0 ? (
+        <PriceText>무료</PriceText>
       ) : cherryPrice > 0 ? (
         <PriceRow>
           <Icon />
@@ -22,7 +20,9 @@ const ArtworkPriceInfo: React.FC<
           </PriceText>
         </PriceRow>
       ) : (
-        <PriceText>무료</PriceText>
+        <CollectorOnlyImage
+          source={require('../assets/images/collectorOnlyText.png')}
+        />
       )}
     </InfoContainer>
   );

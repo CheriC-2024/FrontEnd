@@ -10,7 +10,7 @@ import ToastMessage from 'src/components/ToastMessage';
 import TagButton from 'src/components/TagButton';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from 'src/store';
-import { addTheme, removeTheme } from 'src/slices/themeSlice';
+import { addTheme, removeTheme, resetThemeState } from 'src/slices/themeSlice';
 import { Container } from 'src/styles/layout';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
@@ -28,6 +28,11 @@ const ThemeSetting: React.FC<{}> = ({}) => {
   );
   const { toastVisible, toastMessage, showToast } = useToastMessage();
   const [inputText, setInputText] = useState('');
+
+  // 화면에 처음 진입 시 초기화
+  useEffect(() => {
+    dispatch(resetThemeState()); // 테마 상태 초기화
+  }, []);
 
   // 헤더의 "다음" 버튼을 설정
   useEffect(() => {

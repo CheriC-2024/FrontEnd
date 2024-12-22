@@ -147,10 +147,10 @@ const LoginScreen: React.FC = () => {
         <GoogleIcon />
         <ButtonText>{`   `}Sign up with Google</ButtonText>
       </Button>
-      <H5>{debugMessage}</H5>
+      {/* <H5>{debugMessage}</H5>
       <H5>Connection Type: {connectionType}</H5>
       <H5>Connection Type: {connectionType}</H5>
-      <H5>Is Connected: {isConnected ? 'Yes' : 'No'}</H5>
+      <H5>Is Connected: {isConnected ? 'Yes' : 'No'}</H5> */}
     </Container>
   );
 };

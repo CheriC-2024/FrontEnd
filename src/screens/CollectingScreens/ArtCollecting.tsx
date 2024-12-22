@@ -31,7 +31,9 @@ const ArtCollecting: React.FC = () => {
     data: artworks,
     isLoading,
     isError,
-  } = useFetchArtTypesFilter({ artType: artTypesString });
+  } = useFetchArtTypesFilter({ artType: artTypesString, order: 'NAME' });
+
+  console.log(artworks);
 
   // Update navigation options
   useEffect(() => {
@@ -108,18 +110,31 @@ const ArtCollecting: React.FC = () => {
                   <>
                     <ArtworkText>{item.name}</ArtworkText>
                     <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                      style={{ flexDirection: 'row', alignItems: 'flex-start' }}
                     >
                       <ArtistImage
-                        image={
-                          item.userRes?.profileImgUrl ||
-                          'https://via.placeholder.com/150'
-                        }
+                        image={item.userRes.profileImgUrl}
                         size={18}
                         style={{ elevation: 0 }}
                       />
                       <ArtistText selectedOption={selectedOption}>
-                        {item.userRes?.name || 'Unknown Artist'}
+                        {item.createdAt}
+                      </ArtistText>
+                    </View>
+                  </>
+                )}
+                {selectedOption === 'artist' && (
+                  <>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'flex-start' }}
+                    >
+                      <ArtistImage
+                        image={item.userRes.profileImgUrl}
+                        size={18}
+                        style={{ elevation: 0 }}
+                      />
+                      <ArtistText selectedOption={selectedOption}>
+                        {item.createdAt}
                       </ArtistText>
                     </View>
                   </>
@@ -132,8 +147,6 @@ const ArtCollecting: React.FC = () => {
         contentContainerStyle={{}} // Overall padding for the grid
         showsVerticalScrollIndicator={false}
       />
-
-      {/* Bottom Sheet */}
       {isSheetVisible && (
         <ArtCollectingSheet
           onSelect={handleSelect}
@@ -177,6 +190,7 @@ const ImageInfoWrapper = styled.View<{
       : selectedOption === 'artist'
         ? '4px'
         : '0px'};
+  width: 92%;
 `;
 
 const ArtworkText = styled(Subtitle1)`
@@ -189,6 +203,7 @@ const ArtistText = styled(Caption)<{
   margin-left: ${({ theme }) => theme.margin.xs};
   font-family: ${({ theme, selectedOption }) =>
     selectedOption === 'both' ? theme.fonts.regular : theme.fonts.bold};
+  width: 92%;
 `;
 
 const ToggleText = styled(Caption)`

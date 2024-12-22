@@ -9,12 +9,14 @@ import { setExhibitDetails } from 'src/slices/watchingExhibitSlice';
 import { useDispatch } from 'react-redux';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
 import { getFontFamilyByValue } from 'src/utils/fontUtils';
+import React from 'react';
 
 const ExhibitLoading: React.FC = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { exhibitId, exhibitColors, bgType, name } = route.params || {}; // 전시 ID 가져오기
+  const { exhibitId, exhibitColors, bgType, name, coverImgUrl, font } =
+    route.params || {}; // 전시 ID 가져오기
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // TanStack Query로 데이터 가져오기
@@ -27,6 +29,7 @@ const ExhibitLoading: React.FC = () => {
   useEffect(() => {
     if (exhibitionDetails) {
       dispatch(setExhibitDetails(exhibitionDetails));
+      console.log(exhibitionDetails);
     }
     if (isError) {
       Alert.alert('Error', 'Failed to load exhibition details.');
@@ -68,8 +71,9 @@ const ExhibitLoading: React.FC = () => {
           exhibitId: exhibitId,
           bgType: bgType,
           exhibitColors: exhibitColors,
-          exhibitFont: exhibitFont,
+          exhibitFont: font,
           name: name,
+          coverImgUrl: coverImgUrl,
         });
       }, 5000);
 
@@ -80,23 +84,48 @@ const ExhibitLoading: React.FC = () => {
   // Gradient 설정
   const gradientConfig = getGradientConfig(bgType);
 
-  return (
-    <GradientBackground
-      colors={exhibitColors}
-      start={gradientConfig.start}
-      end={gradientConfig.end}
-    >
+  const renderContent = () => (
+    <>
       <OverlayBackground>
         <AnimatedTicketIcon
           source={require('src/assets/ticket_lottie.png')}
           style={{ opacity: fadeAnim }}
         />
       </OverlayBackground>
-    </GradientBackground>
+    </>
+  );
+  return (
+    <>
+      {coverImgUrl ? (
+        <BackgroundImageContainer source={{ uri: coverImgUrl }}>
+          <Content>{renderContent()}</Content>
+        </BackgroundImageContainer>
+      ) : exhibitColors && exhibitColors.length > 0 ? (
+        <GradientBackground
+          colors={exhibitColors}
+          start={gradientConfig.start}
+          end={gradientConfig.end}
+        >
+          <Content>{renderContent()}</Content>
+        </GradientBackground>
+      ) : (
+        <FallbackBackground>
+          <Content>{renderContent()}</Content>
+        </FallbackBackground>
+      )}
+    </>
   );
 };
 
 export default ExhibitLoading;
+
+const BackgroundImageContainer = styled.ImageBackground`
+  flex: 1;
+`;
+
+const Content = styled.View`
+  flex: 1;
+`;
 
 const GradientBackground = styled(LinearGradient)`
   height: 100%;
@@ -111,6 +140,11 @@ const OverlayBackground = styled.View`
   z-index: 1;
   justify-content: center;
   align-items: center;
+`;
+
+const FallbackBackground = styled.View`
+  flex: 1;
+  background-color: #f0f0f0;
 `;
 
 const AnimatedTicketIcon = styled(Animated.Image)`

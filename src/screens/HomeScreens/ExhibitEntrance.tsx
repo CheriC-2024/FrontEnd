@@ -10,6 +10,7 @@ import {
   Dimensions,
   ImageBackground,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
 import styled from 'styled-components/native';
@@ -26,6 +27,8 @@ import {
   useAddExhibitHeart,
   useRemoveExhibitHeart,
 } from 'src/api/hooks/useExhibitMutations';
+import React from 'react';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -55,26 +58,29 @@ const ExhibitEntrance: React.FC = () => {
     createAt,
     name,
     heartCount,
+    coverImgUrl,
+    font,
   } = route.params || {}; // 전시 ID 가져오기
   const {
     data: exhibitData,
     isLoading,
     isError,
   } = useExhibitionDetails(exhibitId);
+  console.log('Etrance', font);
+
+  const fontFamily = getFontFamilyByValue(font);
 
   const { fontData } = useSelector((state: RootState) => state.exhibit);
 
   // exhibitData.font에 매칭되는 fontFamily 찾기
-  const fontFamily =
-    fontData.find((font) => font.value === exhibitData?.font)?.fontFamily ||
-    'PretendardRegular';
+  //const fontFamily =
 
   useEffect(() => {
-    if (!isLoading && exhibitData?.name && fontFamily) {
+    if (!isLoading && exhibitData?.name) {
       dispatch(setExhibitTitle(exhibitData.name));
       dispatch(setFont(fontFamily));
     }
-  }, [fontFamily, exhibitData, isLoading, dispatch]);
+  }, [exhibitData, isLoading, dispatch]);
 
   // 헤더 설정
   useEffect(() => {
@@ -202,6 +208,8 @@ const ExhibitEntrance: React.FC = () => {
                 exhibitColors: exhibitColors,
                 bgType: bgType,
                 name: name,
+                coverImgUrl: coverImgUrl,
+                font: fontFamily,
               }); // ExhibitLoading 화면으로 이동
             });
           }, 1000); // 확장 및 화면 밖으로 이동하기 전에 1초 지연
@@ -273,12 +281,8 @@ const ExhibitEntrance: React.FC = () => {
     return;
   }
 
-  return (
-    <GradientBackground
-      colors={exhibitColors}
-      start={gradientConfig.start}
-      end={gradientConfig.end}
-    >
+  const renderContent = () => (
+    <>
       <ContentContainer>
         <HeaderContainer>
           <NameWrapper>
@@ -288,18 +292,13 @@ const ExhibitEntrance: React.FC = () => {
             </Subtitle1>
             <Body1 style={{ color: 'white' }}>님의 컬렉션 전시</Body1>
           </NameWrapper>
-          <TouchableOpacity onPress={handleLikePress}>
-            <LikeWrapper>
-              <HeartIcon
-                fill={isLiked ? '#E52C32' : 'none'}
-                stroke={isLiked ? 'none' : '#fff'}
-              />
-              <H6 style={{ color: 'white' }}>{newHeartCount}</H6>
-            </LikeWrapper>
-          </TouchableOpacity>
+          <LikeWrapper>
+            <HeartIcon fill={'#fff'} />
+            <H6 style={{ color: 'white' }}>{newHeartCount}</H6>
+          </LikeWrapper>
         </HeaderContainer>
         <TitleContainer>
-          <ExhibitTitle style={{ fontFamily }}>{name}</ExhibitTitle>
+          <ExhibitTitle fontFamily={fontFamily}>{name}</ExhibitTitle>
           <ExhibitDate>전시 등록일 {createAt}</ExhibitDate>
           <TagsContainer>
             {exhibitThemes.map((theme, idx) => (
@@ -335,7 +334,29 @@ const ExhibitEntrance: React.FC = () => {
           />
         </Animated.View>
       )}
-    </GradientBackground>
+    </>
+  );
+
+  return (
+    <>
+      {coverImgUrl ? (
+        <BackgroundImageContainer source={{ uri: coverImgUrl }}>
+          <Content>{renderContent()}</Content>
+        </BackgroundImageContainer>
+      ) : exhibitColors && exhibitColors.length > 0 ? (
+        <GradientBackground
+          colors={exhibitColors}
+          start={gradientConfig.start}
+          end={gradientConfig.end}
+        >
+          <Content>{renderContent()}</Content>
+        </GradientBackground>
+      ) : (
+        <FallbackBackground>
+          <Content>{renderContent()}</Content>
+        </FallbackBackground>
+      )}
+    </>
   );
 };
 
@@ -348,7 +369,7 @@ const GradientBackground = styled(LinearGradient)`
   top: 0;
 `;
 
-const Background = styled(ImageBackground)`
+const BackgroundImageContainer = styled.ImageBackground`
   flex: 1;
 `;
 
@@ -378,10 +399,11 @@ const TitleContainer = styled.View`
   flex-direction: column;
 `;
 
-const ExhibitTitle = styled.Text`
+const ExhibitTitle = styled.Text<{ fontFamily: string }>`
   font-size: 44px;
   margin-bottom: 16px;
   color: #fff;
+  font-family: ${({ fontFamily }) => fontFamily};
 `;
 
 const ExhibitDate = styled(Caption)`
@@ -416,4 +438,13 @@ const ExhibitOpacity = styled(Animated.View)`
   border-top-right-radius: 300px;
   background-color: ${({ theme }) => theme.colors.redBlack_alpha80};
   overflow: hidden;
+`;
+
+const FallbackBackground = styled.View`
+  flex: 1;
+  background-color: #f0f0f0;
+`;
+
+const Content = styled.View`
+  flex: 1;
 `;

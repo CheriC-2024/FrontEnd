@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 interface ExhibitCardProps extends Exhibition {
   isCurrent: boolean; // To highlight the currently focused card
@@ -30,16 +31,13 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
   exhibitionBackgroundType,
   userRes,
   isCurrent,
+  createAt,
 }) => {
   const navigation = useNavigation();
   const { profileImgUrl } = userRes;
 
-  const { fontData } = useSelector((state: RootState) => state.exhibit);
-
   // Find the matching fontFamily for the provided font identifier
-  const fontFamily =
-    fontData.find((fontItem) => fontItem.value === font)?.fontFamily ||
-    'PretendardRegular';
+  const fontFamily = getFontFamilyByValue(font);
 
   const useGradientBackground = !coverImgUrl || coverImgUrl.trim() === '';
   const gradientColors = colors.length >= 2 ? colors : [...colors, colors[0]];
@@ -50,6 +48,9 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
     const opacity = withTiming(isCurrent ? 1 : 0, { duration: 400 });
     return { opacity };
   });
+
+  console.log('ExhibitCard의 폰트 param', font);
+  console.log('ExhibitCard의 폰트 변환환', fontFamily);
 
   return (
     <TouchableWithoutFeedback
@@ -64,6 +65,9 @@ const ExhibitCard: React.FC<ExhibitCardProps> = ({
             bgType: exhibitionBackgroundType,
             heartCount: heartCount,
             name: name,
+            coverImgUrl: coverImgUrl,
+            createAt: createAt ? createAt.slice(0, 10) : '2024.11.28',
+            font: fontFamily,
           },
         });
       }}

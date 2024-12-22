@@ -10,11 +10,29 @@ import { artistAndArtworkData } from '../data';
 import { Container } from 'src/styles/layout';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
+import {
+  useRecommendUsers,
+  useUserInfoById,
+} from 'src/api/hooks/useUserQueries';
+import { mapArtTypesReverse } from 'src/utils/artTypeMapper';
 
 const ArtistCollecting: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { categoryTitle } = route.params;
+  const type = mapArtTypesReverse([categoryTitle]);
+  const {
+    data: artData,
+    isLoading,
+    isError,
+  } = useRecommendUsers({
+    artType: type[0].toString(),
+    order: 'LATEST',
+    size: 10,
+  });
+  const { data: userData, isLoading: isUserLoading } = useUserInfoById(
+    artData?.id,
+  );
 
   useEffect(() => {
     navigation.setOptions(
@@ -28,34 +46,36 @@ const ArtistCollecting: React.FC = () => {
   const handleArtistPress = (artistId: number) => {
     navigation.navigate('CollectingStack', {
       screen: 'ArtistProfile',
-      params: { artistId: 30 },
+      params: { artistId },
     });
   };
 
-  // TODO:
-  // const handleArtworkPress = (artistId: number) => {
-  //   navigation.navigate('ArtworkInfo', {
-  //     artworkId: artwork.id.toString(),
-  //   });
-  // };
+  if (isLoading || isUserLoading) {
+    return;
+  }
 
-  // TODO: 작가 정보 리스트 조회 API
-  const renderArtistWithArtworks = ({ item }: { item: any }) => (
+  const renderArtistWithArtworks = ({
+    userData,
+    artData,
+  }: {
+    userData: any;
+    artData: any;
+  }) => (
     <ArtistWithArtworksWrapper>
       <View style={{ paddingRight: 16 }}>
         <ProfileRow
-          image={item.artist.image}
-          name={item.artist.name}
-          category={item.artist.category}
+          image={artData.profileImgUrl}
+          name={artData.name}
+          category={categoryTitle}
           size={84}
-          userId={item.artist.id}
-          onPress={() => handleArtistPress(item.artist.id)}
+          userId={artData.id}
+          onPress={() => handleArtistPress(artData.id)}
         />
       </View>
       <View style={{ height: 16 }} />
       <FlatList
-        data={item.artworks}
-        keyExtractor={(artwork) => artwork.id.toString()}
+        data={artData.artBriefRess}
+        keyExtractor={(artwork) => artwork.artId.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         renderItem={({ item: artwork }) => (
@@ -65,7 +85,7 @@ const ArtistCollecting: React.FC = () => {
             selectedIndex={0}
             onSelect={() => {
               navigation.navigate('ArtworkInfo', {
-                artworkId: artwork.id.toString(),
+                artworkId: artwork.artId.toString(),
               });
               console.log('[현재 작품 ID] : ', artwork.id);
             }}
@@ -84,9 +104,11 @@ const ArtistCollecting: React.FC = () => {
         style={{ marginBottom: 16, paddingHorizontal: 16 }}
       />
       <FlatList
-        data={artistAndArtworkData}
-        keyExtractor={(item) => item.artist.id.toString()}
-        renderItem={renderArtistWithArtworks}
+        data={artData}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) =>
+          renderArtistWithArtworks({ userData: userData, artData: item })
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 16 }}
         ItemSeparatorComponent={() => <SeparatorLine />}

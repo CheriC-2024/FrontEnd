@@ -35,7 +35,7 @@ const HomeScreen: React.FC = () => {
     isError: isCarouselError,
   } = useExhibitions({
     userId: undefined,
-    order: 'LATEST',
+    order: 'HITS',
     page: 0,
     size: 3,
   });
@@ -136,11 +136,23 @@ const HomeScreen: React.FC = () => {
         </SectionWrapper>
         {ownArtData.map((item) => (
           <CardWrapper key={item.artId}>
-            <PrivateArtworkCard
-              image={item.imgUrl}
-              collectorName={item.userRes.name}
-              collectorImage={item.userRes.profileImgUrl}
-            />
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('CollectingStack', {
+                  screen: 'ArtworkInfo',
+                  params: {
+                    artworkId: item.artId,
+                  },
+                });
+                console.log('[현재 작품 ID] : ', item.artId);
+              }}
+            >
+              <PrivateArtworkCard
+                image={item.imgUrl}
+                collectorName={item.userRes.name}
+                collectorImage={item.userRes.profileImgUrl}
+              />
+            </TouchableOpacity>
           </CardWrapper>
         ))}
       </Container>

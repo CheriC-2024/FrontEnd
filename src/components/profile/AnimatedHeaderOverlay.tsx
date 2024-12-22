@@ -8,6 +8,7 @@ interface AnimatedHeaderOverlayProps {
   artworkCount: number;
   backgroundImage: string;
   scrollY: Animated.Value;
+  exhibit: boolean;
 }
 
 const AnimatedHeaderOverlay: React.FC<AnimatedHeaderOverlayProps> = ({
@@ -15,6 +16,7 @@ const AnimatedHeaderOverlay: React.FC<AnimatedHeaderOverlayProps> = ({
   artworkCount,
   backgroundImage,
   scrollY,
+  exhibit,
 }) => {
   // scrollY를 사용하여 애니메이션 값 계산
   const backgroundTranslateY = scrollY.interpolate({
@@ -72,7 +74,11 @@ const AnimatedHeaderOverlay: React.FC<AnimatedHeaderOverlayProps> = ({
         }}
       >
         <ArtistName>{artistName}</ArtistName>
-        <ArtworkCount>미술작품 {artworkCount}개</ArtworkCount>
+        {exhibit ? (
+          <ArtworkCount>전시 {artworkCount}개</ArtworkCount>
+        ) : (
+          <ArtworkCount>미술작품 {artworkCount}개</ArtworkCount>
+        )}
       </HeaderTextContainer>
     </Container>
   );

@@ -18,7 +18,7 @@ export const useArtworkData = (artworkId: number) => {
 };
 
 export const useFetchArtTypes = (
-  order: string = 'LATEST',
+  order: string = 'NAME',
   page: number = 0,
   size: number = 15,
 ) => {
@@ -30,21 +30,24 @@ export const useFetchArtTypes = (
   });
 };
 
-export const useFetchArtTypesFilter = ({
-  artType,
-  order = 'LATEST',
-  page = 0,
-  size = 10,
-  userId,
-  isCollectorsArt,
-}: {
-  artType?: string;
-  order?: string;
-  page?: number;
-  size?: number;
-  userId?: number;
-  isCollectorsArt?: string;
-}) => {
+export const useFetchArtTypesFilter = (
+  {
+    artType,
+    order = 'LATEST',
+    page = 0,
+    size = 40,
+    userId,
+    isCollectorsArt,
+  }: {
+    artType?: string;
+    order?: string;
+    page?: number;
+    size?: number;
+    userId?: number;
+    isCollectorsArt?: string;
+  },
+  id: any,
+) => {
   return useQuery({
     queryKey: [
       'artTypesFilter',
