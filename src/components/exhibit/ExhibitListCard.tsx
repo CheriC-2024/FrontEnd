@@ -7,6 +7,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 export interface ExhibitCardProps {
   imageSource: string | null;
@@ -34,15 +35,13 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
   bgType,
 }) => {
   const { fontData } = useSelector((state: RootState) => state.exhibit);
-  console.log('ExhibitListCard', imageSource);
+  console.log('ExhibitListCard', imageSource, '\nparams로 받은 : ', font);
 
   // Redux에서 fontFamily 찾기
-  const fontFamily =
-    fontData.find((fontItem) => fontItem.value === font)?.fontFamily ||
-    'PretendardRegular';
+  const fontFamily = getFontFamilyByValue(font);
   const useGradientBackground = !imageSource || imageSource.trim() === ''; // Check for null or empty string
   const gradientConfig = getGradientConfig(bgType);
-
+  console.log('변환된 폰트 : ', fontFamily);
   return (
     <CardWrapper>
       <CardContainer>
@@ -54,7 +53,7 @@ const ExhibitListCard: React.FC<ExhibitCardProps> = ({
           >
             <OverlayContent>
               <TitleContainer>
-                <Title style={{ fontFamily }} numberOfLines={2}>
+                <Title style={{ fontFamily: fontFamily }} numberOfLines={2}>
                   {title}
                 </Title>
               </TitleContainer>

@@ -28,6 +28,6 @@ export const useChatGpt = (
   return useQuery({
     queryKey: ['chatGptAI', chatGptType, artProperties],
     queryFn: () => getAIThemesTitle(chatGptType, artProperties),
-    enabled: enabled && artProperties.length > 0,
+    enabled: enabled,
   });
 };

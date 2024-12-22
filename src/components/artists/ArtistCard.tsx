@@ -51,7 +51,7 @@ const ArtistName = styled.Text<{ fontType: string }>`
   ${({ fontType }) =>
     fontType === 'H6'
       ? `
-    font-size: 18px;
+    font-size: 16px;
     font-family: PretendardBold;
   `
       : `

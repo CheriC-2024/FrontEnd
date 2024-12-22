@@ -22,6 +22,7 @@ import { homeExhibitData } from '../data';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 const ExhibitList: React.FC = () => {
   const navigation = useNavigation();
@@ -108,6 +109,7 @@ const ExhibitList: React.FC = () => {
   if (isLoading) {
     return null;
   }
+  const font = getFontFamilyByValue(exhibits.font);
 
   return (
     <Container>
@@ -173,6 +175,8 @@ const ExhibitList: React.FC = () => {
                       bgType: item.exhibitionBackgroundType,
                       heartCount: item.heartCount,
                       name: item.name,
+                      font: item.font,
+                      coverImgUrl: item.coverImgUrl,
                     },
                   });
                 }}

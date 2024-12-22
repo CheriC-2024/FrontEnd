@@ -60,6 +60,11 @@ const InfoWrapper = styled.View`
   margin-left: 8px;
 `;
 
-const ArtistName = styled(H5)``;
+const ArtistName = styled(H5).attrs({
+  numberOfLines: 1,
+  ellipsizeMode: 'tail',
+})`
+  width: 180px;
+`;
 
 const ArtistCategory = styled(Caption)``;

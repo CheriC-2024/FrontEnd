@@ -95,7 +95,7 @@ const ArtworkImage = styled.Image`
 const CollectorInfo = styled.View`
   flex-direction: row;
   align-items: center;
-  background-color: ${({ theme }) => theme.colors.cherryRed_10};
+  background-color: #fcf2f1;
   padding: 8px;
   height: 40px;
 `;
@@ -108,5 +108,5 @@ const CollectorImage = styled.Image`
 `;
 
 const CollectorName = styled(ButtonText)`
-  color: #ffffff;
+  color: #120000;
 `;

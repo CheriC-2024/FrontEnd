@@ -87,6 +87,7 @@ const TabNavigator: React.FC = () => {
             <SearchIcon fill={color} width={24} height={24} />
           ),
           tabBarLabel: '검색',
+          headerShown: false,
         }}
       />
       <Tab.Screen

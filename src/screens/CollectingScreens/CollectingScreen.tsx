@@ -27,10 +27,33 @@ import {
   Subtitle1,
   Subtitle2,
 } from 'src/styles/typography';
-import { artistAndArtworkData, artistData, artworkData } from '../data'; // 더미 데이터
+import { artistData, artworkData } from '../data'; // 더미 데이터
 import LinearGradient from 'react-native-linear-gradient';
 import { useFetchArtTypes } from 'src/api/hooks/useArtworkQueries';
 import { ForwardIcon } from 'src/assets/icons/_index';
+import { useRecommendUsers } from 'src/api/hooks/useUserQueries';
+import { artTypeMapping } from 'src/utils/artTypeMapper';
+
+const artTypes = Object.keys(artTypeMapping);
+
+const useArtTypeData = () => {
+  return artTypes.map((artType) => {
+    const { data, isLoading, isError } = useRecommendUsers({
+      isArtist: true,
+      artType,
+      order: 'LATEST',
+      size: 5,
+    });
+
+    return {
+      artType,
+      title: artTypeMapping[artType], // 한글 이름 매핑
+      data,
+      isLoading,
+      isError,
+    };
+  });
+};
 
 const CollectingScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -44,6 +67,21 @@ const CollectingScreen: React.FC = () => {
     '작품',
   );
   const { data: apiData, isLoading, isError } = useFetchArtTypes();
+  const {
+    data: artistAndArtworkData,
+    isLoading: isArtistAndArtworkDataLoading,
+    isError: isArtistAndArtworkDataError,
+  } = useRecommendUsers({
+    artType: 'PAINTING',
+    order: 'LATEST',
+    size: 5,
+  });
+
+  const artTypeData = useArtTypeData(); // artType 데이터를 가져옴
+
+  // 데이터를 상위 2개와 나머지로 그룹화
+  const topCategories = artTypeData.slice(0, 2); // 상위 2개의 artType
+  const remainingCategories = artTypeData.slice(2); // 나머지 artType
 
   const handleCoverTypeChange = (type: '작품' | '작가') => {
     setSelectedCoverType(type);
@@ -189,64 +227,159 @@ const CollectingScreen: React.FC = () => {
           showsHorizontalScrollIndicator={false}
         />
       </ArtistSectionWrapper>
-      <FlatList
-        data={artworkData.slice(1)} // 첫 번째 항목 (key) 제외, 이건 API 연결시 변경 예정
-        keyExtractor={(item, index) => index.toString()}
-        initialNumToRender={2}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <CategoryWrapper
-            is2ndSection={item.categoryTitle === '체리시의 미술 작품'}
-            style={{ paddingLeft: 16 }}
-          >
-            <ArtistCategoryTitle>{item.categoryTitle}</ArtistCategoryTitle>
-            {item.sections?.map((section, index) => (
-              <SectionWrapper key={section.title}>
-                <TouchableOpacity
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                  onPress={() =>
-                    handleNavigation('ArtistCollecting', section.title)
-                  }
-                >
-                  <SectionTitle>{section.title}</SectionTitle>
-                  <Icon
-                    name='chevron-forward'
-                    size={20}
-                    color='#120000'
-                    style={{ paddingBottom: 7 }}
+      {/* 컬렉터님을 위한 추천 */}
+      <ArtistSectionWrapper>
+        <H5>컬렉터님을 위한 추천</H5>
+        {topCategories.map((category, index) => {
+          const { title, data, isLoading, isError } = category;
+
+          if (isLoading) {
+            return (
+              <CategoryWrapper key={index}>
+                <ArtistCategoryTitle>{title}</ArtistCategoryTitle>
+                <Caption>로딩 중...</Caption>
+              </CategoryWrapper>
+            );
+          }
+
+          if (isError || !data) {
+            return (
+              <CategoryWrapper key={index}>
+                <ArtistCategoryTitle>{title}</ArtistCategoryTitle>
+                <Caption>데이터를 가져오는 중 오류가 발생했습니다.</Caption>
+              </CategoryWrapper>
+            );
+          }
+
+          return (
+            <CategoryWrapper key={index}>
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+                onPress={() =>
+                  navigation.navigate('CollectingStack', {
+                    screen: 'ArtistCollecting',
+                    params: { categoryTitle: category.title }, // Pass artType as a param
+                  })
+                }
+              >
+                <SectionTitle>{title}</SectionTitle>
+                <View style={{ marginBottom: 8 }}>
+                  <ForwardIcon width={22} height={22} />
+                </View>
+              </TouchableOpacity>
+              <FlatList
+                data={data}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <ArtistWithArtworks
+                    artist={{
+                      id: item.id,
+                      name: item.name,
+                      image: item.profileImgUrl,
+                    }}
+                    artworks={item.artBriefRess.map((artwork) => ({
+                      id: artwork.artId,
+                      fileName: artwork.imgUrl,
+                      name: artwork.name,
+                      cherryNum: artwork.cherryPrice,
+                      register: artwork.collectorsArt ? 'COLLECTOR' : 'ARTIST',
+                    }))}
                   />
-                </TouchableOpacity>
-                {/* ArtistWithArtworks 컴포넌트를 사용한 가로 스크롤 */}
-                <FlatList
-                  data={artistAndArtworkData.slice(index ** 2)}
-                  keyExtractor={(subItem) => subItem.artist.id.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  renderItem={({ item: subItem }) => (
-                    <ArtistWithArtworks
-                      artist={subItem.artist}
-                      artworks={subItem.artworks}
-                    />
-                  )}
-                  contentContainerStyle={{ paddingHorizontal: 0 }}
-                  ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
-                />
-              </SectionWrapper>
-            ))}
-          </CategoryWrapper>
-        )}
-        ListFooterComponent={<View style={{ height: 60 }} />}
-      />
+                )}
+                contentContainerStyle={{ paddingRight: 16 }}
+                ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+              />
+            </CategoryWrapper>
+          );
+        })}
+      </ArtistSectionWrapper>
+      <SeparatorLine />
+      {/* 체리시의 작가 */}
+      <ArtistSectionWrapper>
+        <H5>체리시의 작가님들</H5>
+        {remainingCategories.map((category, index) => {
+          const { title, data, isLoading, isError } = category;
+
+          if (isLoading) {
+            return (
+              <CategoryWrapper key={index}>
+                <ArtistCategoryTitle>{title}</ArtistCategoryTitle>
+                <Caption>로딩 중...</Caption>
+              </CategoryWrapper>
+            );
+          }
+
+          if (isError || !data) {
+            return (
+              <CategoryWrapper key={index}>
+                <ArtistCategoryTitle>{title}</ArtistCategoryTitle>
+                <Caption>데이터를 가져오는 중 오류가 발생했습니다.</Caption>
+              </CategoryWrapper>
+            );
+          }
+
+          return (
+            <CategoryWrapper key={index}>
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+                onPress={() =>
+                  navigation.navigate('CollectingStack', {
+                    screen: 'ArtistCollecting',
+                    params: { categoryTitle: category.title }, // Pass artType as a param
+                  })
+                }
+              >
+                <SectionTitle>{title}</SectionTitle>
+                <View style={{ marginBottom: 8 }}>
+                  <ForwardIcon width={22} height={22} />
+                </View>
+              </TouchableOpacity>
+              <FlatList
+                data={data}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <ArtistWithArtworks
+                    artist={{
+                      id: item.id,
+                      name: item.name,
+                      image: item.profileImgUrl,
+                    }}
+                    artworks={item.artBriefRess.map((artwork) => ({
+                      id: artwork.artId,
+                      fileName: artwork.imgUrl,
+                      name: artwork.name,
+                      cherryNum: artwork.cherryPrice,
+                      register: artwork.collectorsArt ? 'COLLECTOR' : 'ARTIST',
+                    }))}
+                  />
+                )}
+                contentContainerStyle={{ paddingRight: 16 }}
+                ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
+              />
+            </CategoryWrapper>
+          );
+        })}
+      </ArtistSectionWrapper>
     </View>
   );
 
   const renderArtworkSection = () => {
-    if (isLoading) {
+    if (isLoading || isArtistAndArtworkDataLoading) {
       // Return a placeholder JSX instead of nothing
       return <View style={{ padding: 20 }}></View>;
     }
 
-    if (isError || !apiData) {
+    if (isError || !apiData || isArtistAndArtworkDataError) {
       // Return an error placeholder JSX instead of nothing
       return (
         <View style={{ padding: 20 }}>
@@ -453,10 +586,8 @@ const CategoryTypeButtonText = styled(Body2)<{ selected?: boolean }>`
 const CategoryWrapper = styled.View<{ is2ndSection?: boolean }>`
   padding-top: ${({ is2ndSection, theme }) =>
     is2ndSection ? theme.padding.xs : theme.padding.m};
-  padding-bottom: ${({ theme }) => theme.padding.m};
-  margin-bottom: 20px;
-  background-color: ${({ is2ndSection, theme }) =>
-    is2ndSection ? theme.colors.bg : theme.colors.grey_4};
+  /* background-color: ${({ is2ndSection, theme }) =>
+    is2ndSection ? theme.colors.bg : theme.colors.grey_4}; */
 `;
 
 const CategoryTitle = styled(H6)`

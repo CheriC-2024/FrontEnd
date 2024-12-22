@@ -9,6 +9,6 @@ export const fetchArtistResume = async (artistUserId: number) => {
     return response.data.data; // 서버에서 반환된 데이터 구조에 맞게 반환
   } catch (error) {
     console.error('Error fetching artist resume:', error);
-    throw error;
+    return []; // 에러 발생 시 빈 배열 반환
   }
 };

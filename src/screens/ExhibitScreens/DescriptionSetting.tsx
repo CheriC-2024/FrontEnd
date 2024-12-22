@@ -16,6 +16,7 @@ import {
   setExhibitTitle,
   setExhibitDescription,
   setSelectedFont,
+  resetExhibitState,
 } from 'src/slices/exhibitSlice';
 import { Caption, Subtitle2 } from 'src/styles/typography';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -30,6 +31,11 @@ const DescriptionSetting: React.FC = () => {
   const { exhibitTitle, exhibitDescription, selectedFont, fontData } =
     useSelector((state: RootState) => state.exhibit);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // 화면에 처음 진입 시 초기화
+  useEffect(() => {
+    dispatch(resetExhibitState());
+  }, []);
 
   // 필드 값이 변경될 때 '다음' 버튼 활성화/비활성화 업데이트
   useEffect(() => {

@@ -15,6 +15,7 @@ import { Caption, Subtitle1 } from 'src/styles/typography';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SettingIcon } from 'src/assets/icons/_index';
 import { Container } from 'src/styles/layout';
+import { useFetchArtTypesFilter } from 'src/api/hooks/useArtworkQueries';
 
 const PrivateArtworkList: React.FC = () => {
   const navigation = useNavigation();
@@ -26,6 +27,12 @@ const PrivateArtworkList: React.FC = () => {
   const handleSelect = (mode: 'image' | 'collector' | 'both') => {
     setSelectedOption(mode);
   };
+
+  const {
+    data: ownArtData = [],
+    isLoading: ownArtLoading,
+    error: ownArtError,
+  } = useFetchArtTypesFilter({ userId: undefined, isCollectorsArt: 'true' });
 
   useEffect(() => {
     navigation.setOptions(
@@ -54,19 +61,18 @@ const PrivateArtworkList: React.FC = () => {
   };
 
   const adjustedImages = images.map((item) => {
-    const adjusted = getAdjustedDimensions(item.width, item.height);
     return {
       id: item.id.toString(),
       uri: item.uri,
-      width: adjusted.width,
-      height: adjusted.height,
+      width: 150,
+      height: 150,
       customData: { name: item.name, artist: item.artist },
     };
   });
 
   const flatListData = [
     { key: 'stickyView' },
-    { key: 'staggeredList', data: adjustedImages },
+    { key: 'staggeredList', data: ownArtData },
   ];
 
   return (
@@ -109,36 +115,29 @@ const PrivateArtworkList: React.FC = () => {
             } else if (item.key === 'staggeredList') {
               return (
                 <StaggeredList
-                  data={item.data}
+                  data={ownArtData}
                   renderItem={({ item, index }) => (
-                    <View
-                      key={item.id}
-                      style={{
-                        marginBottom: selectedOption === 'image' ? 16 : 8,
-                        marginHorizontal: 6,
-                      }}
+                    <ImageWrapper
+                      isFirstColumn={index % 2 === 0} // Determine if the item is in the first column
                     >
                       <TouchableOpacity
                         onPress={() =>
-                          handleNavigation('PrivateArtworkInfo', {
-                            artworkId: item.id,
+                          handleNavigation('CollectingStack', {
+                            screen: 'ArtworkInfo',
+                            params: { artworkId: item.artId },
                           })
                         }
                       >
-                        <Image
-                          source={{ uri: item.uri }}
-                          style={{
-                            width: '100%',
-                            aspectRatio: item.width / item.height,
-                            borderRadius: 16,
-                          }}
+                        <StyledImage
+                          source={{ uri: item.imgUrl }}
+                          style={{ aspectRatio: 1 / 1 }}
                         />
                       </TouchableOpacity>
                       {selectedOption !== 'image' && (
                         <ImageInfoWrapper selectedOption={selectedOption}>
                           {selectedOption === 'both' && (
                             <>
-                              <ArtworkText>{item.customData.name}</ArtworkText>
+                              <ArtworkText>{item.name}</ArtworkText>
                               <View
                                 style={{
                                   flexDirection: 'row',
@@ -146,39 +145,41 @@ const PrivateArtworkList: React.FC = () => {
                                 }}
                               >
                                 <ArtistImage
-                                  image={'https://via.placeholder.com/150x150'}
+                                  image={item.userRes.profileImgUrl}
                                   size={18}
                                   style={{ elevation: 0 }}
                                 />
                                 <ArtistText selectedOption={selectedOption}>
-                                  {item.customData.artist}
+                                  {item.createdAt}
                                 </ArtistText>
                               </View>
                             </>
                           )}
                           {selectedOption === 'collector' && (
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <ArtistImage
-                                image={'https://via.placeholder.com/150x150'}
-                                size={18}
-                                style={{ elevation: 0 }}
-                              />
-                              <ArtistText selectedOption={selectedOption}>
-                                {item.customData.artist}
-                              </ArtistText>
-                            </View>
+                            <>
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <ArtistImage
+                                  image={item.userRes.profileImgUrl}
+                                  size={18}
+                                  style={{ elevation: 0 }}
+                                />
+                                <ArtistText selectedOption={selectedOption}>
+                                  {item.createdAt}
+                                </ArtistText>
+                              </View>
+                            </>
                           )}
                         </ImageInfoWrapper>
                       )}
-                    </View>
+                    </ImageWrapper>
                   )}
-                  numColumns={2}
-                  animationType={'SLIDE_DOWN'}
+                  numColumns={2} // Two columns for the staggered grid
+                  contentContainerStyle={{}} // Overall padding for the grid
                   showsVerticalScrollIndicator={false}
                 />
               );
@@ -244,6 +245,18 @@ const ToggleText = styled(Caption)`
   border-radius: ${({ theme }) => theme.radius.l};
   background-color: ${({ theme }) => theme.colors.redBlack};
   color: #fff;
+`;
+
+const StyledImage = styled.Image`
+  width: 100%;
+  border-radius: 16px;
+`;
+
+const ImageWrapper = styled.View<{ isFirstColumn: boolean }>`
+  flex: 1;
+  margin-bottom: 16px; /* Space between rows */
+  padding-right: ${({ isFirstColumn }) => (isFirstColumn ? '0px' : '4px')};
+  padding-left: ${({ isFirstColumn }) => (!isFirstColumn ? '4px' : '0px')};
 `;
 
 export default PrivateArtworkList;

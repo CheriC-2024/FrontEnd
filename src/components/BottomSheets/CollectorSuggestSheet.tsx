@@ -81,14 +81,18 @@ const CollectorSuggestSheet: React.FC<CollectorBottomSheetProps> = ({
 export default CollectorSuggestSheet;
 
 const Overlay = styled.View`
-  flex: 1;
-  background-color: rgba(0, 0, 0, 0.5);
+  height: 100%;
+  background-color: ${({ theme }) => theme.colors.redBlack_alpha50};
+  z-index: -1;
+  position: relative;
 `;
 
 const SheetContainer = styled.View`
-  flex: 0.7;
   justify-content: flex-end;
-  background-color: ${({ theme }) => theme.colors.redBlack_alpha50};
+  z-index: 1;
+  position: absolute;
+  bottom: 0%;
+  width: 100%;
 `;
 
 const SheetContent = styled.View`

@@ -20,7 +20,7 @@ const ArtworkItem: React.FC<ArtworkItemProps> = ({
     <ArtworkItemWrapper selected={selected} onPress={onSelect}>
       <ArtworkImageWrapper selected={selected}>
         <ArtworkImage
-          source={{ uri: artwork.imgUrl || artwork.fileName }}
+          source={{ uri: artwork?.imgUrl || artwork?.fileName }}
           selected={selected}
         />
         {selected && (
@@ -80,7 +80,10 @@ const ArtworkInfoContainer = styled.View`
   margin-top: ${({ theme }) => theme.margin.xs};
 `;
 
-const ArtworkName = styled(Subtitle2)`
+const ArtworkName = styled(Subtitle2).attrs({
+  numberOfLines: 1, // 한 줄로 제한
+  ellipsizeMode: 'tail', // 길 경우 끝에 '...' 처리
+})`
   width: 100%;
 `;
 

@@ -124,9 +124,7 @@ const AIRecommendLoading: React.FC = () => {
   // const { data: aiData, isSuccess: isAiSuccess } = useChatGpt(
   //   source === 'ThemeSetting' ? 'THEME' : 'TITLE',
   //   cloudVisionLabels,
-  //   source === 'ThemeSetting'
-  //     ? shouldCallChatGptForThemes
-  //     : shouldCallChatGptForTitles,
+  //   source === 'ThemeSetting' ? true : true,
   // );
 
   // // ChatGPT API 결과 처리 및 화면 전환

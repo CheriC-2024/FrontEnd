@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import styled from 'styled-components/native';
 import ArtistCard from './ArtistCard'; // 작가 카드 컴포넌트
 import ArtworkItem from '../ArtworkItem'; // 작품 아이템 컴포넌트
+import { useNavigation } from '@react-navigation/native';
 
 // ArtistWithArtworksProps 타입 정의
 interface ArtistWithArtworksProps {
@@ -24,6 +25,7 @@ const ArtistWithArtworks: React.FC<ArtistWithArtworksProps> = ({
   artist,
   artworks,
 }) => {
+  const navigation = useNavigation();
   return (
     <ArtistWithArtworkWrapper>
       <ArtistCard
@@ -43,7 +45,12 @@ const ArtistWithArtworks: React.FC<ArtistWithArtworksProps> = ({
               artwork={artwork}
               selected={false}
               selectedIndex={0}
-              onSelect={() => {}}
+              onSelect={() =>
+                navigation.navigate('CollectingStack', {
+                  screen: 'ArtworkInfo', // Specify the screen within the stack
+                  params: { artworkId: artwork.id }, // Pass artId as a parameter
+                })
+              }
             />
           </ArtworkItemWrapper>
         ))}

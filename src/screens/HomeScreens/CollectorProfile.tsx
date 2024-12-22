@@ -15,6 +15,8 @@ import { headerOptions } from 'src/navigation/UI/headerConfig';
 import { ButtonText, Caption, H4 } from 'src/styles/typography';
 import { useArtistData } from 'src/api/hooks/useArtistQueries';
 import { homeExhibitData } from '../data';
+import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
+import { useFetchArtTypesFilter } from 'src/api/hooks/useArtworkQueries';
 
 const tabs = ['컬렉션 전시', '소장 작품'];
 
@@ -28,6 +30,23 @@ const CollectorProfile: React.FC = () => {
   console.log('Route params:', collectorId);
   const { user, isLoading, error } = useArtistData(collectorId);
   const [isFollowing, setIsFollowing] = useState(false); // 초기값 false
+
+  const {
+    data: homeExhibitData = [],
+    isLoading: isCarouselLoading,
+    isError: isCarouselError,
+  } = useExhibitions({
+    userId: collectorId,
+    order: 'HITS',
+    page: 0,
+    size: 10,
+  });
+
+  const {
+    data: ownArtData = [],
+    isLoading: ownArtLoading,
+    error: ownArtError,
+  } = useFetchArtTypesFilter({ userId: collectorId, isCollectorsArt: 'true' });
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -98,7 +117,7 @@ const CollectorProfile: React.FC = () => {
     />
   );
 
-  if (isLoading || !user) {
+  if (isLoading || !user || isCarouselLoading || ownArtLoading) {
     return;
   }
 
@@ -127,13 +146,16 @@ const CollectorProfile: React.FC = () => {
       return (
         <View style={{ marginVertical: 6, marginHorizontal: 16 }}>
           <ExhibitListCard
-            imageSource={item.imageSource}
-            title={item.title}
-            collectorName={item.collectorName}
-            profileImage={item.profileImage}
-            likes={item.likes}
-            favorites={item.favorites}
-            tags={item.tags}
+            imageSource={item.coverImgUrl}
+            colors={item.colors}
+            title={item.name}
+            collectorName={item.userRes.name}
+            profileImage={item.userRes.profileImgUrl}
+            heartCount={item.heartCount}
+            hits={item.hits}
+            tags={item.themes}
+            font={item.font}
+            bgType={item.exhibitionBackgroundType}
           />
         </View>
       );
@@ -158,18 +180,16 @@ const CollectorProfile: React.FC = () => {
   };
 
   // activeTab에 따라 데이터를 필터링
-  const filteredData =
-    activeTab === 0
-      ? homeExhibitData
-      : artworks.filter((artwork) => artwork.cherryNum === null);
+  const filteredData = activeTab === 0 ? homeExhibitData : ownArtData;
 
   return (
     <View style={{ flex: 1, position: 'relative', backgroundColor: '#fff' }}>
       <AnimatedHeaderOverlay
         artistName={user.name}
-        artworkCount={1} // TODO: 작품 개수 리스트 조회 API 연결시
+        artworkCount={homeExhibitData?.length || 0} // TODO: 작품 개수 리스트 조회 API 연결시
         backgroundImage={user.backgroundImgUrl}
         scrollY={scrollY}
+        exhibit={true}
       />
       <ProfileImageContainer
         style={{
@@ -191,7 +211,7 @@ const CollectorProfile: React.FC = () => {
           position: 'absolute',
           top: scrollY.interpolate({
             inputRange: [0, 230], // 스크롤 범위
-            outputRange: [150, -120], // 스크롤에 따라 위로 이동
+            outputRange: [150, -140], // 스크롤에 따라 위로 이동
             extrapolate: 'clamp',
           }),
           zIndex: 1,
@@ -199,8 +219,8 @@ const CollectorProfile: React.FC = () => {
       >
         <ProfileWrapper>
           <ArtistName>{user.name}</ArtistName>
-          <ArtistInfo>선호 분야 {user.artTypes}</ArtistInfo>
-          <ArtistBio>{user.description}</ArtistBio>
+          <ArtistInfo>선호 분야 {user?.artTypes.join(' • ')}</ArtistInfo>
+          <ArtistBio numberOfLines={3}>{user.description}</ArtistBio>
         </ProfileWrapper>
         <FollowSection>
           <View style={{ flexDirection: 'row' }}>
@@ -243,7 +263,9 @@ const CollectorProfile: React.FC = () => {
             : null
         }
         ListFooterComponent={
-          <></>
+          <>
+            <View style={{ height: 360 }} />
+          </>
           // TODO: 작품 리스트 조회 API
           // <View
           //   style={{

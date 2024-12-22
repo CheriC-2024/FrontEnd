@@ -13,6 +13,7 @@ import {
   AddCollectionSheet,
   ArtistImage,
   ArtworkItem,
+  ExhibitListCard,
   Table,
 } from 'src/components/_index';
 import { headerOptions } from 'src/navigation/UI/headerConfig';
@@ -21,8 +22,12 @@ import ToastMessage from 'src/components/ToastMessage';
 import useToastMessage from 'src/hooks/useToastMessage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useArtworkData } from 'src/api/hooks/useArtworkQueries';
+import {
+  useArtworkData,
+  useFetchArtTypesFilter,
+} from 'src/api/hooks/useArtworkQueries';
 import { useAddHeart, useRemoveHeart } from 'src/api/hooks/useArtworkMutations';
+import { useExhibitions } from 'src/api/hooks/useExhibitQueries';
 
 const ArtworkInfo: React.FC = () => {
   const navigation = useNavigation();
@@ -38,6 +43,15 @@ const ArtworkInfo: React.FC = () => {
 
   // 토스트 메시지 훅 사용
   const { toastVisible, toastMessage, showToast } = useToastMessage();
+
+  const { data: artistArtworkData, isLoading: artistArtworkLoading } =
+    useFetchArtTypesFilter({ userId: artworkData?.userRes?.id });
+  const { data: exhibitData, isLoading: exhibitLoading } = useExhibitions({
+    artId: artworkId,
+    order: 'NAME',
+    page: 0,
+    size: 3,
+  });
 
   useEffect(() => {
     console.log('Toast Visibility:', toastVisible);
@@ -96,7 +110,7 @@ const ArtworkInfo: React.FC = () => {
   }, [navigation]);
 
   // 로딩 상태 처리
-  if (isLoading) {
+  if (isLoading || artistArtworkLoading || exhibitLoading) {
     return (
       <Container>
         <ActivityIndicator size='large' color='#E52C32' />
@@ -226,10 +240,10 @@ const ArtworkInfo: React.FC = () => {
           />
         </TouchableOpacity>
         {/* TODO: 작가별 작품 조회 API */}
-        {/* <OtherArtworksWrapper>
+        <OtherArtworksWrapper>
           <FlatList
-            data={artistData?.artworks}
-            keyExtractor={(artwork) => artwork.id.toString()}
+            data={artistArtworkData}
+            keyExtractor={(artwork) => artwork.artId.toString()}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item: artwork }) => (
@@ -237,56 +251,68 @@ const ArtworkInfo: React.FC = () => {
                 artwork={artwork}
                 selected={false}
                 selectedIndex={0}
-                onSelect={() => {}}
+                onSelect={() =>
+                  navigation.navigate('CollectingStack', {
+                    screen: 'ArtworkInfo',
+                    params: { artworkId: artwork.artId },
+                  })
+                }
               />
             )}
             // 각 아이템 사이의 간격 설정
             ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
           />
-        </OtherArtworksWrapper> */}
+        </OtherArtworksWrapper>
         <TouchableOpacity
-          onPress={() => handlePress(artworkData.userRes.id)}
+          // onPress={() => handlePress(artworkData.userRes.id)}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             marginBottom: 8,
           }}
         >
-          <H6>이 작품이 게시된 컬렉션 전시</H6>
-          <Icon
+          {exhibitData.length > 0 ? <H6>이 작품이 게시된 컬렉션 전시</H6> : ''}
+
+          {/* <Icon
             name='chevron-forward'
             size={22}
             color='#120000'
             style={{ paddingBottom: 2 }}
-          />
+          /> */}
         </TouchableOpacity>
-        <View
-          style={{
-            width: '100%',
-            height: 168,
-            backgroundColor: '#B0ABAB',
-            borderRadius: 20,
-            marginBottom: 12,
-          }}
-        />
-        <View
-          style={{
-            width: '100%',
-            height: 168,
-            backgroundColor: '#B0ABAB',
-            borderRadius: 20,
-            marginBottom: 12,
-          }}
-        />
-        <View
-          style={{
-            width: '100%',
-            height: 168,
-            backgroundColor: '#B0ABAB',
-            borderRadius: 20,
-            marginBottom: 120,
-          }}
-        />
+        <View style={{ marginBottom: 80 }}>
+          {exhibitData.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() =>
+                navigation.navigate('HomeStack', {
+                  screen: 'ExhibitEntrance',
+                  params: {
+                    exhibitId: item.exhibitionId,
+                    exhibitColors: item.colors,
+                    exhibitThemes: item.themes,
+                    bgType: item.exhibitionBackgroundType,
+                    heartCount: item.heartCount,
+                    name: item.name,
+                  },
+                })
+              }
+            >
+              <ExhibitListCard
+                imageSource={item.coverImgUrl}
+                colors={item.colors}
+                title={item.name}
+                collectorName={item.userRes.name}
+                profileImage={item.userRes.profileImgUrl}
+                heartCount={item.heartCount}
+                hits={item.hits}
+                tags={item.themes}
+                font={item.font}
+                bgType={item.exhibitionBackgroundType}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
       <Btn
         onPress={() => setIsBottomSheetVisible(true)}

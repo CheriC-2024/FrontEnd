@@ -61,6 +61,34 @@ export const fetchUsersBriefList = async ({
   return response.data.data; // API 응답 데이터 반환
 };
 
+// 추천 사용자 리스트 가져오기
+export type RecommendUsersParams = {
+  isArtist?: boolean | null;
+  artType: string;
+  order: 'LATEST' | 'NAME' | 'FOLLOWER';
+  page: number;
+  size: number;
+};
+
+export const fetchRecommendUsers = async ({
+  isArtist,
+  artType,
+  order,
+  page,
+  size,
+}: RecommendUsersParams) => {
+  try {
+    const response = await axiosInstance.get('/users/recommend', {
+      params: { isArtist, artType, order, page, size },
+    });
+    console.log('추천 사용자 조회:', response.data.data);
+    return response.data.data; // 추천 사용자 리스트 반환
+  } catch (error) {
+    console.error('Error fetching recommended users:', error);
+    throw error;
+  }
+};
+
 const artTypeMapping: { [key: string]: string } = {
   NEW_MEDIA_ART: '뉴미디어',
   ORIENTAL_PAINTING: '동양화',

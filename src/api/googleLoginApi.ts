@@ -9,6 +9,7 @@ export const signInWithGoogleToken = async (idToken, fcmToken, deviceToken) => {
         'device-token': deviceToken,
         'fcm-token': fcmToken,
       },
+      timeout: 5000,
     });
 
     const { accessToken, refreshToken, firstLogin } = response.data.data;

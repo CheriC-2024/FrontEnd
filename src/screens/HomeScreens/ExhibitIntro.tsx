@@ -17,11 +17,13 @@ import { RootState } from 'src/store';
 import { Audio } from 'expo-av';
 import { getGradientConfig } from 'src/utils/gradientBgUtils';
 import { useIncrementHits } from 'src/api/hooks/useExhibitMutations';
+import React from 'react';
+import { getFontFamilyByValue } from 'src/utils/fontUtils';
 
 const ExhibitIntro: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { exhibitId, bgType, exhibitColors, exhibitFont, name } =
+  const { exhibitId, bgType, exhibitColors, exhibitFont, name, coverImgUrl } =
     route.params || {}; // 전시 ID 가져오기
   const { mutate: incrementHits } = useIncrementHits();
 
@@ -42,6 +44,7 @@ const ExhibitIntro: React.FC = () => {
   const [sound, setSound] = useState<Audio.Sound | null>(null); // 오디오 객체
 
   console.log(exhibitFont);
+  const fontFamily = getFontFamilyByValue(exhibitFont);
 
   // 음악 재생 함수
   const playSound = async () => {
@@ -154,6 +157,50 @@ const ExhibitIntro: React.FC = () => {
   // Gradient 설정
   const gradientConfig = getGradientConfig(bgType);
 
+  const renderContent = () => (
+    <>
+      <OverlayBackground>
+        <TouchableOpacity onPress={toggleMusic}>
+          {isMusicOn ? <MusicOnIcon /> : <MusicOffIcon />}
+        </TouchableOpacity>
+
+        {/* 타이틀 애니메이션 적용 */}
+        <Animated.View
+          style={{
+            opacity: fadeAnimTitle,
+            transform: [{ translateY: translateYTitle }],
+          }}
+        >
+          <StyledTitle fontFamily={fontFamily}>{name}</StyledTitle>
+        </Animated.View>
+
+        {/* 설명 애니메이션 적용 */}
+        <AnimatedDescription
+          style={{
+            opacity: fadeAnimDescription,
+            transform: [{ translateY: translateYDescription }],
+          }}
+        >
+          {exhibitDetails?.description}
+        </AnimatedDescription>
+
+        {showDragGuide && (
+          <Animated.View
+            style={{
+              opacity: fadeAnimGuide,
+              position: 'absolute',
+              bottom: 50,
+              right: 16,
+              zIndex: 1,
+            }}
+          >
+            <DragGuideHorizontal isReversed />
+          </Animated.View>
+        )}
+      </OverlayBackground>
+    </>
+  );
+
   console.log(name);
   return (
     <TouchableWithoutFeedback onPress={handleScreenPress}>
@@ -169,51 +216,23 @@ const ExhibitIntro: React.FC = () => {
           }
         }}
       >
-        <GradientBackground
-          colors={exhibitColors}
-          start={gradientConfig.start}
-          end={gradientConfig.end}
-        >
-          <OverlayBackground>
-            <TouchableOpacity onPress={toggleMusic}>
-              {isMusicOn ? <MusicOnIcon /> : <MusicOffIcon />}
-            </TouchableOpacity>
-
-            {/* 타이틀 애니메이션 적용 */}
-            <Animated.View
-              style={{
-                opacity: fadeAnimTitle,
-                transform: [{ translateY: translateYTitle }],
-              }}
-            >
-              <StyledTitle fontFamily={exhibitFont}>{name}</StyledTitle>
-            </Animated.View>
-
-            {/* 설명 애니메이션 적용 */}
-            <AnimatedDescription
-              style={{
-                opacity: fadeAnimDescription,
-                transform: [{ translateY: translateYDescription }],
-              }}
-            >
-              {exhibitDetails?.description}
-            </AnimatedDescription>
-
-            {showDragGuide && (
-              <Animated.View
-                style={{
-                  opacity: fadeAnimGuide,
-                  position: 'absolute',
-                  bottom: 50,
-                  right: 16,
-                  zIndex: 1,
-                }}
-              >
-                <DragGuideHorizontal isReversed />
-              </Animated.View>
-            )}
-          </OverlayBackground>
-        </GradientBackground>
+        {coverImgUrl ? (
+          <BackgroundImageContainer source={{ uri: coverImgUrl }}>
+            <Content>{renderContent()}</Content>
+          </BackgroundImageContainer>
+        ) : exhibitColors && exhibitColors.length > 0 ? (
+          <GradientBackground
+            colors={exhibitColors}
+            start={gradientConfig.start}
+            end={gradientConfig.end}
+          >
+            <Content>{renderContent()}</Content>
+          </GradientBackground>
+        ) : (
+          <FallbackBackground>
+            <Content>{renderContent()}</Content>
+          </FallbackBackground>
+        )}
       </PanGestureHandler>
     </TouchableWithoutFeedback>
   );
@@ -221,11 +240,28 @@ const ExhibitIntro: React.FC = () => {
 
 export default ExhibitIntro;
 
+const BackgroundImageContainer = styled.ImageBackground`
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  z-index: -10;
+`;
+
+const Content = styled.View`
+  flex: 1;
+`;
+
 const GradientBackground = styled(LinearGradient)`
   height: 100%;
   width: 100%;
   position: absolute;
   top: 0;
+`;
+
+const FallbackBackground = styled.View`
+  flex: 1;
+  background-color: #f0f0f0;
 `;
 
 const OverlayBackground = styled.View`
